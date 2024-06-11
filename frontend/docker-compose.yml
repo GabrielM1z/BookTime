@@ -1,0 +1,27 @@
+version: '2.4'
+
+services:
+  booktime:
+    build:
+      context: .
+      args:
+        - NODE_ENV=development
+    environment:
+      - NODE_ENV=development
+    tty: true
+    ports:
+      - '19006:19006'
+      - '19001:19001'
+      - '19002:19002'
+      - '8081:8081'
+    volumes:
+      - ./booktime:/opt/booktime/app:delegated
+      - ./booktime/package.json:/opt/booktime/package.json
+      - ./booktime/package-lock.json:/opt/booktime/package-lock.json
+      - notused:/opt/booktime/app/node_modules
+    healthcheck:
+      disable: true
+
+volumes:
+  notused:
+
