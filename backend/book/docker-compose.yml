@@ -15,7 +15,7 @@ services:
     volumes:
       - database_dockerizing:/var/lib/postgresql/data
       - ./dbshell/init.sql:/docker-entrypoint-initdb.d/init.sql
-    networks:
+    networks: 
       - fullstack
   api:
     container_name: api_dockerizing

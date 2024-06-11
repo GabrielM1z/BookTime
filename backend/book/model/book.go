@@ -1,18 +1,26 @@
 package model
 
+import "time"
+
 type Book struct {
-	Id       uint   `json:"id"`
-	Title    string `json:"title"`
-	Genre    string `json:"genre"`
-	Volumes  uint8  `json:"volumes"`
-	Chapters uint16 `json:"chapters"`
-	Author   string `json:"author"`
+	IdBook          uint      `json:"id_book"`
+	Title           string    `json:"title"`
+	Description     string    `json:"description"`
+	IdFormat        uint      `json:"id_format"`
+	Publisher       string    `json:"publisher"`
+	PublicationDate time.Time `json:"publication_date"`
+	PageNumber      uint      `json:"page_number"`
+	Language        string    `json:"language"`
+	CoverImageUrl   string    `json:"cover_image_url"`
 }
 
 type PostBook struct {
-	Title    string `json:"title" binding:"required"`
-	Genre    string `json:"genre"`
-	Volumes  uint8  `json:"volumes"`
-	Chapters uint16 `json:"chapters"`
-	Author   string `json:"author"`
+	Title           string    `json:"title" binding:"required"`
+	Description     string    `json:"description"`
+	IdFormat        uint      `json:"id_format"`
+	Publisher       string    `json:"publisher"`
+	PublicationDate time.Time `json:"publication_date"`
+	PageNumber      uint      `json:"page_number"`
+	Language        string    `json:"language"`
+	CoverImageUrl   string    `json:"cover_image_url"`
 }

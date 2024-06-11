@@ -11,50 +11,35 @@ type BookRepository struct {
 	DB *sql.DB
 }
 
-func NewBookRepository(db *sql.DB) BookRepositoryInterface {
+func NewBookRepository(db *sql.DB) *BookRepository {
 	return &BookRepository{DB: db}
 }
 
-// InsertBook implements BookRepositoryInterface
-func (m *BookRepository) InsertBook(post model.PostBook) bool {
-	stmt, err := m.DB.Prepare("INSERT INTO book (title, genre, volumes, chapters, author) VALUES ($1, $2, $3, $4, $5)")
+func (br *BookRepository) SelectBook() []*model.Book {
+	rows, err := br.DB.Query("SELECT id, title, description, id_format, publisher, publication_date, page_number, language, cover_image_url FROM book")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	books := []*model.Book{}
+	for rows.Next() {
+		var book model.Book
+		if err := rows.Scan(&book.IdBook, &book.Title, &book.Description, &book.IdFormat, &book.Publisher, &book.PublicationDate, &book.PageNumber, &book.Language, &book.CoverImageUrl); err != nil {
+			log.Fatal(err)
+		}
+		books = append(books, &book)
+	}
+
+	return books
+}
+
+func (br *BookRepository) InsertBook(post model.PostBook) bool {
+	_, err := br.DB.Exec("INSERT INTO book (title, description, id_format, publisher, publication_date, page_number, language, cover_image_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
+		post.Title, post.Description, post.IdFormat, post.Publisher, post.PublicationDate, post.PageNumber, post.Language, post.CoverImageUrl)
 	if err != nil {
 		log.Println(err)
-		return false
-	}
-	defer stmt.Close()
-	_, err2 := stmt.Exec(post.Title, post.Genre, post.Volumes, post.Chapters, post.Author)
-	if err2 != nil {
-		log.Println(err2)
 		return false
 	}
 	return true
-}
-
-// SelectBook implements BookRepositoryInterface
-func (m *BookRepository) SelectBook() []model.Book {
-	var result []model.Book
-	rows, err := m.DB.Query("SELECT * FROM book")
-	if err != nil {
-		log.Println(err)
-		return nil
-	}
-	for rows.Next() {
-		var (
-			id       uint
-			title    string
-			genre    string
-			volumes  uint8
-			chapters uint16
-			author   string
-		)
-		err := rows.Scan(&id, &title, &genre, &volumes, &chapters, &author)
-		if err != nil {
-			log.Println(err)
-		} else {
-			book := model.Book{Id: id, Title: title, Genre: genre, Volumes: volumes, Chapters: chapters, Author: author}
-			result = append(result, book)
-		}
-	}
-	return result
 }
