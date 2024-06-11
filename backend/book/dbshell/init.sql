@@ -1,17 +1,8 @@
--- Table BOOK
-CREATE TABLE IF NOT EXISTS book (
-    id_book SERIAL PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    description TEXT,
-    id_format INT,
-    publisher VARCHAR(255),
-    publication_date DATE,
-    page_number INT,
-    language VARCHAR(50),
-    cover_image_url VARCHAR(255)
-    FOREIGN KEY (id_format) REFERENCES format(id_format) ON DELETE CASCADE,
+-- Table LIBRARY
+CREATE TABLE IF NOT EXISTS library (
+    id_library SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL
 );
-
 -- Table FORMAT
 CREATE TABLE IF NOT EXISTS format (
     id_format SERIAL PRIMARY KEY,
@@ -26,6 +17,26 @@ CREATE TABLE IF NOT EXISTS author (
     description TEXT
 );
 
+-- Table GENRE
+CREATE TABLE IF NOT EXISTS genre (
+    id_genre SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL
+);
+
+-- Table BOOK
+CREATE TABLE IF NOT EXISTS book (
+    id_book SERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    id_format INT,
+    publisher VARCHAR(255),
+    publication_date DATE,
+    page_number INT,
+    language VARCHAR(50),
+    cover_image_url VARCHAR(255),
+    FOREIGN KEY (id_format) REFERENCES format(id_format) ON DELETE CASCADE,
+);
+
 -- Table BOOK_AUTHOR (Many-to-Many relation between BOOK and AUTHOR)
 CREATE TABLE IF NOT EXISTS book_author (
     id_author INT,
@@ -33,12 +44,6 @@ CREATE TABLE IF NOT EXISTS book_author (
     PRIMARY KEY (id_author, id_book),
     FOREIGN KEY (id_author) REFERENCES author(id_author) ON DELETE CASCADE,
     FOREIGN KEY (id_book) REFERENCES book(id_book) ON DELETE CASCADE
-);
-
--- Table GENRE
-CREATE TABLE IF NOT EXISTS genre (
-    id_genre SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL
 );
 
 -- Table BOOK_GENRE (Many-to-Many relation between BOOK and GENRE)
@@ -60,14 +65,7 @@ CREATE TABLE IF NOT EXISTS state (
     id_user INT,
     id_book INT,
     is_available BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (id_user) REFERENCES user(id_user) ON DELETE CASCADE,
     FOREIGN KEY (id_book) REFERENCES book(id_book) ON DELETE CASCADE
-);
-
--- Table LIBRARY
-CREATE TABLE IF NOT EXISTS library (
-    id_library SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL
 );
 
 -- Table LIBRARY_BOOK (Many-to-Many relation between LIBRARY and BOOK)
@@ -84,6 +82,5 @@ CREATE TABLE IF NOT EXISTS shared_library (
     id_user INT,
     id_library INT,
     PRIMARY KEY (id_user, id_library),
-    FOREIGN KEY (id_user) REFERENCES user(id_user) ON DELETE CASCADE,
     FOREIGN KEY (id_library) REFERENCES library(id_library) ON DELETE CASCADE
 );
