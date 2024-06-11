@@ -1,13 +1,13 @@
 package main
 
 import (
-	"github.com/GabrielM1z/BookTime/tree/develop/backend/booktime/backend/app"
+	"github.com/ramadhanalfarisi/go-simple-dockerizing/app"
 )
 
 func main() {
 	var a app.App
 	a.CreateConnection()
-	a.Migrate()
+	// a.Migrate()
 	a.CreateRoutes()
 	a.Run()
 }

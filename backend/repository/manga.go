@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"log"
 
-	"github.com/GabrielM1z/BookTime/tree/develop/backend/booktime/backend/model"
+	"github.com/ramadhanalfarisi/go-simple-dockerizing/model"
 )
 
 type MangaRepository struct {

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/GabrielM1z/BookTime/tree/develop/backend/booktime/backend/controller"
 	"github.com/gin-gonic/gin"
+	"github.com/ramadhanalfarisi/go-simple-dockerizing/controller"
 )
 
 type App struct {
@@ -14,7 +14,7 @@ type App struct {
 	Routes *gin.Engine
 }
 
-func (a *App) CreateConnection() {
+func (a *App) CreateConnection(){
 	connStr := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable", UNAMEDB, PASSDB, HOSTDB, DBNAME)
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
@@ -31,6 +31,6 @@ func (a *App) CreateRoutes() {
 	a.Routes = routes
 }
 
-func (a *App) Run() {
+func (a *App) Run(){
 	a.Routes.Run(":8080")
 }

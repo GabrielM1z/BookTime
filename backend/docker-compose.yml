@@ -8,10 +8,13 @@ services:
       - 5432:5432
     restart: always
     environment:
+      POSTGRES_DB : mangastore
       POSTGRES_PASSWORD: postgres123
+      POSTGRES_USER : postgres
+      
     volumes:
       - database_dockerizing:/var/lib/postgresql/data
-      - ./dbshell:/docker-entrypoint-initdb.d/
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - fullstack
   api:
@@ -26,6 +29,24 @@ services:
       - postgres
     networks:
       - fullstack
+  migrate:
+    image: migrate/migrate:v4.15.2
+    profiles: ["tools"]
+    volumes:
+      - ./migrations:/migrations
+    entrypoint:
+      [
+        "migrate",
+        "-path",
+        "/migrations",
+        "-database",
+        "postgres://postgres:postgres123@postgres:5432/mangastore?sslmode=disable",
+      ]
+    command: ["up"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: on-failure
 
 volumes:
   database_dockerizing:
