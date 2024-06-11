@@ -2,6 +2,7 @@ package app
 
 import (
 	"log"
+
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
@@ -15,7 +16,7 @@ func (a *App) Migrate() {
 	}
 	m, err := migrate.NewWithDatabaseInstance(
 		"file://./migrations/",
-		"mangastore", driver)
+		"booktime_book", driver)
 	if err != nil {
 		log.Println(err)
 	}

@@ -8,13 +8,13 @@ services:
       - 5432:5432
     restart: always
     environment:
-      POSTGRES_DB : mangastore
+      POSTGRES_DB : booktime_book
       POSTGRES_PASSWORD: postgres123
       POSTGRES_USER : postgres
       
     volumes:
       - database_dockerizing:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./dbshell/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - fullstack
   api:
@@ -40,7 +40,7 @@ services:
         "-path",
         "/migrations",
         "-database",
-        "postgres://postgres:postgres123@postgres:5432/mangastore?sslmode=disable",
+        "postgres://postgres:postgres123@postgres:5432/booktime_book?sslmode=disable",
       ]
     command: ["up"]
     depends_on:

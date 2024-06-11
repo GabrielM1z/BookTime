@@ -1,6 +1,6 @@
-module github.com/ramadhanalfarisi/go-simple-dockerizing
+module booktime
 
-go 1.18
+go 1.22.4
 
 require (
 	github.com/bytedance/sonic v1.8.8 // indirect

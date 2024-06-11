@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/ramadhanalfarisi/go-simple-dockerizing/app"
+	"booktime/app"
 )
 
 func main() {
