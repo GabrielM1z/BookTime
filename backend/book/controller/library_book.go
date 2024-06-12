@@ -4,9 +4,9 @@ import (
 	"database/sql"
 	"net/http"
 
+	"booktime/controller/interfaces"
 	"booktime/model"
 	"booktime/repository"
-	"booktime/controller/interfaces"
 
 	"github.com/gin-gonic/gin"
 )
@@ -24,6 +24,22 @@ func (lbc *LibraryBookController) GetLibraryBook(c *gin.Context) {
 	db := lbc.DB
 	repoLibraryBook := repository.NewLibraryBookRepository(db)
 	getLibraryBook := repoLibraryBook.SelectLibraryBook()
+	if getLibraryBook != nil {
+		c.JSON(http.StatusOK, gin.H{"status": "success", "data": getLibraryBook, "msg": "get library book successfully"})
+	} else {
+		c.JSON(http.StatusOK, gin.H{"status": "success", "data": nil, "msg": "get library book successfully"})
+	}
+}
+
+// GetLibrariesByUserId implements LibraryControllerInterface
+func (ldc *LibraryBookController) GetLibraryBookByLibraryId(c *gin.Context) {
+	db := ldc.DB
+	repoLibrary := repository.NewLibraryBookRepository(db)
+	IdLibrary := c.Query("id_library")
+	var getLibraryBook []model.Book
+	if IdLibrary != "" {
+		getLibraryBook = repoLibrary.SelectLibraryBookByLibrary(IdLibrary)
+	}
 	if getLibraryBook != nil {
 		c.JSON(http.StatusOK, gin.H{"status": "success", "data": getLibraryBook, "msg": "get library book successfully"})
 	} else {

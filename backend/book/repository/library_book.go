@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"booktime/model"
-    "booktime/repository/interfaces"
+	"booktime/repository/interfaces"
 )
 
 type LibraryBookRepository struct {
@@ -32,26 +32,41 @@ func (lbr *LibraryBookRepository) InsertLibraryBook(post model.PostLibraryBook) 
 }
 
 func (lbr *LibraryBookRepository) SelectLibraryBook() []model.LibraryBook {
-	var result []model.LibraryBook
 	rows, err := lbr.DB.Query("SELECT * FROM library_book")
 	if err != nil {
 		log.Println(err)
 		return nil
 	}
+
+	defer rows.Close()
+	libraryBooks := []model.LibraryBook{}
+
 	for rows.Next() {
-		var (
-			id        uint
-			libraryId uint
-			bookId    uint
-		)
-		err := rows.Scan(&id, &libraryId, &bookId)
-		if err != nil {
-			log.Println(err)
-		} else {
-			libraryBook := model.LibraryBook{IdLibrary: libraryId, IdBook: bookId}
-			result = append(result, libraryBook)
+		var libraryBook model.LibraryBook
+		if err := rows.Scan(&libraryBook.IdBook, &libraryBook.IdLibrary); err != nil {
+			log.Fatal(err)
 		}
+		libraryBooks = append(libraryBooks, libraryBook)
 	}
-	return result
+	return libraryBooks
 }
+
+func (lbr *LibraryBookRepository) SelectLibraryBookByLibrary(idLibrary string) []model.Book {
+	rows, err := lbr.DB.Query("SELECT * FROM book WHERE id_book IN (SELECT id_book FROM library_book WHERE id_library = $1)", idLibrary)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	books := []model.Book{}
+	for rows.Next() {
+		var book model.Book
+		if err := rows.Scan(&book.IdBook, &book.Title, &book.Description, &book.FormatName, &book.Publisher, &book.PublicationDate, &book.PageNumber, &book.Language, &book.CoverImageUrl); err != nil {
+			log.Fatal(err)
+		}
+		books = append(books, book)
+	}
+	return books
+}
+
 var _ interfaces.LibraryBookRepositoryInterface = &LibraryBookRepository{}
