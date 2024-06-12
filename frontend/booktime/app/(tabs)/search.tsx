@@ -9,11 +9,11 @@ export default function HomeScreen() {
 
     <View style={styles.body}>
       <SearchBar qrcode={true}></SearchBar>
+        <Text>yo</Text>
+
       <View style={styles.dataTableContainer}>
         <Text>yo</Text>
       </View>
-
-    
     </View>
 
   );
@@ -26,9 +26,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     height: "100%",
   },
-  dataTableContainer:{
-    width: "70%",
-    height: "70%",
-    backgroundColor: "red",
+  dataTableContainer: {
+    width: 700,
+    height: 700,
+    backgroundColor: "black",
   }
 });

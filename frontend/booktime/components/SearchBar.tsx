@@ -12,7 +12,7 @@ export default function searchBar({ qrcode }) {
             </View>;
     }
     return (
-        <View style={styles.body}>
+        
             <View style={styles.searchBarComponent}>
                 <View style={styles.searchContainer}>
                     <TabBarIcon size={40} name={'search'} />
@@ -20,16 +20,10 @@ export default function searchBar({ qrcode }) {
                 </View>
                 {searchBarQR}
             </View>
-        </View>
     );
 }
 
 const styles = StyleSheet.create({
-    body: {
-        paddingTop: 50,
-        backgroundColor: '#fff',
-        height: "100%",
-    },
     searchBarComponent: {
         flexDirection: "row",
         width: "100%"
