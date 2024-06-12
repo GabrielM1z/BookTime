@@ -6,6 +6,7 @@ import (
 
 	"booktime/model"
 	"booktime/repository"
+	"booktime/controller/interfaces"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,7 +15,7 @@ type GenreController struct {
 	DB *sql.DB
 }
 
-func NewGenreController(db *sql.DB) GenreControllerInterface {
+func NewGenreController(db *sql.DB) *GenreController {
 	return &GenreController{DB: db}
 }
 
@@ -46,3 +47,5 @@ func (gc *GenreController) InsertGenre(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "failed", "msg": err.Error()})
 	}
 }
+
+var _ interfaces.GenreControllerInterface = &GenreController{}

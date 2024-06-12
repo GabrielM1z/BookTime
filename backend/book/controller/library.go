@@ -6,6 +6,7 @@ import (
 
 	"booktime/model"
 	"booktime/repository"
+	"booktime/controller/interfaces"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,7 +15,7 @@ type LibraryController struct {
 	DB *sql.DB
 }
 
-func NewLibraryController(db *sql.DB) LibraryControllerInterface {
+func NewLibraryController(db *sql.DB) *LibraryController {
 	return &LibraryController{DB: db}
 }
 
@@ -46,3 +47,5 @@ func (lc *LibraryController) InsertLibrary(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "failed", "msg": err.Error()})
 	}
 }
+
+var _ interfaces.LibraryControllerInterface = &LibraryController{}

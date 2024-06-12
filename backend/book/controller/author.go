@@ -6,6 +6,7 @@ import (
 
 	"booktime/model"
 	"booktime/repository"
+	"booktime/controller/interfaces"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,7 +15,7 @@ type AuthorController struct {
 	DB *sql.DB
 }
 
-func NewAuthorController(db *sql.DB) AuthorControllerInterface {
+func NewAuthorController(db *sql.DB) *AuthorController {
 	return &AuthorController{DB: db}
 }
 
@@ -46,3 +47,5 @@ func (ac *AuthorController) InsertAuthor(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "failed", "msg": err.Error()})
 	}
 }
+
+var _ interfaces.AuthorControllerInterface = &AuthorController{}

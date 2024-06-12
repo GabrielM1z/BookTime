@@ -1,4 +1,4 @@
-package controller
+package interfaces
 
 import "github.com/gin-gonic/gin"
 

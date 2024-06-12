@@ -6,6 +6,7 @@ import (
 
 	"booktime/model"
 	"booktime/repository"
+	"booktime/controller/interfaces"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,7 +15,7 @@ type StateController struct {
 	DB *sql.DB
 }
 
-func NewStateController(db *sql.DB) StateControllerInterface {
+func NewStateController(db *sql.DB) *StateController {
 	return &StateController{DB: db}
 }
 
@@ -68,3 +69,5 @@ func (sc *StateController) InsertState(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "failed", "msg": err.Error()})
 	}
 }
+
+var _ interfaces.StateControllerInterface = &StateController{}

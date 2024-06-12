@@ -6,6 +6,7 @@ import (
 
 	"booktime/model"
 	"booktime/repository"
+	"booktime/controller/interfaces"
 
 	"github.com/gin-gonic/gin"
 )
@@ -44,3 +45,5 @@ func (bgc *BookGenreController) GetBookGenres(g *gin.Context) {
 		g.JSON(http.StatusInternalServerError, gin.H{"status": "failed", "msg": "get book genres failed"})
 	}
 }
+
+var _ interfaces.BookGenreControllerInterface = &BookGenreController{}
