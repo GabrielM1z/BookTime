@@ -5,13 +5,14 @@ import (
 	"log"
 
 	"booktime/model"
+    "booktime/repository/interfaces"
 )
 
 type StateRepository struct {
 	DB *sql.DB
 }
 
-func NewStateRepository(db *sql.DB) StateRepositoryInterface {
+func NewStateRepository(db *sql.DB) *StateRepository {
 	return &StateRepository{DB: db}
 }
 
@@ -97,3 +98,4 @@ func (sr *StateRepository) SelectStateByUserAndBook(idUser, idBook string) []mod
 	return result
 }
 */
+var _ interfaces.StateRepositoryInterface = &StateRepository{}

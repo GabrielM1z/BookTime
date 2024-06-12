@@ -5,13 +5,14 @@ import (
 	"log"
 
 	"booktime/model"
+    "booktime/repository/interfaces"
 )
 
 type FormatRepository struct {
 	DB *sql.DB
 }
 
-func NewFormatRepository(db *sql.DB) FormatRepositoryInterface {
+func NewFormatRepository(db *sql.DB) *FormatRepository {
 	return &FormatRepository{DB: db}
 }
 
@@ -52,3 +53,4 @@ func (fr *FormatRepository) SelectFormat() []model.Format {
 	}
 	return result
 }
+var _ interfaces.FormatRepositoryInterface = &FormatRepository{}
