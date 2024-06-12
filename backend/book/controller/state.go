@@ -22,6 +22,28 @@ func NewStateController(db *sql.DB) StateControllerInterface {
 func (sc *StateController) GetState(c *gin.Context) {
 	db := sc.DB
 	repoState := repository.NewStateRepository(db)
+
+	idUser := c.Query("id_user")
+	idBook := c.Query("id_book")
+
+	var getState []model.State
+	if idUser != "" && idBook != "" {
+		getState = repoState.SelectStateByUserAndBook(idUser, idBook)
+	} else {
+		getState = repoState.SelectState()
+	}
+
+	if getState != nil {
+		c.JSON(http.StatusOK, gin.H{"status": "success", "data": getState, "msg": "get state successfully"})
+	} else {
+		c.JSON(http.StatusOK, gin.H{"status": "success", "data": nil, "msg": "get state successfully"})
+	}
+}
+
+// GetState implements StateControllerInterface
+func (sc *StateController) GetStates(c *gin.Context) {
+	db := sc.DB
+	repoState := repository.NewStateRepository(db)
 	getState := repoState.SelectState()
 	if getState != nil {
 		c.JSON(http.StatusOK, gin.H{"status": "success", "data": getState, "msg": "get state successfully"})

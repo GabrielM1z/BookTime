@@ -50,7 +50,8 @@ func (a *App) CreateRoutes() {
 
 	// State routes
 	stateController := controller.NewStateController(a.DB)
-	routes.GET("/states", stateController.GetState)
+	routes.GET("/state", stateController.GetState)
+	routes.GET("/states", stateController.GetStates)
 	routes.POST("/states", stateController.InsertState)
 
 	// Library routes

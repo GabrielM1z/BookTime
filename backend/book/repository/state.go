@@ -31,20 +31,69 @@ func (sr *StateRepository) InsertState(post model.PostState) bool {
 }
 
 func (ar *StateRepository) SelectState() []model.State {
-    query := "SELECT * FROM state"
-    rows, err := ar.DB.Query(query)
-    if err != nil {
-        log.Fatal(err)
-    }
-    defer rows.Close()
+	query := "SELECT * FROM state"
+	rows, err := ar.DB.Query(query)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
 
-    states := []model.State{}
-    for rows.Next() {
-        var state model.State
-        if err := rows.Scan(&state.IdState, &state.State, &state.Progression, &state.ReadCount, &state.LastReadDate, &state.IdUser, &state.IdBook, &state.IsAvailable); err != nil {
-            log.Fatal(err)
-        }
-        states = append(states, state)
-    }
-    return states
+	states := []model.State{}
+	for rows.Next() {
+		var state model.State
+		if err := rows.Scan(&state.IdState, &state.State, &state.Progression, &state.ReadCount, &state.LastReadDate, &state.IdUser, &state.IdBook, &state.IsAvailable); err != nil {
+			log.Fatal(err)
+		}
+		states = append(states, state)
+	}
+	return states
 }
+
+func (sr *StateRepository) SelectStateByUserAndBook(idUser, idBook string) []model.State {
+	rows, err := sr.DB.Query("SELECT * FROM state WHERE id_user = $1 AND id_book = $2", idUser, idBook)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	states := []model.State{}
+	for rows.Next() {
+		var state model.State
+		if err := rows.Scan(&state.IdState, &state.State, &state.Progression, &state.ReadCount, &state.LastReadDate, &state.IdUser, &state.IdBook, &state.IsAvailable); err != nil {
+			log.Fatal(err)
+		}
+		states = append(states, state)
+	}
+	return states
+}
+
+/*func (sr *StateRepository) SelectStateByUserAndBook(idUser, idBook string) []model.State {
+	var result []model.State
+	rows, err := sr.DB.Query("SELECT * FROM state WHERE id_user = $1 AND id_book = $2", idUser, idBook)
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var (
+			id             uint
+			state          string
+			progression    uint
+			readCount      uint
+			lastReadDate   string
+			isAvailable    bool
+			userId, bookId uint
+		)
+		err := rows.Scan(&id, &state, &progression, &readCount, &lastReadDate, &isAvailable, &userId, &bookId)
+		if err != nil {
+			log.Println(err)
+		} else {
+			state := model.State{IdState: id, State: state, Progression: progression, ReadCount: readCount, LastReadDate: lastReadDate, IsAvailable: isAvailable, IdUser: userId, IdBook: bookId}
+			result = append(result, state)
+		}
+	}
+	return result
+}
+*/
