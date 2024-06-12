@@ -14,18 +14,21 @@ export default function LivreEtagere({ label, cover }) {
 
 const styles = StyleSheet.create({
     livreContainer: {
-        borderWidth: 1,
-        borderColor: 'black',
         alignSelf: 'center',
-        padding: 5,
-        margin: 5,
+        padding: 3,
+        margin: 3,
     },
     coverLivre: {
         backgroundColor: 'yellow',
         width: 100,
         height: 100,
+        borderRadius:20,
+        borderWidth: 1,
+        borderColor: 'rgba(0,0,0,0.5)',
     },
     titreLivre: {
-        backgroundColor: 'purple',
+        fontWeight: 'bold',
+        color: 'white',
+        alignSelf: 'center',
     },
 });

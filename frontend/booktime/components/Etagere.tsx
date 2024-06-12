@@ -1,29 +1,33 @@
 import { StyleSheet, View, Text, ScrollView } from 'react-native';
+
+// import component
 import LivreEtagere from './LivreEtagere';
 
 const cover1 = require('../assets/images/logo_refait.png');
 
-export default function Etagere({ label, livres }) 
+
+// component ETAGERE
+export default function Etagere({ label, livres, index }) 
 {	
-    const books = [
-        { title: 'Titre du livre 1', url: cover1 },
-        { title: 'Titre du livre 2', url: cover1 },
-        { title: 'Titre du livre 3', url: cover1 },
-		{ title: 'Titre du livre 4', url: cover1 },
-		{ title: 'Titre du livre 5', url: cover1 },
-		{ title: 'Titre du livre 6', url: cover1 },
-    ];
+	const colors = [
+		'#ff6961',
+		'#77dd77',
+		'#84b6f4'
+    ]; 
+	
+
+	const randomindex = index%3;
 
 	return (
-		<View style={styles.etagereContainer}>
+		<View style={[styles.etagereContainer, { backgroundColor: colors[randomindex] }]}>
 
             <View style={styles.titreContainer}>
                 <Text style={styles.titreEtagere}>{label}</Text>
             </View>
 
             <ScrollView horizontal style={styles.livresContainer}>
-                {books.map((book, index) => (
-                    <LivreEtagere key={index} label={book.title} cover={book.url}></LivreEtagere>
+                {livres.map((livre, index) => (
+                    <LivreEtagere key={index} label={livre.title} cover={livre.url}></LivreEtagere>
                 ))}
             </ScrollView>
 
@@ -34,22 +38,26 @@ export default function Etagere({ label, livres })
 
 const styles = StyleSheet.create({
     etagereContainer: {
-		backgroundColor: 'red',
-		position: 'absolute',
-		top: 200,
 		alignSelf: 'center',
 		width: '90%',
+		marginTop: 10,
+		marginBottom: 10,
+		padding:10,
+		borderRadius:20,
     },
 	titreContainer: {
-		backgroundColor: 'green',
+		marginBottom: 5,
     },
     livresContainer: {
-		backgroundColor: 'blue',
 		flexDirection: 'row',
-
   	},
 	  titreEtagere: {
-		backgroundColor: 'grey',
 		alignSelf: 'flex-start',
+		color: 'white',
+		fontSize: 20,
+		fontWeight: 'bold',
+		backgroundColor: 'rgba(0,0,0,0.5)',
+		borderRadius: 10,
+		padding: 5
   	},
 });
