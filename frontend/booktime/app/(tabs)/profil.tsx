@@ -36,7 +36,7 @@ export default function App()
           		selectedImage={selectedImage}
         	/>
 			</View>
-			<View style={styles.footerContainer}>
+			<View style={styles.footerContainer}> 
 				<Button theme="primary" label="Choose a photo" onPress={pickImageAsync} />
 				<Button label="Use this photo" theme={undefined} onPress={undefined} />
 			</View>
