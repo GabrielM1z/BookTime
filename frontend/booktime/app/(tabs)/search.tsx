@@ -1,20 +1,34 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, TextInput } from 'react-native';
+import { TabBarIcon } from '@/components/navigation/TabBarIcon';
+import SearchBar from '@/components/SearchBar';
+
 
 
 export default function HomeScreen() {
-    return (
-        <View style={styles.container}>
-          <Text>Page Rechercher</Text>
-        </View>
-      );
-  }
+  return (
+
+    <View style={styles.body}>
+      <SearchBar qrcode={true}></SearchBar>
+      <View style={styles.dataTableContainer}>
+        <Text>yo</Text>
+      </View>
+
+    
+    </View>
+
+  );
+}
 
 
 const styles = StyleSheet.create({
-container: {
-    flex: 1,
+  body: {
+    paddingTop: 50,
     backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-},
+    height: "100%",
+  },
+  dataTableContainer:{
+    width: "70%",
+    height: "70%",
+    backgroundColor: "red",
+  }
 });
