@@ -30,8 +30,6 @@ func (sc *StateController) GetState(c *gin.Context) {
 	var getState []model.State
 	if idUser != "" && idBook != "" {
 		getState = repoState.SelectStateByUserAndBook(idUser, idBook)
-	} else {
-		getState = repoState.SelectState()
 	}
 
 	if getState != nil {

@@ -56,6 +56,7 @@ func (a *App) CreateRoutes() {
 
 	// Library routes
 	libraryController := controller.NewLibraryController(a.DB)
+	routes.GET("/libraries_by_userid", libraryController.GetLibrariesByUserId)
 	routes.GET("/libraries", libraryController.GetLibrary)
 	routes.POST("/libraries", libraryController.InsertLibrary)
 
@@ -63,6 +64,7 @@ func (a *App) CreateRoutes() {
 	libraryBookController := controller.NewLibraryBookController(a.DB)
 	routes.GET("/library_books", libraryBookController.GetLibraryBook)
 	routes.POST("/library_books", libraryBookController.InsertLibraryBook)
+	routes.GET("/library_books_by_libraryid", libraryController.GetLibrariesByUserId)
 
 	// SharedLibrary routes
 	sharedLibraryController := controller.NewSharedLibraryController(a.DB)
