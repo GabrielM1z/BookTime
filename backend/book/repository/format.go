@@ -16,7 +16,7 @@ func NewFormatRepository(db *sql.DB) FormatRepositoryInterface {
 }
 
 func (fr *FormatRepository) InsertFormat(post model.PostFormat) bool {
-	stmt, err := fr.DB.Prepare("INSERT INTO format (name) VALUES ($1)")
+	stmt, err := fr.DB.Prepare("INSERT INTO formats (name) VALUES ($1)")
 	if err != nil {
 		log.Println(err)
 		return false
@@ -32,7 +32,7 @@ func (fr *FormatRepository) InsertFormat(post model.PostFormat) bool {
 
 func (fr *FormatRepository) SelectFormat() []model.Format {
 	var result []model.Format
-	rows, err := fr.DB.Query("SELECT * FROM format")
+	rows, err := fr.DB.Query("SELECT * FROM formats")
 	if err != nil {
 		log.Println(err)
 		return nil

@@ -16,7 +16,7 @@ func NewBookRepository(db *sql.DB) *BookRepository {
 }
 
 func (br *BookRepository) SelectBook() []*model.Book {
-	rows, err := br.DB.Query("SELECT id, title, description, id_format, publisher, publication_date, page_number, language, cover_image_url FROM book")
+	rows, err := br.DB.Query("SELECT id_book, title, description, id_format, publisher,  TO_CHAR(publication_date,'DD-MM-YYYY') publication_date, page_number, language, cover_image_url FROM book")
 	if err != nil {
 		log.Fatal(err)
 	}

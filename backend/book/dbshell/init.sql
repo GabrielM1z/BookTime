@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS library (
     name VARCHAR(255) NOT NULL
 );
 -- Table FORMAT
-CREATE TABLE IF NOT EXISTS format (
+CREATE TABLE IF NOT EXISTS formats (
     id_format SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL
 );
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS book (
     page_number INT,
     language VARCHAR(50),
     cover_image_url VARCHAR(255),
-    FOREIGN KEY (id_format) REFERENCES format(id_format) ON DELETE CASCADE,
+    FOREIGN KEY (id_format) REFERENCES formats(id_format) ON DELETE CASCADE
 );
 
 -- Table BOOK_AUTHOR (Many-to-Many relation between BOOK and AUTHOR)

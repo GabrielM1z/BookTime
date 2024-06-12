@@ -3,7 +3,6 @@ package repository
 import (
 	"database/sql"
 	"log"
-	"time"
 
 	"booktime/model"
 )
@@ -44,7 +43,7 @@ func (sr *StateRepository) SelectState() []model.State {
 			state         string
 			progression   uint
 			readCount     uint
-			lastReadDate  time.Time
+			lastReadDate  string
 			isAvailable   bool
 			userId, bookId uint
 		)
