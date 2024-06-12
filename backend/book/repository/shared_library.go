@@ -5,13 +5,14 @@ import (
 	"log"
 
 	"booktime/model"
+    "booktime/repository/interfaces"
 )
 
 type SharedLibraryRepository struct {
 	DB *sql.DB
 }
 
-func NewSharedLibraryRepository(db *sql.DB) SharedLibraryRepositoryInterface {
+func NewSharedLibraryRepository(db *sql.DB) *SharedLibraryRepository {
 	return &SharedLibraryRepository{DB: db}
 }
 
@@ -53,3 +54,4 @@ func (slr *SharedLibraryRepository) SelectSharedLibrary() []model.SharedLibrary 
 	}
 	return result
 }
+var _ interfaces.SharedLibraryRepositoryInterface = &SharedLibraryRepository{}

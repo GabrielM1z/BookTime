@@ -5,13 +5,14 @@ import (
 	"log"
 
 	"booktime/model"
+    "booktime/repository/interfaces"
 )
 
 type LibraryBookRepository struct {
 	DB *sql.DB
 }
 
-func NewLibraryBookRepository(db *sql.DB) LibraryBookRepositoryInterface {
+func NewLibraryBookRepository(db *sql.DB) *LibraryBookRepository {
 	return &LibraryBookRepository{DB: db}
 }
 
@@ -53,3 +54,4 @@ func (lbr *LibraryBookRepository) SelectLibraryBook() []model.LibraryBook {
 	}
 	return result
 }
+var _ interfaces.LibraryBookRepositoryInterface = &LibraryBookRepository{}
