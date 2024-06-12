@@ -7,8 +7,8 @@ import (
 
 	"booktime/controller"
 
-	_ "github.com/lib/pq"
 	"github.com/gin-gonic/gin"
+	_ "github.com/lib/pq"
 )
 
 type App struct {
@@ -67,6 +67,16 @@ func (a *App) CreateRoutes() {
 	sharedLibraryController := controller.NewSharedLibraryController(a.DB)
 	routes.GET("/shared_libraries", sharedLibraryController.GetSharedLibrary)
 	routes.POST("/shared_libraries", sharedLibraryController.InsertSharedLibrary)
+
+	// BookAuthor routes
+	bookAuthorController := controller.NewBookAuthorController(a.DB)
+	routes.GET("/book_author", bookAuthorController.GetBookAuthor)
+	routes.POST("/book_author", bookAuthorController.InsertBookAuthor)
+
+	// BookGenre routes
+	bookGenreController := controller.NewBookGenreController(a.DB)
+	routes.POST("/book_genres", bookGenreController.InsertBookGenre)
+	routes.GET("/book_genres", bookGenreController.GetBookGenres)
 
 	a.Routes = routes
 }
