@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"booktime/model"
-    "booktime/repository/interfaces"
+	"booktime/repository/interfaces"
 )
 
 type StateRepository struct {
@@ -68,34 +68,4 @@ func (sr *StateRepository) SelectStateByUserAndBook(idUser, idBook string) []mod
 	return states
 }
 
-/*func (sr *StateRepository) SelectStateByUserAndBook(idUser, idBook string) []model.State {
-	var result []model.State
-	rows, err := sr.DB.Query("SELECT * FROM state WHERE id_user = $1 AND id_book = $2", idUser, idBook)
-	if err != nil {
-		log.Println(err)
-		return nil
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var (
-			id             uint
-			state          string
-			progression    uint
-			readCount      uint
-			lastReadDate   string
-			isAvailable    bool
-			userId, bookId uint
-		)
-		err := rows.Scan(&id, &state, &progression, &readCount, &lastReadDate, &isAvailable, &userId, &bookId)
-		if err != nil {
-			log.Println(err)
-		} else {
-			state := model.State{IdState: id, State: state, Progression: progression, ReadCount: readCount, LastReadDate: lastReadDate, IsAvailable: isAvailable, IdUser: userId, IdBook: bookId}
-			result = append(result, state)
-		}
-	}
-	return result
-}
-*/
 var _ interfaces.StateRepositoryInterface = &StateRepository{}
