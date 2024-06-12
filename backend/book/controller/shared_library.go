@@ -6,6 +6,7 @@ import (
 
 	"booktime/model"
 	"booktime/repository"
+	"booktime/controller/interfaces"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,7 +15,7 @@ type SharedLibraryController struct {
 	DB *sql.DB
 }
 
-func NewSharedLibraryController(db *sql.DB) SharedLibraryControllerInterface {
+func NewSharedLibraryController(db *sql.DB) *SharedLibraryController {
 	return &SharedLibraryController{DB: db}
 }
 
@@ -46,3 +47,5 @@ func (slc *SharedLibraryController) InsertSharedLibrary(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "failed", "msg": err.Error()})
 	}
 }
+
+var _ interfaces.SharedLibraryControllerInterface = &SharedLibraryController{}

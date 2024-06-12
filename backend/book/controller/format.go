@@ -6,6 +6,7 @@ import (
 
 	"booktime/model"
 	"booktime/repository"
+	"booktime/controller/interfaces"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,7 +15,7 @@ type FormatController struct {
 	DB *sql.DB
 }
 
-func NewFormatController(db *sql.DB) FormatControllerInterface {
+func NewFormatController(db *sql.DB) *FormatController {
 	return &FormatController{DB: db}
 }
 
@@ -46,3 +47,5 @@ func (fc *FormatController) InsertFormat(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "failed", "msg": err.Error()})
 	}
 }
+
+var _ interfaces.FormatControllerInterface = &FormatController{}

@@ -5,13 +5,14 @@ import (
 	"log"
 
 	"booktime/model"
+    "booktime/repository/interfaces"
 )
 
 type LibraryRepository struct {
 	DB *sql.DB
 }
 
-func NewLibraryRepository(db *sql.DB) LibraryRepositoryInterface {
+func NewLibraryRepository(db *sql.DB) *LibraryRepository {
 	return &LibraryRepository{DB: db}
 }
 
@@ -52,3 +53,24 @@ func (lr *LibraryRepository) SelectLibrary() []model.Library {
 	}
 	return result
 }
+
+
+
+func (lr *LibraryRepository) SelectLibraryByUser(idUser string) []model.Library {
+	rows, err := lr.DB.Query("SELECT * FROM library WHERE id_library IN (SELECT id_library FROM shared_library WHERE id_user = $1)", idUser)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	libraries := []model.Library{}
+	for rows.Next() {
+		var library model.Library
+		if err := rows.Scan(&library.IdLibrary, &library.Name); err != nil {
+			log.Fatal(err)
+		}
+		libraries = append(libraries, library)
+	}
+	return libraries
+}
+var _ interfaces.LibraryRepositoryInterface = &LibraryRepository{}

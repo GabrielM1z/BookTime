@@ -3,16 +3,16 @@ package repository
 import (
 	"database/sql"
 	"log"
-	"time"
 
 	"booktime/model"
+	"booktime/repository/interfaces"
 )
 
 type StateRepository struct {
 	DB *sql.DB
 }
 
-func NewStateRepository(db *sql.DB) StateRepositoryInterface {
+func NewStateRepository(db *sql.DB) *StateRepository {
 	return &StateRepository{DB: db}
 }
 
@@ -31,30 +31,41 @@ func (sr *StateRepository) InsertState(post model.PostState) bool {
 	return true
 }
 
-func (sr *StateRepository) SelectState() []model.State {
-	var result []model.State
-	rows, err := sr.DB.Query("SELECT * FROM state")
+func (ar *StateRepository) SelectState() []model.State {
+	query := "SELECT * FROM state"
+	rows, err := ar.DB.Query(query)
 	if err != nil {
-		log.Println(err)
-		return nil
+		log.Fatal(err)
 	}
+	defer rows.Close()
+
+	states := []model.State{}
 	for rows.Next() {
-		var (
-			id            uint
-			state         string
-			progression   uint
-			readCount     uint
-			lastReadDate  time.Time
-			isAvailable   bool
-			userId, bookId uint
-		)
-		err := rows.Scan(&id, &state, &progression, &readCount, &lastReadDate, &isAvailable, &userId, &bookId)
-		if err != nil {
-			log.Println(err)
-		} else {
-			state := model.State{IdState: id, State: state, Progression: progression, ReadCount: readCount, LastReadDate: lastReadDate, IsAvailable: isAvailable, IdUser: userId, IdBook: bookId}
-			result = append(result, state)
+		var state model.State
+		if err := rows.Scan(&state.IdState, &state.State, &state.Progression, &state.ReadCount, &state.LastReadDate, &state.IdUser, &state.IdBook, &state.IsAvailable); err != nil {
+			log.Fatal(err)
 		}
+		states = append(states, state)
 	}
-	return result
+	return states
 }
+
+func (sr *StateRepository) SelectStateByUserAndBook(idUser, idBook string) []model.State {
+	rows, err := sr.DB.Query("SELECT * FROM state WHERE id_user = $1 AND id_book = $2", idUser, idBook)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	states := []model.State{}
+	for rows.Next() {
+		var state model.State
+		if err := rows.Scan(&state.IdState, &state.State, &state.Progression, &state.ReadCount, &state.LastReadDate, &state.IdUser, &state.IdBook, &state.IsAvailable); err != nil {
+			log.Fatal(err)
+		}
+		states = append(states, state)
+	}
+	return states
+}
+
+var _ interfaces.StateRepositoryInterface = &StateRepository{}

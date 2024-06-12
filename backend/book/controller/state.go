@@ -6,6 +6,7 @@ import (
 
 	"booktime/model"
 	"booktime/repository"
+	"booktime/controller/interfaces"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,12 +15,32 @@ type StateController struct {
 	DB *sql.DB
 }
 
-func NewStateController(db *sql.DB) StateControllerInterface {
+func NewStateController(db *sql.DB) *StateController {
 	return &StateController{DB: db}
 }
 
 // GetState implements StateControllerInterface
 func (sc *StateController) GetState(c *gin.Context) {
+	db := sc.DB
+	repoState := repository.NewStateRepository(db)
+
+	idUser := c.Query("id_user")
+	idBook := c.Query("id_book")
+
+	var getState []model.State
+	if idUser != "" && idBook != "" {
+		getState = repoState.SelectStateByUserAndBook(idUser, idBook)
+	}
+
+	if getState != nil {
+		c.JSON(http.StatusOK, gin.H{"status": "success", "data": getState, "msg": "get state successfully"})
+	} else {
+		c.JSON(http.StatusOK, gin.H{"status": "success", "data": nil, "msg": "get state successfully"})
+	}
+}
+
+// GetState implements StateControllerInterface
+func (sc *StateController) GetStates(c *gin.Context) {
 	db := sc.DB
 	repoState := repository.NewStateRepository(db)
 	getState := repoState.SelectState()
@@ -46,3 +67,5 @@ func (sc *StateController) InsertState(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "failed", "msg": err.Error()})
 	}
 }
+
+var _ interfaces.StateControllerInterface = &StateController{}

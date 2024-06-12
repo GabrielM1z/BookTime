@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"net/http"
 
+	"booktime/controller/interfaces"
 	"booktime/model"
 	"booktime/repository"
 
@@ -14,7 +15,7 @@ type LibraryController struct {
 	DB *sql.DB
 }
 
-func NewLibraryController(db *sql.DB) LibraryControllerInterface {
+func NewLibraryController(db *sql.DB) *LibraryController {
 	return &LibraryController{DB: db}
 }
 
@@ -46,3 +47,21 @@ func (lc *LibraryController) InsertLibrary(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "failed", "msg": err.Error()})
 	}
 }
+
+// GetLibrariesByUserId implements LibraryControllerInterface
+func (lc *LibraryController) GetLibrariesByUserId(c *gin.Context) {
+	db := lc.DB
+	repoLibrary := repository.NewLibraryRepository(db)
+	idUser := c.Query("id_user")
+	var getLibrary []model.Library
+	if idUser != "" {
+		getLibrary = repoLibrary.SelectLibraryByUser(idUser)
+	}
+	if getLibrary != nil {
+		c.JSON(http.StatusOK, gin.H{"status": "success", "data": getLibrary, "msg": "get library successfully"})
+	} else {
+		c.JSON(http.StatusOK, gin.H{"status": "success", "data": nil, "msg": "get library successfully"})
+	}
+}
+
+var _ interfaces.LibraryControllerInterface = &LibraryController{}
