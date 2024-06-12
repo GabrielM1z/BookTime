@@ -19,8 +19,8 @@ func NewLibraryController(db *sql.DB) *LibraryController {
 	return &LibraryController{DB: db}
 }
 
-// GetLibrary implements LibraryControllerInterface
-func (lc *LibraryController) GetLibrary(c *gin.Context) {
+// GetAllLibraries implements LibraryControllerInterface
+func (lc *LibraryController) GetAllLibraries(c *gin.Context) {
 	db := lc.DB
 	repoLibrary := repository.NewLibraryRepository(db)
 	getLibrary := repoLibrary.SelectLibrary()
@@ -52,7 +52,7 @@ func (lc *LibraryController) InsertLibrary(c *gin.Context) {
 func (lc *LibraryController) GetLibrariesByUserId(c *gin.Context) {
 	db := lc.DB
 	repoLibrary := repository.NewLibraryRepository(db)
-	idUser := c.Query("id_user")
+	idUser := c.Param("userId")
 	var getLibrary []model.Library
 	if idUser != "" {
 		getLibrary = repoLibrary.SelectLibraryByUser(idUser)

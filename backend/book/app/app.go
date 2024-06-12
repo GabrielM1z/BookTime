@@ -56,8 +56,8 @@ func (a *App) CreateRoutes() {
 
 	// Library routes
 	libraryController := controller.NewLibraryController(a.DB)
-	routes.GET("/libraries_by_userid", libraryController.GetLibrariesByUserId)
-	routes.GET("/libraries", libraryController.GetLibrary)
+	routes.GET("/user/:userId/libraries", libraryController.GetLibrariesByUserId)
+	routes.GET("/libraries", libraryController.GetAllLibraries)
 	routes.POST("/libraries", libraryController.InsertLibrary)
 
 	// LibraryBook routes
