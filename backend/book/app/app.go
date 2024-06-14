@@ -4,8 +4,12 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
+
+	"github.com/joho/godotenv"
 
 	"booktime/controller"
+	"booktime/service"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
@@ -27,6 +31,20 @@ func (a *App) CreateConnection() {
 
 func (a *App) CreateRoutes() {
 	routes := gin.Default()
+
+	// Load environment variables
+	err := godotenv.Load()
+	if err != nil {
+		log.Println("Error loading .env file")
+	}
+
+	//Service & Api
+	apiKey := os.Getenv("GOOGLE_BOOKS_API_KEY")
+	bookService := service.NewSearchService(apiKey)
+	
+	// Search routes
+	searchController := controller.NewSearchController(bookService)
+	routes.GET("/search", searchController.SearchBooks)
 
 	// Book routes
 	bookController := controller.NewBookController(a.DB)
