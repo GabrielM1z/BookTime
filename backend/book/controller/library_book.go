@@ -19,11 +19,11 @@ func NewLibraryBookController(db *sql.DB) *LibraryBookController {
 	return &LibraryBookController{DB: db}
 }
 
-// GetLibraryBook implements LibraryBookControllerInterface
-func (lbc *LibraryBookController) GetLibraryBook(c *gin.Context) {
+// GetAllLibraryBook implements LibraryBookControllerInterface
+func (lbc *LibraryBookController) GetAllLibraryBook(c *gin.Context) {
 	db := lbc.DB
 	repoLibraryBook := repository.NewLibraryBookRepository(db)
-	getLibraryBook := repoLibraryBook.SelectLibraryBook()
+	getLibraryBook := repoLibraryBook.SelectAllLibraryBook()
 	if getLibraryBook != nil {
 		c.JSON(http.StatusOK, gin.H{"status": "success", "data": getLibraryBook, "msg": "get library book successfully"})
 	} else {
@@ -35,7 +35,7 @@ func (lbc *LibraryBookController) GetLibraryBook(c *gin.Context) {
 func (ldc *LibraryBookController) GetLibraryBookByLibraryId(c *gin.Context) {
 	db := ldc.DB
 	repoLibrary := repository.NewLibraryBookRepository(db)
-	IdLibrary := c.Query("id_library")
+	IdLibrary := c.Param("libraryId")
 	var getLibraryBook []model.Book
 	if IdLibrary != "" {
 		getLibraryBook = repoLibrary.SelectLibraryBookByLibrary(IdLibrary)

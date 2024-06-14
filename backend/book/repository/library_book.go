@@ -31,7 +31,7 @@ func (lbr *LibraryBookRepository) InsertLibraryBook(post model.PostLibraryBook) 
 	return true
 }
 
-func (lbr *LibraryBookRepository) SelectLibraryBook() []model.LibraryBook {
+func (lbr *LibraryBookRepository) SelectAllLibraryBook() []model.LibraryBook {
 	rows, err := lbr.DB.Query("SELECT * FROM library_book")
 	if err != nil {
 		log.Println(err)
