@@ -28,7 +28,7 @@ export default function HomeScreen() {
       <ScrollView style={styles.dataTableContainer} stickyHeaderIndices={[0]}>
         <SearchBar qrcode={true}></SearchBar>
         {books.map((book, index) => (
-          <LivreRecherche cover={book.url} title={book.title} writter={book.autheur}></LivreRecherche>
+          <LivreRecherche key={index} cover={book.url} title={book.title} writter={book.autheur}></LivreRecherche>
         ))}
       </ScrollView>
 
