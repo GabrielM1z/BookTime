@@ -2,8 +2,9 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 // import des component
 import TitreTab from '../../components/TitreTab';
-import LivreEtagere from '../../components/Etagere';
 import Etagere from '../../components/Etagere';
+import SearchBar from '../../components/SearchBar';
+import { ThemedView } from '@/components/ThemedView';
 
 // import des images
 const cover1 = require('../../assets/images/logo_refait.png');
@@ -36,23 +37,24 @@ export default function LibrairyScreen() {
 	]
 
     return (
-        <View style={styles.container}>
+        <ThemedView style={styles.container}>
 			<TitreTab label={"Bibliothèque"}></TitreTab>
+			<SearchBar qrcode={true}></SearchBar>
 
 			<ScrollView style={styles.etagereContainer}>
 				{etageres.map((etagere, index) => (
 					<Etagere key={index} index={index} label={etagere.title} livres={etagere.books}></Etagere>
 				))}
 			</ScrollView>
-		</View>	
+		</ThemedView>	
 	);
 }
 
 
+// style css
 const styles = StyleSheet.create({
   	container: {
 		flex: 1,
-		backgroundColor: '#25292e',
 	},
 	etagereContainer: {
 		flexDirection: 'column',

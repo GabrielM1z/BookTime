@@ -1,14 +1,15 @@
-
 import { StyleSheet, Text, View } from 'react-native';
 
 import TitreTab from '@/components/TitreTab';
 import { ThemedView } from '@/components/ThemedView';
 
 
-export default function HomeScreen() {
+export default function LivreDetailScreen() {
+
+
     return (
         <ThemedView style={styles.container}>
-			<TitreTab label={"News"}></TitreTab>
+			<TitreTab label={"Livre"}></TitreTab>
         </ThemedView>
     );
 }

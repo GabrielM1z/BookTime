@@ -2,27 +2,29 @@ import { StyleSheet, View, Text, ScrollView } from 'react-native';
 
 // import component
 import LivreEtagere from './LivreEtagere';
+import { ThemedText } from './ThemedText';
 
 const cover1 = require('../assets/images/logo_refait.png');
 
 
-// component ETAGERE
+// component représentant une ETAGERE
 export default function Etagere({ label, livres, index }) 
 {	
+	// couleur possible
 	const colors = [
 		'#ff6961',
 		'#77dd77',
 		'#84b6f4'
     ]; 
 	
-
+	// on fait une rotation sur les coouleurs
 	const randomindex = index%3;
 
 	return (
 		<View style={[styles.etagereContainer, { backgroundColor: colors[randomindex] }]}>
 
             <View style={styles.titreContainer}>
-                <Text style={styles.titreEtagere}>{label}</Text>
+                <ThemedText type="titreEtagere">{label}</ThemedText>
             </View>
 
             <ScrollView horizontal style={styles.livresContainer}>
@@ -50,14 +52,5 @@ const styles = StyleSheet.create({
     },
     livresContainer: {
 		flexDirection: 'row',
-  	},
-	  titreEtagere: {
-		alignSelf: 'flex-start',
-		color: 'white',
-		fontSize: 20,
-		fontWeight: 'bold',
-		backgroundColor: 'rgba(0,0,0,0.5)',
-		borderRadius: 10,
-		padding: 5
   	},
 });
