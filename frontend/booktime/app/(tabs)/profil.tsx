@@ -6,6 +6,8 @@ import { useState } from 'react';
 // import des component
 import ImageViewer from '../../components/ImageViewer';
 import Button from '../../components/Button';
+import { ThemedText } from '@/components/ThemedText';
+import { ThemedView } from '@/components/ThemedView';
 
 // import d'une image
 const PlaceholderImage = require('../../assets/images/profil.png');
@@ -31,12 +33,12 @@ export default function App()
 	};
 	
     return (
-		<View style={styles.container}>
+		<ThemedView style={styles.container}>
 			<Image source={bannerImage} style={styles.bannerImage} />
 			<Image source={profilImage} style={styles.profilImage} />
 			
 			<View style={styles.pseudoContainer}>
-				<Text style={styles.pseudo}>MARTINEZ Gabriel</Text>
+				<ThemedText type="pseudo">MARTINEZ Gabriel</ThemedText>
 			</View>
 
 			<View style={styles.badgeContainer}>
@@ -46,19 +48,13 @@ export default function App()
 
 	
 			<StatusBar style="auto" />
-		</View>
+		</ThemedView>
     );
 }
 
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: '#25292e',
-	},
-	pseudo: {
-		fontSize: 20,
-		fontWeight: 'bold',
-		color: 'white',
 	},
 	pseudoContainer: {
 		position: 'absolute',

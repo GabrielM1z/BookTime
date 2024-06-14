@@ -26,7 +26,7 @@ export const Colors = {
 	},
 	dark: {
 		text: theme.logoWhite,
-		background: theme.logoMidBlue,
+		background: theme.logoDeepBlue,
 		tint: tintColorDark,
 		icon: '#9BA1A6',
 		tabIconDefault: '#9BA1A6',

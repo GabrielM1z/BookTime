@@ -10,8 +10,8 @@ export default function LivreRecherche({ cover, title, writter }) {
             <View style={styles.itemInfosContainer}>
                 <Image source={cover} style={styles.itemImage}></Image>
                 <View style={styles.itemInfos}>
-                    <ThemedText style={styles.titreItem}>{title}</ThemedText>
-                    <ThemedText style={styles.autheurItem}>{writter}</ThemedText>
+                    <ThemedText type="titreLivreHorizontal">{title}</ThemedText>
+                    <ThemedText type="auteurLivreHorizontal">{writter}</ThemedText>
                 </View>
             </View>
             <View style={styles.addItemContainer}>
@@ -38,7 +38,6 @@ const styles = StyleSheet.create({
       backgroundColor: 'yellow',
       width: 100,
       height: 100,
-  
       borderRadius: 10,
       borderColor: "#1E9AA4",
       borderWidth:1,

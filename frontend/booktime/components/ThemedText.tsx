@@ -5,7 +5,10 @@ import { useThemeColor } from '@/hooks/useThemeColor';
 export type ThemedTextProps = TextProps & {
 	lightColor?: string;
 	darkColor?: string;
-	type?: 'default' | 'titreTab' | 'titreEtagere' | 'titreLivreHorizontal' | 'auteurLivreHorizontal' | 'titreLivreVertical';
+	type?: 'default' | 'titreTab' 
+	| 'titreEtagere' | 'titreLivreHorizontal' 
+	| 'auteurLivreHorizontal' | 'titreLivreVertical'
+	| 'pseudo';
 };
 
 export function ThemedText({
@@ -27,6 +30,7 @@ export function ThemedText({
 			type === 'titreLivreHorizontal' ? styles.titreLivreHorizontal : undefined,
 			type === 'auteurLivreHorizontal' ? styles.auteurLivreHorizontal : undefined,
 			type === 'titreLivreVertical' ? styles.titreLivreVertical : undefined,
+			type === 'pseudo' ? styles.pseudo : undefined,
 			style,
 		]}
 		{...rest}
@@ -52,17 +56,20 @@ const styles = StyleSheet.create({
 		alignSelf: 'flex-start',
 	},
 	titreLivreHorizontal: {
-		fontSize: 20,
-		fontWeight: 'bold',
+		fontSize: 18,
 	},
 	auteurLivreHorizontal: {
-		fontSize: 20,
-		fontWeight: 'bold',
+		fontSize: 17,
+      	color: "gray",
 	},
 	titreLivreVertical: {
 		fontSize: 15,
 		fontWeight: 'bold',
 		alignSelf: 'center',
+	},
+	pseudo: {
+		fontSize: 20,
+		fontWeight: 'bold',
 	},
 	
 });
