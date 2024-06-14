@@ -15,12 +15,11 @@ export default function TitreTab({ label }) {
 
 const styles = StyleSheet.create({
     titreContainer: {
-        borderWidth: 1,
         borderColor: 'black',
         alignSelf: 'center',
         padding: 5,
         margin: 5,
-        top: 50,
+        marginTop: 50,
     },
     titreTexte: {
         fontSize: 40,
