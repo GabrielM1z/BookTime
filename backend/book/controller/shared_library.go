@@ -4,9 +4,9 @@ import (
 	"database/sql"
 	"net/http"
 
+	"booktime/controller/interfaces"
 	"booktime/model"
 	"booktime/repository"
-	"booktime/controller/interfaces"
 
 	"github.com/gin-gonic/gin"
 )

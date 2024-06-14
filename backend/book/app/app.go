@@ -50,21 +50,21 @@ func (a *App) CreateRoutes() {
 
 	// State routes
 	stateController := controller.NewStateController(a.DB)
-	routes.GET("/state", stateController.GetState)
 	routes.GET("/states", stateController.GetStates)
+	routes.GET("/user/:userId/book/:bookId/states", stateController.GetState)
 	routes.POST("/states", stateController.InsertState)
 
 	// Library routes
 	libraryController := controller.NewLibraryController(a.DB)
-	routes.GET("/user/:userId/libraries", libraryController.GetLibrariesByUserId)
 	routes.GET("/libraries", libraryController.GetAllLibraries)
+	routes.GET("/user/:userId/libraries", libraryController.GetLibrariesByUserId)
 	routes.POST("/libraries", libraryController.InsertLibrary)
 
 	// LibraryBook routes
 	libraryBookController := controller.NewLibraryBookController(a.DB)
-	routes.GET("/library_books", libraryBookController.GetLibraryBook)
+	routes.GET("/library_books", libraryBookController.GetAllLibraryBook)
+	routes.GET("/library/:libraryId/library_books", libraryBookController.GetLibraryBookByLibraryId)
 	routes.POST("/library_books", libraryBookController.InsertLibraryBook)
-	routes.GET("/library_books_by_libraryid", libraryBookController.GetLibraryBookByLibraryId)
 
 	// SharedLibrary routes
 	sharedLibraryController := controller.NewSharedLibraryController(a.DB)
