@@ -8,7 +8,7 @@ export type ThemedTextProps = TextProps & {
 	type?: 'default' | 'titreTab' 
 	| 'titreEtagere' | 'titreLivreHorizontal' 
 	| 'auteurLivreHorizontal' | 'titreLivreVertical'
-	| 'pseudo';
+	| 'pseudo' | 'sousTab';
 };
 
 export function ThemedText({
@@ -31,6 +31,7 @@ export function ThemedText({
 			type === 'auteurLivreHorizontal' ? styles.auteurLivreHorizontal : undefined,
 			type === 'titreLivreVertical' ? styles.titreLivreVertical : undefined,
 			type === 'pseudo' ? styles.pseudo : undefined,
+			type === 'sousTab' ? styles.sousTab : undefined,
 			style,
 		]}
 		{...rest}
@@ -69,6 +70,10 @@ const styles = StyleSheet.create({
 	},
 	pseudo: {
 		fontSize: 20,
+		fontWeight: 'bold',
+	},
+	sousTab: {
+		fontSize: 15,
 		fontWeight: 'bold',
 	},
 	

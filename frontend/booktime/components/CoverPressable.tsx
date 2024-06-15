@@ -2,13 +2,15 @@ import { StyleSheet, View, Text, Image, TouchableOpacity } from 'react-native';
 import { ThemedText } from './ThemedText';
 import { useNavigation } from 'expo-router';
 
-// component représentant le LIVRE de l'ETAGERE
+// component représentant la COUVERTURE du livre qui est CLIQUABLE
 export default function CoverPressable({ cover }) {
 	
     const navigation = useNavigation();
+    const txt = "oui";
 
     const handleImagePress = () => {
-        navigation.navigate('LivreDetail');
+        const label = "oui"
+        navigation.navigate('livreDetails');
     };
 
 	return (
@@ -21,7 +23,6 @@ export default function CoverPressable({ cover }) {
 
 const styles = StyleSheet.create({
     coverLivre: {
-        backgroundColor: 'yellow',
         width: 100,
         height: 100,
         borderRadius:20,
