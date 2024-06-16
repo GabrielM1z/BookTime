@@ -1,22 +1,23 @@
 import { StyleSheet, View, Text, Image, TouchableOpacity } from 'react-native';
 import { ThemedText } from './ThemedText';
-import { useNavigation } from 'expo-router';
+import { Link, useNavigation } from 'expo-router';
 
 // component représentant la COUVERTURE du livre qui est CLIQUABLE
-export default function CoverPressable({ cover }) {
+export default function CoverPressable({ cover }) 
+{
 	
-    const navigation = useNavigation();
-    const txt = "oui";
-
-    const handleImagePress = () => {
-        const label = "oui"
-        navigation.navigate('livreDetails');
-    };
 
 	return (
-        <TouchableOpacity onPress={handleImagePress}>
-            <Image source={cover} style={styles.coverLivre} />
-        </TouchableOpacity>     
+		<Link href={{
+			pathname: "/book/[idBook]",
+			params: {
+				idBook: "ouiouioui",
+			  }
+		  }} asChild>
+			<TouchableOpacity>
+				<Image source={cover} style={styles.coverLivre} />
+			</TouchableOpacity>
+		</Link>
 	);
 }
 
