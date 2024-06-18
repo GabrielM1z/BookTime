@@ -3,7 +3,7 @@ import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { ThemedView } from './ThemedView';
 
 
-export default function searchBar({ qrcode }) {
+export default function searchBar({ qrcode, onChangeEvent}) {
 
     let searchBarQR = <View></View>;
     if (qrcode) {
@@ -17,7 +17,7 @@ export default function searchBar({ qrcode }) {
         <ThemedView style={styles.searchBarComponent}>
             <View style={styles.searchContainer}>
                 <TabBarIcon size={40} name={'search'} />
-                <TextInput style={styles.searchBar} />
+                <TextInput style={styles.searchBar} onChangeText={newText => onChangeEvent(newText)}/>
             </View>
             {searchBarQR}
         </ThemedView>

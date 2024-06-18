@@ -2,13 +2,18 @@ import { StyleSheet, View, Text, Image } from 'react-native';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { ThemedText } from './ThemedText';
 
+const cover1 = require('@/assets/images/logo_refait.png');
 
 export default function LivreRecherche({ cover, title, writter }) {
+
+
+    writter = writter ? writter[0] : "Inconnue" 
+    cover = cover ? cover.thumbnail : cover1
 
     return (
         <View style={styles.itemContainer}>
             <View style={styles.itemInfosContainer}>
-                <Image source={cover} style={styles.itemImage}></Image>
+                <Image source={{ uri : cover}} style={styles.itemImage} resizeMode={'cover'}></Image>
                 <View style={styles.itemInfos}>
                     <ThemedText type="titreLivreHorizontal">{title}</ThemedText>
                     <ThemedText type="auteurLivreHorizontal">{writter}</ThemedText>
