@@ -1,6 +1,5 @@
 Yo
 
-8==D
 
 drive: https://imtminesales-my.sharepoint.com/:f:/g/personal/jean_guyomarc-h_etu_mines-ales_fr/EkmIeMiLj7BJpSTTXwK6E4wBSNAoEk5kU83YApv-0tvuxg?e=RyfmqY
 
