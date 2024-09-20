@@ -2,13 +2,14 @@
 import { StyleSheet, Text, View } from 'react-native';
 
 import TitreTab from '@/components/TitreTab';
+import { ThemedView } from '@/components/ThemedView';
 
 
 export default function HomeScreen() {
     return (
-        <View style={styles.container}>
+        <ThemedView style={styles.container}>
 			<TitreTab label={"News"}></TitreTab>
-        </View>
+        </ThemedView>
     );
 }
 
@@ -16,6 +17,5 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: '#25292e',
 	},
 });

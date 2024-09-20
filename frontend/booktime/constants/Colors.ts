@@ -6,21 +6,32 @@
 const tintColorLight = '#0a7ea4';
 const tintColorDark = '#fff';
 
+export const theme = {
+	logoWhite: '#fafafb',
+	logoBlue: '#1e9aa4',
+	logoMidBlue: '#0c3952',
+	logoDeepBlue: '#191a32',
+}
+
 export const Colors = {
-  light: {
-    text: '#11181C',
-    background: '#fff',
-    tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
-    tabIconSelected: tintColorLight,
-  },
-  dark: {
-    text: '#ECEDEE',
-    background: '#151718',
-    tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
-    tabIconSelected: tintColorDark,
-  },
+	light: {
+		text: '#11181C',
+		background: '#fff',
+		tint: tintColorLight,
+		icon: '#687076',
+		tabIconDefault: '#687076',
+		tabIconSelected: tintColorLight,
+		primary: '#000000',
+		secondary: '#000000',
+	},
+	dark: {
+		text: theme.logoWhite,
+		background: theme.logoDeepBlue,
+		tint: tintColorDark,
+		icon: '#9BA1A6',
+		tabIconDefault: '#9BA1A6',
+		tabIconSelected: tintColorDark,
+		primary: theme.logoDeepBlue,
+		secondary: theme.logoBlue,
+	},
 };

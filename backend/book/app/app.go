@@ -4,8 +4,12 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
+
+	"github.com/joho/godotenv"
 
 	"booktime/controller"
+	"booktime/service"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
@@ -27,6 +31,20 @@ func (a *App) CreateConnection() {
 
 func (a *App) CreateRoutes() {
 	routes := gin.Default()
+
+	// Load environment variables
+	err := godotenv.Load()
+	if err != nil {
+		log.Println("Error loading .env file")
+	}
+
+	//Service & Api
+	apiKey := os.Getenv("GOOGLE_BOOKS_API_KEY")
+	bookService := service.NewSearchService(apiKey)
+	
+	// Search routes
+	searchController := controller.NewSearchController(bookService)
+	routes.GET("/search", searchController.SearchBooks)
 
 	// Book routes
 	bookController := controller.NewBookController(a.DB)
@@ -50,21 +68,21 @@ func (a *App) CreateRoutes() {
 
 	// State routes
 	stateController := controller.NewStateController(a.DB)
-	routes.GET("/state", stateController.GetState)
 	routes.GET("/states", stateController.GetStates)
+	routes.GET("/user/:userId/book/:bookId/states", stateController.GetState)
 	routes.POST("/states", stateController.InsertState)
 
 	// Library routes
 	libraryController := controller.NewLibraryController(a.DB)
-	routes.GET("/libraries_by_userid", libraryController.GetLibrariesByUserId)
-	routes.GET("/libraries", libraryController.GetLibrary)
+	routes.GET("/libraries", libraryController.GetAllLibraries)
+	routes.GET("/user/:userId/libraries", libraryController.GetLibrariesByUserId)
 	routes.POST("/libraries", libraryController.InsertLibrary)
 
 	// LibraryBook routes
 	libraryBookController := controller.NewLibraryBookController(a.DB)
-	routes.GET("/library_books", libraryBookController.GetLibraryBook)
+	routes.GET("/library_books", libraryBookController.GetAllLibraryBook)
+	routes.GET("/library/:libraryId/library_books", libraryBookController.GetLibraryBookByLibraryId)
 	routes.POST("/library_books", libraryBookController.InsertLibraryBook)
-	routes.GET("/library_books_by_libraryid", libraryBookController.GetLibraryBookByLibraryId)
 
 	// SharedLibrary routes
 	sharedLibraryController := controller.NewSharedLibraryController(a.DB)

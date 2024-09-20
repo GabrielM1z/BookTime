@@ -43,7 +43,7 @@ services:
 
   migrate:
     image: migrate/migrate:v4.15.2
-    profiles: ["tools"]
+    profiles: [ "tools" ]
     volumes:
       - ./migrations:/migrations
     entrypoint:
@@ -52,9 +52,9 @@ services:
         "-path",
         "/migrations",
         "-database",
-        "postgres://postgres:postgres123@postgres:5432/booktime_book?sslmode=disable",
+        "postgres://postgres:postgres123@postgres:5432/booktime_book?sslmode=disable"
       ]
-    command: ["up"]
+    command: [ "up" ]
     depends_on:
       postgres:
         condition: service_healthy
@@ -83,6 +83,7 @@ services:
 volumes:
   database_dockerizing:
   api_volume:
+
 
 networks:
   fullstack:

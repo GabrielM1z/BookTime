@@ -4,9 +4,9 @@ import (
 	"database/sql"
 	"net/http"
 
+	"booktime/controller/interfaces"
 	"booktime/model"
 	"booktime/repository"
-	"booktime/controller/interfaces"
 
 	"github.com/gin-gonic/gin"
 )
@@ -24,8 +24,8 @@ func (sc *StateController) GetState(c *gin.Context) {
 	db := sc.DB
 	repoState := repository.NewStateRepository(db)
 
-	idUser := c.Query("id_user")
-	idBook := c.Query("id_book")
+	idUser := c.Param("userId")
+	idBook := c.Param("bookId")
 
 	var getState []model.State
 	if idUser != "" && idBook != "" {

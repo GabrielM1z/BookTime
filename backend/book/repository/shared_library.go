@@ -32,26 +32,20 @@ func (slr *SharedLibraryRepository) InsertSharedLibrary(post model.PostSharedLib
 }
 
 func (slr *SharedLibraryRepository) SelectSharedLibrary() []model.SharedLibrary {
-	var result []model.SharedLibrary
 	rows, err := slr.DB.Query("SELECT * FROM shared_library")
 	if err != nil {
 		log.Println(err)
 		return nil
-	}
-	for rows.Next() {
-		var (
-			id        uint
-			userId    uint
-			libraryId uint
-		)
-		err := rows.Scan(&id, &userId, &libraryId)
-		if err != nil {
-			log.Println(err)
-		} else {
-			sharedLibrary := model.SharedLibrary{IdUser: userId, IdLibrary: libraryId}
-			result = append(result, sharedLibrary)
 		}
+	var sharedLibraries []model.SharedLibrary
+	for rows.Next() {
+		var sharedLibrary model.SharedLibrary
+		if err := rows.Scan(&sharedLibrary.IdUser, &sharedLibrary.IdLibrary); err != nil {
+			log.Println(err)
+		}
+		sharedLibraries = append(sharedLibraries, sharedLibrary)
 	}
-	return result
+	return sharedLibraries
 }
+
 var _ interfaces.SharedLibraryRepositoryInterface = &SharedLibraryRepository{}
