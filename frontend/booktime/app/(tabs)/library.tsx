@@ -51,6 +51,10 @@ export default function LibrairyScreen({}) {
 		}
 	}
 
+	const getLibraryFromBack = () => {
+
+	};
+
 	// affichage général
     return (
         <ThemedView style={styles.container}>
@@ -59,7 +63,7 @@ export default function LibrairyScreen({}) {
 				
 				<SafeAreaView>
 					
-					<SearchBar qrcode={true} onChangeEvent={null}></SearchBar>
+					<SearchBar qrcode={true} onChangeEvent={getLibraryFromBack}></SearchBar>
 
 					<View style={styles.containerBtn}>
 
