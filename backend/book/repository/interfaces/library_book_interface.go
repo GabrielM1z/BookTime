@@ -1,6 +1,6 @@
 package interfaces
 
-import "booktime/model"
+import "book/model"
 
 type LibraryBookRepositoryInterface interface {
 	InsertLibraryBook(post model.PostLibraryBook) bool

@@ -3,8 +3,9 @@ package controller
 import (
 	"net/http"
 
-	"booktime/service"
-	"booktime/controller/interfaces"
+	"book/controller/interfaces"
+	"book/service"
+
 	"github.com/gin-gonic/gin"
 )
 

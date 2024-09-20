@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"log"
 
-	"booktime/model"
-    "booktime/repository/interfaces"
+	"book/model"
+	"book/repository/interfaces"
 )
 
 type LibraryRepository struct {
@@ -54,8 +54,6 @@ func (lr *LibraryRepository) SelectLibrary() []model.Library {
 	return result
 }
 
-
-
 func (lr *LibraryRepository) SelectLibraryByUser(idUser string) []model.Library {
 	rows, err := lr.DB.Query("SELECT * FROM library WHERE id_library IN (SELECT id_library FROM shared_library WHERE id_user = $1)", idUser)
 	if err != nil {
@@ -73,4 +71,5 @@ func (lr *LibraryRepository) SelectLibraryByUser(idUser string) []model.Library 
 	}
 	return libraries
 }
+
 var _ interfaces.LibraryRepositoryInterface = &LibraryRepository{}

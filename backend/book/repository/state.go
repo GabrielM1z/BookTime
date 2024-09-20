@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"log"
 
-	"booktime/model"
-	"booktime/repository/interfaces"
+	"book/model"
+	"book/repository/interfaces"
 )
 
 type StateRepository struct {

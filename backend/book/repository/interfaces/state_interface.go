@@ -1,6 +1,6 @@
 package interfaces
 
-import "booktime/model"
+import "book/model"
 
 type StateRepositoryInterface interface {
 	InsertState(post model.PostState) bool

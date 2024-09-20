@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"log"
 
-	"booktime/model"
-    "booktime/repository/interfaces"
+	"book/model"
+	"book/repository/interfaces"
 )
 
 type FormatRepository struct {
@@ -53,4 +53,5 @@ func (fr *FormatRepository) SelectFormat() []model.Format {
 	}
 	return result
 }
+
 var _ interfaces.FormatRepositoryInterface = &FormatRepository{}

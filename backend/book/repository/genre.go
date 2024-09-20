@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"log"
 
-	"booktime/model"
-    "booktime/repository/interfaces"
+	"book/model"
+	"book/repository/interfaces"
 )
 
 type GenreRepository struct {
@@ -53,4 +53,5 @@ func (gr *GenreRepository) SelectGenre() []model.Genre {
 	}
 	return result
 }
+
 var _ interfaces.GenreRepositoryInterface = &GenreRepository{}

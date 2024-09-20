@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"log"
 
-	"booktime/model"
+	"book/model"
 )
 
 type BookGenreRepository struct {

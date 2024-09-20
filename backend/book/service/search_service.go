@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"net/url"
 
-	"booktime/model"
-	"booktime/service/interfaces"
+	"book/model"
+	"book/service/interfaces"
 )
 
 type SearchService struct {

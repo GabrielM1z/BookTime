@@ -8,8 +8,8 @@ import (
 
 	"github.com/joho/godotenv"
 
-	"booktime/controller"
-	"booktime/service"
+	"book/controller"
+	"book/service"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
@@ -41,7 +41,7 @@ func (a *App) CreateRoutes() {
 	//Service & Api
 	apiKey := os.Getenv("GOOGLE_BOOKS_API_KEY")
 	bookService := service.NewSearchService(apiKey)
-	
+
 	// Search routes
 	searchController := controller.NewSearchController(bookService)
 	routes.GET("/search", searchController.SearchBooks)

@@ -1,6 +1,6 @@
 package interfaces
 
-import "booktime/model"
+import "book/model"
 
 type GenreRepositoryInterface interface {
 	InsertGenre(post model.PostGenre) bool

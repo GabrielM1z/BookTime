@@ -1,6 +1,6 @@
 package interfaces
 
-import "booktime/model"
+import "book/model"
 
 type FormatRepositoryInterface interface {
 	InsertFormat(post model.PostFormat) bool

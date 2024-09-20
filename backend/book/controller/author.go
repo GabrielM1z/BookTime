@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"booktime/controller/interfaces"
-	"booktime/model"
-	"booktime/repository"
+	"book/controller/interfaces"
+	"book/model"
+	"book/repository"
 
 	"github.com/gin-gonic/gin"
 )
@@ -71,6 +71,5 @@ func (ac *AuthorController) UpdateAuthor(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Author updated successfully"})
 }
-
 
 var _ interfaces.AuthorControllerInterface = &AuthorController{}

@@ -1,7 +1,7 @@
 package interfaces
 
-import "booktime/model"
+import "book/model"
 
 type SearchServiceInterface interface {
-	SearchBooks(query, title, author, genre string) ([]model.SimplifiedBook, error);
+	SearchBooks(query, title, author, genre string) ([]model.SimplifiedBook, error)
 }

@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"log"
 
-	"booktime/model"
-    "booktime/repository/interfaces"
+	"book/model"
+	"book/repository/interfaces"
 )
 
 type SharedLibraryRepository struct {
@@ -36,7 +36,7 @@ func (slr *SharedLibraryRepository) SelectSharedLibrary() []model.SharedLibrary 
 	if err != nil {
 		log.Println(err)
 		return nil
-		}
+	}
 	var sharedLibraries []model.SharedLibrary
 	for rows.Next() {
 		var sharedLibrary model.SharedLibrary

@@ -16,7 +16,7 @@ func (a *App) Migrate() {
 	}
 	m, err := migrate.NewWithDatabaseInstance(
 		"file://./migrations/",
-		"booktime_book", driver)
+		"book_book", driver)
 	if err != nil {
 		log.Println(err)
 	}
