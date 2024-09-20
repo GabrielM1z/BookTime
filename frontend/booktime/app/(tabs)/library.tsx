@@ -1,5 +1,6 @@
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import React, { useState } from 'react';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 // import de constantes
 import { Colors } from '@/constants/Colors';
@@ -54,60 +55,65 @@ export default function LibrairyScreen({}) {
     return (
         <ThemedView style={styles.container}>
 
-			<TitreTab label={"Bibliothèque"}></TitreTab>
+			<SafeAreaProvider>
+				
+				<SafeAreaView>
+					
+					<SearchBar qrcode={true} onChangeEvent={null}></SearchBar>
 
-			<SearchBar qrcode={true}></SearchBar>
+					<View style={styles.containerBtn}>
 
-            <View style={styles.containerBtn}>
+					<TouchableOpacity 
+							style={activeTab === 'etagereClassique' ? styles.activeBtn : styles.btn} 
+							onPress={() => setActiveTab('etagereClassique')}
+						>
+							<ThemedText type='sousTab'>
+								Mes étagères
+							</ThemedText>
+						</TouchableOpacity>
 
-			<TouchableOpacity 
-					style={activeTab === 'etagereClassique' ? styles.activeBtn : styles.btn} 
-					onPress={() => setActiveTab('etagereClassique')}
-				>
-					<ThemedText type='sousTab'>
-						Mes étagères
-					</ThemedText>
-				</TouchableOpacity>
+						<TouchableOpacity 
+							style={activeTab === 'allBooks' ? styles.activeBtn : styles.btn} 
+							onPress={() => setActiveTab('allBooks')}
+						>
+							<ThemedText type='sousTab'>
+								Tout mes livres
+							</ThemedText>
+						</TouchableOpacity>
 
-				<TouchableOpacity 
-					style={activeTab === 'allBooks' ? styles.activeBtn : styles.btn} 
-					onPress={() => setActiveTab('allBooks')}
-				>
-					<ThemedText type='sousTab'>
-						Tout mes livres
-					</ThemedText>
-				</TouchableOpacity>
+						<TouchableOpacity 
+							style={activeTab === 'etageresByGenre' ? styles.activeBtn : styles.btn} 
+							onPress={() => setActiveTab('etageresByGenre')}
+						>
+							<ThemedText type='sousTab'>
+								Genre
+							</ThemedText>
+						</TouchableOpacity>
 
-				<TouchableOpacity 
-					style={activeTab === 'etageresByGenre' ? styles.activeBtn : styles.btn} 
-					onPress={() => setActiveTab('etageresByGenre')}
-				>
-					<ThemedText type='sousTab'>
-						Genre
-					</ThemedText>
-				</TouchableOpacity>
+						<TouchableOpacity 
+							style={activeTab === 'etageresByType' ? styles.activeBtn : styles.btn} 
+							onPress={() => setActiveTab('etageresByType')}
+						>
+							<ThemedText type='sousTab'>
+								Type
+							</ThemedText>
+						</TouchableOpacity>
 
-				<TouchableOpacity 
-					style={activeTab === 'etageresByType' ? styles.activeBtn : styles.btn} 
-					onPress={() => setActiveTab('etageresByType')}
-				>
-					<ThemedText type='sousTab'>
-						Type
-					</ThemedText>
-				</TouchableOpacity>
+						<TouchableOpacity 
+							style={activeTab === 'etageresByAuthor' ? styles.activeBtn : styles.btn} 
+							onPress={() => setActiveTab('etageresByAuthor')}
+						>
+							<ThemedText type='sousTab'>
+								Auteur
+							</ThemedText>
+						</TouchableOpacity>
 
-				<TouchableOpacity 
-					style={activeTab === 'etageresByAuthor' ? styles.activeBtn : styles.btn} 
-					onPress={() => setActiveTab('etageresByAuthor')}
-				>
-					<ThemedText type='sousTab'>
-						Auteur
-					</ThemedText>
-				</TouchableOpacity>
+					</View>
 
-			</View>
+					{renderContent()}
 
-			{renderContent()}
+					</SafeAreaView>
+			</SafeAreaProvider>
 
 		</ThemedView>	
 	);
