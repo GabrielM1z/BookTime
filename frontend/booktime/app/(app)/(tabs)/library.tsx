@@ -1,13 +1,13 @@
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 // import des component
-import TitreTab from '../../components/TitreTab';
-import Etagere from '../../components/Etagere';
-import SearchBar from '../../components/SearchBar';
+import TitreTab from '@/components/TitreTab';
+import Etagere from '@/components/Etagere';
+import SearchBar from '@/components/SearchBar';
 import { ThemedView } from '@/components/ThemedView';
 
 // import des images
-const cover1 = require('../../assets/images/logo_refait.png');
+const cover1 = require('@/assets/images/logo_refait.png');
 
 
 // Ecran de la BIBLIOTHEQUE
