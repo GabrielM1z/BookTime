@@ -10,6 +10,8 @@ import { apiLink } from '@/constants/Api';
 import { Book } from '../models/Book';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { useInfiniteQuery } from 'react-query'
+
 const cover1 = require('@/assets/images/logo_refait.png');
 
 // function getListBookFromQuery(query: String) {
@@ -48,6 +50,21 @@ const books = [
 // 		return <LivreRecherche key={index} cover={book.volumeInfo.imageLinks.thumbnail} title={book.volumeInfo.title} writter={"toto"}></LivreRecherche>
 // 	}
 // }
+
+
+const fetchBooks = async (query: String, offset: number = 0) => {
+	const response = fetch(apiLink + query + "&startIndex=" + (offset.toString()));
+	return (await response).json();
+}
+
+const BookList = (query: String) => {
+	const {
+		data,
+		isLoading,
+		fetchNextPage,
+		hasNextPage
+	} = useInfiniteQuery('boooks', fetchBooks)
+}
 
 export default function HomeScreen() {
 	const [bookList, setBookList] = useState<Book[]>([]);
@@ -106,6 +123,9 @@ export default function HomeScreen() {
 				})
 		}
 	}
+
+
+	const fetchBook = async (offset)
 
 	return (
 
