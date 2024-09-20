@@ -55,6 +55,7 @@ func (a *App) CreateRoutes() {
 	authorController := controller.NewAuthorController(a.DB)
 	routes.GET("/authors", authorController.GetAuthor)
 	routes.POST("/authors", authorController.InsertAuthor)
+	routes.PUT("/authors/:id", authorController.UpdateAuthor)
 
 	// Format routes
 	formatController := controller.NewFormatController(a.DB)

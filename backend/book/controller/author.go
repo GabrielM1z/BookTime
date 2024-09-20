@@ -3,6 +3,7 @@ package controller
 import (
 	"database/sql"
 	"net/http"
+	"strconv"
 
 	"booktime/controller/interfaces"
 	"booktime/model"
@@ -19,7 +20,6 @@ func NewAuthorController(db *sql.DB) *AuthorController {
 	return &AuthorController{DB: db}
 }
 
-// GetAuthor implements AuthorControllerInterface
 func (ac *AuthorController) GetAuthor(c *gin.Context) {
 	db := ac.DB
 	repoAuthor := repository.NewAuthorRepository(db)
@@ -31,7 +31,6 @@ func (ac *AuthorController) GetAuthor(c *gin.Context) {
 	}
 }
 
-// InsertAuthor implements AuthorControllerInterface
 func (ac *AuthorController) InsertAuthor(c *gin.Context) {
 	db := ac.DB
 	var post model.PostAuthor
@@ -47,5 +46,31 @@ func (ac *AuthorController) InsertAuthor(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "failed", "msg": err.Error()})
 	}
 }
+
+func (ac *AuthorController) UpdateAuthor(c *gin.Context) {
+	db := ac.DB
+	idParam := c.Param("id")
+	id, err := strconv.Atoi(idParam) //parseInt
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid author ID"})
+		return
+	}
+
+	var author model.Author
+	if err := c.ShouldBindJSON(&author); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	repoAuthor := repository.NewAuthorRepository(db)
+	success := repoAuthor.UpdateAuthor(id, author)
+	if !success {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update author"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Author updated successfully"})
+}
+
 
 var _ interfaces.AuthorControllerInterface = &AuthorController{}
