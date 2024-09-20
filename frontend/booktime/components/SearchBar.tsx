@@ -20,8 +20,6 @@ export default function searchBar({ qrcode, onChangeEvent }) {
 
     const setSearchTerm = (searchTerm: string) => {
 
-
-
         clearTimeout(delayedDebounceFn)
 
         delayedDebounceFn = setTimeout(() => {

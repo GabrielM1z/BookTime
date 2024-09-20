@@ -8,6 +8,7 @@ import { ThemedView } from '@/components/ThemedView';
 
 import { apiLink } from '@/constants/Api';
 import { Book } from '../models/Book';
+import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 
 const cover1 = require('@/assets/images/logo_refait.png');
 
@@ -59,19 +60,19 @@ export default function HomeScreen() {
 
 	const renderFooter = () => {
 		return (
-		  // Footer View with Loader
-		  <View style={styles.footer}>
-			{loading ? (
-			  <ActivityIndicator
-				color="black"
-				style={{margin: 15}} />
-			) : null}
-		  </View>
+			// Footer View with Loader
+			<View style={styles.footer}>
+				{loading ? (
+					<ActivityIndicator
+						color="black"
+						style={{ margin: 15 }} />
+				) : null}
+			</View>
 		);
-	  };
+	};
 
-	const getListBookFromQuery = (query? : string) => {
-		
+	const getListBookFromQuery = (query?: string) => {
+
 		if (!loading && !isListEnd) {
 			setLoading(true);
 			fetch(apiLink + (query ? query : lastQuery) + "&startIndex=" + (query ? "0" : bookList.length.toString()))
@@ -80,17 +81,17 @@ export default function HomeScreen() {
 
 					if (json.items.length > 0) {
 						// After the response increasing the offset 	
-						if(query == null){
+						if (query == null) {
 							setBookList([...bookList, ...json.items]);
-							console.log("caca", "lastQuery : "+lastQuery)
-							
+							console.log("caca", "lastQuery : " + lastQuery)
 
-						}else{
-							
-							flatListRef.current?.scrollToIndex({index: 0, animated:null});
+
+						} else {
+
+							flatListRef.current?.scrollToIndex({ index: 0, animated: null });
 							setBookList(json.items);
 							setLastQuery(query);
-							console.log("pipi", "lastQuery : "+lastQuery);
+							console.log("pipi", "lastQuery : " + lastQuery);
 
 						}
 						setLoading(false);
@@ -117,23 +118,30 @@ export default function HomeScreen() {
 				))) : (<Text>Loading...</Text>
 				)}
 			</ScrollView> */}
+			<SafeAreaProvider>
 
-			<SearchBar qrcode={true} onChangeEvent={getListBookFromQuery}></SearchBar>
-			<FlatList
-				ref={flatListRef}
-				style={styles.dataTableContainer}
-				data={bookList} 
-				keyExtractor={(item, index) => index.toString()}
-				renderItem={({ item }) => <LivreRecherche cover={item.volumeInfo.imageLinks} title={item.volumeInfo.title} writter={item.volumeInfo.authors}></LivreRecherche>}
-				onEndReachedThreshold={0}
-				onEndReached={(info)=> {
-					console.log("caca trggered");
-					if (!loading) {
-						getListBookFromQuery();
-					}
-				}}
-				ListFooterComponent={renderFooter}
-			/>
+				<SafeAreaView>
+
+
+					<SearchBar qrcode={true} onChangeEvent={getListBookFromQuery}></SearchBar>
+					<FlatList
+						ref={flatListRef}
+						style={styles.dataTableContainer}
+						data={bookList}
+						keyExtractor={(item, index) => index.toString()}
+						renderItem={({ item }) => <LivreRecherche cover={item.volumeInfo.imageLinks} title={item.volumeInfo.title} writter={item.volumeInfo.authors}></LivreRecherche>}
+						onEndReachedThreshold={0}
+						onEndReached={(info) => {
+							console.log("caca trggered");
+							if (!loading) {
+								getListBookFromQuery();
+							}
+						}}
+						ListFooterComponent={renderFooter}
+					/>
+
+				</SafeAreaView>
+			</SafeAreaProvider>
 
 		</ThemedView>
 
@@ -155,5 +163,5 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 		alignItems: 'center',
 		flexDirection: 'row',
-	  },
+	},
 });
