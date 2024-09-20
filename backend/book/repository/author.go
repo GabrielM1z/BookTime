@@ -45,4 +45,20 @@ func (ar *AuthorRepository) SelectAuthor() []model.Author {
 	return authors
 }
 
+func (ar *AuthorRepository) UpdateAuthor(id int, author model.Author) bool {
+	stmt, err := ar.DB.Prepare("UPDATE author SET first_name = $1, last_name = $2, description = $3 WHERE id = $4")
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(author.FirstName, author.LastName, author.Description, id)
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+	return true
+}
+
 var _ interfaces.AuthorRepositoryInterface = &AuthorRepository{}

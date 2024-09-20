@@ -17,9 +17,9 @@ services:
     networks:
       - fullstack
 
-  api:
-    container_name: api_dockerizing
-    build: .
+  api_books:
+    container_name: api_books
+    build: ./book
     ports:
       - 8080:8080
     restart: always
@@ -27,6 +27,17 @@ services:
       - api_volume:/usr/src/app/
     depends_on:
       - postgres
+    networks:
+      - fullstack
+
+  api_gateway:
+    container_name: api_gateway
+    build: ./gateway
+    ports:
+      - 8082:8080
+    restart: always
+    volumes:
+      - api_volume:/usr/src/app/
     networks:
       - fullstack
 
@@ -49,6 +60,26 @@ services:
         condition: service_healthy
     restart: on-failure
 
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: keycloak
+    environment:
+      DB_VENDOR: POSTGRES
+      DB_ADDR: postgres
+      DB_DATABASE: booktime_book
+      DB_USER: postgres
+      DB_PASSWORD: postgres123
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin123
+    command: ["start-dev"]  # Démarrage en mode développement
+    ports:
+      - 8081:8080
+    depends_on:
+      - postgres
+    restart: always
+    networks:
+      - fullstack
+
 volumes:
   database_dockerizing:
   api_volume:
@@ -57,3 +88,5 @@ volumes:
 networks:
   fullstack:
     driver: bridge
+
+
