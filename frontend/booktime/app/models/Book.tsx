@@ -5,11 +5,6 @@ export interface BookInfos{
 }
 
 export interface Book{
+    id : string;
     volumeInfo : BookInfos
-}
-
-export interface BookResponse{
-    kind : string;
-    items : Book[];
-    totalItems : number;
 }
