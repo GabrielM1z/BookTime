@@ -1,9 +1,10 @@
 import { StyleSheet, View, TextInput } from 'react-native';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { ThemedView } from './ThemedView';
+import { useEffect, useState } from 'react';
 
 
-export default function searchBar({ qrcode, onChangeEvent}) {
+export default function searchBar({ qrcode, onChangeEvent }) {
 
     let searchBarQR = <View></View>;
     if (qrcode) {
@@ -12,12 +13,32 @@ export default function searchBar({ qrcode, onChangeEvent}) {
                 <View style={styles.qrSearch}><TabBarIcon size={30} color={"white"} name={'qr-code'} /></View>
             </View>;
     }
+
+    // const [searchTerm, setSearchTerm] = useState("");
+
+    let delayedDebounceFn : NodeJS.Timeout;
+
+    const setSearchTerm = (searchTerm: string) => {
+
+
+
+        clearTimeout(delayedDebounceFn)
+
+        delayedDebounceFn = setTimeout(() => {
+            onChangeEvent(searchTerm);
+        }, 3000)
+
+    };
+
+
+
+    let searchWaiting: NodeJS.Timeout;
     return (
 
         <ThemedView style={styles.searchBarComponent}>
             <View style={styles.searchContainer}>
                 <TabBarIcon size={40} name={'search'} />
-                <TextInput style={styles.searchBar} onChangeText={newText => onChangeEvent(newText)}/>
+                <TextInput style={styles.searchBar} onChangeText={setSearchTerm} />
             </View>
             {searchBarQR}
         </ThemedView>
