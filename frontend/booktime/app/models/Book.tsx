@@ -6,5 +6,6 @@ export interface BookInfos{
 
 export interface Book{
     id : string;
+    etag : string;
     volumeInfo : BookInfos
 }

@@ -1,170 +1,101 @@
-import { StyleSheet, Text, View, Image, ScrollView, FlatList, ActivityIndicator, VirtualizedList } from 'react-native';
+import { StyleSheet, Text, View, Image, ScrollView, FlatList, ActivityIndicator, VirtualizedList, RefreshControl } from 'react-native';
 import { useState, useEffect, useRef } from 'react';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
-import SearchBar from '@/components/SearchBar';
+import { SearchBar } from '@/components/SearchBar';
 import TitreTab from '@/components/TitreTab';
-import LivreRecherche from '@/components/LivreRecherche'
+import { LivreRecherche } from '@/components/LivreRecherche'
 import { ThemedView } from '@/components/ThemedView';
 
-import { apiLink } from '@/constants/Api';
+import { useInfiniteScroll } from '@/core/api';
 import { Book } from '../models/Book';
-import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
+import { apiLink } from '@/constants/Api';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { useInfiniteQuery } from 'react-query'
 
 const cover1 = require('@/assets/images/logo_refait.png');
 
-// function getListBookFromQuery(query: String) {
-// 	try {
-// 		fetch(apiLink + query)
-// 		.then(response => response.json())
-// 		.then(json => setBookList(json.items))
 
-// 	} catch (error) {
-// 		console.log("Erreur API")
-// 	}
-// }
+type TFilters = {
+	q: string;
+};
 
-// useEffect(()=> getListBookFromQuery(""))
-
-const books = [
-	{ title: 'Titre du livre 1', autheur: "Martinez", url: cover1 },
-	{ title: 'Titre du livre 2', autheur: "Martinez", url: cover1 },
-	{ title: 'Titre du livre 3', autheur: "Martinez", url: cover1 },
-	{ title: 'Titre du livre 4', autheur: "Martinez", url: cover1 },
-	{ title: 'Titre du livre 5', autheur: "Martinez", url: cover1 },
-	{ title: 'Titre du livre 6', autheur: "Martinez", url: cover1 },
-	{ title: 'Titre du livre 1', autheur: "Martinez", url: cover1 },
-	{ title: 'Titre du livre 2', autheur: "Martinez", url: cover1 },
-	{ title: 'Titre du livre 3', autheur: "Martinez", url: cover1 },
-	{ title: 'Titre du livre 4', autheur: "Martinez", url: cover1 },
-	{ title: 'Titre du livre 5', autheur: "Martinez", url: cover1 },
-	{ title: 'Titre du livre 6', autheur: "Martinez", url: cover1 },
-];
-
-// function test(book : Book, index : number) {
-// 	try {
-// 		return <LivreRecherche key={index} cover={book.volumeInfo.imageLinks.thumbnail} title={book.volumeInfo.title} writter={book.volumeInfo.authors}></LivreRecherche>
-// 	} catch (error) {
-// 		console.log(index, book.volumeInfo.title);
-// 		return <LivreRecherche key={index} cover={book.volumeInfo.imageLinks.thumbnail} title={book.volumeInfo.title} writter={"toto"}></LivreRecherche>
-// 	}
-// }
-
-
-const fetchBooks = async (query: String, offset: number = 0) => {
-	const response = fetch(apiLink + query + "&startIndex=" + (offset.toString()));
-	return (await response).json();
+type TBook = {
+	items: Book[];
+	kind: string;
+	totalItems: number;
 }
 
-const BookList = (query: String) => {
-	const {
-		data,
-		isLoading,
-		fetchNextPage,
-		hasNextPage
-	} = useInfiniteQuery('boooks', fetchBooks)
-}
+
+const removeDuplicates = (items: Book[]): Book[] => {
+	const seenIds = new Set<string>();
+	return items.filter((item) => {
+		if (seenIds.has(item.id)) {
+			return false;
+		} else {
+			seenIds.add(item.id);
+			return true;
+		}
+	});
+};
+
 
 export default function HomeScreen() {
-	const [bookList, setBookList] = useState<Book[]>([]);
-	const [loading, setLoading] = useState(false)
-	const [isListEnd, setIsListEnd] = useState(false)
-	const [lastQuery, setLastQuery] = useState("bite");
-	const flatListRef = useRef<FlatList<Book>>(null)
+	const [filters, setFilters] = useState<TFilters>({
+		q: '',
+	});
 
-
-
-	const renderFooter = () => {
-		return (
-			// Footer View with Loader
-			<View style={styles.footer}>
-				{loading ? (
-					<ActivityIndicator
-						color="black"
-						style={{ margin: 15 }} />
-				) : null}
-			</View>
-		);
-	};
-
-	const getListBookFromQuery = (query?: string) => {
-
-		if (!loading && !isListEnd) {
-			setLoading(true);
-			fetch(apiLink + (query ? query : lastQuery) + "&startIndex=" + (query ? "0" : bookList.length.toString()))
-				.then(response => response.json())
-				.then(json => {
-
-					if (json.items.length > 0) {
-						// After the response increasing the offset 	
-						if (query == null) {
-							setBookList([...bookList, ...json.items]);
-							console.log("caca", "lastQuery : " + lastQuery)
-
-
-						} else {
-
-							flatListRef.current?.scrollToIndex({ index: 0, animated: null });
-							setBookList(json.items);
-							setLastQuery(query);
-							console.log("pipi", "lastQuery : " + lastQuery);
-
-						}
-						setLoading(false);
-					} else {
-						setIsListEnd(true);
-						setLoading(false);
-					}
-
-
-				}).catch((error) => {
-					console.log("Erreur API", error)
-				})
-		}
+	const searchBarChanged = (searchTerms: string) => {
+		setFilters({
+			...filters,
+			q: searchTerms,
+		});
 	}
 
+	const {
+		data,
+		isRefreshing,
+		onRefresh,
+		onEndReached,
+		isFetchingNextPage
+	} = useInfiniteScroll<Book, TFilters>({
+		url: apiLink,
+		limit: 10,
+		filters: filters,
+		key: 'books',
+		initialPage: 0,
+		formatResponse: (data: TBook) => data.items,
+	});
 
-	const fetchBook = async (offset)
+	data.forEach(element => {
+		console.log(element.volumeInfo.title);
+	});
 
 	return (
-
 		<ThemedView style={styles.body}>
-			{/* <ScrollView style={styles.dataTableContainer} stickyHeaderIndices={[0]}>
-				<SearchBar qrcode={true} onChangeEvent={getListBookFromQuery}></SearchBar>
-				{bookList ? (bookList.map((book, index) => (
-					<LivreRecherche key={index} cover={book.volumeInfo.imageLinks} title={book.volumeInfo.title} writter={book.volumeInfo.authors}></LivreRecherche>
-					// test(book, index)
-				))) : (<Text>Loading...</Text>
-				)}
-			</ScrollView> */}
-			<SafeAreaProvider>
-
-				<SafeAreaView>
-
-
-					<SearchBar qrcode={true} onChangeEvent={getListBookFromQuery}></SearchBar>
-					<FlatList
-						ref={flatListRef}
-						style={styles.dataTableContainer}
-						data={bookList}
-						keyExtractor={(item, index) => index.toString()}
-						renderItem={({ item }) => <LivreRecherche cover={item.volumeInfo.imageLinks} title={item.volumeInfo.title} writter={item.volumeInfo.authors}></LivreRecherche>}
-						onEndReachedThreshold={0}
-						onEndReached={(info) => {
-							console.log("caca trggered");
-							if (!loading) {
-								getListBookFromQuery();
-							}
-						}}
-						ListFooterComponent={renderFooter}
-					/>
-
-				</SafeAreaView>
-			</SafeAreaProvider>
-
+			<SafeAreaView>
+				<SearchBar qrcode={true} onSearch={searchBarChanged} />
+				<FlatList
+					contentContainerStyle={styles.contentContainerStyle}
+					keyExtractor={item => `${item.id}+${item.etag}`}
+					initialNumToRender={10}
+					data={data}
+					onEndReached={onEndReached}
+					removeClippedSubviews={true}
+					// refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />}
+					renderItem={({ item }) => <LivreRecherche book={item} />}
+					ListEmptyComponent={
+						<View style={styles.listEmptyComponent}>
+							<Text>{'noResult'}</Text>
+						</View>
+					}
+					ListFooterComponent={
+						<View style={styles.listFooterComponent}>
+							{isFetchingNextPage && <ActivityIndicator />}
+						</View>
+					}
+				/>
+			</SafeAreaView>
 		</ThemedView>
-
 	);
 }
 
@@ -178,10 +109,27 @@ const styles = StyleSheet.create({
 		marginTop: "5%",
 		flexDirection: "column",
 	},
-	footer: {
-		padding: 10,
+	// listFooterComponent: {
+	// 	padding: 10,
+	// 	justifyContent: 'center',
+	// 	alignItems: 'center',
+	// 	flexDirection: 'row',
+	// },
+	listEmptyComponent: {
+		flexDirection: 'row',
+	},
+	listFooterComponent: {
+		flexDirection: 'row',
+		height: 100,
 		justifyContent: 'center',
 		alignItems: 'center',
-		flexDirection: 'row',
+	},
+	item: {
+		height: 60,
+		width: '100%',
+	},
+	contentContainerStyle: {
+		marginTop: 10,
+		padding: 10,
 	},
 });

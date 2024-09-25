@@ -1,32 +1,30 @@
 import { StyleSheet, View, Text, Image } from 'react-native';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { ThemedText } from './ThemedText';
+import { Book } from '@/app/models/Book';
 
 const defaultCover = require('@/assets/images/logo_refait.png');
 
-export default function LivreRecherche({ cover, title, writter }) {
-
-
-    writter = writter ? writter[0] : "Inconnue" 
-    // cover = cover ? cover.thumbnail : defaultCover1
-
-    return (
-        <View style={styles.itemContainer}>
-            <View style={styles.itemInfosContainer}>
-                <Image source={cover? { uri : cover.thumbnail} : defaultCover } style={styles.itemImage} resizeMode={'cover'}></Image>
-                <View style={styles.itemInfos}>
-                    <ThemedText type="titreLivreHorizontal">{title}</ThemedText>
-                    <ThemedText type="auteurLivreHorizontal">{writter}</ThemedText>
-                </View>
-            </View>
-            <View style={styles.addItemContainer}>
-                <View style={styles.addItem}>
-                    <TabBarIcon size={20} color={"#1E9AA4"} name={'add'} />
-                </View>
-            </View>
-        </View>
-    );
+export const LivreRecherche = ({book} : {book : Book}) => {
+  // console.log(book.id, book.volumeInfo.title, book.volumeInfo.authors);
+  return (
+      <View style={styles.itemContainer}>
+          <View style={styles.itemInfosContainer}>
+              <Image source={book.volumeInfo.imageLinks? { uri : book.volumeInfo.imageLinks.thumbnail} : defaultCover } style={styles.itemImage} resizeMode={'cover'}></Image>
+              <View style={styles.itemInfos}>
+                  <ThemedText type="titreLivreHorizontal">{book.volumeInfo.title}</ThemedText>
+                  <ThemedText type="auteurLivreHorizontal">{book.volumeInfo.authors ? book.volumeInfo.authors[0] : "Inconnue"}</ThemedText>
+              </View>
+          </View>
+          <View style={styles.addItemContainer}>
+              <View style={styles.addItem}>
+                  <TabBarIcon size={20} color={"#1E9AA4"} name={'add'} />
+              </View>
+          </View>
+      </View>
+  );
 }
+
 
 const styles = StyleSheet.create({
     itemContainer: {
