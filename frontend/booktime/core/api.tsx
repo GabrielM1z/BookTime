@@ -85,8 +85,6 @@ export const useInfiniteScroll = <T = unknown, F = object>({
         return data?.pages.flatMap(page => page.data) || [];
     }, [data?.pages]);
 
-    console.log("flattenData");
-
     return {
         data: flattenData,
         onEndReached: loadNext,

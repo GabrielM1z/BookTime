@@ -12,9 +12,6 @@ import { apiLink } from '@/constants/Api';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 
-const cover1 = require('@/assets/images/logo_refait.png');
-
-
 type TFilters = {
 	q: string;
 };
@@ -66,19 +63,16 @@ export default function HomeScreen() {
 		formatResponse: (data: TBook) => data.items,
 	});
 
-	data.forEach(element => {
-		console.log(element.volumeInfo.title);
-	});
-
 	return (
 		<ThemedView style={styles.body}>
 			<SafeAreaView>
 				<SearchBar qrcode={true} onSearch={searchBarChanged} />
 				<FlatList
 					contentContainerStyle={styles.contentContainerStyle}
-					keyExtractor={item => `${item.id}+${item.etag}`}
+					// keyExtractor={item => `${item.id}+${item.etag}`}
+					keyExtractor={item => item.id}
 					initialNumToRender={10}
-					data={data}
+					data={removeDuplicates(data)}
 					onEndReached={onEndReached}
 					removeClippedSubviews={true}
 					// refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />}
