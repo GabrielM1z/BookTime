@@ -2,9 +2,16 @@ import { StyleSheet, View, TextInput } from 'react-native';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { ThemedView } from './ThemedView';
 import { useEffect, useState } from 'react';
+import { debounce } from 'lodash';
 
 
-export default function searchBar({ qrcode, onChangeEvent }) {
+interface SearchBarProps {
+    qrcode: boolean;  // Type de la prop qrcode
+    onSearch: (value: string) => void;  // Type de la prop onSearch
+  }
+
+
+export const SearchBar: React.FC<SearchBarProps> = ({ qrcode, onSearch }) => {
 
     let searchBarQR = <View></View>;
     if (qrcode) {
@@ -14,29 +21,34 @@ export default function searchBar({ qrcode, onChangeEvent }) {
             </View>;
     }
 
-    // const [searchTerm, setSearchTerm] = useState("");
+    const [searchTerm, setSearchTerm] = useState('');
 
-    let delayedDebounceFn : NodeJS.Timeout;
+    // Update the search term and call the parent's onSearch function
+    const debouncedChangeHandler = debounce((value: string) => {
+        onSearch(value);  // Call the parent's function with the current value
+    }, 500); // 500ms delay
 
-    const setSearchTerm = (searchTerm: string) => {
+    useEffect(() => {
+        debouncedChangeHandler(searchTerm);
 
-        clearTimeout(delayedDebounceFn)
+        // Cleanup function to cancel debounce on unmount
+        return () => {
+        debouncedChangeHandler.cancel();
+        };
+    }, [searchTerm]);
 
-        delayedDebounceFn = setTimeout(() => {
-            onChangeEvent(searchTerm);
-        }, 3000)
-
-    };
-
-
-
-    let searchWaiting: NodeJS.Timeout;
     return (
 
         <ThemedView style={styles.searchBarComponent}>
             <View style={styles.searchContainer}>
                 <TabBarIcon size={40} name={'search'} />
-                <TextInput style={styles.searchBar} onChangeText={setSearchTerm} />
+                <TextInput 
+                    style={styles.searchBar} 
+                    value={searchTerm}
+                    onChangeText={(text) => {
+                        setSearchTerm(text);
+                        debouncedChangeHandler(text); // Update debounced value
+                    }} />
             </View>
             {searchBarQR}
         </ThemedView>
