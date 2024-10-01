@@ -6,7 +6,7 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '@/constants/Colors';
 
 // import des components
-import SearchBar from '@/components/SearchBar';
+import {SearchBar} from '@/components/SearchBar';
 import { ThemedView } from '@/components/ThemedView';
 import TitreTab from '@/components/TitreTab';
 import { ThemedText } from '@/components/ThemedText';
@@ -63,7 +63,7 @@ export default function LibrairyScreen({}) {
 				
 				<SafeAreaView>
 					
-					<SearchBar qrcode={true} onChangeEvent={getLibraryFromBack}></SearchBar>
+					<SearchBar qrcode={true} onSearch={getLibraryFromBack}></SearchBar>
 
 					<View style={styles.containerBtn}>
 
