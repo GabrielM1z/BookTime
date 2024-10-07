@@ -11,6 +11,8 @@ import (
 	"book/controller"
 	"book/service"
 
+	"github.com/gofiber/fiber/v2"
+
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 )
@@ -47,9 +49,26 @@ func (a *App) CreateRoutes() {
 	routes.GET("/search", searchController.SearchBooks)
 
 	// Book routes
-	bookController := controller.NewBookController(a.DB)
-	routes.GET("/books", bookController.GetBook)
-	routes.POST("/books", bookController.InsertBook)
+	// bookController := controller.NewBookController(a.DB)
+	// routes.GET("/books", bookController.GetBook)
+	//routes.POST("/books", bookController.InsertBook)
+
+	app := fiber.New()
+
+	// Routes du service "book"
+	app.Get("/books", func(c *fiber.Ctx) error {
+		// Logique pour récupérer les livres
+		return c.JSON(fiber.Map{
+			"message": "Liste des livres",
+		})
+	})
+
+	app.Post("/books", func(c *fiber.Ctx) error {
+		// Logique pour insérer un livre
+		return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+			"message": "Livre inséré",
+		})
+	})
 
 	// Author routes
 	authorController := controller.NewAuthorController(a.DB)
@@ -104,5 +123,5 @@ func (a *App) CreateRoutes() {
 }
 
 func (a *App) Run() {
-	a.Routes.Run(":8080")
+	a.Routes.Run(":8083")
 }
