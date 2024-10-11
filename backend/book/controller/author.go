@@ -20,15 +20,39 @@ func NewAuthorController(db *sql.DB) *AuthorController {
 	return &AuthorController{DB: db}
 }
 
-func (ac *AuthorController) GetAuthor(c *gin.Context) {
+func (ac *AuthorController) GetAuthors(c *gin.Context) {
 	db := ac.DB
 	repoAuthor := repository.NewAuthorRepository(db)
-	getAuthor := repoAuthor.SelectAuthor()
+	getAuthor := repoAuthor.SelectAuthors()
 	if getAuthor != nil {
 		c.JSON(http.StatusOK, gin.H{"status": "success", "data": getAuthor, "msg": "get author successfully"})
 	} else {
 		c.JSON(http.StatusOK, gin.H{"status": "success", "data": nil, "msg": "get author successfully"})
 	}
+}
+
+func (ac *AuthorController) GetAuthor(c *gin.Context) {
+	db := ac.DB
+	idParam := c.Param("id")
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid author ID"})
+		return
+	}
+
+	repoAuthor := repository.NewAuthorRepository(db)
+	author, err := repoAuthor.SelectAuthor(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get author"})
+		return
+	}
+
+	if author == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Author not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"status": "success", "data": author})
 }
 
 func (ac *AuthorController) InsertAuthor(c *gin.Context) {
@@ -70,6 +94,25 @@ func (ac *AuthorController) UpdateAuthor(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Author updated successfully"})
+}
+
+func (ac *AuthorController) DeleteAuthor(c *gin.Context) {
+	db := ac.DB
+	idParam := c.Param("id")
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid author ID"})
+		return
+	}
+
+	repoAuthor := repository.NewAuthorRepository(db)
+	success := repoAuthor.DeleteAuthor(id)
+	if !success {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete author"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Author deleted successfully"})
 }
 
 var _ interfaces.AuthorControllerInterface = &AuthorController{}

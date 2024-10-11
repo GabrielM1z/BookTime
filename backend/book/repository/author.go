@@ -26,7 +26,7 @@ func (ar *AuthorRepository) InsertAuthor(post model.PostAuthor) bool {
 	return true
 }
 
-func (ar *AuthorRepository) SelectAuthor() []model.Author {
+func (ar *AuthorRepository) SelectAuthors() []model.Author {
 	query := "SELECT * FROM author"
 	rows, err := ar.DB.Query(query)
 	if err != nil {
@@ -45,8 +45,25 @@ func (ar *AuthorRepository) SelectAuthor() []model.Author {
 	return authors
 }
 
+func (ar *AuthorRepository) SelectAuthor(id int) (*model.Author, error) {
+	query := "SELECT id_author, first_name, last_name, description FROM author WHERE id_author = $1"
+	row := ar.DB.QueryRow(query, id)
+
+	var author model.Author
+	err := row.Scan(&author.IdAuthor, &author.FirstName, &author.LastName, &author.Description)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		log.Println(err)
+		return nil, err
+	}
+
+	return &author, nil
+}
+
 func (ar *AuthorRepository) UpdateAuthor(id int, author model.Author) bool {
-	stmt, err := ar.DB.Prepare("UPDATE author SET first_name = $1, last_name = $2, description = $3 WHERE id = $4")
+	stmt, err := ar.DB.Prepare("UPDATE author SET first_name = $1, last_name = $2, description = $3 WHERE id_author = $4")
 	if err != nil {
 		log.Println(err)
 		return false
@@ -54,6 +71,22 @@ func (ar *AuthorRepository) UpdateAuthor(id int, author model.Author) bool {
 	defer stmt.Close()
 
 	_, err = stmt.Exec(author.FirstName, author.LastName, author.Description, id)
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+	return true
+}
+
+func (ar *AuthorRepository) DeleteAuthor(id int) bool {
+	stmt, err := ar.DB.Prepare("DELETE FROM author WHERE id_author = $1")
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(id)
 	if err != nil {
 		log.Println(err)
 		return false
