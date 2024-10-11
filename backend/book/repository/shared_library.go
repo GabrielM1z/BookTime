@@ -31,7 +31,7 @@ func (slr *SharedLibraryRepository) InsertSharedLibrary(post model.PostSharedLib
 	return true
 }
 
-func (slr *SharedLibraryRepository) SelectSharedLibrary() []model.SharedLibrary {
+func (slr *SharedLibraryRepository) SelectSharedLibraries() []model.SharedLibrary {
 	rows, err := slr.DB.Query("SELECT * FROM shared_library")
 	if err != nil {
 		log.Println(err)
@@ -46,6 +46,50 @@ func (slr *SharedLibraryRepository) SelectSharedLibrary() []model.SharedLibrary 
 		sharedLibraries = append(sharedLibraries, sharedLibrary)
 	}
 	return sharedLibraries
+}
+
+func (slr *SharedLibraryRepository) SelectSharedLibrary(idUser uint, idLibrary uint) (model.SharedLibrary, error) {
+	var sharedLibrary model.SharedLibrary
+	stmt, err := slr.DB.Prepare("SELECT * FROM shared_library WHERE id_user = $1 and id_library = $2")
+	if err != nil {
+		log.Println(err)
+		return sharedLibrary, err
+	}
+	defer stmt.Close()
+
+	row := stmt.QueryRow(idUser, idLibrary)
+	err = row.Scan(&sharedLibrary.IdUser, &sharedLibrary.IdLibrary)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return sharedLibrary, nil // Pas de format trouvé
+		}
+		log.Println(err)
+		return sharedLibrary, err // Erreur de lecture
+	}
+
+	return sharedLibrary, nil
+}
+
+func (slr *SharedLibraryRepository) UpdateSharedLibrary(idUser uint, idLibrary uint, sharedLibrary model.SharedLibrary) bool {
+	query := `UPDATE shared_library SET id_user = $1, id_library = $2 WHERE id_user = $3 and id_library = $4`
+
+	_, err := slr.DB.Exec(query, sharedLibrary.IdUser, sharedLibrary.IdLibrary, idUser, idLibrary)
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+	return true
+}
+
+func (slr *SharedLibraryRepository) DeleteSharedLibrary(idUser uint, idLibrary uint) bool {
+	query := "DELETE FROM shared_library WHERE id_user = $1 and id_library = $2"
+
+	_, err := slr.DB.Exec(query, idUser, idLibrary)
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+	return true
 }
 
 var _ interfaces.SharedLibraryRepositoryInterface = &SharedLibraryRepository{}

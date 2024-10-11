@@ -15,13 +15,11 @@ func NewBookRepository(db *sql.DB) *BookRepository {
 	return &BookRepository{DB: db}
 }
 
-func (br *BookRepository) SelectBook() []*model.Book {
+func (br *BookRepository) SelectBooks() []*model.Book {
 	query := `
-        SELECT b.id_book, b.title, b.description, f.name as format_name, b.publisher, 
-               TO_CHAR(b.publication_date,'YYYY-MM-DD') as publication_date, b.page_number, b.language, b.cover_image_url
-        FROM book b
-        JOIN formats f ON b.id_format = f.id_format
-        ORDER BY b.id_book;`
+        SELECT id_book, title, description, id_format, publisher, 
+               TO_CHAR(publication_date,'YYYY-MM-DD') as publication_date, page_number, language, cover_image_url
+        FROM book;`
 
 	rows, err := br.DB.Query(query)
 	if err != nil {
@@ -30,11 +28,15 @@ func (br *BookRepository) SelectBook() []*model.Book {
 	defer rows.Close()
 
 	books := []*model.Book{}
+	IDFormat := 0
+
 	for rows.Next() {
 		var book model.Book
-		if err := rows.Scan(&book.IdBook, &book.Title, &book.Description, &book.FormatName, &book.Publisher, &book.PublicationDate, &book.PageNumber, &book.Language, &book.CoverImageUrl); err != nil {
+		if err := rows.Scan(&book.IdBook, &book.Title, &book.Description, &IDFormat, &book.Publisher, &book.PublicationDate, &book.PageNumber, &book.Language, &book.CoverImageUrl); err != nil {
 			log.Fatal(err)
 		}
+		format, _ := NewFormatRepository(br.DB).SelectFormat(uint(IDFormat))
+		book.Format = format
 		books = append(books, &book)
 	}
 
@@ -99,6 +101,59 @@ func (br *BookRepository) SelectGenresByBookID(bookID uint) []model.Genre {
 func (br *BookRepository) InsertBook(post model.PostBook) bool {
 	_, err := br.DB.Exec("INSERT INTO book (title, description, id_format, publisher, publication_date, page_number, language, cover_image_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
 		post.Title, post.Description, post.IdFormat, post.Publisher, post.PublicationDate, post.PageNumber, post.Language, post.CoverImageUrl)
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+	return true
+}
+
+func (br *BookRepository) SelectBook(id int) (*model.Book, error) {
+	query := `
+        SELECT id_book, title, description, id_format, publisher, 
+               TO_CHAR(publication_date,'YYYY-MM-DD') as publication_date, page_number, language, cover_image_url
+        FROM book WHERE id_book = $1`
+
+	row := br.DB.QueryRow(query, id)
+
+	IDFormat := 0
+
+	var book model.Book
+	err := row.Scan(&book.IdBook, &book.Title, &book.Description, &IDFormat, &book.Publisher, &book.PublicationDate, &book.PageNumber, &book.Language, &book.CoverImageUrl)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		log.Println(err)
+		return nil, err
+	}
+
+	format, _ := NewFormatRepository(br.DB).SelectFormat(uint(IDFormat))
+	book.Format = format
+
+	book.Authors = br.SelectAuthorsByBookID(book.IdBook)
+	book.Genres = br.SelectGenresByBookID(book.IdBook)
+
+	return &book, nil
+}
+
+func (br *BookRepository) UpdateBook(id int, book model.Book) bool {
+	query := `UPDATE book SET title = $1, description = $2, id_format = $3, publisher = $4, publication_date = $5, 
+			  page_number = $6, language = $7, cover_image_url = $8 WHERE id_book = $9`
+
+	_, err := br.DB.Exec(query, book.Title, book.Description, book.Format.IdFormat, book.Publisher, book.PublicationDate,
+		book.PageNumber, book.Language, book.CoverImageUrl, id)
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+	return true
+}
+
+func (br *BookRepository) DeleteBook(id int) bool {
+	query := "DELETE FROM book WHERE id_book = $1"
+
+	_, err := br.DB.Exec(query, id)
 	if err != nil {
 		log.Println(err)
 		return false

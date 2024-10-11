@@ -4,6 +4,9 @@ import "book/model"
 
 type StateRepositoryInterface interface {
 	InsertState(post model.PostState) bool
-	SelectState() []model.State
-	SelectStateByUserAndBook(idUser, idBook string) []model.State
+	SelectStates() []model.State
+	SelectState(id uint) model.State
+	SelectStateByUserAndBook(idUser, idBook uint) []model.State
+	UpdateState(id int, state model.State) bool
+	DeleteState(id int) bool
 }

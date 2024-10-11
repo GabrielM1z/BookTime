@@ -31,7 +31,7 @@ func (sr *StateRepository) InsertState(post model.PostState) bool {
 	return true
 }
 
-func (ar *StateRepository) SelectState() []model.State {
+func (ar *StateRepository) SelectStates() []model.State {
 	query := "SELECT * FROM state"
 	rows, err := ar.DB.Query(query)
 	if err != nil {
@@ -50,7 +50,7 @@ func (ar *StateRepository) SelectState() []model.State {
 	return states
 }
 
-func (sr *StateRepository) SelectStateByUserAndBook(idUser, idBook string) []model.State {
+func (sr *StateRepository) SelectStateByUserAndBook(idUser, idBook uint) []model.State {
 	rows, err := sr.DB.Query("SELECT * FROM state WHERE id_user = $1 AND id_book = $2", idUser, idBook)
 	if err != nil {
 		log.Fatal(err)
@@ -66,6 +66,47 @@ func (sr *StateRepository) SelectStateByUserAndBook(idUser, idBook string) []mod
 		states = append(states, state)
 	}
 	return states
+}
+
+func (sr *StateRepository) SelectState(idState uint) model.State {
+	rows, err := sr.DB.Query("SELECT * FROM state WHERE id_state = $1", idState)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	states := []model.State{}
+	for rows.Next() {
+		var state model.State
+		if err := rows.Scan(&state.IdState, &state.State, &state.Progression, &state.ReadCount, &state.LastReadDate, &state.IdUser, &state.IdBook, &state.IsAvailable); err != nil {
+			log.Fatal(err)
+		}
+		states = append(states, state)
+	}
+	return states[0]
+}
+
+func (sr *StateRepository) UpdateState(idState int, state model.State) bool {
+	query := `UPDATE state SET state = $1, progression = $2, read_count = $3, last_read_date = $4, is_available = $5
+			  WHERE id_state = $6`
+
+	_, err := sr.DB.Exec(query, state.State, state.Progression, state.ReadCount, state.LastReadDate, state.IsAvailable, idState)
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+	return true
+}
+
+func (sr *StateRepository) DeleteState(idState int) bool {
+	query := "DELETE FROM state WHERE id_state = $1"
+
+	_, err := sr.DB.Exec(query, idState)
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+	return true
 }
 
 var _ interfaces.StateRepositoryInterface = &StateRepository{}
