@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/joho/godotenv"
+	// "github.com/joho/godotenv"
 
 	"book/controller"
 	"book/service"
@@ -21,10 +21,8 @@ type App struct {
 }
 
 func (a *App) CreateConnection() {
-	UNAMEDB := os.Getenv("DB_USER")
-    PASSDB := os.Getenv("DB_PASSWORD")
 
-	connStr := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable", UNAMEDB, PASSDB, "postgre", "book_db")
+	connStr := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable", "postgres", "postgres123", "postgres", "book_db")
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatal(err)
@@ -36,10 +34,10 @@ func (a *App) CreateRoutes() {
 	routes := gin.Default()
 
 	// Load environment variables
-	err := godotenv.Load()
-	if err != nil {
-		log.Println("Error loading .env file")
-	}
+	// err := godotenv.Load()
+	// if err != nil {
+	// 	log.Println("Error loading .env file")
+	// }
 
 	//Service & Api
 	apiKey := os.Getenv("GOOGLE_BOOKS_API_KEY")
@@ -131,5 +129,5 @@ func (a *App) CreateRoutes() {
 }
 
 func (a *App) Run() {
-	a.Routes.Run(":8083")
+	a.Routes.Run(":8080")
 }
