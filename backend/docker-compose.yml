@@ -17,10 +17,9 @@ services:
 
   keycloak:
     build: ./keycloak
-    container_name: keycloak
     command: start-dev
     environment:
-      KC_HOSTNAME: localhost
+      KC_HOSTNAME: keycloak
       KC_HOSTNAME_STRICT: false
       KC_HOSTNAME_STRICT_HTTPS: false
 

@@ -32,7 +32,7 @@ func InitKeycloak() {
 	}
 
 	// Configurer la vérification du token
-	verifier = provider.Verifier(&oidc.Config{ClientID: clientID, SkipIssuerCheck: true})
+	verifier = provider.Verifier(&oidc.Config{ClientID: clientID})
 
 	// Configurer l'OAuth2
 	oauth2Config = oauth2.Config{
