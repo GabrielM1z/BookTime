@@ -23,7 +23,10 @@ type App struct {
 }
 
 func (a *App) CreateConnection() {
-	connStr := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable", UNAMEDB, PASSDB, HOSTDB, DBNAME)
+	UNAMEDB := os.Getenv("DB_USER")
+    PASSDB := os.Getenv("DB_PASSWORD")
+
+	connStr := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable", UNAMEDB, PASSDB, "postgre", "book_db")
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatal(err)
