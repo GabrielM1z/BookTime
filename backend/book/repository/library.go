@@ -16,6 +16,7 @@ func NewLibraryRepository(db *sql.DB) *LibraryRepository {
 	return &LibraryRepository{DB: db}
 }
 
+// InsertLibrary - Insère une nouvelle bibliothèque
 func (lr *LibraryRepository) InsertLibrary(post model.PostLibrary) bool {
 	stmt, err := lr.DB.Prepare("INSERT INTO library (name) VALUES ($1)")
 	if err != nil {
@@ -31,13 +32,15 @@ func (lr *LibraryRepository) InsertLibrary(post model.PostLibrary) bool {
 	return true
 }
 
-func (lr *LibraryRepository) SelectLibrary() []model.Library {
+// SelectLibraries - Sélectionne toutes les bibliothèques
+func (lr *LibraryRepository) SelectLibraries() []model.Library {
 	var result []model.Library
 	rows, err := lr.DB.Query("SELECT * FROM library")
 	if err != nil {
-		log.Println(err)
-		return nil
+		log.Fatal(err)
 	}
+	defer rows.Close()
+
 	for rows.Next() {
 		var (
 			id   uint
@@ -54,7 +57,54 @@ func (lr *LibraryRepository) SelectLibrary() []model.Library {
 	return result
 }
 
-func (lr *LibraryRepository) SelectLibraryByUser(idUser string) []model.Library {
+// SelectLibrary - Sélectionne une bibliothèque par ID
+func (lr *LibraryRepository) SelectLibrary(id uint) (model.Library, error) {
+	var library model.Library
+	stmt, err := lr.DB.Prepare("SELECT * FROM library WHERE id_library = $1")
+	if err != nil {
+		log.Println(err)
+		return library, err
+	}
+	defer stmt.Close()
+
+	row := stmt.QueryRow(id)
+	err = row.Scan(&library.IdLibrary, &library.Name)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return library, nil
+		}
+		log.Println(err)
+		return library, err
+	}
+
+	return library, nil
+}
+
+// UpdateLibrary - Met à jour une bibliothèque
+func (lr *LibraryRepository) UpdateLibrary(id int, library model.Library) bool {
+	query := `UPDATE library SET name = $1 WHERE id_library = $2`
+
+	_, err := lr.DB.Exec(query, library.Name, id)
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+	return true
+}
+
+// DeleteLibrary - Supprime une bibliothèque par ID
+func (lr *LibraryRepository) DeleteLibrary(id int) bool {
+	query := "DELETE FROM library WHERE id_library = $1"
+
+	_, err := lr.DB.Exec(query, id)
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+	return true
+}
+
+func (lr *LibraryRepository) SelectLibraryByUser(idUser uint) []model.Library {
 	rows, err := lr.DB.Query("SELECT * FROM library WHERE id_library IN (SELECT id_library FROM shared_library WHERE id_user = $1)", idUser)
 	if err != nil {
 		log.Fatal(err)

@@ -1,3 +1,11 @@
+-- Créer la base de données pour Keycloak
+CREATE DATABASE keycloak_db;
+
+-- Créer la base de données pour le service Book
+CREATE DATABASE book_db;
+
+\connect book_db;
+
 -- Table LIBRARY
 CREATE TABLE IF NOT EXISTS library (
     id_library SERIAL PRIMARY KEY,

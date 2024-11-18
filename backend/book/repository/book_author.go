@@ -5,7 +5,6 @@ import (
 	"log"
 
 	"book/model"
-	"book/repository/interfaces"
 )
 
 type BookAuthorRepository struct {
@@ -16,42 +15,62 @@ func NewBookAuthorRepository(db *sql.DB) *BookAuthorRepository {
 	return &BookAuthorRepository{DB: db}
 }
 
-func (ar *BookAuthorRepository) InsertBookAuthor(post model.PostBookAuthor) bool {
-	stmt, err := ar.DB.Prepare("INSERT INTO book_author (id_author, id_book) VALUES ($1, $2)")
+// InsertBookAuthor insère une relation entre un livre et un auteur
+func (repo *BookAuthorRepository) InsertBookAuthor(post model.PostBookAuthor) bool {
+	query := "INSERT INTO book_author (id_author, id_book) VALUES ($1, $2)"
+	_, err := repo.DB.Exec(query, post.IdAuthor, post.IdBook)
 	if err != nil {
-		log.Println(err)
-		return false
-	}
-	defer stmt.Close()
-	_, err2 := stmt.Exec(post.IdAuthor, post.IdBook)
-	if err2 != nil {
-		log.Println(err2)
+		log.Println("Error inserting book author:", err)
 		return false
 	}
 	return true
 }
 
-func (ar *BookAuthorRepository) SelectBookAuthor() []model.BookAuthor {
-	var result []model.BookAuthor
-	rows, err := ar.DB.Query("SELECT * FROM book_author")
+// SelectBookAuthors récupère toutes les relations entre livres et auteurs
+func (repo *BookAuthorRepository) SelectBookAuthors() []model.BookAuthor {
+	query := "SELECT id_author, id_book FROM book_author"
+	rows, err := repo.DB.Query(query)
 	if err != nil {
-		log.Println(err)
+		log.Println("Error selecting book authors:", err)
 		return nil
 	}
+	defer rows.Close()
+
+	var bookAuthors []model.BookAuthor
 	for rows.Next() {
-		var (
-			id_author uint
-			id_book   uint
-		)
-		err := rows.Scan(&id_author, &id_book)
-		if err != nil {
-			log.Println(err)
-		} else {
-			book_author := model.BookAuthor{IdAuthor: id_author, IdBook: id_book}
-			result = append(result, book_author)
+		var bookAuthor model.BookAuthor
+		if err := rows.Scan(&bookAuthor.IdAuthor, &bookAuthor.IdBook); err != nil {
+			log.Println("Error scanning book author:", err)
+			continue
 		}
+		bookAuthors = append(bookAuthors, bookAuthor)
 	}
-	return result
+	return bookAuthors
 }
 
-var _ interfaces.BookAuthorRepositoryInterface = &BookAuthorRepository{}
+// SelectBookAuthor récupère une relation spécifique entre un livre et un auteur
+func (repo *BookAuthorRepository) SelectBookAuthor(idAuthor uint, idBook uint) (model.BookAuthor, error) {
+	query := "SELECT id_author, id_book FROM book_author WHERE id_author = $1 AND id_book = $2"
+	row := repo.DB.QueryRow(query, idAuthor, idBook)
+
+	var bookAuthor model.BookAuthor
+	err := row.Scan(&bookAuthor.IdAuthor, &bookAuthor.IdBook)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return model.BookAuthor{}, nil
+		}
+		return model.BookAuthor{}, err
+	}
+	return bookAuthor, nil
+}
+
+// DeleteBookAuthor supprime une relation entre un livre et un auteur
+func (repo *BookAuthorRepository) DeleteBookAuthor(idAuthor uint, idBook uint) bool {
+	query := "DELETE FROM book_author WHERE id_author = $1 AND id_book = $2"
+	_, err := repo.DB.Exec(query, idAuthor, idBook)
+	if err != nil {
+		log.Println("Error deleting book author:", err)
+		return false
+	}
+	return true
+}

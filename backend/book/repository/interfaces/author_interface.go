@@ -4,6 +4,7 @@ import "book/model"
 
 type AuthorRepositoryInterface interface {
 	InsertAuthor(post model.PostAuthor) bool
-	SelectAuthor() []model.Author
+	SelectAuthor(id int) (*model.Author, error)
+	SelectAuthors() []model.Author
 	UpdateAuthor(id int, author model.Author) bool
 }
