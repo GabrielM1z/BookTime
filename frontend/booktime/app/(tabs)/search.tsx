@@ -7,7 +7,7 @@ import { LivreRecherche } from '@/components/LivreRecherche'
 import { ThemedView } from '@/components/ThemedView';
 
 import { useInfiniteScroll } from '@/core/api';
-import { Book } from '../models/Book';
+import { Book } from '../../models/Book';
 import { apiLink } from '@/constants/Api';
 import { SafeAreaView } from 'react-native-safe-area-context';
 

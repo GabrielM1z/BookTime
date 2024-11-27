@@ -1,7 +1,7 @@
 import { StyleSheet, View, Text, Image } from 'react-native';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { ThemedText } from './ThemedText';
-import { Book } from '@/app/models/Book';
+import { Book } from '@/models/Book';
 import { red } from 'react-native-reanimated/lib/typescript/reanimated2/Colors';
 
 const defaultCover = require('@/assets/images/logo_refait.png');
