@@ -6,7 +6,7 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '@/constants/Colors';
 
 // import des components
-import {SearchBar} from '@/components/SearchBar';
+import SearchBar from '@/components/SearchBar';
 import { ThemedView } from '@/components/ThemedView';
 import TitreTab from '@/components/TitreTab';
 import { ThemedText } from '@/components/ThemedText';
@@ -17,6 +17,9 @@ import AllBooks from '@/components/etageres/allBooks';
 import EtagereByGenre from '@/components/etageres/etageresByGenre';
 import EtageresByTypes from '@/components/etageres/etageresByTypes';
 import EtageresByAuthor from '@/components/etageres/etageresByAuthor';
+
+// import des styles
+import libraryStyles from '../../styles/libraryStyles';
 
 
 // Ecran de la BIBLIOTHEQUE
@@ -57,18 +60,20 @@ export default function LibrairyScreen({}) {
 
 	// affichage général
     return (
-        <ThemedView style={styles.container}>
-
+        <ThemedView style={libraryStyles.container}>
 			<SafeAreaProvider>
-				
 				<SafeAreaView>
+
+					
+					<TitreTab label={"Bibliotheque"}></TitreTab>
 					
 					<SearchBar qrcode={true} onSearch={getLibraryFromBack}></SearchBar>
+				
 
-					<View style={styles.containerBtn}>
+					<View style={libraryStyles.containerBtn}>
 
 					<TouchableOpacity 
-							style={activeTab === 'etagereClassique' ? styles.activeBtn : styles.btn} 
+							style={activeTab === 'etagereClassique' ? libraryStyles.activeBtn : libraryStyles.btn} 
 							onPress={() => setActiveTab('etagereClassique')}
 						>
 							<ThemedText type='sousTab'>
@@ -77,7 +82,7 @@ export default function LibrairyScreen({}) {
 						</TouchableOpacity>
 
 						<TouchableOpacity 
-							style={activeTab === 'allBooks' ? styles.activeBtn : styles.btn} 
+							style={activeTab === 'allBooks' ? libraryStyles.activeBtn : libraryStyles.btn} 
 							onPress={() => setActiveTab('allBooks')}
 						>
 							<ThemedText type='sousTab'>
@@ -86,7 +91,7 @@ export default function LibrairyScreen({}) {
 						</TouchableOpacity>
 
 						<TouchableOpacity 
-							style={activeTab === 'etageresByGenre' ? styles.activeBtn : styles.btn} 
+							style={activeTab === 'etageresByGenre' ? libraryStyles.activeBtn : libraryStyles.btn} 
 							onPress={() => setActiveTab('etageresByGenre')}
 						>
 							<ThemedText type='sousTab'>
@@ -95,7 +100,7 @@ export default function LibrairyScreen({}) {
 						</TouchableOpacity>
 
 						<TouchableOpacity 
-							style={activeTab === 'etageresByType' ? styles.activeBtn : styles.btn} 
+							style={activeTab === 'etageresByType' ? libraryStyles.activeBtn : libraryStyles.btn} 
 							onPress={() => setActiveTab('etageresByType')}
 						>
 							<ThemedText type='sousTab'>
@@ -104,7 +109,7 @@ export default function LibrairyScreen({}) {
 						</TouchableOpacity>
 
 						<TouchableOpacity 
-							style={activeTab === 'etageresByAuthor' ? styles.activeBtn : styles.btn} 
+							style={activeTab === 'etageresByAuthor' ? libraryStyles.activeBtn : libraryStyles.btn} 
 							onPress={() => setActiveTab('etageresByAuthor')}
 						>
 							<ThemedText type='sousTab'>
@@ -122,38 +127,3 @@ export default function LibrairyScreen({}) {
 		</ThemedView>	
 	);
 }
-
-
-// style css
-const styles = StyleSheet.create({
-  	container: {
-		flex: 1,
-	},
-	etagereContainer: {
-		flexDirection: 'column',
-	},
-	btn: {
-		backgroundColor: Colors.dark.primary,
-		borderColor: Colors.dark.secondary,
-		borderWidth: 2,
-		borderRadius: 100,
-		paddingVertical: 5,
-		paddingHorizontal: 10,
-		marginRight: 5,
-		marginTop: 5,
-	},
-	activeBtn: {
-		backgroundColor: Colors.dark.secondary,
-		borderColor: Colors.dark.secondary,
-		borderWidth: 2,
-		borderRadius: 100,
-		paddingVertical: 5,
-		paddingHorizontal: 10,
-		marginRight: 5,
-		marginTop: 5,
-	},
-	containerBtn: {
-		flexDirection: 'row',
-        flexWrap: 'wrap',
-    },
-});

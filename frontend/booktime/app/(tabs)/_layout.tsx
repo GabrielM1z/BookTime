@@ -59,6 +59,28 @@ export default function TabLayout() {
 				),
 				}}
 			/>
+			
+			{/* tab invisible sur la nav bar */}
+			<Tabs.Screen
+				name="book/[idBook]"
+				options={{
+					title: 'Book',
+					tabBarIcon: ({ color, focused }) => (
+						<TabBarIcon name={focused ? 'star' : 'star-outline'} color={color} />
+					),
+					href: null,
+				}}
+			/>
+			<Tabs.Screen
+				name="author/[idAuthor]"
+				options={{
+					title: 'Author',
+					tabBarIcon: ({ color, focused }) => (
+						<TabBarIcon name={focused ? 'star' : 'star-outline'} color={color} />
+					),
+					href: null,
+				}}
+			/>
 		</Tabs>
 		
 	);

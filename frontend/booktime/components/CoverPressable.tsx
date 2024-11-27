@@ -1,17 +1,15 @@
-import { StyleSheet, View, Text, Image, TouchableOpacity } from 'react-native';
-import { ThemedText } from './ThemedText';
-import { Link, useNavigation } from 'expo-router';
+import { StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { Link } from 'expo-router';
 
 // component représentant la COUVERTURE du livre qui est CLIQUABLE
 export default function CoverPressable({ cover }) 
 {
 	
-
 	return (
-		<Link href={{
+		<Link push href={{
 			pathname: "/book/[idBook]",
 			params: {
-				idBook: "ouiouioui",
+				idBook: "nononon",
 			  }
 		  }} asChild>
 			<TouchableOpacity>
