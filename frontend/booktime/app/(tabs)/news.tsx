@@ -3,6 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import TitreTab from '@/components/TitreTab';
 import { ThemedView } from '@/components/ThemedView';
+import React from 'react';
 
 
 export default function HomeScreen() {
