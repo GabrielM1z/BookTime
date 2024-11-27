@@ -7,8 +7,9 @@ import LivreRecherche from '@/components/LivreRecherche'
 import { ThemedView } from '@/components/ThemedView';
 
 import { apiLink } from '@/constants/Api';
-import { Book } from '../models/Book';
+import { Book } from '../../models/Book';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
+import React from 'react';
 
 const cover1 = require('@/assets/images/logo_refait.png');
 
