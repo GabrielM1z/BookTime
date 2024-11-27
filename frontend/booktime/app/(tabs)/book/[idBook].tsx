@@ -1,11 +1,11 @@
-import { StyleSheet, Text, View, Image, Button } from 'react-native';
+import { StyleSheet, View, Image } from 'react-native';
 import React from "react";
 
-import TitreTab from '@/components/TitreTab';
 import { ThemedView } from '@/components/ThemedView';
 import { useLocalSearchParams } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { Colors } from '@/constants/Colors';
+import { Link } from 'expo-router';
 
 
 export default function LivreDetail() {
@@ -19,7 +19,15 @@ export default function LivreDetail() {
 			<View style={styles.containerTitre}>
 				<Image source={cover1} style={styles.coverLivre}></Image>
 				<ThemedText type='titreLivreHorizontal'>{idBook}</ThemedText>
-				<ThemedText type='auteurLivreHorizontal'>{idBook}</ThemedText>
+				<Link push href={{
+					pathname: "/author/[idAuthor]",
+					params: {
+						idAuthor: "ouiouioui",
+						}
+					}}>
+					<ThemedText type='auteurLivreHorizontal'>{idBook}</ThemedText>
+		  		</Link>
+				
 			</View>
 
 			<View style={styles.containerResume}>
