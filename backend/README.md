@@ -5,3 +5,9 @@ Run the API services
 ```shell
 docker-compose up --build
 ```
+
+### api Google Books
+Créer un fichier .env dans le dossier book puis mettre la ligne suivante:
+GOOGLE_BOOKS_API_KEY=_API-KEY_
+
+Cela permettra de faire la requête de recherche.

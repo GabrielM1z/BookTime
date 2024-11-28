@@ -4,7 +4,7 @@ type Book struct {
 	IdBook          uint     `json:"id_book"`
 	Title           string   `json:"title"`
 	Description     string   `json:"description"`
-	FormatName      string   `json:"format_name"`
+	Format          Format   `json:"format"`
 	Publisher       string   `json:"publisher"`
 	PublicationDate string   `json:"publication_date"`
 	PageNumber      uint     `json:"page_number"`

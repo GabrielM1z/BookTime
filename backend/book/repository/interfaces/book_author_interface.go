@@ -1,8 +1,10 @@
 package interfaces
 
-import "booktime/model"
+import "book/model"
 
 type BookAuthorRepositoryInterface interface {
 	InsertBookAuthor(post model.PostBookAuthor) bool
-	SelectBookAuthor() []model.BookAuthor
+	SelectBookAuthors() []model.BookAuthor
+	SelectBookAuthor(idAuthor uint, idBook uint) (model.BookAuthor, error)
+	DeleteBookAuthor(idAuthor uint, idBook uint) bool
 }

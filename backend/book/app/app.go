@@ -4,8 +4,12 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
 
-	"booktime/controller"
+	// "github.com/joho/godotenv"
+
+	"book/controller"
+	"book/service"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
@@ -17,7 +21,8 @@ type App struct {
 }
 
 func (a *App) CreateConnection() {
-	connStr := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable", UNAMEDB, PASSDB, HOSTDB, DBNAME)
+
+	connStr := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable", "postgres", "postgres123", "postgres", "book_db")
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatal(err)
@@ -28,58 +33,98 @@ func (a *App) CreateConnection() {
 func (a *App) CreateRoutes() {
 	routes := gin.Default()
 
+	// Load environment variables
+	// err := godotenv.Load()
+	// if err != nil {
+	// 	log.Println("Error loading .env file")
+	// }
+
+	//Service & Api
+	apiKey := os.Getenv("GOOGLE_BOOKS_API_KEY")
+	bookService := service.NewSearchService(apiKey)
+	prefix := "/books";
+
+	// Search routes
+	searchController := controller.NewSearchController(bookService)
+	routes.GET(prefix + "/search", searchController.SearchBooks)
+
 	// Book routes
 	bookController := controller.NewBookController(a.DB)
-	routes.GET("/books", bookController.GetBook)
-	routes.POST("/books", bookController.InsertBook)
+	routes.GET(prefix + "/books", bookController.GetBooks)
+	routes.GET(prefix + "/books/:id", bookController.GetBook)
+	routes.POST(prefix + "/books", bookController.InsertBook)
+	routes.PUT(prefix + "/books/:id", bookController.UpdateBook)
+	routes.DELETE(prefix + "/books/:id", bookController.DeleteBook)
 
 	// Author routes
 	authorController := controller.NewAuthorController(a.DB)
-	routes.GET("/authors", authorController.GetAuthor)
-	routes.POST("/authors", authorController.InsertAuthor)
+	routes.GET(prefix + "/authors", authorController.GetAuthors)
+	routes.GET(prefix + "/authors/:id", authorController.GetAuthor)
+	routes.POST(prefix + "/authors", authorController.InsertAuthor)
+	routes.PUT(prefix + "/authors/:id", authorController.UpdateAuthor)
+	routes.DELETE(prefix + "/authors/:id", authorController.DeleteAuthor)
 
 	// Format routes
 	formatController := controller.NewFormatController(a.DB)
-	routes.GET("/formats", formatController.GetFormat)
-	routes.POST("/formats", formatController.InsertFormat)
+	routes.GET(prefix + "/formats", formatController.GetFormats)
+	routes.GET(prefix + "/formats/:id", formatController.GetFormat)
+	routes.POST(prefix + "/formats", formatController.InsertFormat)
+	routes.PUT(prefix + "/formats/:id", formatController.UpdateFormat)
+	routes.DELETE(prefix + "/formats/:id", formatController.DeleteFormat)
 
 	// Genre routes
 	genreController := controller.NewGenreController(a.DB)
-	routes.GET("/genres", genreController.GetGenre)
-	routes.POST("/genres", genreController.InsertGenre)
+	routes.GET(prefix + "/genres", genreController.GetGenres)
+	routes.GET(prefix + "/genres/:id", genreController.GetGenre)
+	routes.POST(prefix + "/genres", genreController.InsertGenre)
+	routes.PUT(prefix + "/genres/:id", genreController.UpdateGenre)
+	routes.DELETE(prefix + "/genres/:id", genreController.DeleteGenre)
 
 	// State routes
 	stateController := controller.NewStateController(a.DB)
-	routes.GET("/states", stateController.GetStates)
-	routes.GET("/user/:userId/book/:bookId/states", stateController.GetState)
-	routes.POST("/states", stateController.InsertState)
+	routes.GET(prefix + "/states", stateController.GetStates)
+	routes.GET(prefix + "/states/:stateId", stateController.GetState)
+	routes.GET(prefix + "/user/:userId/book/:bookId/states", stateController.GetStateByUserAndBook)
+	routes.POST(prefix + "/states", stateController.InsertState)
+	routes.PUT(prefix + "/states/:stateId", stateController.UpdateState)
+	routes.DELETE(prefix + "/states/:stateId", stateController.DeleteState)
 
-	// Library routes
 	libraryController := controller.NewLibraryController(a.DB)
-	routes.GET("/libraries", libraryController.GetAllLibraries)
-	routes.GET("/user/:userId/libraries", libraryController.GetLibrariesByUserId)
-	routes.POST("/libraries", libraryController.InsertLibrary)
+	routes.GET(prefix + "/libraries", libraryController.GetLibraries)
+	routes.GET(prefix + "/libraries/:id", libraryController.GetLibrary)
+	routes.GET(prefix + "/libraries/user/:userId", libraryController.GetLibrariesByUserId)
+	routes.POST(prefix + "/libraries", libraryController.InsertLibrary)
+	routes.PUT(prefix + "/libraries/:id", libraryController.UpdateLibrary)
+	routes.DELETE(prefix + "/libraries/:id", libraryController.DeleteLibrary)
 
 	// LibraryBook routes
 	libraryBookController := controller.NewLibraryBookController(a.DB)
-	routes.GET("/library_books", libraryBookController.GetAllLibraryBook)
-	routes.GET("/library/:libraryId/library_books", libraryBookController.GetLibraryBookByLibraryId)
-	routes.POST("/library_books", libraryBookController.InsertLibraryBook)
+	routes.GET(prefix + "/libraryBook", libraryBookController.GetLibraryBooks)                           // Récupère tous les liens bibliothèque-livre
+	routes.POST(prefix + "/libraryBook", libraryBookController.InsertLibraryBook)                        // Crée un lien
+	routes.DELETE(prefix + "/libraryBook/:id_library/:id_book", libraryBookController.DeleteLibraryBook) // Supprime un lien
+	routes.GET(prefix + "/libraryBook/:libraryId", libraryBookController.GetLibraryBookByLibraryId)
 
 	// SharedLibrary routes
 	sharedLibraryController := controller.NewSharedLibraryController(a.DB)
-	routes.GET("/shared_libraries", sharedLibraryController.GetSharedLibrary)
-	routes.POST("/shared_libraries", sharedLibraryController.InsertSharedLibrary)
+	routes.GET(prefix + "/shared_libraries", sharedLibraryController.GetSharedLibraries)
+	routes.GET(prefix + "/shared_libraries/:id_user/:id_library", sharedLibraryController.GetSharedLibrary)
+	routes.POST(prefix + "/shared_libraries", sharedLibraryController.InsertSharedLibrary)
+	routes.PUT(prefix + "/shared_libraries/:id_user/:id_library", sharedLibraryController.UpdateSharedLibrary)
+	routes.DELETE(prefix + "/shared_libraries/:id_user/:id_library", sharedLibraryController.DeleteSharedLibrary)
 
-	// BookAuthor routes
+	// Routes BookAuthor
 	bookAuthorController := controller.NewBookAuthorController(a.DB)
-	routes.GET("/book_author", bookAuthorController.GetBookAuthor)
-	routes.POST("/book_author", bookAuthorController.InsertBookAuthor)
+	routes.GET(prefix + "/book_authors", bookAuthorController.GetBookAuthors)
+	routes.GET(prefix + "/book_authors/:id_author/:id_book", bookAuthorController.GetBookAuthor)
+	routes.POST(prefix + "/book_authors", bookAuthorController.InsertBookAuthor)
+	routes.DELETE(prefix + "/book_authors/:id_author/:id_book", bookAuthorController.DeleteBookAuthor)
 
-	// BookGenre routes
+	// Routes BookGenre
 	bookGenreController := controller.NewBookGenreController(a.DB)
-	routes.POST("/book_genres", bookGenreController.InsertBookGenre)
-	routes.GET("/book_genres", bookGenreController.GetBookGenres)
+	routes.GET(prefix + "/book_genres", bookGenreController.GetBookGenres)
+	routes.GET(prefix + "/book_genres/:id_genre/:id_book", bookGenreController.GetBookGenre)
+	routes.POST(prefix + "/book_genres", bookGenreController.InsertBookGenre)
+	routes.DELETE(prefix + "/book_genres/:id_genre/:id_book", bookGenreController.DeleteBookGenre)
 
 	a.Routes = routes
 }

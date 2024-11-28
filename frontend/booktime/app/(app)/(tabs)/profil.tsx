@@ -10,6 +10,7 @@ import ImageViewer from '@/components/ImageViewer';
 import Button from '@/components/Button';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import React from 'react';
 
 // import d'une image
 const PlaceholderImage = require('@/assets/images/profil.png');

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"booktime/app"
+	"book/app"
 )
 
 func main() {

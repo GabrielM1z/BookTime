@@ -1,9 +1,17 @@
 import { StyleSheet, View, TextInput } from 'react-native';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { ThemedView } from './ThemedView';
+import { useEffect, useState } from 'react';
+import { debounce } from 'lodash';
 
 
-export default function searchBar({ qrcode }) {
+interface SearchBarProps {
+    qrcode: boolean;  // Type de la prop qrcode
+    onSearch: (value: string) => void;  // Type de la prop onSearch
+  }
+
+
+export const SearchBar: React.FC<SearchBarProps> = ({ qrcode, onSearch }) => {
 
     let searchBarQR = <View></View>;
     if (qrcode) {
@@ -12,12 +20,35 @@ export default function searchBar({ qrcode }) {
                 <View style={styles.qrSearch}><TabBarIcon size={30} color={"white"} name={'qr-code'} /></View>
             </View>;
     }
+
+    const [searchTerm, setSearchTerm] = useState('');
+
+    // Update the search term and call the parent's onSearch function
+    const debouncedChangeHandler = debounce((value: string) => {
+        onSearch(value);  // Call the parent's function with the current value
+    }, 500); // 500ms delay
+
+    useEffect(() => {
+        debouncedChangeHandler(searchTerm);
+
+        // Cleanup function to cancel debounce on unmount
+        return () => {
+        debouncedChangeHandler.cancel();
+        };
+    }, [searchTerm]);
+
     return (
 
         <ThemedView style={styles.searchBarComponent}>
             <View style={styles.searchContainer}>
                 <TabBarIcon size={40} name={'search'} />
-                <TextInput style={styles.searchBar} />
+                <TextInput 
+                    style={styles.searchBar} 
+                    value={searchTerm}
+                    onChangeText={(text) => {
+                        setSearchTerm(text);
+                        debouncedChangeHandler(text); // Update debounced value
+                    }} />
             </View>
             {searchBarQR}
         </ThemedView>

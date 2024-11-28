@@ -1,8 +1,11 @@
 package interfaces
 
-import "booktime/model"
+import "book/model"
 
 type BookRepositoryInterface interface {
-	SelectBook() []model.Book
+	SelectBook(id int) (*model.Book, error)
+	SelectBooks() []model.Book
 	InsertBook(post model.PostBook) bool
+	UpdateBook(id int) bool
+	DeleteBook(id int) bool
 }
