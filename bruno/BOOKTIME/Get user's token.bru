@@ -1,0 +1,25 @@
+meta {
+  name: Get user's token
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:8080/realms/booktime/protocol/openid-connect/token
+  body: formUrlEncoded
+  auth: none
+}
+
+body:form-urlencoded {
+  client_id: gateway-client
+  client_secret: {{client_secret}}
+  grant_type: password
+  username: {{username}}
+  password: {{password}}
+  audience: gateway-client
+}
+
+script:post-response {
+  let data = res.getBody();
+  bru.setEnvVar("access_token", data.access_token);
+}
