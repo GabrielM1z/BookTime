@@ -5,7 +5,7 @@ meta {
 }
 
 post {
-  url: http://localhost:8080/realms/booktime/protocol/openid-connect/token
+  url: {{base_keycloak_url}}/protocol/openid-connect/token
   body: formUrlEncoded
   auth: none
 }
