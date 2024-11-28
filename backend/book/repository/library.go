@@ -104,7 +104,7 @@ func (lr *LibraryRepository) DeleteLibrary(id int) bool {
 	return true
 }
 
-func (lr *LibraryRepository) SelectLibraryByUser(idUser uint) []model.Library {
+func (lr *LibraryRepository) SelectLibraryByUser(idUser string) []model.Library {
 	rows, err := lr.DB.Query("SELECT * FROM library WHERE id_library IN (SELECT id_library FROM shared_library WHERE id_user = $1)", idUser)
 	if err != nil {
 		log.Fatal(err)

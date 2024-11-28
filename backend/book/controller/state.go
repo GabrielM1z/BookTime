@@ -2,14 +2,17 @@ package controller
 
 import (
 	"database/sql"
+	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"book/controller/interfaces"
 	"book/model"
 	"book/repository"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt"
 )
 
 type StateController struct {
@@ -25,14 +28,8 @@ func (sc *StateController) GetStateByUserAndBook(c *gin.Context) {
 	db := sc.DB
 	repoState := repository.NewStateRepository(db)
 
-	idUser := c.Param("userId")
+	idUser := getUserID(c)
 	idBook := c.Param("bookId")
-
-	idUserUint, err := strconv.ParseUint(idUser, 10, 32) // Convertir en uint
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "msg": "invalid genre ID"})
-		return
-	}
 
 	idBookUint, err := strconv.ParseUint(idBook, 10, 32) // Convertir en uint
 	if err != nil {
@@ -42,7 +39,7 @@ func (sc *StateController) GetStateByUserAndBook(c *gin.Context) {
 
 	var getState []model.State
 	if idUser != "" && idBook != "" {
-		getState = repoState.SelectStateByUserAndBook(uint(idUserUint), uint(idBookUint))
+		getState = repoState.SelectStateByUserAndBook(idUser, uint(idBookUint))
 	}
 
 	if getState != nil {
@@ -64,13 +61,55 @@ func (sc *StateController) GetStates(c *gin.Context) {
 	}
 }
 
+func getUserID(c *gin.Context) string {
+	// Récupérer le jeton d'authentification depuis l'en-tête Authorization
+	authHeader := c.GetHeader("Authorization")
+	if authHeader == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header is missing"})
+		return ""
+	}
+
+	// Vérifier si le jeton est de type Bearer
+	if !strings.HasPrefix(authHeader, "Bearer ") {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token format"})
+		return ""
+	}
+
+	// Extraire le token
+	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+
+	// Décoder le token sans validation pour extraire les claims (utilisez un clé si nécessaire pour vérifier la signature)
+	token, _, err := new(jwt.Parser).ParseUnverified(tokenString, jwt.MapClaims{})
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+		return ""
+	}
+
+	// Convertir les claims en jwt.MapClaims pour extraire "sub"
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
+		return ""
+	}
+
+	// Récupérer le champ "sub" (subject)
+	sub, ok := claims["sub"].(string)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Subject (sub) not found in token"})
+		return ""
+	}
+
+	return sub
+}
+
 // InsertState implements StateControllerInterface
 func (sc *StateController) InsertState(c *gin.Context) {
 	db := sc.DB
 	var post model.PostState
+	idUser := getUserID(c)
 	if err := c.ShouldBindJSON(&post); err == nil {
 		repoState := repository.NewStateRepository(db)
-		insert := repoState.InsertState(post)
+		insert := repoState.InsertState(post, idUser)
 		if insert {
 			c.JSON(http.StatusOK, gin.H{"status": "success", "msg": "insert state successfully"})
 		} else {
@@ -82,6 +121,9 @@ func (sc *StateController) InsertState(c *gin.Context) {
 }
 
 func (sc *StateController) GetState(c *gin.Context) {
+
+	log.Printf("Subject (sub): %s\n", getUserID(c))
+
 	db := sc.DB
 	repoState := repository.NewStateRepository(db)
 

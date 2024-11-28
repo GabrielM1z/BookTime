@@ -58,6 +58,7 @@ const styles = StyleSheet.create({
 	},
 	titreLivreHorizontal: {
 		fontSize: 18,
+		width: "100%"
 	},
 	auteurLivreHorizontal: {
 		fontSize: 17,

@@ -61,15 +61,10 @@ func (lc *LibraryController) GetLibrary(c *gin.Context) {
 func (lc *LibraryController) GetLibrariesByUserId(c *gin.Context) {
 	db := lc.DB
 	repoLibrary := repository.NewLibraryRepository(db)
-	idUser := c.Param("userId")
+	idUser := getUserID(c)
 	var getLibrary []model.Library
-	id, err := strconv.ParseUint(idUser, 10, 32)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "msg": "invalid library ID"})
-		return
-	}
 	if idUser != "" {
-		getLibrary = repoLibrary.SelectLibraryByUser(uint(id))
+		getLibrary = repoLibrary.SelectLibraryByUser(idUser)
 	}
 	if getLibrary != nil {
 		c.JSON(http.StatusOK, gin.H{"status": "success", "data": getLibrary, "msg": "get library successfully"})

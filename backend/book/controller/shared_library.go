@@ -37,13 +37,8 @@ func (slc *SharedLibraryController) GetSharedLibrary(c *gin.Context) {
 	repoSharedLibrary := repository.NewSharedLibraryRepository(db)
 
 	// Récupère l'ID depuis les paramètres de la requête
-	idUserParam := c.Param("id_user")
+	idUser := getUserID(c)
 	idLibraryParam := c.Param("id_library")
-	idUser, err := strconv.ParseUint(idUserParam, 10, 32) // Convertir en uint
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "msg": "invalid sharedLibrary ID"})
-		return
-	}
 	idLibrary, err := strconv.ParseUint(idLibraryParam, 10, 32) // Convertir en uint
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "msg": "invalid sharedLibrary ID"})
@@ -51,14 +46,14 @@ func (slc *SharedLibraryController) GetSharedLibrary(c *gin.Context) {
 	}
 
 	// Récupère le format avec l'ID
-	sharedLibrary, err := repoSharedLibrary.SelectSharedLibrary(uint(idUser), uint(idLibrary))
+	sharedLibrary, err := repoSharedLibrary.SelectSharedLibrary(idUser, uint(idLibrary))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "msg": "error retrieving sharedlibrary"})
 		return
 	}
 
 	// Vérification si le format existe via son ID
-	if sharedLibrary.IdUser != 0 {
+	if sharedLibrary.IdUser != "" {
 		c.JSON(http.StatusOK, gin.H{"status": "success", "data": sharedLibrary, "msg": "sharedLibrary retrieved successfully"})
 	} else {
 		c.JSON(http.StatusNotFound, gin.H{"status": "error", "data": nil, "msg": "sharedLibrary not found"})
@@ -69,9 +64,10 @@ func (slc *SharedLibraryController) GetSharedLibrary(c *gin.Context) {
 func (slc *SharedLibraryController) InsertSharedLibrary(c *gin.Context) {
 	db := slc.DB
 	var post model.PostSharedLibrary
+	idUser := getUserID(c)
 	if err := c.ShouldBindJSON(&post); err == nil {
 		repoSharedLibrary := repository.NewSharedLibraryRepository(db)
-		insert := repoSharedLibrary.InsertSharedLibrary(post)
+		insert := repoSharedLibrary.InsertSharedLibrary(post, idUser)
 		if insert {
 			c.JSON(http.StatusOK, gin.H{"status": "success", "msg": "insert shared library successfully"})
 		} else {
@@ -84,13 +80,8 @@ func (slc *SharedLibraryController) InsertSharedLibrary(c *gin.Context) {
 
 func (slc *SharedLibraryController) UpdateSharedLibrary(c *gin.Context) {
 	db := slc.DB
-	idUserParam := c.Param("id_user")
+	idUser := getUserID(c)
 	idLibraryParam := c.Param("id_library")
-	idUser, err := strconv.ParseUint(idUserParam, 10, 32) // Convertir en uint
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "msg": "invalid sharedLibrary ID"})
-		return
-	}
 	idLibrary, err := strconv.ParseUint(idLibraryParam, 10, 32) // Convertir en uint
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "msg": "invalid sharedLibrary ID"})
@@ -104,7 +95,7 @@ func (slc *SharedLibraryController) UpdateSharedLibrary(c *gin.Context) {
 	}
 
 	repoSharedLibrary := repository.NewSharedLibraryRepository(db)
-	success := repoSharedLibrary.UpdateSharedLibrary(uint(idUser), uint(idLibrary), sharedLibrary)
+	success := repoSharedLibrary.UpdateSharedLibrary(idUser, uint(idLibrary), sharedLibrary)
 	if !success {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update sharedLibrary"})
 		return
@@ -115,13 +106,8 @@ func (slc *SharedLibraryController) UpdateSharedLibrary(c *gin.Context) {
 
 func (slc *SharedLibraryController) DeleteSharedLibrary(c *gin.Context) {
 	db := slc.DB
-	idUserParam := c.Param("id_user")
+	idUser := getUserID(c)
 	idLibraryParam := c.Param("id_library")
-	idUser, err := strconv.ParseUint(idUserParam, 10, 32) // Convertir en uint
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "msg": "invalid sharedLibrary ID"})
-		return
-	}
 	idLibrary, err := strconv.ParseUint(idLibraryParam, 10, 32) // Convertir en uint
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "msg": "invalid sharedLibrary ID"})
@@ -129,7 +115,7 @@ func (slc *SharedLibraryController) DeleteSharedLibrary(c *gin.Context) {
 	}
 
 	repoSharedLibrary := repository.NewSharedLibraryRepository(db)
-	success := repoSharedLibrary.DeleteSharedLibrary(uint(idUser), uint(idLibrary))
+	success := repoSharedLibrary.DeleteSharedLibrary(idUser, uint(idLibrary))
 	if !success {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete SharedLibrary"})
 		return
