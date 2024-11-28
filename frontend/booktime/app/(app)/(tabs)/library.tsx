@@ -19,7 +19,7 @@ import EtageresByTypes from '@/components/etageres/etageresByTypes';
 import EtageresByAuthor from '@/components/etageres/etageresByAuthor';
 
 // import des styles
-import libraryStyles from '../../styles/libraryStyles';
+import libraryStyles from '@/styles/libraryStyles';
 
 
 // Ecran de la BIBLIOTHEQUE
