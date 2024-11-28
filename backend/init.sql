@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS state (
     progression INT,
     read_count INT DEFAULT 0,
     last_read_date TIMESTAMP,
-    id_user INT,
+    id_user VARCHAR(36),
     id_book INT,
     is_available BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (id_book) REFERENCES book(id_book) ON DELETE CASCADE
@@ -87,7 +87,7 @@ CREATE TABLE IF NOT EXISTS library_book (
 
 -- Table SHARED_LIBRARY (Many-to-Many relation between USER and LIBRARY)
 CREATE TABLE IF NOT EXISTS shared_library (
-    id_user INT,
+    id_user VARCHAR(36),
     id_library INT,
     PRIMARY KEY (id_user, id_library),
     FOREIGN KEY (id_library) REFERENCES library(id_library) ON DELETE CASCADE

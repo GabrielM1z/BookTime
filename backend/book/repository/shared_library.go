@@ -16,14 +16,14 @@ func NewSharedLibraryRepository(db *sql.DB) *SharedLibraryRepository {
 	return &SharedLibraryRepository{DB: db}
 }
 
-func (slr *SharedLibraryRepository) InsertSharedLibrary(post model.PostSharedLibrary) bool {
+func (slr *SharedLibraryRepository) InsertSharedLibrary(post model.PostSharedLibrary, idUser string) bool {
 	stmt, err := slr.DB.Prepare("INSERT INTO shared_library (id_user, id_library) VALUES ($1, $2)")
 	if err != nil {
 		log.Println(err)
 		return false
 	}
 	defer stmt.Close()
-	_, err2 := stmt.Exec(post.UserId, post.LibraryId)
+	_, err2 := stmt.Exec(idUser, post.LibraryId)
 	if err2 != nil {
 		log.Println(err2)
 		return false
@@ -48,7 +48,7 @@ func (slr *SharedLibraryRepository) SelectSharedLibraries() []model.SharedLibrar
 	return sharedLibraries
 }
 
-func (slr *SharedLibraryRepository) SelectSharedLibrary(idUser uint, idLibrary uint) (model.SharedLibrary, error) {
+func (slr *SharedLibraryRepository) SelectSharedLibrary(idUser string, idLibrary uint) (model.SharedLibrary, error) {
 	var sharedLibrary model.SharedLibrary
 	stmt, err := slr.DB.Prepare("SELECT * FROM shared_library WHERE id_user = $1 and id_library = $2")
 	if err != nil {
@@ -70,7 +70,7 @@ func (slr *SharedLibraryRepository) SelectSharedLibrary(idUser uint, idLibrary u
 	return sharedLibrary, nil
 }
 
-func (slr *SharedLibraryRepository) UpdateSharedLibrary(idUser uint, idLibrary uint, sharedLibrary model.SharedLibrary) bool {
+func (slr *SharedLibraryRepository) UpdateSharedLibrary(idUser string, idLibrary uint, sharedLibrary model.SharedLibrary) bool {
 	query := `UPDATE shared_library SET id_user = $1, id_library = $2 WHERE id_user = $3 and id_library = $4`
 
 	_, err := slr.DB.Exec(query, sharedLibrary.IdUser, sharedLibrary.IdLibrary, idUser, idLibrary)
@@ -81,7 +81,7 @@ func (slr *SharedLibraryRepository) UpdateSharedLibrary(idUser uint, idLibrary u
 	return true
 }
 
-func (slr *SharedLibraryRepository) DeleteSharedLibrary(idUser uint, idLibrary uint) bool {
+func (slr *SharedLibraryRepository) DeleteSharedLibrary(idUser string, idLibrary uint) bool {
 	query := "DELETE FROM shared_library WHERE id_user = $1 and id_library = $2"
 
 	_, err := slr.DB.Exec(query, idUser, idLibrary)

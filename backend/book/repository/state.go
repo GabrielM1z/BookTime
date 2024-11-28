@@ -16,14 +16,14 @@ func NewStateRepository(db *sql.DB) *StateRepository {
 	return &StateRepository{DB: db}
 }
 
-func (sr *StateRepository) InsertState(post model.PostState) bool {
+func (sr *StateRepository) InsertState(post model.PostState, idUser string) bool {
 	stmt, err := sr.DB.Prepare("INSERT INTO state (state, progression, read_count, last_read_date, is_available, id_user, id_book) VALUES ($1, $2, $3, $4, $5, $6, $7)")
 	if err != nil {
 		log.Println(err)
 		return false
 	}
 	defer stmt.Close()
-	_, err2 := stmt.Exec(post.State, post.Progression, post.ReadCount, post.LastReadDate, post.IsAvailable, post.IdUser, post.IdBook)
+	_, err2 := stmt.Exec(post.State, post.Progression, post.ReadCount, post.LastReadDate, post.IsAvailable, idUser, post.IdBook)
 	if err2 != nil {
 		log.Println(err2)
 		return false
@@ -50,7 +50,7 @@ func (ar *StateRepository) SelectStates() []model.State {
 	return states
 }
 
-func (sr *StateRepository) SelectStateByUserAndBook(idUser, idBook uint) []model.State {
+func (sr *StateRepository) SelectStateByUserAndBook(idUser string, idBook uint) []model.State {
 	rows, err := sr.DB.Query("SELECT * FROM state WHERE id_user = $1 AND id_book = $2", idUser, idBook)
 	if err != nil {
 		log.Fatal(err)
