@@ -3,6 +3,7 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 
 // import des component
 import { ThemedText } from './ThemedText';
+import React from 'react';
 
 // component qui représente le TITRE du TAB dans lequel on se situe
 export default function TitreTab({ label }) {
@@ -21,6 +22,5 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         padding: 5,
         margin: 5,
-        marginTop: 50,
     },
 });
