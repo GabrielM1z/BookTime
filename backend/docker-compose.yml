@@ -79,6 +79,17 @@ services:
     networks:
       - backend
 
+  api_news:
+    container_name: api_news
+    hostname: news
+    build: ./news
+    ports:
+      - 8084:8080
+    restart: always
+    networks:
+      - backend
+    env_file: ".env"
+
   api_gateway:
     container_name: api_gateway
     hostname: gateway
