@@ -7,7 +7,7 @@ meta {
 get {
   url: {{base_book_url}}/search?query=école
   body: none
-  auth: bearer
+  auth: none
 }
 
 params:query {
@@ -15,10 +15,6 @@ params:query {
   ~genre: fiction
   ~title: Harry Potter
   ~author: J.K.
-}
-
-auth:bearer {
-  token: {{access_token}}
 }
 
 tests {
