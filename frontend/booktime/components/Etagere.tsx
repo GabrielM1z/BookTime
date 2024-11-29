@@ -1,8 +1,7 @@
 import { StyleSheet, View, Text, ScrollView } from 'react-native';
-
-// import component
 import LivreEtagere from '@/components/LivreEtagere';
 import { ThemedText } from './ThemedText';
+import React from 'react';
 
 const cover1 = require('../assets/images/logo_refait.png');
 
