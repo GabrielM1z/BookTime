@@ -18,12 +18,13 @@ func NewNewsService(apiKey string) *NewsService {
 	return &NewsService{ApiKey: apiKey}
 }
 
-func (ns *NewsService) SearchNews(topic string) ([]model.Article, error) {
+func (ns *NewsService) SearchNews(topic string, language string) ([]model.Article, error) {
 	baseURL := "https://newsapi.org/v2/everything"
 
 	// Préparation des paramètres de la requête
 	params := url.Values{}
 	params.Add("q", topic)
+	params.Add("language", language)
 	params.Add("sortBy", "publishedAt")
 	params.Add("apiKey", ns.ApiKey)
 

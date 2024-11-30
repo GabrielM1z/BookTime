@@ -22,8 +22,13 @@ func (nc *newsController) SearchNews(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Topic parameter is required"})
 		return
 	}
+	language := c.Query("language")
+	if language == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Language parameter is required"})
+		return
+	}
 
-	news, err := nc.NewsService.SearchNews(topic)
+	news, err := nc.NewsService.SearchNews(topic, language)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

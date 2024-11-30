@@ -5,11 +5,12 @@ meta {
 }
 
 get {
-  url: {{base_book_url}}/news/search?topic=books
+  url: http://localhost:8082/news/search?topic=books&language=en
   body: none
   auth: none
 }
 
 params:query {
   topic: books
+  language: en
 }
