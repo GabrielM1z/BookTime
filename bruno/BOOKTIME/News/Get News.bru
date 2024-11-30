@@ -1,0 +1,15 @@
+meta {
+  name: Get News
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{base_book_url}}/news/search?topic=books
+  body: none
+  auth: none
+}
+
+params:query {
+  topic: books
+}

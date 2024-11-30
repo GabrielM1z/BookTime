@@ -1,7 +1,6 @@
 package app
 
 import (
-	"log"
 	"os"
 
 	"news/controller"
@@ -20,8 +19,6 @@ func (a *App) CreateRoutes() {
 
 	//Service & Api
 	apiKey := os.Getenv("NEWS_API_KEY")
-	log.Println("API KEY")
-	log.Println(apiKey)
 	newsService := service.NewNewsService(apiKey)
 	prefix := "/news"
 
