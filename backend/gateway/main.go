@@ -74,6 +74,11 @@ func main() {
 		return proxyRequest(c, booksServiceBaseURL)
 	})
 
+	// Route service Books uniquement endpoint shops sans protection
+	app.All("/books/shops*", func(c *fiber.Ctx) error {
+		return proxyRequest(c, booksServiceBaseURL)
+	})
+
 	// Route service Books
 	app.All("/books/*", middleware.KeycloakMiddleware, func(c *fiber.Ctx) error {
 		return proxyRequest(c, booksServiceBaseURL)

@@ -3,6 +3,7 @@ package service
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 
@@ -36,6 +37,9 @@ func (bs *SearchService) SearchBooks(query, title, author, genre string) ([]mode
 	params.Add("q", searchQuery)
 	params.Add("key", bs.ApiKey)
 	apiURL := fmt.Sprintf("%s?%s", baseURL, params.Encode())
+
+	log.Println("apiURL")
+	log.Println(apiURL)
 
 	resp, err := http.Get(apiURL)
 	if err != nil {
