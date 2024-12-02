@@ -35,7 +35,7 @@ export default function App()
 		}
 	};
 
-	const { signOut } = useSession();
+	const { logOut } = useSession();
 	
     return (
 		<ThemedView style={styles.container}>
@@ -54,7 +54,7 @@ export default function App()
 				<Text
 					onPress={() => {
 						// The `app/(app)/_layout.tsx` will redirect to the sign-in screen.
-						signOut();
+						logOut();
 						
 					}}>
 					Sign Out
