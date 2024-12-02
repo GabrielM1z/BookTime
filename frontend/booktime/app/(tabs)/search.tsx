@@ -10,6 +10,7 @@ import { useInfiniteScroll } from '@/core/api';
 import { Book } from '../../models/Book';
 import { apiLinkServeur } from '@/constants/Api';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
+import React from 'react';
 
 //Filtres appliqué à la recherche API
 type TFilters = {

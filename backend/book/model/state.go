@@ -6,7 +6,7 @@ type State struct {
 	Progression  uint   `json:"progression"`
 	ReadCount    uint   `json:"read_count"`
 	LastReadDate string `json:"last_read_date"`
-	IdUser       uint   `json:"id_user"`
+	IdUser       string `json:"id_user"`
 	IdBook       uint   `json:"id_book"`
 	IsAvailable  bool   `json:"is_available"`
 }
@@ -16,7 +16,6 @@ type PostState struct {
 	Progression  uint   `json:"progression"`
 	ReadCount    uint   `json:"read_count"`
 	LastReadDate string `json:"last_read_date"`
-	IdUser       uint   `json:"id_user"`
 	IdBook       uint   `json:"id_book" binding:"required"`
 	IsAvailable  bool   `json:"is_available"`
 }

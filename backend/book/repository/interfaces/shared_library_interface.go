@@ -3,9 +3,9 @@ package interfaces
 import "book/model"
 
 type SharedLibraryRepositoryInterface interface {
-	InsertSharedLibrary(post model.PostSharedLibrary) bool
+	InsertSharedLibrary(post model.PostSharedLibrary, idUser string) bool
 	SelectSharedLibraries() []model.SharedLibrary
-	SelectSharedLibrary(idUser uint, idLibrary uint) (model.SharedLibrary, error)
-	UpdateSharedLibrary(idUser uint, idLibrary uint, sharedLibrary model.SharedLibrary) bool
-	DeleteSharedLibrary(idUser uint, idLibrary uint) bool
+	SelectSharedLibrary(idUser string, idLibrary uint) (model.SharedLibrary, error)
+	UpdateSharedLibrary(idUser string, idLibrary uint, sharedLibrary model.SharedLibrary) bool
+	DeleteSharedLibrary(idUser string, idLibrary uint) bool
 }

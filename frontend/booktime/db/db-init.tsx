@@ -6,7 +6,7 @@ import * as SQLite from 'expo-sqlite';
 const db = SQLite.openDatabaseSync('booktime.db');
 
 // Fonction pour initialiser la base de données avec un fichier SQL
-export const initDBFromFile = async () => {
+export const initDB = async () => {
 
 	// init de toute les table 1 par 1
 	initLibrary()
@@ -19,16 +19,18 @@ export const initDBFromFile = async () => {
 	initState()
 	initLibraryBook()
 	initSharedLibrary()
-	
 };
 
+
+
+////////////////////////// Création des tables //////////////////////////
 
 const initLibrary = async () => {
 	try {
 		db.execAsync(`
 			CREATE TABLE IF NOT EXISTS library (
-				id_library SERIAL PRIMARY KEY,
-			name VARCHAR(255) NOT NULL
+				id_library TEXT PRIMARY KEY,
+				name VARCHAR(255) NOT NULL
 			);
 		`);
 		console.log('Librairy initialized successfully');
@@ -41,7 +43,7 @@ const initFormat = async () => {
 	try {
 		db.execAsync(`
 			CREATE TABLE IF NOT EXISTS formats (
-				id_format SERIAL PRIMARY KEY,
+				id_format TEXT PRIMARY KEY,
 				name VARCHAR(100) NOT NULL
 			);
 		`);
@@ -55,7 +57,7 @@ const initAuthor = async () => {
 	try {
 		db.execAsync(`
 			CREATE TABLE IF NOT EXISTS author (
-				id_author SERIAL PRIMARY KEY,
+				id_author TEXT PRIMARY KEY,
 				first_name VARCHAR(100) NOT NULL,
 				last_name VARCHAR(100) NOT NULL,
 				description TEXT
@@ -71,7 +73,7 @@ const initGenre = async () => {
 	try {
 		db.execAsync(`
 			CREATE TABLE IF NOT EXISTS genre (
-				id_genre SERIAL PRIMARY KEY,
+				id_genre TEXT PRIMARY KEY,
 				name VARCHAR(100) NOT NULL
 			);
 		`);
@@ -85,7 +87,7 @@ const initBook = async () => {
 	try {
 		db.execAsync(`
 			CREATE TABLE IF NOT EXISTS book (
-				id_book SERIAL PRIMARY KEY,
+				id_book TEXT PRIMARY KEY,
 				title VARCHAR(255) NOT NULL,
 				description TEXT,
 				id_format INT,
@@ -141,7 +143,7 @@ const initState = async () => {
 	try {
 		db.execAsync(`
 			CREATE TABLE IF NOT EXISTS state (
-				id_state SERIAL PRIMARY KEY,
+				id_state TEXT PRIMARY KEY,
 				state VARCHAR(50),
 				progression INT,
 				read_count INT DEFAULT 0,
@@ -190,3 +192,15 @@ const initSharedLibrary = async () => {
 		console.error('Error initializing shared_library', error);
 	}
 }
+
+
+////////////////////////// Remplissage initial //////////////////////////
+
+// TODO Création de l'utilisateur invité
+
+// TODO Ajout des étagères de base (Like et Lu)
+
+
+
+////////////////////////// TRIGGER //////////////////////////
+
