@@ -1,7 +1,73 @@
+import { Book2 } from '@/models/Book2';
+import { Library } from '@/models/Library';
 import * as SQLite from 'expo-sqlite';
 
 const db = SQLite.openDatabaseSync('booktime.db');
 
+
+////////////////////////// REQUETE INSERT //////////////////////////
+
+// requete pour inserer un livre + liaison avec une étagère
+export const insertBook = async (library: Library, book: Book2) => 
+{
+	const statement = await db.prepareAsync(`
+		INSERT INTO BOOK (title, description, id_format, publisher, publication_date, page_number, language, cover_image_url)
+		VALUES (
+			$bookTitle,
+			$bookDescription,
+			$formatId,
+			$bookEditorName,
+			$bookPublicationDate,
+			$bookNbPage,
+			$bookLangage,
+			$bookCover
+		);
+		INSERT INTO LIBRARY_BOOK (id_library, id_book)
+		VALUES (
+			$libraryId,
+			(SELECT last_insert_rowid())
+		);
+	`);
+
+	try {
+		let result = await statement.executeAsync({ 
+			$bookTitle: book.title,
+			$bookDescription: book.description,
+			$formatId: book.format,
+			$bookEditorName: book.publisher,
+			$bookPublicationDate: book.publicationDate,
+			$bookNbPage: book.pageNumber,
+			$bookLangage: book.language,
+			$bookCover: book.coverImageUrl,
+			$libraryId: library.id,
+		});
+		console.log("result : ", result)        
+	} catch (error) {
+		console.error('Error insert into Librairy', error);
+	}
+}
+
+
+////////////////////////// REQUETE DELETE //////////////////////////
+
+// Suppr la liason entre le livre et une étagère
+export const deleteBookFromLibrairy = async (library: Library, book: Book2) => 
+{
+	const statement = await db.prepareAsync(`
+		DELETE FROM LIBRARY_BOOK
+		WHERE id_library = $libraryId AND id_book = $bookId;
+	`);
+
+	try {
+		let result = await statement.executeAsync({
+			$bookId: book.id,
+			$libraryId: library.id,
+		});
+		console.log("result : ", result)        
+	} catch (error) {
+		console.error('Error insert into Librairy', error);
+	}
+}
 
 
 ////////////////////////// REQUETE SELECT //////////////////////////
@@ -104,4 +170,6 @@ export const getBooksFromLibrary = async (idLibrary: any) =>
 	return [];
 }
 
-// fonction pour récupérer tout les livres par type
+
+
+
