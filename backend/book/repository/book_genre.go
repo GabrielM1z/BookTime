@@ -5,6 +5,8 @@ import (
 	"log"
 
 	"book/model"
+
+	"github.com/google/uuid"
 )
 
 type BookGenreRepository struct {
@@ -49,7 +51,7 @@ func (repo *BookGenreRepository) SelectBookGenres() []model.BookGenre {
 }
 
 // SelectBookGenre récupère une relation spécifique entre un livre et un genre
-func (repo *BookGenreRepository) SelectBookGenre(idGenre uint, idBook uint) (model.BookGenre, error) {
+func (repo *BookGenreRepository) SelectBookGenre(idGenre uuid.UUID, idBook uuid.UUID) (model.BookGenre, error) {
 	query := "SELECT id_genre, id_book FROM book_genre WHERE id_genre = $1 AND id_book = $2"
 	row := repo.DB.QueryRow(query, idGenre, idBook)
 
@@ -65,7 +67,7 @@ func (repo *BookGenreRepository) SelectBookGenre(idGenre uint, idBook uint) (mod
 }
 
 // DeleteBookGenre supprime une relation entre un livre et un genre
-func (repo *BookGenreRepository) DeleteBookGenre(idGenre uint, idBook uint) bool {
+func (repo *BookGenreRepository) DeleteBookGenre(idGenre uuid.UUID, idBook uuid.UUID) bool {
 	query := "DELETE FROM book_genre WHERE id_genre = $1 AND id_book = $2"
 	_, err := repo.DB.Exec(query, idGenre, idBook)
 	if err != nil {

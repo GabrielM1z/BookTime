@@ -5,9 +5,13 @@ meta {
 }
 
 put {
-  url: {{base_book_url}}/states/3
+  url: {{base_book_url}}/states/"f18251e2-0134-46b8-a09b-8362b023764a"
   body: json
   auth: bearer
+}
+
+headers {
+  bookId: f18251e2-0134-46b8-a09b-8362b023764a
 }
 
 auth:bearer {
@@ -17,11 +21,10 @@ auth:bearer {
 body:json {
   {
       "state": "ToRead",
-      "progression": 321,
-      "read_count": 2,
-      "last_read_date": "1980-01-01",
-      "id_user": 1,
-      "id_book": 1,
+      "progression": 12,
+      "read_count": 536,
+      "last_read_date": "1983-03-03",
+      "id_book": "f18251e2-0134-46b8-a09b-8362b023764a",
       "is_available": true
   }
 }

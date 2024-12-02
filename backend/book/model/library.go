@@ -1,8 +1,10 @@
 package model
 
+import "github.com/google/uuid"
+
 type Library struct {
-	IdLibrary uint   `json:"id_library"`
-	Name      string `json:"name"`
+	IdLibrary uuid.UUID `json:"id_library"`
+	Name      string    `json:"name"`
 }
 
 type PostLibrary struct {

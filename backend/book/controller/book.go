@@ -3,13 +3,13 @@ package controller
 import (
 	"database/sql"
 	"net/http"
-	"strconv"
 
 	"book/controller/interfaces"
 	"book/model"
 	"book/repository"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type BookController struct {
@@ -35,7 +35,7 @@ func (bc *BookController) GetBooks(c *gin.Context) {
 func (bc *BookController) GetBook(c *gin.Context) {
 	db := bc.DB
 	idParam := c.Param("id")
-	id, err := strconv.Atoi(idParam)
+	id, err := uuid.Parse(idParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid book ID"})
 		return
@@ -76,7 +76,7 @@ func (bc *BookController) InsertBook(c *gin.Context) {
 func (bc *BookController) UpdateBook(c *gin.Context) {
 	db := bc.DB
 	idParam := c.Param("id")
-	id, err := strconv.Atoi(idParam)
+	id, err := uuid.Parse(idParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid book ID"})
 		return
@@ -101,7 +101,7 @@ func (bc *BookController) UpdateBook(c *gin.Context) {
 func (bc *BookController) DeleteBook(c *gin.Context) {
 	db := bc.DB
 	idParam := c.Param("id")
-	id, err := strconv.Atoi(idParam)
+	id, err := uuid.Parse(idParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid book ID"})
 		return

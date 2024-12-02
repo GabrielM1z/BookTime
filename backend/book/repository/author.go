@@ -6,6 +6,8 @@ import (
 
 	"book/model"
 	"book/repository/interfaces"
+
+	"github.com/google/uuid"
 )
 
 type AuthorRepository struct {
@@ -45,7 +47,7 @@ func (ar *AuthorRepository) SelectAuthors() []model.Author {
 	return authors
 }
 
-func (ar *AuthorRepository) SelectAuthor(id int) (*model.Author, error) {
+func (ar *AuthorRepository) SelectAuthor(id uuid.UUID) (*model.Author, error) {
 	query := "SELECT id_author, first_name, last_name, description FROM author WHERE id_author = $1"
 	row := ar.DB.QueryRow(query, id)
 
@@ -62,7 +64,7 @@ func (ar *AuthorRepository) SelectAuthor(id int) (*model.Author, error) {
 	return &author, nil
 }
 
-func (ar *AuthorRepository) UpdateAuthor(id int, author model.Author) bool {
+func (ar *AuthorRepository) UpdateAuthor(id uuid.UUID, author model.Author) bool {
 	stmt, err := ar.DB.Prepare("UPDATE author SET first_name = $1, last_name = $2, description = $3 WHERE id_author = $4")
 	if err != nil {
 		log.Println(err)
@@ -78,7 +80,7 @@ func (ar *AuthorRepository) UpdateAuthor(id int, author model.Author) bool {
 	return true
 }
 
-func (ar *AuthorRepository) DeleteAuthor(id int) bool {
+func (ar *AuthorRepository) DeleteAuthor(id uuid.UUID) bool {
 	stmt, err := ar.DB.Prepare("DELETE FROM author WHERE id_author = $1")
 	if err != nil {
 		log.Println(err)

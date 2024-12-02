@@ -6,6 +6,8 @@ import (
 
 	"book/model"
 	"book/repository/interfaces"
+
+	"github.com/google/uuid"
 )
 
 type FormatRepository struct {
@@ -41,7 +43,7 @@ func (fr *FormatRepository) SelectFormats() []model.Format {
 
 	for rows.Next() {
 		var (
-			id   uint
+			id   uuid.UUID
 			name string
 		)
 		err := rows.Scan(&id, &name)
@@ -55,7 +57,7 @@ func (fr *FormatRepository) SelectFormats() []model.Format {
 	return result
 }
 
-func (fr *FormatRepository) SelectFormat(id uint) (model.Format, error) {
+func (fr *FormatRepository) SelectFormat(id uuid.UUID) (model.Format, error) {
 	var format model.Format
 	stmt, err := fr.DB.Prepare("SELECT * FROM formats WHERE id_format = $1")
 	if err != nil {
@@ -77,7 +79,7 @@ func (fr *FormatRepository) SelectFormat(id uint) (model.Format, error) {
 	return format, nil
 }
 
-func (fr *FormatRepository) UpdateFormat(id int, format model.Format) bool {
+func (fr *FormatRepository) UpdateFormat(id uuid.UUID, format model.Format) bool {
 	query := `UPDATE formats SET name = $1 WHERE id_format = $2`
 
 	_, err := fr.DB.Exec(query, format.Name, id)
@@ -88,7 +90,7 @@ func (fr *FormatRepository) UpdateFormat(id int, format model.Format) bool {
 	return true
 }
 
-func (fr *FormatRepository) DeleteFormat(id int) bool {
+func (fr *FormatRepository) DeleteFormat(id uuid.UUID) bool {
 	query := "DELETE FROM formats WHERE id_format = $1"
 
 	_, err := fr.DB.Exec(query, id)

@@ -1,11 +1,13 @@
 package model
 
+import "github.com/google/uuid"
+
 type BookGenre struct {
-	IdGenre uint `json:"id_genre"`
-	IdBook  uint `json:"id_book"`
+	IdGenre uuid.UUID `json:"id_genre"`
+	IdBook  uuid.UUID `json:"id_book"`
 }
 
 type PostBookGenre struct {
-	IdGenre uint `json:"id_genre" binding:"required"`
-	IdBook  uint `json:"id_book" binding:"required"`
+	IdGenre uuid.UUID `json:"id_genre" binding:"required"`
+	IdBook  uuid.UUID `json:"id_book" binding:"required"`
 }

@@ -1,7 +1,9 @@
 package model
 
+import "github.com/google/uuid"
+
 type Author struct {
-	IdAuthor    uint   `json:"id_author"`
+	IdAuthor    uuid.UUID   `json:"id_author"`
 	FirstName   string `json:"first_name"`
 	LastName    string `json:"last_name"`
 	Description string `json:"description"`

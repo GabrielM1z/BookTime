@@ -2,13 +2,14 @@ package interfaces
 
 import (
 	"book/model"
+
+	"github.com/google/uuid"
 )
 
 type StateRepositoryInterface interface {
-	InsertState(post model.PostState, idUser string) bool
+	InsertState(post model.PostState, idUser uuid.UUID) bool
 	SelectStates() []model.State
-	SelectState(id uint) model.State
-	SelectStateByUserAndBook(idUser string, idBook uint) []model.State
-	UpdateState(id int, state model.State) bool
-	DeleteState(id int) bool
+	SelectStateByUserAndBook(idUser uuid.UUID, idBook uuid.UUID) model.State
+	UpdateState(idUser uuid.UUID, idBook uuid.UUID, state model.State) bool
+	DeleteState(idUser uuid.UUID, idBook uuid.UUID) bool
 }

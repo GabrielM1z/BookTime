@@ -1,8 +1,10 @@
 package model
 
+import "github.com/google/uuid"
+
 type Format struct {
-	IdFormat uint   `json:"id_format"`
-	Name     string `json:"name"`
+	IdFormat uuid.UUID `json:"id_format"`
+	Name     string    `json:"name"`
 }
 
 type PostFormat struct {
