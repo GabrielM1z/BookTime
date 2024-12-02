@@ -11,8 +11,19 @@ export default function TabLayout() {
 	return (
 		<Tabs
 		screenOptions={{
-			tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+			tabBarActiveTintColor: "blue",
 			headerShown: false,
+			tabBarShowLabel: false,
+			tabBarStyle: {
+				position: "absolute",
+				bottom: 27,
+				marginLeft: 16,
+				marginRight: 16,
+				elevation: 0,
+				borderRadius: 30,
+				alignItems: "center",
+				justifyContent: "center",
+			}
 		}}>
 			<Tabs.Screen
 				name="index"
