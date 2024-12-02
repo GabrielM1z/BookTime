@@ -92,3 +92,19 @@ CREATE TABLE IF NOT EXISTS shared_library (
     PRIMARY KEY (id_user, id_library),
     FOREIGN KEY (id_library) REFERENCES library(id_library) ON DELETE CASCADE
 );
+
+-- Créer la base de données pour le service Book
+CREATE DATABASE user_db;
+
+\connect user_db;
+
+-- Table USER
+CREATE TABLE IF NOT EXISTS user (
+    id_user SERIAL PRIMARY KEY,
+    id_keycloak VARCHAR(255) UNIQUE,
+    user_name VARCHAR(255) UNIQUE NOT NULL,
+    first_name VARCHAR(255) NOT NULL,
+    last_name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    birthdate DATE NOT NULL
+);

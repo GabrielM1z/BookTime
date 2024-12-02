@@ -8,13 +8,13 @@ import { ThemedView } from '@/components/ThemedView';
 
 import { useInfiniteScroll } from '@/core/api';
 import { Book } from '../../models/Book';
-import { apiLink } from '@/constants/Api';
+import { apiLinkServeur } from '@/constants/Api';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import React from 'react';
 
-
+//Filtres appliqué à la recherche API
 type TFilters = {
-	q: string;
+	query: string;
 };
 
 type TBook = {
@@ -23,7 +23,7 @@ type TBook = {
 	totalItems: number;
 }
 
-
+// ISBN différents smais id Google Book dupliqué 
 const removeDuplicates = (items: Book[]): Book[] => {
 	const seenIds = new Set<string>();
 	return items.filter((item) => {
@@ -39,13 +39,13 @@ const removeDuplicates = (items: Book[]): Book[] => {
 
 export default function HomeScreen() {
 	const [filters, setFilters] = useState<TFilters>({
-		q: '',
+		query: '',
 	});
 
 	const searchBarChanged = (searchTerms: string) => {
 		setFilters({
 			...filters,
-			q: searchTerms,
+			query: searchTerms,
 		});
 	}
 
@@ -56,13 +56,16 @@ export default function HomeScreen() {
 		onEndReached,
 		isFetchingNextPage
 	} = useInfiniteScroll<Book, TFilters>({
-		url: apiLink,
+		url: apiLinkServeur,
 		limit: 10,
 		filters: filters,
 		key: 'books',
 		initialPage: 0,
 		formatResponse: (data: TBook) => data.items,
 	});
+
+	console.log(data);
+	
 
 	return (
 		<ThemedView style={styles.body}>
