@@ -29,7 +29,7 @@ const initLibrary = async () => {
 	try {
 		db.execAsync(`
 			CREATE TABLE IF NOT EXISTS library (
-				id_library INTEGER PRIMARY KEY AUTOINCREMENT,
+				id_library TEXT PRIMARY KEY,
 				name VARCHAR(255) NOT NULL
 			);
 		`);
@@ -43,7 +43,7 @@ const initFormat = async () => {
 	try {
 		db.execAsync(`
 			CREATE TABLE IF NOT EXISTS formats (
-				id_format INTEGER PRIMARY KEY AUTOINCREMENT,
+				id_format TEXT PRIMARY KEY,
 				name VARCHAR(100) NOT NULL
 			);
 		`);
@@ -57,7 +57,7 @@ const initAuthor = async () => {
 	try {
 		db.execAsync(`
 			CREATE TABLE IF NOT EXISTS author (
-				id_author INTEGER PRIMARY KEY AUTOINCREMENT,
+				id_author TEXT PRIMARY KEY,
 				first_name VARCHAR(100) NOT NULL,
 				last_name VARCHAR(100) NOT NULL,
 				description TEXT
@@ -73,7 +73,7 @@ const initGenre = async () => {
 	try {
 		db.execAsync(`
 			CREATE TABLE IF NOT EXISTS genre (
-				id_genre INTEGER PRIMARY KEY AUTOINCREMENT,
+				id_genre TEXT PRIMARY KEY,
 				name VARCHAR(100) NOT NULL
 			);
 		`);
@@ -87,7 +87,7 @@ const initBook = async () => {
 	try {
 		db.execAsync(`
 			CREATE TABLE IF NOT EXISTS book (
-				id_book INTEGER PRIMARY KEY AUTOINCREMENT,
+				id_book TEXT PRIMARY KEY,
 				title VARCHAR(255) NOT NULL,
 				description TEXT,
 				id_format INT,
@@ -143,7 +143,7 @@ const initState = async () => {
 	try {
 		db.execAsync(`
 			CREATE TABLE IF NOT EXISTS state (
-				id_state INTEGER PRIMARY KEY AUTOINCREMENT,
+				id_state TEXT PRIMARY KEY,
 				state VARCHAR(50),
 				progression INT,
 				read_count INT DEFAULT 0,
@@ -199,3 +199,8 @@ const initSharedLibrary = async () => {
 // TODO Création de l'utilisateur invité
 
 // TODO Ajout des étagères de base (Like et Lu)
+
+
+
+////////////////////////// TRIGGER //////////////////////////
+
