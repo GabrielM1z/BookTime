@@ -8,7 +8,7 @@ import { debounce } from 'lodash';
 interface SearchBarProps {
     qrcode: boolean;  // Type de la prop qrcode
     onSearch: (value: string) => void;  // Type de la prop onSearch
-  }
+}
 
 
 export const SearchBar: React.FC<SearchBarProps> = ({ qrcode, onSearch }) => {

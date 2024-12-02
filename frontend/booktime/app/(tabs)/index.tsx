@@ -12,7 +12,7 @@ export default function HomeScreen() {
 	// création BDD
 	useEffect(() => {
 		// Initialiser la base de données avec le fichier SQL
-		initDBFromFile();
+		// initDBFromFile();
 	  }, []);
 
 
