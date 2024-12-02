@@ -1,0 +1,16 @@
+meta {
+  name: Get News
+  type: http
+  seq: 1
+}
+
+get {
+  url: http://localhost:8082/news/search?topic=books&language=en
+  body: none
+  auth: none
+}
+
+params:query {
+  topic: books
+  language: en
+}

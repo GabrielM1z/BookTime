@@ -41,12 +41,17 @@ func (a *App) CreateRoutes() {
 
 	//Service & Api
 	apiKey := os.Getenv("GOOGLE_BOOKS_API_KEY")
-	bookService := service.NewSearchService(apiKey)
+	bookSearchService := service.NewSearchService(apiKey)
+	bookShopsService := service.NewShopsService(apiKey)
 	prefix := "/books"
 
 	// Search routes
-	searchController := controller.NewSearchController(bookService)
+	searchController := controller.NewSearchController(bookSearchService)
 	routes.GET(prefix+"/search", searchController.SearchBooks)
+
+	// Shops routes
+	shopsController := controller.NewShopsController(bookShopsService)
+	routes.GET(prefix+"/shops", shopsController.ShopsBooks)
 
 	// Book routes
 	bookController := controller.NewBookController(a.DB)
