@@ -19,13 +19,13 @@ func NewActionRepository(db *sql.DB) *ActionRepository {
 }
 
 func (ar *ActionRepository) InsertAction(post model.PostAction, idUser uuid.UUID) bool {
-	stmt, err := ar.DB.Prepare("INSERT INTO action (id_user, date, type, action, executed_by) VALUES ($1, $2, $3, $4, $5)")
+	stmt, err := ar.DB.Prepare("INSERT INTO action (id_user, table, date, type, action, executed_by) VALUES ($1, $2, $3, $4, $5, $6)")
 	if err != nil {
 		log.Println(err)
 		return false
 	}
 	defer stmt.Close()
-	_, err2 := stmt.Exec(post.IdUser, post.Date, post.Type, post.Action, post.ExecutedBy)
+	_, err2 := stmt.Exec(post.IdUser, post.Table, post.Date, post.Type, post.Action, post.ExecutedBy)
 	if err2 != nil {
 		log.Println(err2)
 		return false
@@ -44,7 +44,7 @@ func (ar *ActionRepository) SelectActions() []model.Action {
 	actions := []model.Action{}
 	for rows.Next() {
 		var action model.Action
-		if err := rows.Scan(&action.IdAction, &action.IdUser, &action.Date, &action.Type, &action.Action, &action.ExecutedBy); err != nil {
+		if err := rows.Scan(&action.IdAction, &action.IdUser, &action.Table, &action.Date, &action.Type, &action.Action, &action.ExecutedBy); err != nil {
 			log.Fatal(err)
 		}
 		actions = append(actions, action)
@@ -76,10 +76,10 @@ func (ar *ActionRepository) SelectAction(idUser uuid.UUID, idAction uuid.UUID) m
 }
 
 func (ar *ActionRepository) UpdateAction(idUser uuid.UUID, idAction uuid.UUID, action model.Action) bool {
-	query := `UPDATE action SET action = $1, progression = $2, read_count = $3, last_read_date = $4, is_available = $5
-			  WHERE id_user = $6 AND id_action = $7`
+	query := `UPDATE action SET action = $1, table = $2, progression = $3, read_count = $4, last_read_date = $5, is_available = $6
+			  WHERE id_user = $7 AND id_action = $8`
 
-	_, err := ar.DB.Exec(query, action.Date, action.Type, action.Action, action.ExecutedBy, idUser, idAction)
+	_, err := ar.DB.Exec(query, action.Table, action.Date, action.Type, action.Action, action.ExecutedBy, idUser, idAction)
 	if err != nil {
 		log.Println(err)
 		return false

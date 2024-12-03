@@ -51,6 +51,7 @@ func (sr *StateRepository) InsertState(post model.PostState, idUser uuid.UUID) b
 	}
 
 	var action = model.PostAction{IdUser: idUser,
+		Table:      "STATE",
 		Date:       time.Now(),
 		Type:       "INSERT",
 		Action:     actionJSON,
@@ -158,6 +159,7 @@ func (sr *StateRepository) UpdateState(idUser uuid.UUID, idBook uuid.UUID, state
 	}
 
 	var action = model.PostAction{
+		Table:      "STATE",
 		IdUser:     idUser,
 		Date:       time.Now(),
 		Type:       "UPDATE",
@@ -190,6 +192,7 @@ func (sr *StateRepository) DeleteState(idUser uuid.UUID, idBook uuid.UUID) bool 
 	}
 
 	var action = model.PostAction{IdUser: idUser,
+		Table:      "STATE",
 		Date:       time.Now(),
 		Type:       "DELETE",
 		Action:     actionJSON,
