@@ -3,7 +3,6 @@ package repository
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"log"
 	"time"
 
@@ -28,13 +27,14 @@ func (sr *StateRepository) InsertState(post model.PostState, idUser uuid.UUID) b
 		return false
 	}
 	defer stmt.Close()
+
 	_, err2 := stmt.Exec(post.State, post.Progression, post.ReadCount, post.LastReadDate, post.IsAvailable, idUser, post.IdBook)
 	if err2 != nil {
 		log.Println(err2)
 		return false
 	}
 
-	actionmap := map[string]interface{}{
+	actionMap := map[string]interface{}{
 		"state":        post.State,
 		"progression":  post.Progression,
 		"readCount":    post.ReadCount,
@@ -44,22 +44,7 @@ func (sr *StateRepository) InsertState(post model.PostState, idUser uuid.UUID) b
 		"idBook":       post.IdBook,
 	}
 
-	actionJSON, err := json.Marshal(actionmap)
-	if err != nil {
-		fmt.Println("Erreur lors de l'encodage JSON:", err)
-		return false
-	}
-
-	var action = model.PostAction{IdUser: idUser,
-		Table:      "STATE",
-		Date:       time.Now(),
-		Type:       "INSERT",
-		Action:     actionJSON,
-		ExecutedBy: "SERVER"}
-
-	NewActionRepository(sr.DB).InsertAction(action, idUser)
-
-	return true
+	return sr.LogAction(idUser, "STATE", "INSERT", actionMap)
 }
 
 func (ar *StateRepository) SelectStates() []model.State {
@@ -103,8 +88,7 @@ func (sr *StateRepository) UpdateState(idUser uuid.UUID, idBook uuid.UUID, state
 	baseState := sr.SelectStateByUserAndBook(idUser, idBook)
 
 	query := `UPDATE state SET state = $1, progression = $2, read_count = $3, last_read_date = $4, is_available = $5
-			  WHERE id_user = $6 AND id_book = $7`
-
+              WHERE id_user = $6 AND id_book = $7`
 	_, err := sr.DB.Exec(query, state.State, state.Progression, state.ReadCount, state.LastReadDate, state.IsAvailable, idUser, idBook)
 	if err != nil {
 		log.Println(err)
@@ -112,7 +96,6 @@ func (sr *StateRepository) UpdateState(idUser uuid.UUID, idBook uuid.UUID, state
 	}
 
 	actionMap := map[string]interface{}{}
-
 	if baseState.State != state.State {
 		actionMap["state"] = state.State
 	}
@@ -123,23 +106,12 @@ func (sr *StateRepository) UpdateState(idUser uuid.UUID, idBook uuid.UUID, state
 		actionMap["readCount"] = state.ReadCount
 	}
 
-	// Comparer les dates sans tenir compte de l'heure
-	parsedBaseDate, err1 := time.Parse(time.RFC3339, baseState.LastReadDate)
-	parsedStateDate, err2 := time.Parse("2006-01-02", state.LastReadDate)
-
-	// Si la date de base est dans le format complet (avec heure) et celle de l'état est sans heure
-	if err1 == nil && err2 == nil {
-		// Comparer uniquement les dates (en ignorant l'heure)
-		parsedBaseDate = parsedBaseDate.UTC().Truncate(24 * time.Hour)   // Ignorer l'heure
-		parsedStateDate = parsedStateDate.UTC().Truncate(24 * time.Hour) // Ignorer l'heure
-
-		if !parsedBaseDate.Equal(parsedStateDate) {
-			actionMap["lastReadDate"] = state.LastReadDate
-		}
-	} else if baseState.LastReadDate != state.LastReadDate {
-		// Si l'une des deux dates n'est pas dans le bon format, on les compare comme des chaînes
+	parsedBaseDate, _ := time.Parse(time.RFC3339, baseState.LastReadDate)
+	parsedStateDate, _ := time.Parse("2006-01-02", state.LastReadDate)
+	if !parsedBaseDate.Truncate(24 * time.Hour).Equal(parsedStateDate) {
 		actionMap["lastReadDate"] = state.LastReadDate
 	}
+
 	if baseState.IsAvailable != state.IsAvailable {
 		actionMap["isAvailable"] = state.IsAvailable
 	}
@@ -148,59 +120,45 @@ func (sr *StateRepository) UpdateState(idUser uuid.UUID, idBook uuid.UUID, state
 		return true
 	}
 
-	// Convertir idUser et idBook en chaînes
 	actionMap["idUser"] = idUser.String()
 	actionMap["idBook"] = idBook.String()
 
-	actionJSON, err := json.Marshal(actionMap)
-	if err != nil {
-		log.Println("Erreur lors de l'encodage JSON:", err)
-		return false
-	}
-
-	var action = model.PostAction{
-		Table:      "STATE",
-		IdUser:     idUser,
-		Date:       time.Now(),
-		Type:       "UPDATE",
-		Action:     actionJSON,
-		ExecutedBy: "SERVER",
-	}
-
-	NewActionRepository(sr.DB).InsertAction(action, idUser)
-
-	return true
+	return sr.LogAction(idUser, "STATE", "UPDATE", actionMap)
 }
 
 func (sr *StateRepository) DeleteState(idUser uuid.UUID, idBook uuid.UUID) bool {
 	query := "DELETE FROM state WHERE id_user = $1 AND id_book = $2"
-
 	_, err := sr.DB.Exec(query, idUser, idBook)
 	if err != nil {
 		log.Println(err)
 		return false
 	}
 
-	actionMap := map[string]interface{}{}
-	actionMap["idUser"] = idUser
-	actionMap["idBook"] = idBook
+	actionMap := map[string]interface{}{
+		"idUser": idUser,
+		"idBook": idBook,
+	}
 
-	actionJSON, err := json.Marshal(actionMap)
+	return sr.LogAction(idUser, "STATE", "DELETE", actionMap)
+}
+
+func (sr *StateRepository) LogAction(idUser uuid.UUID, tableName, actionType string, actionData map[string]interface{}) bool {
+	actionJSON, err := json.Marshal(actionData)
 	if err != nil {
-		fmt.Println("Erreur lors de l'encodage JSON:", err)
+		log.Println("Erreur lors de l'encodage JSON:", err)
 		return false
 	}
 
-	var action = model.PostAction{IdUser: idUser,
-		Table:      "STATE",
+	action := model.PostAction{
+		IdUser:     idUser,
+		Table:      tableName,
 		Date:       time.Now(),
-		Type:       "DELETE",
+		Type:       actionType,
 		Action:     actionJSON,
-		ExecutedBy: "SERVER"}
+		ExecutedBy: "SERVER",
+	}
 
-	NewActionRepository(sr.DB).InsertAction(action, idUser)
-
-	return true
+	return NewActionRepository(sr.DB).InsertAction(action, idUser)
 }
 
 var _ interfaces.StateRepositoryInterface = &StateRepository{}
