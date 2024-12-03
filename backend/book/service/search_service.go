@@ -29,11 +29,12 @@ func bookExists(books []model.BookItem, id string) bool {
 	return false
 }
 
-func (bs *SearchService) SearchBooks(query, title, author, genre string) ([]model.SimplifiedBook, error) {
+func (bs *SearchService) SearchBooks(startIndex, query, title, author, genre string) ([]model.SimplifiedBook, error) {
 	baseURL := "https://www.googleapis.com/books/v1/volumes?"
 	params := url.Values{}
 
 	searchQuery := query
+
 	if title != "" {
 		searchQuery += "+intitle:" + title
 	}
@@ -44,12 +45,12 @@ func (bs *SearchService) SearchBooks(query, title, author, genre string) ([]mode
 		searchQuery += "+subject:" + genre
 	}
 
+	params.Add("startIndex", startIndex)
 	params.Add("q", searchQuery)
 	params.Add("key", bs.ApiKey)
 	apiURL := fmt.Sprintf("%s?%s", baseURL, params.Encode())
 
-	log.Println("apiURL")
-	log.Println(apiURL)
+	log.Println("apiURL : " + apiURL)
 
 	resp, err := http.Get(apiURL)
 	if err != nil {
