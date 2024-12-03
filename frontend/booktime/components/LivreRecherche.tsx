@@ -1,13 +1,13 @@
 import { StyleSheet, View, Image, Pressable } from 'react-native';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { ThemedText } from './ThemedText';
-import { Book } from '@/models/Book';
+import { Book, BookInfos } from '@/models/Book';
 import { Book2 } from '@/models/Book2';
 import React from 'react';
 
 const defaultCover = require('@/assets/images/logo_refait.png');
 
-export const LivreRecherche = ({ book }: { book: Book }) => {
+export const LivreRecherche = ({ book }: { book: BookInfos }) => {
 
   const handleAddBook = () => {
     console.log(`Book added: ${book}`);
@@ -16,10 +16,10 @@ export const LivreRecherche = ({ book }: { book: Book }) => {
   return (
     <View style={styles.itemContainer}>
 
-      <Image source={book.volumeInfo.imageLinks ? { uri: book.volumeInfo.imageLinks.thumbnail } : defaultCover} style={styles.itemImage} resizeMode={'cover'}></Image>
+      <Image source={book.thumbnail ? { uri: book.thumbnail } : defaultCover} style={styles.itemImage} resizeMode={'cover'}></Image>
       <View style={styles.itemInfos}>
-        <ThemedText type="titreLivreHorizontal" numberOfLines={1}>{book.volumeInfo.title}</ThemedText>
-        <ThemedText type="auteurLivreHorizontal">{book.volumeInfo.authors ? book.volumeInfo.authors[0] : "Inconnue"}</ThemedText>
+        <ThemedText type="titreLivreHorizontal" numberOfLines={1}>{book.title}</ThemedText>
+        <ThemedText type="auteurLivreHorizontal">{book.authors ? book.authors[0] : "Inconnue"}</ThemedText>
       </View>
       <View style={styles.addItemContainer}>
         <Pressable onPress={handleAddBook} style={styles.addItem}>
