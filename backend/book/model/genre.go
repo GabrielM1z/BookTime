@@ -1,8 +1,10 @@
 package model
 
+import "github.com/google/uuid"
+
 type Genre struct {
-	IdGenre uint   `json:"id_genre"`
-	Name    string `json:"name"`
+	IdGenre uuid.UUID `json:"id_genre"`
+	Name    string    `json:"name"`
 }
 
 type PostGenre struct {

@@ -3,6 +3,7 @@ package service
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 
@@ -18,8 +19,18 @@ func NewSearchService(apiKey string) *SearchService {
 	return &SearchService{ApiKey: apiKey}
 }
 
+// Function to check if a book with the same ID exists
+func bookExists(books []model.BookItem, id string) bool {
+	for _, book := range books {
+		if book.ID == id {
+			return true
+		}
+	}
+	return false
+}
+
 func (bs *SearchService) SearchBooks(query, title, author, genre string) ([]model.SimplifiedBook, error) {
-	baseURL := "https://www.googleapis.com/books/v1/volumes"
+	baseURL := "https://www.googleapis.com/books/v1/volumes?"
 	params := url.Values{}
 
 	searchQuery := query
@@ -36,6 +47,9 @@ func (bs *SearchService) SearchBooks(query, title, author, genre string) ([]mode
 	params.Add("q", searchQuery)
 	params.Add("key", bs.ApiKey)
 	apiURL := fmt.Sprintf("%s?%s", baseURL, params.Encode())
+
+	log.Println("apiURL")
+	log.Println(apiURL)
 
 	resp, err := http.Get(apiURL)
 	if err != nil {
@@ -74,6 +88,9 @@ func (bs *SearchService) SearchBooks(query, title, author, genre string) ([]mode
 			}
 		}
 
+		// if bookExists(simplifiedBooks, item.ID) {
+
+		// }
 		simplifiedBooks = append(simplifiedBooks, simplifiedBook)
 	}
 

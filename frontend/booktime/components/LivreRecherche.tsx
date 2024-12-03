@@ -1,13 +1,18 @@
-import { StyleSheet, View, Text, Image } from 'react-native';
+import { StyleSheet, View, Image, Pressable } from 'react-native';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { ThemedText } from './ThemedText';
 import { Book } from '@/models/Book';
-import { red } from 'react-native-reanimated/lib/typescript/reanimated2/Colors';
+import { Book2 } from '@/models/Book2';
+import React from 'react';
 
 const defaultCover = require('@/assets/images/logo_refait.png');
 
 export const LivreRecherche = ({ book }: { book: Book }) => {
-  // console.log(book.id, book.volumeInfo.title, book.volumeInfo.authors);
+
+  const handleAddBook = () => {
+    console.log(`Book added: ${book}`);
+  };
+
   return (
     <View style={styles.itemContainer}>
 
@@ -17,9 +22,9 @@ export const LivreRecherche = ({ book }: { book: Book }) => {
         <ThemedText type="auteurLivreHorizontal">{book.volumeInfo.authors ? book.volumeInfo.authors[0] : "Inconnue"}</ThemedText>
       </View>
       <View style={styles.addItemContainer}>
-        <View style={styles.addItem}>
+        <Pressable onPress={handleAddBook} style={styles.addItem}>
           <TabBarIcon size={20} color={"#1E9AA4"} name={'add'} />
-        </View>
+        </Pressable>
       </View>
     </View>
   );

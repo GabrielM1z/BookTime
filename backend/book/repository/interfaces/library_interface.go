@@ -1,12 +1,16 @@
 package interfaces
 
-import "book/model"
+import (
+	"book/model"
+
+	"github.com/google/uuid"
+)
 
 type LibraryRepositoryInterface interface {
 	InsertLibrary(post model.PostLibrary) bool
 	SelectLibraries() []model.Library
-	SelectLibrary(id uint) (model.Library, error)
-	SelectLibraryByUser(idUser uint) []model.Library
-	UpdateLibrary(id int, library model.Library) bool
-	DeleteLibrary(id int) bool
+	SelectLibrary(id uuid.UUID) (model.Library, error)
+	SelectLibraryByUser(idUser uuid.UUID) []model.Library
+	UpdateLibrary(id uuid.UUID, library model.Library) bool
+	DeleteLibrary(id uuid.UUID) bool
 }

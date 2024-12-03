@@ -3,13 +3,13 @@ package controller
 import (
 	"database/sql"
 	"net/http"
-	"strconv"
 
 	"book/controller/interfaces"
 	"book/model"
 	"book/repository"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type LibraryBookController struct {
@@ -38,26 +38,26 @@ func (lc *LibraryBookController) GetLibraryBook(c *gin.Context) {
 	repoLibraryBook := repository.NewLibraryBookRepository(db)
 
 	idLibraryParam := c.Param("id_library")
-	idLibrary, err := strconv.ParseUint(idLibraryParam, 10, 32)
+	idLibrary, err := uuid.Parse(idLibraryParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "msg": "invalid library ID"})
 		return
 	}
 
 	idBookParam := c.Param("id_book")
-	idBook, err := strconv.ParseUint(idBookParam, 10, 32)
+	idBook, err := uuid.Parse(idBookParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "msg": "invalid book ID"})
 		return
 	}
 
-	libraryBook, err := repoLibraryBook.SelectLibraryBook(uint(idLibrary), uint(idBook))
+	libraryBook, err := repoLibraryBook.SelectLibraryBook(idLibrary, idBook)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "msg": "error retrieving library book"})
 		return
 	}
 
-	if libraryBook.IdLibrary != 0 && libraryBook.IdBook != 0 {
+	if libraryBook.IdLibrary != uuid.Nil && libraryBook.IdBook != uuid.Nil {
 		c.JSON(http.StatusOK, gin.H{"status": "success", "data": libraryBook, "msg": "library book retrieved successfully"})
 	} else {
 		c.JSON(http.StatusNotFound, gin.H{"status": "error", "data": nil, "msg": "library book not found"})
@@ -101,14 +101,14 @@ func (lc *LibraryBookController) InsertLibraryBook(c *gin.Context) {
 func (lc *LibraryBookController) UpdateLibraryBook(c *gin.Context) {
 	db := lc.DB
 	idLibraryParam := c.Param("id_library")
-	idLibrary, err := strconv.Atoi(idLibraryParam)
+	idLibrary, err := uuid.Parse(idLibraryParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid library ID"})
 		return
 	}
 
 	idBookParam := c.Param("id_book")
-	idBook, err := strconv.Atoi(idBookParam)
+	idBook, err := uuid.Parse(idBookParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid book ID"})
 		return
@@ -134,14 +134,14 @@ func (lc *LibraryBookController) UpdateLibraryBook(c *gin.Context) {
 func (lc *LibraryBookController) DeleteLibraryBook(c *gin.Context) {
 	db := lc.DB
 	idLibraryParam := c.Param("id_library")
-	idLibrary, err := strconv.Atoi(idLibraryParam)
+	idLibrary, err := uuid.Parse(idLibraryParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid library ID"})
 		return
 	}
 
 	idBookParam := c.Param("id_book")
-	idBook, err := strconv.Atoi(idBookParam)
+	idBook, err := uuid.Parse(idBookParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid book ID"})
 		return

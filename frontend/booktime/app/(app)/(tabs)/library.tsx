@@ -63,13 +63,9 @@ export default function LibrairyScreen({}) {
         <ThemedView style={libraryStyles.container}>
 			<SafeAreaProvider>
 				<SafeAreaView>
-
-					
-					<TitreTab label={"Bibliotheque"}></TitreTab>
 					
 					<SearchBar qrcode={true} onSearch={getLibraryFromBack}></SearchBar>
 				
-
 					<View style={libraryStyles.containerBtn}>
 
 					<TouchableOpacity 

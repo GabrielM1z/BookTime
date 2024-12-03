@@ -6,6 +6,8 @@ import (
 
 	"book/model"
 	"book/repository/interfaces"
+
+	"github.com/google/uuid"
 )
 
 type GenreRepository struct {
@@ -79,7 +81,7 @@ func (gr *GenreRepository) SelectGenres() []model.Genre {
 
 	for rows.Next() {
 		var (
-			id   uint
+			id   uuid.UUID
 			name string
 		)
 		err := rows.Scan(&id, &name)
@@ -93,7 +95,7 @@ func (gr *GenreRepository) SelectGenres() []model.Genre {
 	return result
 }
 
-func (gr *GenreRepository) SelectGenre(id uint) (model.Genre, error) {
+func (gr *GenreRepository) SelectGenre(id uuid.UUID) (model.Genre, error) {
 	var genre model.Genre
 	stmt, err := gr.DB.Prepare("SELECT * FROM genre WHERE id_genre = $1")
 	if err != nil {
@@ -115,7 +117,7 @@ func (gr *GenreRepository) SelectGenre(id uint) (model.Genre, error) {
 	return genre, nil
 }
 
-func (gr *GenreRepository) UpdateGenre(id int, genre model.Genre) bool {
+func (gr *GenreRepository) UpdateGenre(id uuid.UUID, genre model.Genre) bool {
 	query := `UPDATE genre SET name = $1 WHERE id_genre = $2`
 
 	_, err := gr.DB.Exec(query, genre.Name, id)
@@ -126,7 +128,7 @@ func (gr *GenreRepository) UpdateGenre(id int, genre model.Genre) bool {
 	return true
 }
 
-func (gr *GenreRepository) DeleteGenre(id int) bool {
+func (gr *GenreRepository) DeleteGenre(id uuid.UUID) bool {
 	query := "DELETE FROM genre WHERE id_genre = $1"
 
 	_, err := gr.DB.Exec(query, id)

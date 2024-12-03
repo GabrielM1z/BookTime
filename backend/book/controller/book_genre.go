@@ -3,13 +3,13 @@ package controller
 import (
 	"database/sql"
 	"net/http"
-	"strconv"
 
 	"book/controller/interfaces"
 	"book/model"
 	"book/repository"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type BookGenreController struct {
@@ -39,24 +39,24 @@ func (bgc *BookGenreController) GetBookGenre(c *gin.Context) {
 
 	idGenreParam := c.Param("id_genre")
 	idBookParam := c.Param("id_book")
-	idGenre, err := strconv.ParseUint(idGenreParam, 10, 32)
+	idGenre, err := uuid.Parse(idGenreParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "msg": "invalid book genre ID"})
 		return
 	}
-	idBook, err := strconv.ParseUint(idBookParam, 10, 32)
+	idBook, err := uuid.Parse(idBookParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "msg": "invalid book genre ID"})
 		return
 	}
 
-	bookGenre, err := repoBookGenre.SelectBookGenre(uint(idGenre), uint(idBook))
+	bookGenre, err := repoBookGenre.SelectBookGenre(idGenre, idBook)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "msg": "error retrieving book genre"})
 		return
 	}
 
-	if bookGenre.IdGenre != 0 {
+	if bookGenre.IdGenre != uuid.Nil {
 		c.JSON(http.StatusOK, gin.H{"status": "success", "data": bookGenre, "msg": "book genre retrieved successfully"})
 	} else {
 		c.JSON(http.StatusNotFound, gin.H{"status": "error", "data": nil, "msg": "book genre not found"})
@@ -85,19 +85,19 @@ func (bgc *BookGenreController) DeleteBookGenre(c *gin.Context) {
 	db := bgc.DB
 	idGenreParam := c.Param("id_genre")
 	idBookParam := c.Param("id_book")
-	idGenre, err := strconv.ParseUint(idGenreParam, 10, 32)
+	idGenre, err := uuid.Parse(idGenreParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "msg": "invalid book genre ID"})
 		return
 	}
-	idBook, err := strconv.ParseUint(idBookParam, 10, 32)
+	idBook, err := uuid.Parse(idBookParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "msg": "invalid book genre ID"})
 		return
 	}
 
 	repoBookGenre := repository.NewBookGenreRepository(db)
-	success := repoBookGenre.DeleteBookGenre(uint(idGenre), uint(idBook))
+	success := repoBookGenre.DeleteBookGenre(idGenre, idBook)
 	if !success {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete book genre"})
 		return

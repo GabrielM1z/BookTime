@@ -1,6 +1,7 @@
 import { StyleSheet, View, Text, Image } from 'react-native';
 import { ThemedText } from './ThemedText';
 import CoverPressable from './CoverPressable';
+import React from 'react';
 
 // component représentant le LIVRE de l'ETAGERE
 export default function LivreEtagere({ label, cover }) {

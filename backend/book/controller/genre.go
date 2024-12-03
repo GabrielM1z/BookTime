@@ -3,13 +3,13 @@ package controller
 import (
 	"database/sql"
 	"net/http"
-	"strconv"
 
 	"book/controller/interfaces"
 	"book/model"
 	"book/repository"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type GenreController struct {
@@ -68,21 +68,21 @@ func (gc *GenreController) GetGenre(c *gin.Context) {
 
 	// Récupère l'ID depuis les paramètres de la requête
 	idParam := c.Param("id")
-	id, err := strconv.ParseUint(idParam, 10, 32) // Convertir en uint
+	id, err := uuid.Parse(idParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "msg": "invalid genre ID"})
 		return
 	}
 
 	// Récupère le genre avec l'ID
-	genre, err := repoGenre.SelectGenre(uint(id))
+	genre, err := repoGenre.SelectGenre(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "msg": "error retrieving genre"})
 		return
 	}
 
 	// Vérification si le genre existe via son ID
-	if genre.IdGenre != 0 {
+	if genre.IdGenre != uuid.Nil {
 		c.JSON(http.StatusOK, gin.H{"status": "success", "data": genre, "msg": "genre retrieved successfully"})
 	} else {
 		c.JSON(http.StatusNotFound, gin.H{"status": "error", "data": nil, "msg": "genre not found"})
@@ -109,7 +109,7 @@ func (gc *GenreController) InsertGenre(c *gin.Context) {
 func (gc *GenreController) UpdateGenre(c *gin.Context) {
 	db := gc.DB
 	idParam := c.Param("id")
-	id, err := strconv.Atoi(idParam)
+	id, err := uuid.Parse(idParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid genre ID"})
 		return
@@ -134,7 +134,7 @@ func (gc *GenreController) UpdateGenre(c *gin.Context) {
 func (gc *GenreController) DeleteGenre(c *gin.Context) {
 	db := gc.DB
 	idParam := c.Param("id")
-	id, err := strconv.Atoi(idParam)
+	id, err := uuid.Parse(idParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid genre ID"})
 		return

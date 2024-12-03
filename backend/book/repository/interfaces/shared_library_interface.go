@@ -1,11 +1,15 @@
 package interfaces
 
-import "book/model"
+import (
+	"book/model"
+
+	"github.com/google/uuid"
+)
 
 type SharedLibraryRepositoryInterface interface {
-	InsertSharedLibrary(post model.PostSharedLibrary) bool
+	InsertSharedLibrary(post model.PostSharedLibrary, idUser uuid.UUID) bool
 	SelectSharedLibraries() []model.SharedLibrary
-	SelectSharedLibrary(idUser uint, idLibrary uint) (model.SharedLibrary, error)
-	UpdateSharedLibrary(idUser uint, idLibrary uint, sharedLibrary model.SharedLibrary) bool
-	DeleteSharedLibrary(idUser uint, idLibrary uint) bool
+	SelectSharedLibrary(idUser uuid.UUID, idLibrary uuid.UUID) (model.SharedLibrary, error)
+	UpdateSharedLibrary(idUser uuid.UUID, idLibrary uuid.UUID, sharedLibrary model.SharedLibrary) bool
+	DeleteSharedLibrary(idUser uuid.UUID, idLibrary uuid.UUID) bool
 }

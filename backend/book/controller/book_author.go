@@ -3,13 +3,13 @@ package controller
 import (
 	"database/sql"
 	"net/http"
-	"strconv"
 
 	"book/controller/interfaces"
 	"book/model"
 	"book/repository"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type BookAuthorController struct {
@@ -39,24 +39,24 @@ func (bac *BookAuthorController) GetBookAuthor(c *gin.Context) {
 
 	idAuthorParam := c.Param("id_author")
 	idBookParam := c.Param("id_book")
-	idAuthor, err := strconv.ParseUint(idAuthorParam, 10, 32)
+	idAuthor, err := uuid.Parse(idAuthorParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "msg": "invalid book author ID"})
 		return
 	}
-	idBook, err := strconv.ParseUint(idBookParam, 10, 32)
+	idBook, err := uuid.Parse(idBookParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "msg": "invalid book author ID"})
 		return
 	}
 
-	bookAuthor, err := repoBookAuthor.SelectBookAuthor(uint(idAuthor), uint(idBook))
+	bookAuthor, err := repoBookAuthor.SelectBookAuthor(idAuthor, idBook)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "msg": "error retrieving book author"})
 		return
 	}
 
-	if bookAuthor.IdAuthor != 0 {
+	if bookAuthor.IdAuthor != uuid.Nil {
 		c.JSON(http.StatusOK, gin.H{"status": "success", "data": bookAuthor, "msg": "book author retrieved successfully"})
 	} else {
 		c.JSON(http.StatusNotFound, gin.H{"status": "error", "data": nil, "msg": "book author not found"})
@@ -85,19 +85,19 @@ func (bac *BookAuthorController) DeleteBookAuthor(c *gin.Context) {
 	db := bac.DB
 	idAuthorParam := c.Param("id_author")
 	idBookParam := c.Param("id_book")
-	idAuthor, err := strconv.ParseUint(idAuthorParam, 10, 32)
+	idAuthor, err := uuid.Parse(idAuthorParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "msg": "invalid book author ID"})
 		return
 	}
-	idBook, err := strconv.ParseUint(idBookParam, 10, 32)
+	idBook, err := uuid.Parse(idBookParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "msg": "invalid book author ID"})
 		return
 	}
 
 	repoBookAuthor := repository.NewBookAuthorRepository(db)
-	success := repoBookAuthor.DeleteBookAuthor(uint(idAuthor), uint(idBook))
+	success := repoBookAuthor.DeleteBookAuthor(idAuthor, idBook)
 	if !success {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete book author"})
 		return

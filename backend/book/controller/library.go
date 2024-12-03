@@ -3,13 +3,13 @@ package controller
 import (
 	"database/sql"
 	"net/http"
-	"strconv"
 
 	"book/controller/interfaces"
 	"book/model"
 	"book/repository"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type LibraryController struct {
@@ -38,19 +38,19 @@ func (lc *LibraryController) GetLibrary(c *gin.Context) {
 	repoLibrary := repository.NewLibraryRepository(db)
 
 	idParam := c.Param("id")
-	id, err := strconv.ParseUint(idParam, 10, 32)
+	id, err := uuid.Parse(idParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "msg": "invalid library ID"})
 		return
 	}
 
-	library, err := repoLibrary.SelectLibrary(uint(id))
+	library, err := repoLibrary.SelectLibrary(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "msg": "error retrieving library"})
 		return
 	}
 
-	if library.IdLibrary != 0 {
+	if library.IdLibrary != uuid.Nil {
 		c.JSON(http.StatusOK, gin.H{"status": "success", "data": library, "msg": "library retrieved successfully"})
 	} else {
 		c.JSON(http.StatusNotFound, gin.H{"status": "error", "data": nil, "msg": "library not found"})
@@ -61,15 +61,10 @@ func (lc *LibraryController) GetLibrary(c *gin.Context) {
 func (lc *LibraryController) GetLibrariesByUserId(c *gin.Context) {
 	db := lc.DB
 	repoLibrary := repository.NewLibraryRepository(db)
-	idUser := c.Param("userId")
+	idUser := getUserID(c)
 	var getLibrary []model.Library
-	id, err := strconv.ParseUint(idUser, 10, 32)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "msg": "invalid library ID"})
-		return
-	}
-	if idUser != "" {
-		getLibrary = repoLibrary.SelectLibraryByUser(uint(id))
+	if idUser != uuid.Nil {
+		getLibrary = repoLibrary.SelectLibraryByUser(idUser)
 	}
 	if getLibrary != nil {
 		c.JSON(http.StatusOK, gin.H{"status": "success", "data": getLibrary, "msg": "get library successfully"})
@@ -99,7 +94,7 @@ func (lc *LibraryController) InsertLibrary(c *gin.Context) {
 func (lc *LibraryController) UpdateLibrary(c *gin.Context) {
 	db := lc.DB
 	idParam := c.Param("id")
-	id, err := strconv.Atoi(idParam)
+	id, err := uuid.Parse(idParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid library ID"})
 		return
@@ -125,7 +120,7 @@ func (lc *LibraryController) UpdateLibrary(c *gin.Context) {
 func (lc *LibraryController) DeleteLibrary(c *gin.Context) {
 	db := lc.DB
 	idParam := c.Param("id")
-	id, err := strconv.Atoi(idParam)
+	id, err := uuid.Parse(idParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid library ID"})
 		return

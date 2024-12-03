@@ -1,11 +1,13 @@
 package model
 
+import "github.com/google/uuid"
+
 type BookAuthor struct {
-	IdAuthor uint `json:"id_author"`
-	IdBook   uint `json:"id_book"`
+	IdAuthor uuid.UUID `json:"id_author"`
+	IdBook   uuid.UUID `json:"id_book"`
 }
 
 type PostBookAuthor struct {
-	IdAuthor uint `json:"id_author"`
-	IdBook   uint `json:"id_book"`
+	IdAuthor uuid.UUID `json:"id_author"`
+	IdBook   uuid.UUID `json:"id_book"`
 }

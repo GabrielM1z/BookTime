@@ -1,0 +1,43 @@
+meta {
+  name: Update state by Id
+  type: http
+  seq: 6
+}
+
+put {
+  url: {{base_book_url}}/states/"f18251e2-0134-46b8-a09b-8362b023764a"
+  body: json
+  auth: bearer
+}
+
+headers {
+  bookId: f18251e2-0134-46b8-a09b-8362b023764a
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+      "state": "ToRead",
+      "progression": 12,
+      "read_count": 536,
+      "last_read_date": "1983-03-03",
+      "id_book": "f18251e2-0134-46b8-a09b-8362b023764a",
+      "is_available": true
+  }
+}
+
+tests {
+  test("Successful POST request", function () {
+      expect(res.getStatus()).to.be.oneOf([200, 201]);
+  });
+  
+}
+
+docs {
+  This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.
+  
+  A successful POST request typically returns a `200 OK` or `201 Created` response code.
+}

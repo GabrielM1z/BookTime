@@ -6,6 +6,8 @@ import (
 
 	"book/model"
 	"book/repository/interfaces"
+
+	"github.com/google/uuid"
 )
 
 type LibraryRepository struct {
@@ -43,7 +45,7 @@ func (lr *LibraryRepository) SelectLibraries() []model.Library {
 
 	for rows.Next() {
 		var (
-			id   uint
+			id   uuid.UUID
 			name string
 		)
 		err := rows.Scan(&id, &name)
@@ -58,7 +60,7 @@ func (lr *LibraryRepository) SelectLibraries() []model.Library {
 }
 
 // SelectLibrary - Sélectionne une bibliothèque par ID
-func (lr *LibraryRepository) SelectLibrary(id uint) (model.Library, error) {
+func (lr *LibraryRepository) SelectLibrary(id uuid.UUID) (model.Library, error) {
 	var library model.Library
 	stmt, err := lr.DB.Prepare("SELECT * FROM library WHERE id_library = $1")
 	if err != nil {
@@ -81,7 +83,7 @@ func (lr *LibraryRepository) SelectLibrary(id uint) (model.Library, error) {
 }
 
 // UpdateLibrary - Met à jour une bibliothèque
-func (lr *LibraryRepository) UpdateLibrary(id int, library model.Library) bool {
+func (lr *LibraryRepository) UpdateLibrary(id uuid.UUID, library model.Library) bool {
 	query := `UPDATE library SET name = $1 WHERE id_library = $2`
 
 	_, err := lr.DB.Exec(query, library.Name, id)
@@ -93,7 +95,7 @@ func (lr *LibraryRepository) UpdateLibrary(id int, library model.Library) bool {
 }
 
 // DeleteLibrary - Supprime une bibliothèque par ID
-func (lr *LibraryRepository) DeleteLibrary(id int) bool {
+func (lr *LibraryRepository) DeleteLibrary(id uuid.UUID) bool {
 	query := "DELETE FROM library WHERE id_library = $1"
 
 	_, err := lr.DB.Exec(query, id)
@@ -104,7 +106,7 @@ func (lr *LibraryRepository) DeleteLibrary(id int) bool {
 	return true
 }
 
-func (lr *LibraryRepository) SelectLibraryByUser(idUser uint) []model.Library {
+func (lr *LibraryRepository) SelectLibraryByUser(idUser uuid.UUID) []model.Library {
 	rows, err := lr.DB.Query("SELECT * FROM library WHERE id_library IN (SELECT id_library FROM shared_library WHERE id_user = $1)", idUser)
 	if err != nil {
 		log.Fatal(err)

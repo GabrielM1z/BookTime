@@ -29,6 +29,7 @@
     "plugins": [
       "expo-router",
       "expo-asset",
+      "expo-sqlite",
       "expo-font",
       "expo-secure-store"
     ],

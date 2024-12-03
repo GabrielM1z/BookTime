@@ -3,13 +3,13 @@ package controller
 import (
 	"database/sql"
 	"net/http"
-	"strconv"
 
 	"book/controller/interfaces"
 	"book/model"
 	"book/repository"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type FormatController struct {
@@ -39,21 +39,21 @@ func (fc *FormatController) GetFormat(c *gin.Context) {
 
 	// Récupère l'ID depuis les paramètres de la requête
 	idParam := c.Param("id")
-	id, err := strconv.ParseUint(idParam, 10, 32) // Convertir en uint
+	id, err := uuid.Parse(idParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "msg": "invalid format ID"})
 		return
 	}
 
 	// Récupère le format avec l'ID
-	format, err := repoFormat.SelectFormat(uint(id))
+	format, err := repoFormat.SelectFormat(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "msg": "error retrieving format"})
 		return
 	}
 
 	// Vérification si le format existe via son ID
-	if format.IdFormat != 0 {
+	if format.IdFormat != uuid.Nil {
 		c.JSON(http.StatusOK, gin.H{"status": "success", "data": format, "msg": "format retrieved successfully"})
 	} else {
 		c.JSON(http.StatusNotFound, gin.H{"status": "error", "data": nil, "msg": "format not found"})
@@ -80,7 +80,7 @@ func (fc *FormatController) InsertFormat(c *gin.Context) {
 func (fc *FormatController) UpdateFormat(c *gin.Context) {
 	db := fc.DB
 	idParam := c.Param("id")
-	id, err := strconv.Atoi(idParam)
+	id, err := uuid.Parse(idParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid format ID"})
 		return
@@ -105,7 +105,7 @@ func (fc *FormatController) UpdateFormat(c *gin.Context) {
 func (fc *FormatController) DeleteFormat(c *gin.Context) {
 	db := fc.DB
 	idParam := c.Param("id")
-	id, err := strconv.Atoi(idParam)
+	id, err := uuid.Parse(idParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid format ID"})
 		return
