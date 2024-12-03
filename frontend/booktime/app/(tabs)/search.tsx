@@ -17,11 +17,11 @@ type TFilters = {
 	query: string;
 };
 
-type TBook = {
-	items: Book[];
-	kind: string;
-	totalItems: number;
-}
+// type TBook = {
+// 	items: Book[];
+// 	kind: string;
+// 	totalItems: number;
+// }
 
 // ISBN différents smais id Google Book dupliqué 
 const removeDuplicates = (items: Book[]): Book[] => {
@@ -61,7 +61,7 @@ export default function HomeScreen() {
 		filters: filters,
 		key: 'books',
 		initialPage: 0,
-		formatResponse: (data: TBook) => data.items,
+		// formatResponse: (data: TBook) => data.items,
 	});
 
 	console.log(data);
@@ -76,7 +76,8 @@ export default function HomeScreen() {
 					// keyExtractor={item => `${item.id}+${item.etag}`}
 					keyExtractor={item => item.id}
 					initialNumToRender={10}
-					data={removeDuplicates(data)}
+					// data={removeDuplicates(data)}
+					data={data}
 					onEndReached={onEndReached}
 					removeClippedSubviews={true}
 					// refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />}
