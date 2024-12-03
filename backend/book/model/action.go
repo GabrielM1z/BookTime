@@ -9,6 +9,7 @@ import (
 type Action struct {
 	IdAction   uuid.UUID `json:"id_action"`
 	IdUser     uuid.UUID `json:"id_user"`
+	Table      string    `json:"table"`
 	Date       time.Time `json:"date"`
 	Type       string    `json:"type"`
 	Action     []byte    `json:"read_count"`
@@ -17,6 +18,7 @@ type Action struct {
 
 type PostAction struct {
 	IdUser     uuid.UUID `json:"id_user"`
+	Table      string    `json:"table"`
 	Date       time.Time `json:"date"`
 	Type       string    `json:"type"`
 	Action     []byte    `json:"read_count"`
