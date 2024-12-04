@@ -3,17 +3,19 @@ import { StyleSheet, View, Image, Text } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
 
+import { useSession } from '@/context/auth';
+
 // import des component
-import ImageViewer from '../../components/ImageViewer';
-import Button from '../../components/Button';
+import ImageViewer from '@/components/ImageViewer';
+import Button from '@/components/Button';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import React from 'react';
 
 // import d'une image
-const PlaceholderImage = require('../../assets/images/profil.png');
-const profilImage = require('../../assets/images/profil.png');
-const bannerImage = require('../../assets/images/banner.jpg');
+const PlaceholderImage = require('@/assets/images/profil.png');
+const profilImage = require('@/assets/images/profil.png');
+const bannerImage = require('@/assets/images/banner.jpg');
 
 // fonction par défaut
 export default function App() 
@@ -32,6 +34,8 @@ export default function App()
 			alert('You did not select any image.');
 		}
 	};
+
+	const { logOut } = useSession();
 	
     return (
 		<ThemedView style={styles.container}>
@@ -46,7 +50,16 @@ export default function App()
 				<Text style={styles.badgeTexte}>Badges</Text>
 			</View>
 			
-
+			<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+				<Text
+					onPress={() => {
+						// The `app/(app)/_layout.tsx` will redirect to the sign-in screen.
+						logOut();
+						
+					}}>
+					Sign Out
+				</Text>
+			</View>
 	
 			<StatusBar style="auto" />
 		</ThemedView>

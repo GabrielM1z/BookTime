@@ -5,19 +5,8 @@ import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import React, { useEffect } from 'react';
-import { initDB } from '@/db/db-init';
-import { truncateDB, dropDB } from '@/db/db-drop';
 
 export default function HomeScreen() {
-
-	// création BDD
-	useEffect(() => {
-		// Initialiser la base de données avec le fichier SQL
-		// dropDB();
-		initDB();
-	  }, []);
-
-
 	return (
 		<ParallaxScrollView
 		headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
