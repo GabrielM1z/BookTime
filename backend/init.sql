@@ -101,7 +101,7 @@ CREATE TABLE IF NOT EXISTS shared_library (
 CREATE TABLE IF NOT EXISTS action (
     id_action UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     id_user UUID,
-    table VARCHAR(50),
+    table_name VARCHAR(50),
     date TIMESTAMP,
     type VARCHAR(50),
     action JSON,

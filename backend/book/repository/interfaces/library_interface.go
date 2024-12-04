@@ -7,7 +7,7 @@ import (
 )
 
 type LibraryRepositoryInterface interface {
-	InsertLibrary(post model.PostLibrary) bool
+	InsertLibrary(post model.PostLibrary, idUser uuid.UUID) bool
 	SelectLibraries() []model.Library
 	SelectLibrary(id uuid.UUID) (model.Library, error)
 	SelectLibraryByUser(idUser uuid.UUID) []model.Library
