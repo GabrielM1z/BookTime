@@ -3,6 +3,7 @@ import Etagere from '@/components/Etagere';
 import NewEtagere from '@/components/NewEtagere';
 import React, { useEffect, useState } from 'react';
 import { getAllLibrary } from '@/db/db-etagere';
+import { useSQLiteContext } from 'expo-sqlite';
 
 // import des images
 const cover1 = require('@/assets/images/logo_refait.png');
@@ -26,10 +27,11 @@ export default function pageEtageres() {
     useEffect(() => {
         refreshEtageres();
     }, []);
+    const db = useSQLiteContext();
 
     const refreshEtageres = async () => {
         try {
-            const data = await getAllLibrary();
+            const data = await getAllLibrary(db);
             setEtageres(data);
         } catch (error) {
             console.error('Error fetching etageres:', error);

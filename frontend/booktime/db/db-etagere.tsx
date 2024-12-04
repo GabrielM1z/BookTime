@@ -1,9 +1,7 @@
-import * as SQLite from 'expo-sqlite';
-
-const db = SQLite.openDatabaseSync('booktime.db');
+import { SQLiteDatabase } from 'expo-sqlite';
 
 // Fonction pour ajouter une bibliothèque (étagère)
-export const addLibrary = async (name: any) => 
+export const addLibrary = async (db: SQLiteDatabase, name: any) => 
 {
     const statement = await db.prepareAsync(
         'INSERT INTO library (name) VALUES ($name);'
@@ -20,7 +18,7 @@ export const addLibrary = async (name: any) =>
 }
 
 // Fonction pour recupérer toute les étagères
-export const getAllLibrary = async () => 
+export const getAllLibrary = async (db: SQLiteDatabase) => 
 {
     try {
         let allRows = await db.getAllAsync('SELECT * FROM library');
