@@ -9,13 +9,13 @@ import React from 'react';
 export default function AppLayout() {
     const { session, isLoading } = useSession();
 
-    if (isLoading) {
-        return <Text>Chargement...</Text>;
-    }
+    // if (isLoading) {
+    //     return <Text>Chargement...</Text>;
+    // }
 
-    if (!session && !session?.isGuest) {
-        return <Redirect href="/sign-in" />;
-    }
+    // if (!session && !session?.isGuest) {
+    //     return <Redirect href="/sign-in" />;
+    // }
 
     return (
         <Stack>
