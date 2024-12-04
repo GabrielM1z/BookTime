@@ -2,7 +2,9 @@ package repository
 
 import (
 	"database/sql"
+	"encoding/json"
 	"log"
+	"time"
 
 	"book/model"
 	"book/repository/interfaces"
@@ -18,19 +20,25 @@ func NewSharedLibraryRepository(db *sql.DB) *SharedLibraryRepository {
 	return &SharedLibraryRepository{DB: db}
 }
 
-func (slr *SharedLibraryRepository) InsertSharedLibrary(post model.PostSharedLibrary, idUser uuid.UUID) bool {
+func (slr *SharedLibraryRepository) InsertSharedLibrary(sharedLibrary model.PostSharedLibrary, idUser uuid.UUID) bool {
 	stmt, err := slr.DB.Prepare("INSERT INTO shared_library (id_user, id_library) VALUES ($1, $2)")
 	if err != nil {
 		log.Println(err)
 		return false
 	}
 	defer stmt.Close()
-	_, err2 := stmt.Exec(idUser, post.LibraryId)
+	_, err2 := stmt.Exec(idUser, sharedLibrary.IdLibrary)
 	if err2 != nil {
 		log.Println(err2)
 		return false
 	}
-	return true
+	
+	actionMap := map[string]interface{}{
+		"idUser":		idUser,
+		"idLibrary":	sharedLibrary.IdLibrary,
+	}
+
+	return slr.LogAction(idUser, "SHARED_LIBRARY", "INSERT", actionMap)
 }
 
 func (slr *SharedLibraryRepository) SelectSharedLibraries() []model.SharedLibrary {
@@ -91,7 +99,32 @@ func (slr *SharedLibraryRepository) DeleteSharedLibrary(idUser uuid.UUID, idLibr
 		log.Println(err)
 		return false
 	}
-	return true
+	
+	actionMap := map[string]interface{}{
+		"idUser": idUser,
+		"idBook": idLibrary,
+	}
+
+	return slr.LogAction(idUser, "SHARED_LIBRARY", "DELETE", actionMap)
+}
+
+func (sr *SharedLibraryRepository) LogAction(idUser uuid.UUID, tableName, actionType string, actionData map[string]interface{}) bool {
+	actionJSON, err := json.Marshal(actionData)
+	if err != nil {
+		log.Println("Erreur lors de l'encodage JSON:", err)
+		return false
+	}
+
+	action := model.PostAction{
+		IdUser:     idUser,
+		Table:      tableName,
+		Date:       time.Now(),
+		Type:       actionType,
+		Action:     actionJSON,
+		ExecutedBy: "SERVER",
+	}
+
+	return NewActionRepository(sr.DB).InsertAction(action, idUser)
 }
 
 var _ interfaces.SharedLibraryRepositoryInterface = &SharedLibraryRepository{}
