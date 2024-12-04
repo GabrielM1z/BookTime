@@ -154,7 +154,7 @@ func (lbr *LibraryBookRepository) DeleteLibraryBook(idLibrary, idBook uuid.UUID,
 		"idBook":    idBook,
 	}
 
-	return lbr.LogAction(idUser, "LIBRARY", "DELETE", actionMap)
+	return lbr.LogAction(idUser, "LIBRARY_BOOK", "DELETE", actionMap)
 }
 
 func (lbr *LibraryBookRepository) LogAction(idUser uuid.UUID, tableName, actionType string, actionData map[string]interface{}) bool {

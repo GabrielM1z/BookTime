@@ -1,17 +1,20 @@
 meta {
-  name: Delete library by Id
+  name: Sunchronize
   type: http
-  seq: 4
+  seq: 1
 }
 
-delete {
-  url: {{base_book_url}}/libraries/2
+get {
+  url: {{base_book_url}}/search?query=école
   body: none
-  auth: bearer
+  auth: none
 }
 
-auth:bearer {
-  token: {{access_token}}
+params:query {
+  query: école
+  ~genre: fiction
+  ~title: Harry Potter
+  ~author: J.K.
 }
 
 tests {

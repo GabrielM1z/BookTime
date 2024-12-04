@@ -43,6 +43,7 @@ func (a *App) CreateRoutes() {
 	apiKey := os.Getenv("GOOGLE_BOOKS_API_KEY")
 	bookSearchService := service.NewSearchService(apiKey)
 	bookShopsService := service.NewShopsService(apiKey)
+	bookSynchroService := service.NewSynchroService(a.DB)
 	prefix := "/books"
 
 	// Search routes
@@ -52,6 +53,10 @@ func (a *App) CreateRoutes() {
 	// Shops routes
 	shopsController := controller.NewShopsController(bookShopsService)
 	routes.GET(prefix+"/shops", shopsController.ShopsBooks)
+
+	// Synchro routes
+	synchroController := controller.NewSynchroController(bookSynchroService)
+	routes.GET(prefix+"/synchro", synchroController.Synchro)
 
 	// Book routes
 	bookController := controller.NewBookController(a.DB)
