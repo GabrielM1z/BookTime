@@ -19,7 +19,7 @@ func NewActionRepository(db *sql.DB) *ActionRepository {
 }
 
 func (ar *ActionRepository) InsertAction(post model.PostAction, idUser uuid.UUID) bool {
-	stmt, err := ar.DB.Prepare("INSERT INTO action (id_user, table, date, type, action, executed_by) VALUES ($1, $2, $3, $4, $5, $6)")
+	stmt, err := ar.DB.Prepare("INSERT INTO action (id_user, table_name, date, type, action, executed_by) VALUES ($1, $2, $3, $4, $5, $6)")
 	if err != nil {
 		log.Println(err)
 		return false
@@ -76,7 +76,7 @@ func (ar *ActionRepository) SelectAction(idUser uuid.UUID, idAction uuid.UUID) m
 }
 
 func (ar *ActionRepository) UpdateAction(idUser uuid.UUID, idAction uuid.UUID, action model.Action) bool {
-	query := `UPDATE action SET action = $1, table = $2, progression = $3, read_count = $4, last_read_date = $5, is_available = $6
+	query := `UPDATE action SET action = $1, table_name = $2, progression = $3, read_count = $4, last_read_date = $5, is_available = $6
 			  WHERE id_user = $7 AND id_action = $8`
 
 	_, err := ar.DB.Exec(query, action.Table, action.Date, action.Type, action.Action, action.ExecutedBy, idUser, idAction)

@@ -77,9 +77,10 @@ func (lc *LibraryController) GetLibrariesByUserId(c *gin.Context) {
 func (lc *LibraryController) InsertLibrary(c *gin.Context) {
 	db := lc.DB
 	var post model.PostLibrary
+	idUser := getUserID(c)
 	if err := c.ShouldBindJSON(&post); err == nil {
 		repoLibrary := repository.NewLibraryRepository(db)
-		insert := repoLibrary.InsertLibrary(post)
+		insert := repoLibrary.InsertLibrary(post, idUser)
 		if insert {
 			c.JSON(http.StatusOK, gin.H{"status": "success", "msg": "library inserted successfully"})
 		} else {

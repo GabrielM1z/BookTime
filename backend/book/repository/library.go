@@ -2,7 +2,9 @@ package repository
 
 import (
 	"database/sql"
+	"encoding/json"
 	"log"
+	"time"
 
 	"book/model"
 	"book/repository/interfaces"
@@ -19,19 +21,30 @@ func NewLibraryRepository(db *sql.DB) *LibraryRepository {
 }
 
 // InsertLibrary - Insère une nouvelle bibliothèque
-func (lr *LibraryRepository) InsertLibrary(post model.PostLibrary) bool {
-	stmt, err := lr.DB.Prepare("INSERT INTO library (name) VALUES ($1)")
+func (lr *LibraryRepository) InsertLibrary(post model.PostLibrary, idUser uuid.UUID) bool {
+	var libraryID uuid.UUID
+
+	query := "INSERT INTO library (name) VALUES ($1) RETURNING id_library"
+	stmt, err := lr.DB.Prepare(query)
 	if err != nil {
-		log.Println(err)
+		log.Println("Error preparing statement:", err)
 		return false
 	}
 	defer stmt.Close()
-	_, err2 := stmt.Exec(post.Name)
-	if err2 != nil {
-		log.Println(err2)
+
+	// Exécuter la requête et récupérer l'ID
+	err = stmt.QueryRow(post.Name).Scan(&libraryID)
+	if err != nil {
+		log.Println("Error executing query:", err)
 		return false
 	}
-	return true
+
+	actionMap := map[string]interface{}{
+		"name":      post.Name,
+		"idLibrary": libraryID,
+	}
+
+	return lr.LogAction(idUser, "LIBRARY", "INSERT", actionMap)
 }
 
 // SelectLibraries - Sélectionne toutes les bibliothèques
@@ -122,6 +135,25 @@ func (lr *LibraryRepository) SelectLibraryByUser(idUser uuid.UUID) []model.Libra
 		libraries = append(libraries, library)
 	}
 	return libraries
+}
+
+func (lr *LibraryRepository) LogAction(idUser uuid.UUID, tableName, actionType string, actionData map[string]interface{}) bool {
+	actionJSON, err := json.Marshal(actionData)
+	if err != nil {
+		log.Println("Erreur lors de l'encodage JSON:", err)
+		return false
+	}
+
+	action := model.PostAction{
+		IdUser:     idUser,
+		Table:      tableName,
+		Date:       time.Now(),
+		Type:       actionType,
+		Action:     actionJSON,
+		ExecutedBy: "SERVER",
+	}
+
+	return NewActionRepository(lr.DB).InsertAction(action, idUser)
 }
 
 var _ interfaces.LibraryRepositoryInterface = &LibraryRepository{}
