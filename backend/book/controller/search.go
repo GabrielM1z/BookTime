@@ -22,12 +22,14 @@ func (bc *searchController) SearchBooks(c *gin.Context) {
 	title := c.Query("title")
 	author := c.Query("author")
 	genre := c.Query("genre")
+	startIndex := c.Query("startIndex")
+
 	if query == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Query parameter is required"})
 		return
 	}
 
-	books, err := bc.SearchService.SearchBooks(query, title, author, genre)
+	books, err := bc.SearchService.SearchBooks(startIndex, query, title, author, genre)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

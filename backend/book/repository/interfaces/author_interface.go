@@ -1,10 +1,14 @@
 package interfaces
 
-import "book/model"
+import (
+	"book/model"
+
+	"github.com/google/uuid"
+)
 
 type AuthorRepositoryInterface interface {
 	InsertAuthor(post model.PostAuthor) bool
-	SelectAuthor(id int) (*model.Author, error)
+	SelectAuthor(id uuid.UUID) (*model.Author, error)
 	SelectAuthors() []model.Author
-	UpdateAuthor(id int, author model.Author) bool
+	UpdateAuthor(id uuid.UUID, author model.Author) bool
 }

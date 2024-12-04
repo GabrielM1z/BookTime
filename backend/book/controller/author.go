@@ -3,13 +3,13 @@ package controller
 import (
 	"database/sql"
 	"net/http"
-	"strconv"
 
 	"book/controller/interfaces"
 	"book/model"
 	"book/repository"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type AuthorController struct {
@@ -34,7 +34,8 @@ func (ac *AuthorController) GetAuthors(c *gin.Context) {
 func (ac *AuthorController) GetAuthor(c *gin.Context) {
 	db := ac.DB
 	idParam := c.Param("id")
-	id, err := strconv.Atoi(idParam)
+	id, err := uuid.Parse(idParam)
+
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid author ID"})
 		return
@@ -74,7 +75,7 @@ func (ac *AuthorController) InsertAuthor(c *gin.Context) {
 func (ac *AuthorController) UpdateAuthor(c *gin.Context) {
 	db := ac.DB
 	idParam := c.Param("id")
-	id, err := strconv.Atoi(idParam) //parseInt
+	id, err := uuid.Parse(idParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid author ID"})
 		return
@@ -99,7 +100,7 @@ func (ac *AuthorController) UpdateAuthor(c *gin.Context) {
 func (ac *AuthorController) DeleteAuthor(c *gin.Context) {
 	db := ac.DB
 	idParam := c.Param("id")
-	id, err := strconv.Atoi(idParam)
+	id, err := uuid.Parse(idParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid author ID"})
 		return

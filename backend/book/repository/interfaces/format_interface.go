@@ -1,11 +1,15 @@
 package interfaces
 
-import "book/model"
+import (
+	"book/model"
+
+	"github.com/google/uuid"
+)
 
 type FormatRepositoryInterface interface {
 	InsertFormat(post model.PostFormat) bool
 	SelectFormats() []model.Format
-	SelectFormat(id uint) (model.Format, error)
-	UpdateFormat(id int, format model.Format) bool
-	DeleteFormat(id int) bool
+	SelectFormat(id uuid.UUID) (model.Format, error)
+	UpdateFormat(id uuid.UUID, format model.Format) bool
+	DeleteFormat(id uuid.UUID) bool
 }

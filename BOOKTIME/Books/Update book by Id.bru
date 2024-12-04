@@ -1,0 +1,46 @@
+meta {
+  name: Update book by Id
+  type: http
+  seq: 5
+}
+
+put {
+  url: {{base_book_url}}/books/:id
+  body: json
+  auth: bearer
+}
+
+params:path {
+  id: 38
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+      "title": "Le Seigneur des Agneaux",
+      "description": "Un roman de fantasy épique écrit par J.R.R. Tolkien.",
+      "id_format": 1,
+      "publisher": "Houghton Mifflin",
+      "publication_date": "1980-01-01",
+      "page_number": 1178,
+      "language": "français",
+      "cover_image_url": "https://example.com/le-seigneur-des-anneaux.jpg"
+  }
+  
+}
+
+tests {
+  test("Successful POST request", function () {
+      expect(res.getStatus()).to.be.oneOf([200, 201]);
+  });
+  
+}
+
+docs {
+  This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.
+  
+  A successful POST request typically returns a `200 OK` or `201 Created` response code.
+}

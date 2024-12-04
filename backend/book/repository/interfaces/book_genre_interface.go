@@ -1,10 +1,14 @@
 package interfaces
 
-import "book/model"
+import (
+	"book/model"
+
+	"github.com/google/uuid"
+)
 
 type BookGenreRepositoryInterface interface {
 	InsertBookGenre(post model.PostBookGenre) bool
 	SelectBookGenres() []model.BookGenre
-	SelectBookGenre(idGenre uint, idBook uint) (model.BookGenre, error)
-	DeleteBookGenre(idGenre uint, idBook uint) bool
+	SelectBookGenre(idGenre uuid.UUID, idBook uuid.UUID) (model.BookGenre, error)
+	DeleteBookGenre(idGenre uuid.UUID, idBook uuid.UUID) bool
 }
