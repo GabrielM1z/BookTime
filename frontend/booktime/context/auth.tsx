@@ -3,17 +3,18 @@ import * as SecureStore from 'expo-secure-store';
 import axios from 'axios';
 import { keycloakAuthUrl, keycloakClientSecret } from '@/constants/Api';
 import { ReactNode } from 'react';
+import { Session, sessionFromKeycloak, guestSession } from '@/models/session';
+import { getSession, deleteSession, addSession } from '@/db/session';
+import { useSQLiteContext } from 'expo-sqlite';
 
 const AuthContext = createContext<{
-    session: string | null;
-    isGuest: boolean;
+    session: Session | null;
     isLoading: boolean;
     logIn: (username: string, password: string, remember: boolean) => void;
     logOut: () => void;
     logAsGuest: () => void;
 }>({
-    session: null as string | null,
-    isGuest: false,
+    session: null as Session | null,
     isLoading: true,
     logIn: (username: string, password: string, remember: boolean) => null,
     logOut: () => null,
@@ -25,94 +26,98 @@ export function useSession() {
 }
 
 export function SessionProvider({ children }: { children: ReactNode }) {
-    const [session, setSession] = useState<string | null>(null);
-    const [isGuest, setIsGuest] = useState(false);
+    const [session, setSession] = useState<Session | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [remember, setRemember] = useState(false);
+
+    const db = useSQLiteContext();
 
     // Charger la session à partir du stockage sécurisé au démarrage
     useEffect(() => {
         async function loadSession() {
             const storedSession = await SecureStore.getItemAsync('session');
             if (storedSession) {
-                setSession(storedSession);
+                const session = await getSession(db, storedSession);
+                if (session) {
+                    setSession(session);
+                } else {
+                    await SecureStore.deleteItemAsync('session');
+                }
             }
             setIsLoading(false);
         }
         loadSession();
     }, []);
 
-    // Nettoyer la session si "Se souvenir de moi" n'est pas activé
-    useEffect(() => {
-        const cleanupSession = async () => {
-            if (!remember) {
-                await SecureStore.deleteItemAsync('session');
-            }
-        };
-
-        // Nettoyage lorsque le composant est démonté ou que l'application est fermée
-        return () => {
-            cleanupSession();
-        };
-    }, [remember]);
-
     const logIn = async (username: string, password: string, remember: boolean) => {
-        const token = await authenticate(username, password);
-        if (!token) {
+        // const response = await axios.post(
+        //     keycloakAuthUrl,
+        //     {
+        //         data: {
+        //             grant_type: 'password',
+        //             client_id: 'booktime',
+        //             client_secret: keycloakClientSecret,
+        //             username: username,
+        //             password: password,
+        //             odience: 'gateway-client',
+        //             scope: 'openid profile email'
+        //         },
+        //         headers: {
+        //             'Content-Type': 'application/x-www-form-urlencoded',
+        //         },
+        //     }
+        // );
+
+        const response = await fetch(keycloakAuthUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: {
+                client_id: 'booktime',
+                client_secret: keycloakClientSecret,
+                grant_type: 'password',
+                username,
+                password,
+                scope: 'openid profile email',
+                odience: 'gateway-client'
+            }
+        });
+
+
+        console.log(response);
+
+        if (response.status !== 200) {
             throw new Error('Invalid credentials');
         }
 
-        setSession(token);
-        setRemember(remember); // Mettre à jour l'état "Se souvenir de moi"
-        setIsGuest(false);
+        let session = sessionFromKeycloak(response.data);
 
         if (remember) {
-            await SecureStore.setItemAsync('session', token);
+            addSession(db, session);
+            await SecureStore.setItemAsync('session', session.id);
         }
+
+        setSession(session);
     };
 
     const logOut = async () => {
-        setSession(null);
-        setRemember(false); // Réinitialiser l'état "Se souvenir de moi"
-        setIsGuest(false);
-        await SecureStore.deleteItemAsync('session');
+        if (session) {
+            deleteSession(db, session);
+            setSession(null);
+            await SecureStore.deleteItemAsync('session');
+        }
     };
 
-    const logAsGuest = () => {
-        setSession(null);
-        setRemember(false); // Ne pas stocker la session en mode invité
-        setIsGuest(true);
+    const logAsGuest = async () => {
+        const session = guestSession();
+
+        addSession(db, session);
+        await SecureStore.setItemAsync('session', session.id);
+
+        setSession(session);
     };
 
     return (
-        <AuthContext.Provider value={{ session, isGuest, isLoading, logIn, logOut, logAsGuest }}>
+        <AuthContext.Provider value={{ session, isLoading, logIn, logOut, logAsGuest }}>
             {children}
         </AuthContext.Provider>
     );
-}
-
-const authenticate = async (username: string, password: string) => {
-    const response = await axios.post(
-        keycloakAuthUrl,
-        {
-            grant_type: 'password',
-            client_id: 'booktime',
-            client_secret: keycloakClientSecret,
-            username: username,
-            password: password,
-            odience: 'gateway-client',
-            scope: 'openid profile email'
-        },
-        {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-        }
-    );
-    console.log(response);
-
-    if (response.status === 200) {
-        return response.data.access_token;
-    }
-    return null;
 }

@@ -1,15 +1,13 @@
 import { Book2 } from '@/models/Book2';
 import { Library } from '@/models/Library';
-import * as SQLite from 'expo-sqlite';
-
-const db = SQLite.openDatabaseSync('booktime.db');
-
+import { useSQLiteContext } from 'expo-sqlite';
 
 ////////////////////////// REQUETE INSERT //////////////////////////
 
 // requete pour inserer un livre + liaison avec une étagère
 export const insertBook = async (library: Library, book: Book2) => 
 {
+	const db = useSQLiteContext();
 	const statement = await db.prepareAsync(`
 		INSERT INTO BOOK (title, description, id_format, publisher, publication_date, page_number, language, cover_image_url)
 		VALUES (
@@ -53,6 +51,7 @@ export const insertBook = async (library: Library, book: Book2) =>
 // Suppr la liason entre le livre et une étagère
 export const deleteBookFromLibrairy = async (library: Library, book: Book2) => 
 {
+	const db = useSQLiteContext();
 	const statement = await db.prepareAsync(`
 		DELETE FROM LIBRARY_BOOK
 		WHERE id_library = $libraryId AND id_book = $bookId;
@@ -75,6 +74,7 @@ export const deleteBookFromLibrairy = async (library: Library, book: Book2) =>
 // Fonction pour recupérer tout les livres
 export const getAllBooks = async () => 
 {
+	const db = useSQLiteContext();
 	try {
         let allRows = await db.getAllAsync('SELECT * FROM book');
         console.log(allRows)
@@ -88,6 +88,7 @@ export const getAllBooks = async () =>
 // Fonction pour recupérer tout les livres avec toutes les infos
 export const getAllBooksWithAllInfo = async () => 
 {
+	const db = useSQLiteContext();
 	try {
 		let allRows = await db.getAllAsync(`
 			SELECT 
@@ -126,6 +127,7 @@ export const getAllBooksWithAllInfo = async () =>
 // fonction pour récupérer tout les livres d'1 seule étagère
 export const getBooksFromLibrary = async (idLibrary: any) => 
 {
+	const db = useSQLiteContext();
 	const statement = await db.prepareAsync(`
 		SELECT 
 			library.name AS library_name,

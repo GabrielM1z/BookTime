@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Button, Text, View, TextInput, StyleSheet, Alert, Switch } from 'react-native';
 import { useSession } from '@/context/auth';
 import { useRouter } from 'expo-router';
+import { useSQLiteContext } from 'expo-sqlite';
 
 export default function SignIn() {
     const { logIn, logAsGuest } = useSession();
@@ -27,7 +28,9 @@ export default function SignIn() {
     };
 
     const handleLogAsGuest = async () => {
+        console.log('Starting guest session');
         await logAsGuest();
+        console.log('Guest session started');
         router.replace('(app)');
     }
 

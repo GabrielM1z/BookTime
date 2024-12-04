@@ -7,13 +7,13 @@ import { useSession } from "@/context/auth";
 import React from 'react';
 
 export default function AppLayout() {
-    const { session, isGuest, isLoading } = useSession();
+    const { session, isLoading } = useSession();
 
     if (isLoading) {
         return <Text>Chargement...</Text>;
     }
 
-    if (!session && !isGuest) {
+    if (!session && !session?.isGuest) {
         return <Redirect href="/sign-in" />;
     }
 
