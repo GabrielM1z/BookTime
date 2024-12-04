@@ -1,9 +1,8 @@
-import { useSQLiteContext } from 'expo-sqlite';
+import { SQLiteDatabase } from 'expo-sqlite';
 
 // Fonction pour ajouter une bibliothèque (étagère)
-export const addLibrary = async (name: any) => 
+export const addLibrary = async (db: SQLiteDatabase, name: any) => 
 {
-    const db = useSQLiteContext();
     const statement = await db.prepareAsync(
         'INSERT INTO library (name) VALUES ($name);'
     );
@@ -19,9 +18,8 @@ export const addLibrary = async (name: any) =>
 }
 
 // Fonction pour recupérer toute les étagères
-export const getAllLibrary = async () => 
+export const getAllLibrary = async (db: SQLiteDatabase) => 
 {
-    const db = useSQLiteContext();
     try {
         let allRows = await db.getAllAsync('SELECT * FROM library');
         return allRows;
