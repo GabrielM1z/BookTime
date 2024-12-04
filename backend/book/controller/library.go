@@ -95,6 +95,7 @@ func (lc *LibraryController) InsertLibrary(c *gin.Context) {
 func (lc *LibraryController) UpdateLibrary(c *gin.Context) {
 	db := lc.DB
 	idParam := c.Param("id")
+	idUser := getUserID(c)
 	id, err := uuid.Parse(idParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid library ID"})
@@ -108,7 +109,7 @@ func (lc *LibraryController) UpdateLibrary(c *gin.Context) {
 	}
 
 	repoLibrary := repository.NewLibraryRepository(db)
-	success := repoLibrary.UpdateLibrary(id, library)
+	success := repoLibrary.UpdateLibrary(id, library, idUser)
 	if !success {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update library"})
 		return
@@ -121,6 +122,7 @@ func (lc *LibraryController) UpdateLibrary(c *gin.Context) {
 func (lc *LibraryController) DeleteLibrary(c *gin.Context) {
 	db := lc.DB
 	idParam := c.Param("id")
+	idUser := getUserID(c)
 	id, err := uuid.Parse(idParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid library ID"})
@@ -128,7 +130,7 @@ func (lc *LibraryController) DeleteLibrary(c *gin.Context) {
 	}
 
 	repoLibrary := repository.NewLibraryRepository(db)
-	success := repoLibrary.DeleteLibrary(id)
+	success := repoLibrary.DeleteLibrary(id, idUser)
 	if !success {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete library"})
 		return

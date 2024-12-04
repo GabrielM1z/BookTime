@@ -96,7 +96,14 @@ func (lr *LibraryRepository) SelectLibrary(id uuid.UUID) (model.Library, error) 
 }
 
 // UpdateLibrary - Met à jour une bibliothèque
-func (lr *LibraryRepository) UpdateLibrary(id uuid.UUID, library model.Library) bool {
+func (lr *LibraryRepository) UpdateLibrary(id uuid.UUID, library model.Library, idUser uuid.UUID) bool {
+	baseLibrary, error := lr.SelectLibrary(id)
+
+	if error != nil {
+		log.Println(error)
+		return false
+	}
+
 	query := `UPDATE library SET name = $1 WHERE id_library = $2`
 
 	_, err := lr.DB.Exec(query, library.Name, id)
@@ -104,11 +111,21 @@ func (lr *LibraryRepository) UpdateLibrary(id uuid.UUID, library model.Library) 
 		log.Println(err)
 		return false
 	}
-	return true
+
+	actionMap := map[string]interface{}{}
+	if baseLibrary.Name != library.Name {
+		actionMap["name"] = library.Name
+	}
+
+	if len(actionMap) == 0 {
+		return true
+	}
+
+	return lr.LogAction(idUser, "LIBRARY", "UPDATE", actionMap)
 }
 
 // DeleteLibrary - Supprime une bibliothèque par ID
-func (lr *LibraryRepository) DeleteLibrary(id uuid.UUID) bool {
+func (lr *LibraryRepository) DeleteLibrary(id uuid.UUID, idUser uuid.UUID) bool {
 	query := "DELETE FROM library WHERE id_library = $1"
 
 	_, err := lr.DB.Exec(query, id)
@@ -116,7 +133,12 @@ func (lr *LibraryRepository) DeleteLibrary(id uuid.UUID) bool {
 		log.Println(err)
 		return false
 	}
-	return true
+
+	actionMap := map[string]interface{}{
+		"idLibrary": id,
+	}
+
+	return lr.LogAction(idUser, "LIBRARY", "DELETE", actionMap)
 }
 
 func (lr *LibraryRepository) SelectLibraryByUser(idUser uuid.UUID) []model.Library {

@@ -83,10 +83,11 @@ func (ldc *LibraryBookController) GetLibraryBookByLibraryId(c *gin.Context) {
 // InsertLibraryBook - Insère un lien bibliothèque-livre
 func (lc *LibraryBookController) InsertLibraryBook(c *gin.Context) {
 	db := lc.DB
+	idUser := getUserID(c)
 	var post model.PostLibraryBook
 	if err := c.ShouldBindJSON(&post); err == nil {
 		repoLibraryBook := repository.NewLibraryBookRepository(db)
-		insert := repoLibraryBook.InsertLibraryBook(post)
+		insert := repoLibraryBook.InsertLibraryBook(post, idUser)
 		if insert {
 			c.JSON(http.StatusOK, gin.H{"status": "success", "msg": "library book inserted successfully"})
 		} else {
@@ -133,6 +134,7 @@ func (lc *LibraryBookController) UpdateLibraryBook(c *gin.Context) {
 // DeleteLibraryBook - Supprime un lien bibliothèque-livre
 func (lc *LibraryBookController) DeleteLibraryBook(c *gin.Context) {
 	db := lc.DB
+	idUser := getUserID(c)
 	idLibraryParam := c.Param("id_library")
 	idLibrary, err := uuid.Parse(idLibraryParam)
 	if err != nil {
@@ -148,7 +150,7 @@ func (lc *LibraryBookController) DeleteLibraryBook(c *gin.Context) {
 	}
 
 	repoLibraryBook := repository.NewLibraryBookRepository(db)
-	success := repoLibraryBook.DeleteLibraryBook(idLibrary, idBook)
+	success := repoLibraryBook.DeleteLibraryBook(idLibrary, idBook, idUser)
 	if !success {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete library book"})
 		return

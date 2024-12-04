@@ -2,7 +2,9 @@ package repository
 
 import (
 	"database/sql"
+	"encoding/json"
 	"log"
+	"time"
 
 	"book/model"
 
@@ -18,9 +20,9 @@ func NewLibraryBookRepository(db *sql.DB) *LibraryBookRepository {
 }
 
 // SelectLibraryBooks - Récupère tous les liens bibliothèque-livre
-func (r *LibraryBookRepository) SelectLibraryBooks() []model.LibraryBook {
+func (lbr *LibraryBookRepository) SelectLibraryBooks() []model.LibraryBook {
 	var result []model.LibraryBook
-	rows, err := r.DB.Query("SELECT * FROM library_book")
+	rows, err := lbr.DB.Query("SELECT * FROM library_book")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -39,9 +41,9 @@ func (r *LibraryBookRepository) SelectLibraryBooks() []model.LibraryBook {
 }
 
 // SelectLibraryBook - Récupère un lien bibliothèque-livre spécifique
-func (r *LibraryBookRepository) SelectLibraryBook(idLibrary uuid.UUID, idBook uuid.UUID) (model.LibraryBook, error) {
+func (lbr *LibraryBookRepository) SelectLibraryBook(idLibrary uuid.UUID, idBook uuid.UUID) (model.LibraryBook, error) {
 	var libraryBook model.LibraryBook
-	stmt, err := r.DB.Prepare("SELECT * FROM library_book WHERE id_library = $1 AND id_book = $2")
+	stmt, err := lbr.DB.Prepare("SELECT * FROM library_book WHERE id_library = $1 AND id_book = $2")
 	if err != nil {
 		log.Println(err)
 		return libraryBook, err
@@ -99,8 +101,8 @@ func (lbr *LibraryBookRepository) SelectLibraryBookByLibrary(idLibrary string) [
 }
 
 // InsertLibraryBook - Insère un lien bibliothèque-livre
-func (r *LibraryBookRepository) InsertLibraryBook(post model.PostLibraryBook) bool {
-	stmt, err := r.DB.Prepare("INSERT INTO library_book (id_library, id_book) VALUES ($1, $2)")
+func (lbr *LibraryBookRepository) InsertLibraryBook(post model.PostLibraryBook, idUser uuid.UUID) bool {
+	stmt, err := lbr.DB.Prepare("INSERT INTO library_book (id_library, id_book) VALUES ($1, $2)")
 	if err != nil {
 		log.Println(err)
 		return false
@@ -112,7 +114,13 @@ func (r *LibraryBookRepository) InsertLibraryBook(post model.PostLibraryBook) bo
 		log.Println(err2)
 		return false
 	}
-	return true
+
+	actionMap := map[string]interface{}{
+		"idBook":    post.BookId,
+		"idLibrary": post.LibraryId,
+	}
+
+	return lbr.LogAction(idUser, "LIBRARY_BOOK", "INSERT", actionMap)
 }
 
 // UpdateLibraryBook - Met à jour un lien bibliothèque-livre
@@ -127,8 +135,8 @@ func (r *LibraryBookRepository) UpdateLibraryBook(idLibrary, idBook uuid.UUID, l
 }
 
 // DeleteLibraryBook - Supprime un lien bibliothèque-livre
-func (r *LibraryBookRepository) DeleteLibraryBook(idLibrary, idBook uuid.UUID) bool {
-	stmt, err := r.DB.Prepare("DELETE FROM library_book WHERE id_library = $1 AND id_book = $2")
+func (lbr *LibraryBookRepository) DeleteLibraryBook(idLibrary, idBook uuid.UUID, idUser uuid.UUID) bool {
+	stmt, err := lbr.DB.Prepare("DELETE FROM library_book WHERE id_library = $1 AND id_book = $2")
 	if err != nil {
 		log.Println(err)
 		return false
@@ -140,5 +148,30 @@ func (r *LibraryBookRepository) DeleteLibraryBook(idLibrary, idBook uuid.UUID) b
 		log.Println(err2)
 		return false
 	}
-	return true
+
+	actionMap := map[string]interface{}{
+		"idLibrary": idLibrary,
+		"idBook":    idBook,
+	}
+
+	return lbr.LogAction(idUser, "LIBRARY", "DELETE", actionMap)
+}
+
+func (lbr *LibraryBookRepository) LogAction(idUser uuid.UUID, tableName, actionType string, actionData map[string]interface{}) bool {
+	actionJSON, err := json.Marshal(actionData)
+	if err != nil {
+		log.Println("Erreur lors de l'encodage JSON:", err)
+		return false
+	}
+
+	action := model.PostAction{
+		IdUser:     idUser,
+		Table:      tableName,
+		Date:       time.Now(),
+		Type:       actionType,
+		Action:     actionJSON,
+		ExecutedBy: "SERVER",
+	}
+
+	return NewActionRepository(lbr.DB).InsertAction(action, idUser)
 }
