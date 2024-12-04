@@ -3,7 +3,6 @@ package service
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"net/url"
 
@@ -32,7 +31,6 @@ func bookExists(books []model.BookItem, id string) bool {
 func (bs *SearchService) SearchBooks(startIndex, query, title, author, genre string) ([]model.SimplifiedBook, error) {
 	baseURL := "https://www.googleapis.com/books/v1/volumes?"
 	params := url.Values{}
-
 	searchQuery := query
 
 	if title != "" {
@@ -45,12 +43,13 @@ func (bs *SearchService) SearchBooks(startIndex, query, title, author, genre str
 		searchQuery += "+subject:" + genre
 	}
 
-	params.Add("startIndex", startIndex)
+	maxResults := "10"
+
 	params.Add("q", searchQuery)
+	params.Add("startIndex", startIndex)
+	params.Add("maxResults", maxResults)
 	params.Add("key", bs.ApiKey)
 	apiURL := fmt.Sprintf("%s?%s", baseURL, params.Encode())
-
-	log.Println("apiURL : " + apiURL)
 
 	resp, err := http.Get(apiURL)
 	if err != nil {

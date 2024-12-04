@@ -115,7 +115,7 @@ CREATE DATABASE user_db;
 
 -- Table USER
 -- A refaire ==> mauvais format (Matthieu <3)
-CREATE TABLE IF NOT EXISTS user (
+CREATE TABLE IF NOT EXISTS userBooktime (
     id_user SERIAL PRIMARY KEY,
     id_keycloak VARCHAR(255) UNIQUE,
     user_name VARCHAR(255) UNIQUE NOT NULL,
