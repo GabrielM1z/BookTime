@@ -17,6 +17,7 @@ export const initDB = async (db: SQLiteDatabase) => {
     initLibraryBook(db)
     initSharedLibrary(db)
     initUser(db)
+    initAction(db)
 };
 
 export default initDB;
@@ -206,5 +207,25 @@ const initUser = async (db: SQLiteDatabase) => {
         console.log('user initialized successfully');
     } catch (error) {
         console.error('Error initializing user', error);
+    }
+}
+
+
+const initAction = async (db: SQLiteDatabase) => {
+    try {
+        db.execAsync(`
+            CREATE TABLE IF NOT EXISTS library (
+                id_action TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+                id_action TEXT,
+                table_name VARCHAR(50),
+                date TIMESTAMP,
+                type VARCHAR(50),
+                action JSON,
+                executed_by VARCHAR(6)
+            );
+        `);
+        console.log('Action initialized successfully');
+    } catch (error) {
+        console.error('Error initializing Action', error);
     }
 }
