@@ -8,5 +8,5 @@ type SharedLibrary struct {
 }
 
 type PostSharedLibrary struct {
-	LibraryId uuid.UUID `json:"id_library" binding:"required"`
+	IdLibrary uuid.UUID `json:"id_library" binding:"required"`
 }
