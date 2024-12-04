@@ -11,7 +11,8 @@ import { SQLiteProvider } from 'expo-sqlite';
 import { QueryProvider } from '@/components/QueryProvider';
 import { SessionProvider } from "@/context/auth";
 import React from 'react';
-import { migrateDbIfNeeded, deleteDB } from '@/db/init';
+import { migrateDbIfNeeded } from '@/db/init';
+import { deleteDatabaseAsync } from 'expo-sqlite';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -22,7 +23,7 @@ export default function RootLayout() {
     });
     const colorScheme = useColorScheme();
 
-    // deleteDB();
+    // deleteDatabaseAsync('booktime.db');
 
     useEffect(() => {
         if (loaded) {

@@ -27,6 +27,7 @@ export function useSession() {
 
 export function SessionProvider({ children }: { children: ReactNode }) {
     const [session, setSession] = useState<Session | null>(null);
+    const [sessions, setSessions] = useState<Session[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     const db = useSQLiteContext();
@@ -49,46 +50,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     }, []);
 
     const logIn = async (username: string, password: string, remember: boolean) => {
-        // const response = await axios.post(
-        //     keycloakAuthUrl,
-        //     {
-        //         data: {
-        //             grant_type: 'password',
-        //             client_id: 'booktime',
-        //             client_secret: keycloakClientSecret,
-        //             username: username,
-        //             password: password,
-        //             odience: 'gateway-client',
-        //             scope: 'openid profile email'
-        //         },
-        //         headers: {
-        //             'Content-Type': 'application/x-www-form-urlencoded',
-        //         },
-        //     }
-        // );
-
-        const response = await fetch(keycloakAuthUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: {
-                client_id: 'booktime',
-                client_secret: keycloakClientSecret,
-                grant_type: 'password',
-                username,
-                password,
-                scope: 'openid profile email',
-                odience: 'gateway-client'
-            }
-        });
-
-
-        console.log(response);
-
-        if (response.status !== 200) {
-            throw new Error('Invalid credentials');
-        }
-
-        let session = sessionFromKeycloak(response.data);
+        const response = await authenticate(username, password);
+        let session = sessionFromKeycloak(response);
 
         if (remember) {
             addSession(db, session);
@@ -120,4 +83,48 @@ export function SessionProvider({ children }: { children: ReactNode }) {
             {children}
         </AuthContext.Provider>
     );
+}
+
+
+const authenticate = async (username: string, password: string) => {
+    // const response = await axios.post(
+    //     keycloakAuthUrl,
+    //     {
+    //         data: {
+    //             grant_type: 'password',
+    //             client_id: 'booktime',
+    //             client_secret: keycloakClientSecret,
+    //             username: username,
+    //             password: password,
+    //             odience: 'gateway-client',
+    //             scope: 'openid profile email'
+    //         },
+    //         headers: {
+    //             'Content-Type': 'application/x-www-form-urlencoded',
+    //         },
+    //     }
+    // );
+
+    const response = await fetch(keycloakAuthUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: {
+            client_id: 'booktime',
+            client_secret: keycloakClientSecret,
+            grant_type: 'password',
+            username,
+            password,
+            scope: 'openid profile email',
+            odience: 'gateway-client'
+        }
+    });
+
+
+    console.log(response);
+
+    if (response.status !== 200) {
+        throw new Error('Invalid credentials');
+    }
+
+    return response.data;
 }

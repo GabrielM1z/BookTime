@@ -1,4 +1,4 @@
-import { SQLiteDatabase, deleteDatabaseSync } from 'expo-sqlite';
+import { SQLiteDatabase } from 'expo-sqlite';
 
 const listMigrations = () => {
   const context = require.context('./migrations', false, /^\.\/\d{3}_[a-zA-Z0-9_]+\.tsx$/);
@@ -45,12 +45,3 @@ export const migrateDbIfNeeded = async (db: SQLiteDatabase) => {
 
   console.log('Toutes les migrations sont à jour.');
 };
-
-export const deleteDB = async () => {
-  try {
-      await deleteDatabaseSync('booktime.db');
-      console.log('Delete DB successfully');
-  } catch (error) {
-      console.error('Error during Delete DB', error);
-  }
-}

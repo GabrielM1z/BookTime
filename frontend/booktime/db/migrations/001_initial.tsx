@@ -17,7 +17,6 @@ export const initDB = async (db: SQLiteDatabase) => {
     initLibraryBook(db)
     initSharedLibrary(db)
     initUser(db)
-    initSession(db)
 };
 
 export default initDB;
@@ -207,27 +206,5 @@ const initUser = async (db: SQLiteDatabase) => {
         console.log('user initialized successfully');
     } catch (error) {
         console.error('Error initializing user', error);
-    }
-}
-
-const initSession = async (db: SQLiteDatabase) => {
-    try {
-        db.execAsync(`
-            CREATE TABLE IF NOT EXISTS session (
-                id_session TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
-                id_user TEXT,
-                is_guest BOOLEAN DEFAULT FALSE,
-                access_token TEXT,
-                expires_in INT,
-                refresh_token TEXT,
-                refresh_expires_in INT,
-                token_type TEXT,
-                session_state PRIMARY KEY,
-                FOREIGN KEY (uuid_user) REFERENCES user(uuid_user) ON DELETE CASCADE
-            );
-        `);
-        console.log('session initialized successfully');
-    } catch (error) {
-        console.error('Error initializing session', error);
     }
 }
