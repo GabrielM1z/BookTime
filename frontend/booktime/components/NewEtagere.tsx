@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import TitreTab from "./TitreTab";
 import { Modal, TouchableOpacity, View, StyleSheet, TextInput, Text } from "react-native";
 import { Colors } from '@/constants/Colors';
-import { addLibrary } from '@/db/db-etagere';
-import { useSQLiteContext } from 'expo-sqlite';
+import { useRepository } from '@/hooks/useRepository';
 
 
 export default function NewEtagere({ onAddEtagere })
@@ -12,7 +11,7 @@ export default function NewEtagere({ onAddEtagere })
 	const [formData, setFormData] = useState({
 		name: ''
 	});
-	const db = useSQLiteContext();
+	const { libraryRepository } = useRepository();
 
 	const handleInputChange = (field: any, value: any) => {
 		setFormData({ name: value });
@@ -21,7 +20,7 @@ export default function NewEtagere({ onAddEtagere })
 	const handleSubmit = async () => {
 		try {
             console.log('Form Data Submitted:', formData);
-            await addLibrary(db, formData.name); // Ajoute l'étagère à la base de données
+            await libraryRepository.add(formData.name); // Ajoute l'étagère
             setModalVisible(false); // Ferme la popup après soumission
             onAddEtagere(); // Notifie le parent pour rafraîchir la liste des étagères
         } catch (error) {

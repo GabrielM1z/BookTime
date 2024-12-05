@@ -3,7 +3,7 @@ import 'react-native-reanimated';
 import { Redirect, Stack } from "expo-router";
 import { Text } from "react-native";
 
-import { useAuth } from "@/providers/auth";
+import { useAuth } from "@/hooks/useAuth";
 import React from 'react';
 
 export default function AppLayout() {

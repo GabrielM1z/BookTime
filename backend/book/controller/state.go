@@ -112,11 +112,11 @@ func getUserID(c *gin.Context) uuid.UUID {
 // InsertState implements StateControllerInterface
 func (sc *StateController) InsertState(c *gin.Context) {
 	db := sc.DB
-	var post model.PostState
-	idUser := getUserID(c)
-	if err := c.ShouldBindJSON(&post); err == nil {
+	var state model.State
+	state.IdUser = getUserID(c)
+	if err := c.ShouldBindJSON(&state); err == nil {
 		repoState := repository.NewStateRepository(db)
-		insert := repoState.InsertState(post, idUser)
+		insert := repoState.InsertState(state)
 		if insert {
 			c.JSON(http.StatusOK, gin.H{"status": "success", "msg": "insert state successfully"})
 		} else {

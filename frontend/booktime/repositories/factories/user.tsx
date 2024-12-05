@@ -1,5 +1,5 @@
 import { Platform } from "react-native";
-import { UserRepositoryProps, APIUserRepository, SQLiteUserRepository } from "../user";
+import { APIUserRepository, SQLiteUserRepository, UserRepositoryProps } from "../user";
 
 export const userRepositoryFactory = (): UserRepositoryProps => {
     if (Platform.OS === 'web') {

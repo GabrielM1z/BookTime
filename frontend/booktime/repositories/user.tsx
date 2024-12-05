@@ -1,19 +1,21 @@
+import { useApi } from '@/hooks/useApi';
 import { AuthResponseProps, PayloadProps } from '@/models/keycloak';
 import { User } from '@/models/user';
+import { Api } from '@/services/api';
 import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite';
 import { jwtDecode } from 'jwt-decode';
 
 export interface UserRepositoryProps {
-    getUserFromKeycloakToken(data: AuthResponseProps): User;
-    getUserById(id: string): Promise<User | null>;
-    getAllUsers(): Promise<User[]>;
-    addUser(user: User): Promise<void>;
-    updateUser(user: User): Promise<void>;
-    deleteUser(user: User): Promise<void>;
+    getFromKeycloakToken(data: AuthResponseProps): User;
+    getById(id: string): Promise<User | null>;
+    getAll(): Promise<User[]>;
+    add(user: User): Promise<void>;
+    update(user: User): Promise<void>;
+    delete(user: User): Promise<void>;
 }
 
 class CommonUserRepository {
-    getUserFromKeycloakToken(data: AuthResponseProps): User {
+    getFromKeycloakToken(data: AuthResponseProps): User {
         const payload = jwtDecode<PayloadProps>(data.access_token);
 
         // call api pour avoir le reste des info
@@ -37,7 +39,7 @@ export class SQLiteUserRepository extends CommonUserRepository implements UserRe
         this.db = useSQLiteContext();
     }
 
-    async getUserById(id: string): Promise<User | null> {
+    async getById(id: string): Promise<User | null> {
         const statement = await this.db.prepareAsync(`
             SELECT * FROM user WHERE id = $id;
         `);
@@ -49,14 +51,14 @@ export class SQLiteUserRepository extends CommonUserRepository implements UserRe
         return result.getFirstAsync();
     }
 
-    async getAllUsers(): Promise<User[]> {
+    async getAll(): Promise<User[]> {
         let result = await this.db.getAllAsync<User>(`
             SELECT * FROM user;
         `);
         return result;
     }
 
-    async addUser(user: User): Promise<void> {
+    async add(user: User): Promise<void> {
         const statement = await this.db.prepareAsync(`
             INSERT INTO user (id, username, email, email_verified, given_name, family_name)
             VALUES (
@@ -79,7 +81,7 @@ export class SQLiteUserRepository extends CommonUserRepository implements UserRe
         });
     }
 
-    async updateUser(user: User): Promise<void> {
+    async update(user: User): Promise<void> {
         const statement = await this.db.prepareAsync(`
             UPDATE user
             SET username = $username,
@@ -100,7 +102,7 @@ export class SQLiteUserRepository extends CommonUserRepository implements UserRe
         });
     }
 
-    async deleteUser(user: User): Promise<void> {
+    async delete(user: User): Promise<void> {
         const statement = await this.db.prepareAsync(`
             DELETE FROM user WHERE id = $id;
         `);
@@ -113,43 +115,32 @@ export class SQLiteUserRepository extends CommonUserRepository implements UserRe
 
 
 export class APIUserRepository extends CommonUserRepository implements UserRepositoryProps {
-    async getUserById(id: string): Promise<User | null> {
-        const response = await fetch(`/api/user/${id}`);
-        if (response.ok) {
-            return await response.json();
-        } else {
-            return null;
-        }
+    private api: Api;
+
+    constructor() {
+        super();
+        this.api = useApi();
     }
 
-    async getAllUsers(): Promise<User[]> {
-        const response = await fetch('/api/user');
-        return await response.json();
+    async getById(id: string): Promise<User | null> {
+        const response = await this.api.get(`/api/user/${id}`);
+        return response.data;
     }
 
-    async addUser(user: User): Promise<void> {
-        await fetch('/api/user', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(user)
-        });
+    async getAll(): Promise<User[]> {
+        const response = await this.api.get('/api/user');
+        return response.data;
     }
 
-    async updateUser(user: User): Promise<void> {
-        await fetch(`/api/user/${user.id}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(user)
-        });
+    async add(user: User): Promise<void> {
+        await this.api.post('/api/user', user);
     }
 
-    async deleteUser(user: User): Promise<void> {
-        await fetch(`/api/user/${user.id}`, {
-            method: 'DELETE'
-        });
+    async update(user: User): Promise<void> {
+        await this.api.put(`/api/user/${user.id}`, user);
+    }
+
+    async delete(user: User): Promise<void> {
+        await this.api.delete(`/api/user/${user.id}`);
     }
 }

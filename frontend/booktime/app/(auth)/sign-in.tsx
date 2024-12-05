@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button, Text, View, TextInput, StyleSheet, Alert, Switch } from 'react-native';
-import { useAuth } from '@/providers/auth';
+import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 

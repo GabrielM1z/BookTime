@@ -76,11 +76,11 @@ func (lc *LibraryController) GetLibrariesByUserId(c *gin.Context) {
 // InsertLibrary - Insère une nouvelle bibliothèque
 func (lc *LibraryController) InsertLibrary(c *gin.Context) {
 	db := lc.DB
-	var post model.PostLibrary
+	var library model.Library
 	idUser := getUserID(c)
-	if err := c.ShouldBindJSON(&post); err == nil {
+	if err := c.ShouldBindJSON(&library); err == nil {
 		repoLibrary := repository.NewLibraryRepository(db)
-		insert := repoLibrary.InsertLibrary(post, idUser)
+		insert := repoLibrary.InsertLibrary(library, idUser)
 		if insert {
 			c.JSON(http.StatusOK, gin.H{"status": "success", "msg": "library inserted successfully"})
 		} else {
@@ -107,9 +107,10 @@ func (lc *LibraryController) UpdateLibrary(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	library.IdLibrary = id
 
 	repoLibrary := repository.NewLibraryRepository(db)
-	success := repoLibrary.UpdateLibrary(id, library, idUser)
+	success := repoLibrary.UpdateLibrary(library, idUser)
 	if !success {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update library"})
 		return
