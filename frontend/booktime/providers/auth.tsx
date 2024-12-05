@@ -1,10 +1,8 @@
-import { keycloakAuthUrl, keycloakClientId, keycloakClientSecret } from "@/constants/Api";
 import { usePersistentState } from "@/hooks/usePersistantState";
-import { AuthResponseProps } from "@/models/keycloak";
+import { useRepository } from "@/hooks/useRepository";
 import { Session } from "@/models/session";
-import axios from 'axios';
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { useRepository } from "./repository";
+import { authenticate } from "@/services/api";
+import React, { createContext, useEffect, useState } from "react";
 
 export interface AuthContextProps {
     session: Session | null;
@@ -17,7 +15,7 @@ export interface AuthContextProps {
     switchSession(session: Session): void;
 }
 
-const AuthContext = createContext<AuthContextProps>({
+export const AuthContext = createContext<AuthContextProps>({
     session: null as Session | null,
     sessions: [],
     isLoading: true,
@@ -27,14 +25,6 @@ const AuthContext = createContext<AuthContextProps>({
     refreshSession: () => null,
     switchSession: (session: Session) => null,
 })
-
-export const useAuth = (): AuthContextProps => {
-    const context = useContext(AuthContext);
-    if (!context) {
-        throw new Error('useAuth must be used within an AuthProvider');
-    }
-    return context;
-};
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [session, setSession] = usePersistentState<Session | null>('@session', null);
@@ -78,7 +68,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     }
 
-    const switchSession = (session: Session) => {        setSessions([]);
+    const switchSession = (session: Session) => {
+        setSessions([]);
 
         setSession(session);
         // setSessionId(session.id);
@@ -104,57 +95,4 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             {children}
         </AuthContext.Provider>
     )
-}
-
-const authenticate = async (username: string, password: string): Promise<AuthResponseProps> => {
-    const response = await axios.post(
-        keycloakAuthUrl,
-        new URLSearchParams({
-            grant_type: 'password',
-            client_id: keycloakClientId,
-            client_secret: keycloakClientSecret,
-            username: username,
-            password: password,
-            audience: 'gateway-client',
-            scope: 'openid profile email'
-        }).toString(),
-        {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-        }
-    );
-
-    console.log(response);
-
-    if (response.status !== 200) {
-        throw new Error('Invalid credentials');
-    }
-
-    return response.data;
-}
-
-const refresh = async (refreshToken: string): Promise<AuthResponseProps> => {
-    const response = await axios.post(
-        keycloakAuthUrl,
-        new URLSearchParams({
-            grant_type: 'refresh_token',
-            client_id: keycloakClientId,
-            client_secret: keycloakClientSecret,
-            refresh_token: refreshToken,
-            audience: 'gateway-client',
-            scope: 'openid profile email'
-        }).toString(),
-        {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-        }
-    );
-
-    if (response.status !== 200) {
-        throw new Error('Invalid credentials');
-    }
-
-    return response.data;
 }

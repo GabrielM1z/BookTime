@@ -2,7 +2,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import Etagere from '@/components/Etagere';
 import NewEtagere from '@/components/NewEtagere';
 import React, { useEffect, useState } from 'react';
-import { useRepository } from '@/providers/repository';
+import { useRepository } from '@/hooks/useRepository';
 
 // import des images
 const cover1 = require('@/assets/images/logo_refait.png');

@@ -3,7 +3,7 @@ import { StyleSheet, View, Image, Text } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
 
-import { useAuth } from '@/providers/auth';
+import { useAuth } from '@/hooks/useAuth';
 
 // import des component
 import ImageViewer from '@/components/ImageViewer';

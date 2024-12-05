@@ -1,5 +1,7 @@
+import { useApi } from '@/hooks/useApi';
 import { AuthResponseProps, PayloadProps } from '@/models/keycloak';
 import { User } from '@/models/user';
+import { Api } from '@/services/api';
 import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite';
 import { jwtDecode } from 'jwt-decode';
 
@@ -113,43 +115,32 @@ export class SQLiteUserRepository extends CommonUserRepository implements UserRe
 
 
 export class APIUserRepository extends CommonUserRepository implements UserRepositoryProps {
+    private api: Api;
+
+    constructor() {
+        super();
+        this.api = useApi();
+    }
+
     async getById(id: string): Promise<User | null> {
-        const response = await fetch(`/api/user/${id}`);
-        if (response.ok) {
-            return await response.json();
-        } else {
-            return null;
-        }
+        const response = await this.api.get(`/api/user/${id}`);
+        return response.data;
     }
 
     async getAll(): Promise<User[]> {
-        const response = await fetch('/api/user');
-        return await response.json();
+        const response = await this.api.get('/api/user');
+        return response.data;
     }
 
     async add(user: User): Promise<void> {
-        await fetch('/api/user', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(user)
-        });
+        await this.api.post('/api/user', user);
     }
 
     async update(user: User): Promise<void> {
-        await fetch(`/api/user/${user.id}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(user)
-        });
+        await this.api.put(`/api/user/${user.id}`, user);
     }
 
     async delete(user: User): Promise<void> {
-        await fetch(`/api/user/${user.id}`, {
-            method: 'DELETE'
-        });
+        await this.api.delete(`/api/user/${user.id}`);
     }
 }

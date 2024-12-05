@@ -1,4 +1,6 @@
+import { useApi } from '@/hooks/useApi';
 import { Library } from '@/models/library';
+import { Api } from '@/services/api';
 import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite';
 
 export interface LibraryRepositoryProps {
@@ -32,6 +34,12 @@ export class SQLiteLibraryRepository implements LibraryRepositoryProps {
 }
 
 export class APILibraryRepository implements LibraryRepositoryProps {
+    private api: Api;
+
+    constructor() {
+        this.api = useApi();
+    }
+    
     async getAll(): Promise<Library[]> {
         return [];
     }

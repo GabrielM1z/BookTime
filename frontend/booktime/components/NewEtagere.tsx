@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import TitreTab from "./TitreTab";
 import { Modal, TouchableOpacity, View, StyleSheet, TextInput, Text } from "react-native";
 import { Colors } from '@/constants/Colors';
-import { useRepository } from '@/providers/repository';
+import { useRepository } from '@/hooks/useRepository';
 
 
 export default function NewEtagere({ onAddEtagere })
