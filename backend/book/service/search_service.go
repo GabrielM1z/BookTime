@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"book/model"
 	"book/service/interfaces"
@@ -87,6 +88,8 @@ func (bs *SearchService) SearchBooks(startIndex, query, title, author, genre str
 				break
 			}
 		}
+
+		simplifiedBook.Thumbnail = strings.ReplaceAll(simplifiedBook.Thumbnail, "http", "https")
 
 		// if bookExists(simplifiedBooks, item.ID) {
 
