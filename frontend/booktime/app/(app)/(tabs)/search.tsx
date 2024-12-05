@@ -7,7 +7,7 @@ import { LivreRecherche } from '@/components/LivreRecherche'
 import { ThemedView } from '@/components/ThemedView';
 
 import { useInfiniteScroll } from '@/core/api';
-import { Book } from '../../models/Book';
+import { Book } from '../../../models/Book';
 import { apiLinkServeur } from '@/constants/Api';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import React from 'react';
@@ -65,7 +65,7 @@ export default function HomeScreen() {
 	});
 
 	console.log(data);
-	
+
 
 	return (
 		<ThemedView style={styles.body}>
@@ -74,7 +74,7 @@ export default function HomeScreen() {
 				<FlatList
 					contentContainerStyle={styles.contentContainerStyle}
 					// keyExtractor={item => `${item.id}+${item.etag}`}
-					keyExtractor={item => item.id}
+					keyExtractor={item => item.title + item.isbn13}
 					initialNumToRender={10}
 					// data={removeDuplicates(data)}
 					data={data}

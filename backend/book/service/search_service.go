@@ -1,11 +1,13 @@
 package service
 
 import (
+	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
-	"strings"
 
 	"book/model"
 	"book/service/interfaces"
@@ -27,6 +29,36 @@ func bookExists(books []model.BookItem, id string) bool {
 		}
 	}
 	return false
+}
+
+func convertImageToBase64(imageLink string) (string, error) {
+	// Faire une requête HTTP pour récupérer l'image
+	resp, err := http.Get(imageLink)
+	if err != nil {
+		fmt.Println("Erreur lors de la récupération de l'image:", err)
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	// Vérifier le statut de la réponse
+	if resp.StatusCode != http.StatusOK {
+		fmt.Printf("Erreur: statut HTTP %d\n", resp.StatusCode)
+		return "", err
+	}
+
+	// Lire les données de l'image dans un buffer
+	var imgBuffer bytes.Buffer
+	_, err = io.Copy(&imgBuffer, resp.Body)
+	if err != nil {
+		fmt.Println("Erreur lors de la copie des données:", err)
+		return "", err
+	}
+
+	// Convertir les données en base64
+	imgBase64 := base64.StdEncoding.EncodeToString(imgBuffer.Bytes())
+
+	return imgBase64, nil
+
 }
 
 func (bs *SearchService) SearchBooks(startIndex, query, title, author, genre string) ([]model.SimplifiedBook, error) {
@@ -89,7 +121,11 @@ func (bs *SearchService) SearchBooks(startIndex, query, title, author, genre str
 			}
 		}
 
-		simplifiedBook.Thumbnail = strings.ReplaceAll(simplifiedBook.Thumbnail, "http", "https")
+		simplifiedBook.Thumbnail, err = convertImageToBase64(simplifiedBook.Thumbnail)
+
+		if err != nil {
+			simplifiedBook.Thumbnail = ""
+		}
 
 		// if bookExists(simplifiedBooks, item.ID) {
 
