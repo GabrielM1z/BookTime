@@ -8,6 +8,7 @@ import { Feather } from "@expo/vector-icons";
 export function TabBar ({ state, descriptors, navigation} : BottomTabBarProps){
 
 	const icon = {
+		index: (props: any) => <Feather name='home' size={24} color={Colors.dark.text} {...props}/>,
 		library: (props: any) => <Feather name='book' size={24} color={Colors.dark.text} {...props}/>,
 		search: (props: any) => <Feather name='search' size={24} color={Colors.dark.text} {...props}/>,
 		news: (props: any) => <Feather name='mail' size={24} color={Colors.dark.text} {...props}/>,
@@ -16,7 +17,9 @@ export function TabBar ({ state, descriptors, navigation} : BottomTabBarProps){
 
 	return (
 		<View style={styles.tabbar}>
-			{state.routes.map((route, index) => {
+			{state.routes
+				.filter(route => route.name !== 'index')
+				.map((route, index) => {
 				const {options} = descriptors[route.key];
 				const label =
 					options.tabBarLabel !== undefined

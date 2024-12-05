@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"time"
 
@@ -20,7 +21,7 @@ func NewStateRepository(db *sql.DB) *StateRepository {
 	return &StateRepository{DB: db}
 }
 
-func (sr *StateRepository) InsertState(post model.PostState, idUser uuid.UUID) bool {
+func (sr *StateRepository) InsertState(state model.State) bool {
 	stmt, err := sr.DB.Prepare("INSERT INTO state (state, progression, read_count, last_read_date, is_available, id_user, id_book) VALUES ($1, $2, $3, $4, $5, $6, $7)")
 	if err != nil {
 		log.Println(err)
@@ -28,23 +29,23 @@ func (sr *StateRepository) InsertState(post model.PostState, idUser uuid.UUID) b
 	}
 	defer stmt.Close()
 
-	_, err2 := stmt.Exec(post.State, post.Progression, post.ReadCount, post.LastReadDate, post.IsAvailable, idUser, post.IdBook)
+	_, err2 := stmt.Exec(state.State, state.Progression, state.ReadCount, state.LastReadDate, state.IsAvailable, state.IdUser, state.IdBook)
 	if err2 != nil {
 		log.Println(err2)
 		return false
 	}
 
 	actionMap := map[string]interface{}{
-		"state":        post.State,
-		"progression":  post.Progression,
-		"readCount":    post.ReadCount,
-		"lastReadDate": post.LastReadDate,
-		"isAvailable":  post.IsAvailable,
-		"idUser":       idUser,
-		"idBook":       post.IdBook,
+		"state":        state.State,
+		"progression":  state.Progression,
+		"readCount":    state.ReadCount,
+		"lastReadDate": state.LastReadDate,
+		"isAvailable":  state.IsAvailable,
+		"idUser":       state.IdUser,
+		"idBook":       state.IdBook,
 	}
 
-	return sr.LogAction(idUser, "STATE", "INSERT", actionMap)
+	return sr.LogAction(state.IdUser, "STATE", "INSERT", actionMap)
 }
 
 func (ar *StateRepository) SelectStates() []model.State {
@@ -87,9 +88,46 @@ func (sr *StateRepository) SelectStateByUserAndBook(idUser uuid.UUID, idBook uui
 func (sr *StateRepository) UpdateState(idUser uuid.UUID, idBook uuid.UUID, state model.State) bool {
 	baseState := sr.SelectStateByUserAndBook(idUser, idBook)
 
-	query := `UPDATE state SET state = $1, progression = $2, read_count = $3, last_read_date = $4, is_available = $5
-              WHERE id_user = $6 AND id_book = $7`
-	_, err := sr.DB.Exec(query, state.State, state.Progression, state.ReadCount, state.LastReadDate, state.IsAvailable, idUser, idBook)
+	query := "UPDATE state SET "
+	params := []interface{}{}
+	counter := 1 // Compteur pour les paramètres SQL ($1, $2, etc.)
+
+	// Ajout des champs dynamiquement en fonction des valeurs non nulles
+	if state.State != "" {
+		query += "state = $" + fmt.Sprint(counter) + ", "
+		params = append(params, state.State)
+		counter++
+	}
+	if state.Progression != 0 {
+		query += "progression = $" + fmt.Sprint(counter) + ", "
+		params = append(params, state.Progression)
+		counter++
+	}
+	if state.ReadCount != 0 {
+		query += "read_count = $" + fmt.Sprint(counter) + ", "
+		params = append(params, state.ReadCount)
+		counter++
+	}
+	if state.LastReadDate != "" {
+		query += "last_read_date = $" + fmt.Sprint(counter) + ", "
+		params = append(params, state.LastReadDate)
+		counter++
+	}
+	if state.IsAvailable != baseState.IsAvailable { // Comparaison avec l'état de base
+		query += "is_available = $" + fmt.Sprint(counter) + ", "
+		params = append(params, state.IsAvailable)
+		counter++
+	}
+
+	// Suppression de la virgule finale et ajout des conditions WHERE
+	query = query[:len(query)-2] + " WHERE id_user = $" + fmt.Sprint(counter) +
+		" AND id_book = $" + fmt.Sprint(counter+1)
+
+	// Ajout des paramètres pour les conditions WHERE
+	params = append(params, idUser, idBook)
+
+	// Exécution de la requête
+	_, err := sr.DB.Exec(query, params...)
 	if err != nil {
 		log.Println(err)
 		return false

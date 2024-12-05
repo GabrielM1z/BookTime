@@ -3,19 +3,19 @@ import 'react-native-reanimated';
 import { Redirect, Stack } from "expo-router";
 import { Text } from "react-native";
 
-import { useSession } from "@/context/auth";
+import { useAuth } from "@/hooks/useAuth";
 import React from 'react';
 
 export default function AppLayout() {
-    const { session, isLoading } = useSession();
+    const { session, isLoading } = useAuth();
 
-    // if (isLoading) {
-    //     return <Text>Chargement...</Text>;
-    // }
+    if (isLoading) {
+        return <Text>Chargement...</Text>;
+    }
 
-    // if (!session && !session?.isGuest) {
-    //     return <Redirect href="/sign-in" />;
-    // }
+    if (!session && !session?.isGuest) {
+        return <Redirect href="/sign-in" />;
+    }
 
     return (
         <Stack>
