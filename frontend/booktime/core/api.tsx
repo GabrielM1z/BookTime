@@ -55,19 +55,6 @@ export const useInfiniteScroll = <T = unknown, F = object>({
             }
         )
 
-        // const headers = { 'Authorization': 'Bearer ' +token };
-        // const { data } = await fetch(url + "startIndex=0&maxResults=10&query=harry", {
-        //     method: "GET",
-        //     mode: "no-cors",
-        //     headers: headers
-        // }).then(function (response) {
-        //     console.log(response);
-        // }).catch(function (e) {
-        //     console.log(e);
-        // });
-
-        
-
         return {
             data: formatResponse ? formatResponse(data) : data,
             nextPage: pageParam + 1,

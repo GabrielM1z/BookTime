@@ -1,6 +1,6 @@
-import { jwtDecode } from 'jwt-decode';
+import { Serializable } from './serializable';
 
-export interface User {
+export interface UserProps {
     id: string;
     emailVerified: boolean;
     username: string;
@@ -9,26 +9,41 @@ export interface User {
     email: string;
 }
 
-interface DecodedPayload {
-    sub: string;
-    email_verified: boolean;
-    name: string;
-    preferred_username: string;
-    given_name: string;
-    family_name: string;
+export class User extends Serializable<User> implements UserProps {
+    id: string;
+    emailVerified: boolean;
+    username: string;
+    givenName: string;
+    familyName: string;
     email: string;
-}
 
+    constructor(data: UserProps) {
+        super();
+        this.id = data.id;
+        this.emailVerified = data.emailVerified;
+        this.username = data.username;
+        this.givenName = data.givenName;
+        this.familyName = data.familyName;
+        this.email = data.email;
+    }
 
-export const userFromKeycloakToken = (token : any) : User => {
-    const decoded = jwtDecode<DecodedPayload>(token);
+    toJSON(): object {
+        return {
+            id: this.id,
+            email_verified: this.emailVerified,
+            username: this.username,
+            given_name: this.givenName,
+            family_name: this.familyName,
+            email: this.email
+        };
+    }
 
-    return {
-        id: decoded.sub,
-        emailVerified: decoded.email_verified,
-        username: decoded.preferred_username,
-        givenName: decoded.given_name,
-        familyName: decoded.family_name,
-        email: decoded.email
+    fromJSON(json: any): void {
+        this.id = json.id;
+        this.emailVerified = json.email_verified;
+        this.username = json.username;
+        this.givenName = json.given_name;
+        this.familyName = json.family_name;
+        this.email = json.email;
     }
 }

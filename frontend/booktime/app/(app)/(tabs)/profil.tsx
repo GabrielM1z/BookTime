@@ -3,7 +3,7 @@ import { StyleSheet, View, Image, Text } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
 
-import { useSession } from '@/context/auth';
+import { useAuth } from '@/hooks/useAuth';
 
 // import des component
 import ImageViewer from '@/components/ImageViewer';
@@ -35,7 +35,7 @@ export default function App()
 		}
 	};
 
-	const { logOut } = useSession();
+	const { logOut } = useAuth();
 	
     return (
 		<ThemedView style={styles.container}>
