@@ -2,8 +2,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import Etagere from '@/components/Etagere';
 import NewEtagere from '@/components/NewEtagere';
 import React, { useEffect, useState } from 'react';
-import { getAllLibrary } from '@/db/db-etagere';
-import { useSQLiteContext } from 'expo-sqlite';
+import { useRepository } from '@/providers/repository';
 
 // import des images
 const cover1 = require('@/assets/images/logo_refait.png');
@@ -27,11 +26,11 @@ export default function pageEtageres() {
     useEffect(() => {
         refreshEtageres();
     }, []);
-    const db = useSQLiteContext();
+    const { libraryRepository } = useRepository();
 
     const refreshEtageres = async () => {
         try {
-            const data = await getAllLibrary(db);
+            const data = await libraryRepository.getAll();
             setEtageres(data);
         } catch (error) {
             console.error('Error fetching etageres:', error);

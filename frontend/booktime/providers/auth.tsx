@@ -50,7 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const logIn = async (username: string, password: string, remember: boolean) => {
         const authResponse = await authenticate(username, password);
         const session = Session.fromKeycloak(authResponse);
-        const user = userRepository.getUserFromKeycloakToken(authResponse);
+        const user = userRepository.getFromKeycloakToken(authResponse);
         session.idUser = user.id;
         setSession(session);
         if (remember) {
