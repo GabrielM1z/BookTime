@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Button, Text, View, TextInput, StyleSheet, Alert, Switch } from 'react-native';
-import { useSession } from '@/context/auth';
+import { useAuth } from '@/providers/auth';
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 
 export default function SignIn() {
-    const { logIn, logAsGuest } = useSession();
+    const { logIn, logAsGuest } = useAuth();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [rememberMe, setRememberMe] = useState(false);

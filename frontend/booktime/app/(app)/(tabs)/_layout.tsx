@@ -4,12 +4,14 @@ import React from 'react';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { TabBar } from '@/components/TabBar';
 
 export default function TabLayout() {
     const colorScheme = useColorScheme();
 
     return (
         <Tabs
+            tabBar={props => <TabBar {...props} />}
             screenOptions={{
                 tabBarActiveTintColor: Colors.dark.background,
                 headerShown: false,
@@ -26,11 +28,11 @@ export default function TabLayout() {
                 }
             }}>
             <Tabs.Screen
-                name="index"
+                name="library"
                 options={{
-                    title: 'Accueil',
+                    title: 'Bibliothèque',
                     tabBarIcon: ({ color, focused }) => (
-                        <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
+                        <TabBarIcon name={focused ? 'library' : 'library-outline'} color={color} />
                     ),
                 }}
             />
@@ -40,15 +42,6 @@ export default function TabLayout() {
                     title: 'Rechercher',
                     tabBarIcon: ({ color, focused }) => (
                         <TabBarIcon name={focused ? 'search' : 'search-outline'} color={color} />
-                    ),
-                }}
-            />
-            <Tabs.Screen
-                name="library"
-                options={{
-                    title: 'Bibliothèque',
-                    tabBarIcon: ({ color, focused }) => (
-                        <TabBarIcon name={focused ? 'library' : 'library-outline'} color={color} />
                     ),
                 }}
             />

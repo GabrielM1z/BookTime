@@ -12,7 +12,7 @@ type Action struct {
 	Table      string    `json:"table"`
 	Date       time.Time `json:"date"`
 	Type       string    `json:"type"`
-	Action     []byte    `json:"read_count"`
+	Action     []byte    `json:"action"`
 	ExecutedBy string    `json:"executed_by"`
 }
 
@@ -21,6 +21,6 @@ type PostAction struct {
 	Table      string    `json:"table"`
 	Date       time.Time `json:"date"`
 	Type       string    `json:"type"`
-	Action     []byte    `json:"read_count"`
+	Action     []byte    `json:"action"`
 	ExecutedBy string    `json:"executed_by"`
 }
