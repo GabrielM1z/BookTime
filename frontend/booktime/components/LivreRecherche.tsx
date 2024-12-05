@@ -8,41 +8,43 @@ import axios from 'axios';
 
 const defaultCover = require('@/assets/images/logo_refait.png');
 
-async function getImageAPI(book: BookInfos): Promise<string | number> {
-  if (book.thumbnail) {
-    try {
-      console.log(book.thumbnail)
-      const response = await axios.get(book.thumbnail, {
-        responseType: 'blob',
-      });
-      if (response.status === 200) {
-        return response.data; // Assurez-vous que response.data correspond à un type Image
-      } else {
-        return defaultCover; // Par défaut si le statut n'est pas 200
-      }
-    } catch (e) {
-      console.log(e);
-      return defaultCover; // En cas d'erreur dans la requête
-    }
-  } else {
-    return defaultCover; // Si aucun thumbnail n'est fourni
-  }
-}
+// async function getImageAPI(book: BookInfos): Promise<string | number> {
+//   if (book.thumbnail) {
+//     try {
+//       console.log(book.thumbnail)
+//       const response = await axios.get(book.thumbnail, {
+//         responseType: 'blob',
+//       });
+//       if (response.status === 200) {
+//         return response.data; // Assurez-vous que response.data correspond à un type Image
+//       } else {
+//         return defaultCover; // Par défaut si le statut n'est pas 200
+//       }
+//     } catch (e) {
+//       console.log(e);
+//       return defaultCover; // En cas d'erreur dans la requête
+//     }
+//   } else {
+//     return defaultCover; // Si aucun thumbnail n'est fourni
+//   }
+// }
 
 export const LivreRecherche = ({ book }: { book: BookInfos }) => {
 
-  const [imageSource, setImageSource] = useState<string | number>(defaultCover);
-  console.log(("coucou"))
-  useEffect(() => {
-    const fetchImage = async () => {
-      const image = await getImageAPI(book);
-      setImageSource(image);
-    };
+  // const [imageSource, setImageSource] = useState<string | number>(defaultCover);
+  // console.log(("coucou"))
+  // useEffect(() => {
+  //   const fetchImage = async () => {
+  //     const image = await getImageAPI(book);
+  //     setImageSource(image);
+  //   };
 
-    fetchImage().catch((error) => {
-      console.error('Error loading image:', error);
-    });
-  }, [book]);
+  //   fetchImage().catch((error) => {
+  //     console.error('Error loading image:', error);
+  //   });
+  // }, [book]);
+
+  console.log(book.thumbnail)
 
   const handleAddBook = () => {
     console.log(`Book added: ${book}`);
@@ -51,7 +53,9 @@ export const LivreRecherche = ({ book }: { book: BookInfos }) => {
   return (
     <View style={styles.itemContainer}>
 
-      <Image source={typeof imageSource === 'string' ? { uri: imageSource } : imageSource} style={styles.itemImage} resizeMode={'cover'}></Image>
+      {/* <Image source={typeof imageSource === 'string' ? { uri: imageSource } : imageSource} style={styles.itemImage} resizeMode={'cover'}></Image> */}
+      <Image source={book.thumbnail ? { uri: 'data:image/png;base64,'+book.thumbnail, cache: "reload" } : defaultCover} style={styles.itemImage} resizeMode={'cover'} ></Image>
+
       <View style={styles.itemInfos}>
         <ThemedText type="titreLivreHorizontal" numberOfLines={1}>{book.title}</ThemedText>
         <ThemedText type="auteurLivreHorizontal">{book.authors ? book.authors[0] : "Inconnue"}</ThemedText>
