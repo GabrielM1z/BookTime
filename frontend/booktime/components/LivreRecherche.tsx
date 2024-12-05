@@ -11,7 +11,10 @@ const defaultCover = require('@/assets/images/logo_refait.png');
 async function getImageAPI(book: BookInfos): Promise<string | number> {
   if (book.thumbnail) {
     try {
-      const response = await axios.get(book.thumbnail);
+      console.log(book.thumbnail)
+      const response = await axios.get(book.thumbnail, {
+        responseType: 'blob',
+      });
       if (response.status === 200) {
         return response.data; // Assurez-vous que response.data correspond à un type Image
       } else {
@@ -29,7 +32,7 @@ async function getImageAPI(book: BookInfos): Promise<string | number> {
 export const LivreRecherche = ({ book }: { book: BookInfos }) => {
 
   const [imageSource, setImageSource] = useState<string | number>(defaultCover);
-
+  console.log(("coucou"))
   useEffect(() => {
     const fetchImage = async () => {
       const image = await getImageAPI(book);
@@ -48,7 +51,7 @@ export const LivreRecherche = ({ book }: { book: BookInfos }) => {
   return (
     <View style={styles.itemContainer}>
 
-      <Image source={getImageAPI(book)} style={styles.itemImage} resizeMode={'cover'}></Image>
+      <Image source={typeof imageSource === 'string' ? { uri: imageSource } : imageSource} style={styles.itemImage} resizeMode={'cover'}></Image>
       <View style={styles.itemInfos}>
         <ThemedText type="titreLivreHorizontal" numberOfLines={1}>{book.title}</ThemedText>
         <ThemedText type="auteurLivreHorizontal">{book.authors ? book.authors[0] : "Inconnue"}</ThemedText>
