@@ -33,9 +33,9 @@ func (ar *ActionRepository) InsertAction(post model.PostAction, idUser uuid.UUID
 	return true
 }
 
-func (ar *ActionRepository) SelectActions() []model.Action {
-	query := "SELECT * FROM action"
-	rows, err := ar.DB.Query(query)
+func (ar *ActionRepository) SelectActions(idUser uuid.UUID) []model.Action {
+	query := "SELECT * FROM action WHERE id_user = $1"
+	rows, err := ar.DB.Query(query, idUser)
 	if err != nil {
 		log.Fatal(err)
 	}
