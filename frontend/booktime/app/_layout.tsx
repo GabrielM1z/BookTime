@@ -1,18 +1,19 @@
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Slot, Stack } from "expo-router";
+import { Stack } from "expo-router";
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { SQLiteProvider } from 'expo-sqlite';
-
 import { QueryProvider } from '@/components/QueryProvider';
-import { SessionProvider } from "@/context/auth";
 import React from 'react';
 import { migrateDbIfNeeded } from '@/db/init';
 import { deleteDatabaseAsync } from 'expo-sqlite';
+import { RepositoryProviderWrapper } from '@/providers/repository';
+import { AuthProvider } from '@/providers/auth';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -24,6 +25,7 @@ export default function RootLayout() {
     const colorScheme = useColorScheme();
 
     // deleteDatabaseAsync('booktime.db');
+    // AsyncStorage.clear();
 
     useEffect(() => {
         if (loaded) {
@@ -38,8 +40,8 @@ export default function RootLayout() {
     return (
         <SafeAreaProvider>
             <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-                <SQLiteProvider databaseName='booktime.db' onInit={migrateDbIfNeeded}>
-                    <SessionProvider>
+                <RepositoryProviderWrapper databaseName='booktime.db' onInit={migrateDbIfNeeded}>
+                    <AuthProvider>
                         <QueryProvider>
                             <Stack>
                                 <Stack.Screen name="(app)" options={{ headerShown: false }} />
@@ -47,8 +49,8 @@ export default function RootLayout() {
                                 <Stack.Screen name="+not-found" />
                             </Stack>
                         </QueryProvider>
-                    </SessionProvider>
-                </SQLiteProvider>
+                    </AuthProvider>
+                </RepositoryProviderWrapper>
             </ThemeProvider>
         </SafeAreaProvider>
     );
