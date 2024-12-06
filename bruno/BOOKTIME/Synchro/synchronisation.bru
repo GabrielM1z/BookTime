@@ -1,0 +1,45 @@
+meta {
+  name: synchronisation
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{base_book_url}}/synchro
+  body: json
+  auth: bearer
+}
+
+params:query {
+  ~jsonData: 
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  [{
+    "id_action": "550e8400-e29b-41d4-a716-446655440041",
+    "id_user": "a18d0c1e-474e-4ea6-a334-eed99789e03b",
+    "table": "STATE",
+    "date": "2024-12-06T08:23:04.037215Z",
+    "type": "UPDATE",
+    "action": "ewogICAgInN0YXRlIjogIlJlYWRlZCIsCiAgICAicmVhZF9jb3VudCI6IDEsCiAgICAicHJvZ3Jlc3Npb24iOiAyNTUsCiAgICAibGFzdF9yZWFkX2RhdGUiOiAiMjAyNC0xMi0wNiIsCiAgICAiaWRfYm9vayI6ICIzOTk4ODYwMS0wYTZhLTQ2NGUtOGM3MS0wOWQ3YjU2YTNjNGMiLAogICAgImlkX3VzZXIiOiAiYTE4ZDBjMWUtNDc0ZS00ZWE2LWEzMzQtZWVkOTk3ODllMDNiIiwKICAgICJpc19hdmFpbGFibGUiOiB0cnVlCn0=",
+    "executed_by": "CLIENT"
+  }]
+  
+  
+}
+
+tests {
+  test("Status code is 200", function () {
+      expect(res.getStatus()).to.equal(200);
+  });
+}
+
+docs {
+  This is a GET request and it is used to "get" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).
+  
+  A successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data.
+}
