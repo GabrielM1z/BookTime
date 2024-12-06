@@ -31,7 +31,7 @@ func bookExists(books []model.BookItem, id string) bool {
 }
 
 func (bs *SearchService) SearchBooks(startIndex, query, title, author, genre string) ([]model.SimplifiedBook, error) {
-	baseURL := "https://www.googleapis.com/books/v1/volumes?"
+	baseURL := "https://www.googleapis.com/books/v1/volumes"
 	params := url.Values{}
 	searchQuery := query
 
