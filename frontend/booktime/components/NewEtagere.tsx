@@ -12,6 +12,7 @@ export default function NewEtagere({ onAddEtagere })
 		name: ''
 	});
 	const { libraryRepository } = useRepository();
+	const { actionRepository } = useRepository();
 
 	const handleInputChange = (field: any, value: any) => {
 		setFormData({ name: value });
@@ -20,7 +21,7 @@ export default function NewEtagere({ onAddEtagere })
 	const handleSubmit = async () => {
 		try {
             console.log('Form Data Submitted:', formData);
-            await libraryRepository.add(formData.name); // Ajoute l'étagère
+            await libraryRepository.add(formData.name, actionRepository); // Ajoute l'étagère
             setModalVisible(false); // Ferme la popup après soumission
             onAddEtagere(); // Notifie le parent pour rafraîchir la liste des étagères
         } catch (error) {
