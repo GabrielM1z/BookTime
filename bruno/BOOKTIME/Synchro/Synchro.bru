@@ -1,5 +1,5 @@
 meta {
-  name: Synchro
+  name: synchro
   type: http
   seq: 1
 }
@@ -11,10 +11,11 @@ get {
 }
 
 params:query {
-  query: école
-  ~genre: fiction
-  ~title: Harry Potter
-  ~author: J.K.
+  jsonData: [{"action": "{\"id_library\":\"f51fd458a8ed2e5e9a013e0b9f55093a\",\"name\":\"Oui\"}", "date": "2024-12-06 10:43:00", "executed_by": "CLIENT", "id_action": "6c0e7ee30bf0e7118e166c7db752e676", "id_user": null, "table_name": "LIBRARY", "type": "INSERT"}, {"action": "{\"id_library\":\"eb347475ab446c58e9a65745ab23f3e1\",\"name\":\"Ouighj\"}", "date": "2024-12-06 10:43:23", "executed_by": "CLIENT", "id_action": "204ca2980f6561d2325b75745d97e6bb", "id_user": null, "table_name": "LIBRARY", "type": "INSERT"}]
+}
+
+auth:bearer {
+  token: {{access_token}}
 }
 
 tests {
