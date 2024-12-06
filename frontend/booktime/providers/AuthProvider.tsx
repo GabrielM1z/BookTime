@@ -87,14 +87,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         })();
     }, []);
 
-    useEffect(() => {
-        (async () => {
-            console.log("Current session:", session);
-            const allSessions = await sessionRepository.getAll();
-            console.log("All sessions: ", allSessions);
-        })();
-    }, [session]);
-
     return (
         <AuthContext.Provider
             value={{
