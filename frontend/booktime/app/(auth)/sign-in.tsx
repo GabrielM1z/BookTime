@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Text, View, TextInput, StyleSheet, Alert, Switch } from 'react-native';
+import { Button, Text, View, TextInput, StyleSheet, Alert, Switch, Keyboard } from 'react-native';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
@@ -14,6 +14,7 @@ export default function SignIn() {
 
     const handleLogIn = async () => {
         setIsLoading(true);
+        Keyboard.dismiss();
 
         try {
             await logIn(username, password, rememberMe)
@@ -28,9 +29,8 @@ export default function SignIn() {
     };
 
     const handleLogAsGuest = async () => {
-        console.log('Starting guest session');
+        Keyboard.dismiss();
         await logAsGuest();
-        console.log('Guest session started');
         router.replace('(app)');
     }
 

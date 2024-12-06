@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"book/controller/interfaces"
@@ -20,12 +21,17 @@ func NewSynchroController(SynchroService *service.SynchroService) *synchroContro
 }
 
 func (bc *synchroController) Synchro(c *gin.Context) {
-
+	var uuidUser = getUserID(c)
 	jsonData := c.Query("jsonData")
 	if jsonData == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "jsonData is required"})
 		return
 	}
+
+	log.Println("jsonData")
+	log.Println(jsonData)
+	// log.Println("[]byte(jsonData)")
+	// log.Println([]byte(jsonData))
 
 	// Convertir la chaîne JSON en slice d'Action
 	var actions []model.Action
@@ -35,7 +41,7 @@ func (bc *synchroController) Synchro(c *gin.Context) {
 		return
 	}
 
-	actions_to_exec, err := bc.SynchroService.Synchro(actions)
+	actions_to_exec, err := bc.SynchroService.Synchro(uuidUser, actions)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
