@@ -32,10 +32,10 @@ func (slr *SharedLibraryRepository) InsertSharedLibrary(sharedLibrary model.Post
 		log.Println(err2)
 		return false
 	}
-	
+
 	actionMap := map[string]interface{}{
-		"idUser":		idUser,
-		"idLibrary":	sharedLibrary.IdLibrary,
+		"id_user":    idUser,
+		"id_library": sharedLibrary.IdLibrary,
 	}
 
 	return slr.LogAction(idUser, "SHARED_LIBRARY", "INSERT", actionMap)
@@ -99,10 +99,10 @@ func (slr *SharedLibraryRepository) DeleteSharedLibrary(idUser uuid.UUID, idLibr
 		log.Println(err)
 		return false
 	}
-	
+
 	actionMap := map[string]interface{}{
-		"idUser": idUser,
-		"idBook": idLibrary,
+		"id_user":    idUser,
+		"id_library": idLibrary,
 	}
 
 	return slr.LogAction(idUser, "SHARED_LIBRARY", "DELETE", actionMap)

@@ -185,13 +185,22 @@ func (ss *SynchroService) Synchro(uuidUser uuid.UUID, client_actions []model.Act
 
 	server_actions := repository.NewActionRepository(ss.DB).SelectActions(uuidUser)
 
+	log.Println("PASS THERE")
+
 	mixed_actions := slices.Concat(server_actions, client_actions)
+
+	log.Println("PASS LA")
 
 	filtered_actions, err := ss.filteredActions(mixed_actions)
 
+	log.Println("PASS HERE")
+
 	server_actions_to_exec, client_actions_to_exec, err := ss.whoDoWhichActions(filtered_actions)
 
-	log.Println(server_actions_to_exec)
+	// log.Println("client_actions_to_exec : ")
+	// log.Println(client_actions_to_exec)
+
+	ss.executeActionsToSynchronizeServer(server_actions_to_exec)
 
 	return client_actions_to_exec, err
 }
@@ -261,21 +270,41 @@ func (ss *SynchroService) executeActionsToSynchronizeServer(clientActionsToExecu
 			}
 
 		case "STATE":
+			log.Println("PASS THERE STATE")
+			log.Println(" action : ")
+			log.Println(action)
 			var state model.State
-			err := json.Unmarshal([]byte(action.Action), &state)
+			err := json.Unmarshal(action.Action, &state)
+
 			if err != nil {
 				log.Fatalf("Erreur lors du décodage du JSON : %v", err)
 			}
+
+			var data map[string]interface{}
+			erer := json.Unmarshal([]byte(action.Action), &data)
+			if erer != nil {
+				log.Fatalf("erreur lors du décodage JSON : %w", erer)
+			}
+
+			log.Println("state : ")
+			log.Println(state)
+
+			log.Println("state : ")
+			log.Println(data)
+
 			switch action.Type {
 			case "INSERT":
+				log.Println("PASS THERE STATE INSERT")
 				if res := repository.NewStateRepository(ss.DB).InsertState(state); !res {
 					return fmt.Errorf("insert failed for ID %s", action.IdAction)
 				}
 			case "UPDATE":
+				log.Println("PASS THERE STATE U")
 				if res := repository.NewStateRepository(ss.DB).UpdateState(state.IdUser, state.IdBook, state); !res {
 					return fmt.Errorf("update failed for ID %s", action.IdAction)
 				}
 			case "DELETE":
+				log.Println("PASS THERE STATE DEL")
 				if res := repository.NewStateRepository(ss.DB).DeleteState(state.IdBook, state.IdUser); !res {
 					return fmt.Errorf("delete failed for ID %s", action.IdAction)
 				}

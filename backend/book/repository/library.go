@@ -42,8 +42,8 @@ func (lr *LibraryRepository) InsertLibrary(libary model.Library, idUser uuid.UUI
 	}
 
 	actionMap := map[string]interface{}{
-		"name":      libary.Name,
-		"idLibrary": IdLibrary,
+		"name":       libary.Name,
+		"id_library": IdLibrary,
 	}
 
 	return lr.LogAction(idUser, "LIBRARY", "INSERT", actionMap)
@@ -137,7 +137,7 @@ func (lr *LibraryRepository) DeleteLibrary(id uuid.UUID, idUser uuid.UUID) bool 
 	}
 
 	actionMap := map[string]interface{}{
-		"idLibrary": id,
+		"id_library": id,
 	}
 
 	return lr.LogAction(idUser, "LIBRARY", "DELETE", actionMap)

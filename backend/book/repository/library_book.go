@@ -116,8 +116,8 @@ func (lbr *LibraryBookRepository) InsertLibraryBook(post model.PostLibraryBook, 
 	}
 
 	actionMap := map[string]interface{}{
-		"idBook":    post.BookId,
-		"idLibrary": post.LibraryId,
+		"id_book":    post.BookId,
+		"id_library": post.LibraryId,
 	}
 
 	return lbr.LogAction(idUser, "LIBRARY_BOOK", "INSERT", actionMap)
@@ -150,8 +150,8 @@ func (lbr *LibraryBookRepository) DeleteLibraryBook(idLibrary, idBook uuid.UUID,
 	}
 
 	actionMap := map[string]interface{}{
-		"idLibrary": idLibrary,
-		"idBook":    idBook,
+		"id_library": idLibrary,
+		"id_book":    idBook,
 	}
 
 	return lbr.LogAction(idUser, "LIBRARY_BOOK", "DELETE", actionMap)

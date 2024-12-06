@@ -149,6 +149,7 @@ func (sc *StateController) GetState(c *gin.Context) {
 }
 
 func (sc *StateController) UpdateState(c *gin.Context) {
+	log.Println("CONTROLLER : UpdateState")
 	db := sc.DB
 	repoState := repository.NewStateRepository(db)
 

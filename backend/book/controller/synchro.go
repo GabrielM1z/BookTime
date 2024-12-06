@@ -30,8 +30,8 @@ func (bc *synchroController) Synchro(c *gin.Context) {
 
 	log.Println("jsonData")
 	log.Println(jsonData)
-	log.Println("[]byte(jsonData)")
-	log.Println([]byte(jsonData))
+	// log.Println("[]byte(jsonData)")
+	// log.Println([]byte(jsonData))
 
 	// Convertir la chaîne JSON en slice d'Action
 	var actions []model.Action
