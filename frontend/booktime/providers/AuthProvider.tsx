@@ -23,13 +23,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const sessionRepository = new SessionRepository();
 
     const logIn = async (username: string, password: string, remember: boolean) => {
-        const authResponse = await authenticate(username, password);
-        const newSession = Session.fromKeycloak(authResponse);
-        if (remember) {
-            await sessionRepository.save(newSession);
-            await sessionRepository.setCurrentSessionId(newSession.id);
+        try {
+            setIsLoading(true);
+            const authResponse = await authenticate(username, password);
+            const newSession = Session.fromKeycloak(authResponse);
+            if (remember) {
+                await sessionRepository.save(newSession);
+                await sessionRepository.setCurrentSessionId(newSession.id);
+            }
+            setSession(newSession);
         }
-        setSession(newSession);
+        catch (error) {
+            console.error(error);
+            throw error;
+        }
+        finally {
+            setIsLoading(false);
+        }
+
     };
 
     const logAsGuest = async () => {
