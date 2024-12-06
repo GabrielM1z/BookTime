@@ -10,9 +10,10 @@ import { QueryProvider } from '@/components/QueryProvider';
 import React from 'react';
 import { migrateDbIfNeeded } from '@/db/init';
 import { deleteDatabaseAsync } from 'expo-sqlite';
-import { RepositoryProviderWrapper } from '@/providers/repository';
-import { AuthProvider } from '@/providers/auth';
+import { RepositoryProviderWrapper } from '@/providers/RepositoryProvider';
+import { AuthProvider } from '@/providers/AuthProvider';
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { ApiWrapper } from '@/services/api';
 
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -24,7 +25,7 @@ export default function RootLayout() {
     });
     const colorScheme = useColorScheme();
 
-    deleteDatabaseAsync('booktime.db');
+    // deleteDatabaseAsync('booktime.db');
     // AsyncStorage.clear();
 
     useEffect(() => {
@@ -42,13 +43,15 @@ export default function RootLayout() {
             <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
                 <RepositoryProviderWrapper databaseName='booktime.db' onInit={migrateDbIfNeeded}>
                     <AuthProvider>
-                        <QueryProvider>
-                            <Stack>
-                                <Stack.Screen name="(app)" options={{ headerShown: false }} />
-                                <Stack.Screen name="(auth)" />
-                                <Stack.Screen name="+not-found" />
-                            </Stack>
-                        </QueryProvider>
+                        <ApiWrapper>
+                            <QueryProvider>
+                                <Stack>
+                                    <Stack.Screen name="(app)" options={{ headerShown: false }} />
+                                    <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                                    <Stack.Screen name="+not-found" />
+                                </Stack>
+                            </QueryProvider>
+                        </ApiWrapper>
                     </AuthProvider>
                 </RepositoryProviderWrapper>
             </ThemeProvider>

@@ -49,8 +49,9 @@ export default function pageEtageres() {
         await refreshEtageres(); // Recharge les étagères depuis la base après l'ajout
     };
 
-	console.log("etagere", etageres)
-    console.log("action", action)
+	// console.log("etagere", etageres)
+    // console.log("action", action)
+    // console.log('trigger : ', trigger)
 
     return (
 		<ScrollView style={styles.etagereContainer}>
