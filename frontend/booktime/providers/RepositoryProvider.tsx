@@ -4,7 +4,6 @@ import { LibraryRepositoryProps } from "@/repositories/library";
 import { UserRepositoryProps } from "@/repositories/user";
 import { SQLiteProvider, SQLiteProviderProps } from "expo-sqlite";
 import React, { createContext } from "react";
-import { ApiProvider } from "./api";
 
 export interface RepositoryContextProps {
     userRepository: UserRepositoryProps;
@@ -35,9 +34,7 @@ export function RepositoryProviderWrapper({
 }: SQLiteProviderProps) {
     return (
         <SQLiteProvider {...props}>
-            <ApiProvider>
-                <RepositoryProvider>{children}</RepositoryProvider>
-            </ApiProvider>
+            <RepositoryProvider>{children}</RepositoryProvider>
         </SQLiteProvider>
     );
 }

@@ -1,4 +1,4 @@
-import { RepositoryContext } from "@/providers/repository";
+import { RepositoryContext } from "@/providers/RepositoryProvider";
 import { useContext } from "react";
 
 export function useRepository() {

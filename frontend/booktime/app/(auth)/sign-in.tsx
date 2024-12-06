@@ -28,9 +28,7 @@ export default function SignIn() {
     };
 
     const handleLogAsGuest = async () => {
-        console.log('Starting guest session');
         await logAsGuest();
-        console.log('Guest session started');
         router.replace('(app)');
     }
 

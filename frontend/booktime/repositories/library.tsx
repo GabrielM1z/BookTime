@@ -1,5 +1,5 @@
-import { useApi } from '@/hooks/useApi';
-import { Library } from '@/models/library';
+import api from '@/services/api';
+import { Library } from '@/models/Library';
 import { Api } from '@/services/api';
 import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite';
 
@@ -34,12 +34,6 @@ export class SQLiteLibraryRepository implements LibraryRepositoryProps {
 }
 
 export class APILibraryRepository implements LibraryRepositoryProps {
-    private api: Api;
-
-    constructor() {
-        this.api = useApi();
-    }
-    
     async getAll(): Promise<Library[]> {
         return [];
     }
