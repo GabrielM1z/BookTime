@@ -1,33 +1,17 @@
 meta {
-  name: Synchro
+  name: synchro
   type: http
   seq: 1
 }
 
 get {
-  url: {{base_book_url}}/synchro?jsonData=[{
-  "id_action": "550e8400-e29b-41d4-a716-446655440041",
-  "id_user": "a18d0c1e-474e-4ea6-a334-eed99789e03b",
-  "table": "STATE",
-  "date": "2024-12-06T08:23:04.037215Z",
-  "type": "UPDATE",
-  "action": "ewogICAgInN0YXRlIjogIlJlYWRlZCIsCiAgICAicmVhZF9jb3VudCI6IDEsCiAgICAicHJvZ3Jlc3Npb24iOiAyNTUsCiAgICAibGFzdF9yZWFkX2RhdGUiOiAiMjAyNC0xMi0wNiIsCiAgICAiaWRfYm9vayI6ICIzOTk4ODYwMS0wYTZhLTQ2NGUtOGM3MS0wOWQ3YjU2YTNjNGMiLAogICAgImlkX3VzZXIiOiAiYTE4ZDBjMWUtNDc0ZS00ZWE2LWEzMzQtZWVkOTk3ODllMDNiIiwKICAgICJpc19hdmFpbGFibGUiOiB0cnVlCn0=",
-  "executed_by": "CLIENT"
-}]
+  url: {{base_book_url}}/synchro?jsonData=[{"action": "{\"id_library\":\"f51fd458a8ed2e5e9a013e0b9f55093a\",\"name\":\"Oui\"}", "date": "2024-12-06 10:43:00", "executed_by": "CLIENT", "id_action": "6c0e7ee30bf0e7118e166c7db752e676", "id_user": null, "table_name": "LIBRARY", "type": "INSERT"}, {"action": "{\"id_library\":\"eb347475ab446c58e9a65745ab23f3e1\",\"name\":\"Ouighj\"}", "date": "2024-12-06 10:43:23", "executed_by": "CLIENT", "id_action": "204ca2980f6561d2325b75745d97e6bb", "id_user": null, "table_name": "LIBRARY", "type": "INSERT"}]
   body: none
   auth: bearer
 }
 
 params:query {
-  jsonData: [{
-    "id_action": "550e8400-e29b-41d4-a716-446655440041",
-    "id_user": "a18d0c1e-474e-4ea6-a334-eed99789e03b",
-    "table": "STATE",
-    "date": "2024-12-06T08:23:04.037215Z",
-    "type": "UPDATE",
-    "action": "ewogICAgInN0YXRlIjogIlJlYWRlZCIsCiAgICAicmVhZF9jb3VudCI6IDEsCiAgICAicHJvZ3Jlc3Npb24iOiAyNTUsCiAgICAibGFzdF9yZWFkX2RhdGUiOiAiMjAyNC0xMi0wNiIsCiAgICAiaWRfYm9vayI6ICIzOTk4ODYwMS0wYTZhLTQ2NGUtOGM3MS0wOWQ3YjU2YTNjNGMiLAogICAgImlkX3VzZXIiOiAiYTE4ZDBjMWUtNDc0ZS00ZWE2LWEzMzQtZWVkOTk3ODllMDNiIiwKICAgICJpc19hdmFpbGFibGUiOiB0cnVlCn0=",
-    "executed_by": "CLIENT"
-  }]
+  jsonData: [{"action": "{\"id_library\":\"f51fd458a8ed2e5e9a013e0b9f55093a\",\"name\":\"Oui\"}", "date": "2024-12-06 10:43:00", "executed_by": "CLIENT", "id_action": "6c0e7ee30bf0e7118e166c7db752e676", "id_user": null, "table_name": "LIBRARY", "type": "INSERT"}, {"action": "{\"id_library\":\"eb347475ab446c58e9a65745ab23f3e1\",\"name\":\"Ouighj\"}", "date": "2024-12-06 10:43:23", "executed_by": "CLIENT", "id_action": "204ca2980f6561d2325b75745d97e6bb", "id_user": null, "table_name": "LIBRARY", "type": "INSERT"}]
 }
 
 auth:bearer {
