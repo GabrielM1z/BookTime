@@ -21,17 +21,24 @@ export default function pageEtageres() {
     ];
 
 	const [etageres, setEtageres] = useState([]);
+    const [action, setAction] = useState([]);
+    const [trigger, setTrigger] = useState([]);
 
     // Charger les étagères initiales depuis la base de données
     useEffect(() => {
         refreshEtageres();
     }, []);
     const { libraryRepository } = useRepository();
+    const { actionRepository } = useRepository();
 
     const refreshEtageres = async () => {
         try {
             const data = await libraryRepository.getAll();
             setEtageres(data);
+            const data2 = await actionRepository.getAll();
+            setAction(data2);
+            const data3 = await actionRepository.getTrigger();
+            setTrigger(data3);
         } catch (error) {
             console.error('Error fetching etageres:', error);
         }
@@ -42,7 +49,9 @@ export default function pageEtageres() {
         await refreshEtageres(); // Recharge les étagères depuis la base après l'ajout
     };
 
-	console.log(etageres)
+	console.log("etagere", etageres)
+    console.log("action", action)
+    console.log('trigger : ', trigger)
 
     return (
 		<ScrollView style={styles.etagereContainer}>

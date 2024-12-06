@@ -24,7 +24,7 @@ export default function RootLayout() {
     });
     const colorScheme = useColorScheme();
 
-    // deleteDatabaseAsync('booktime.db');
+    deleteDatabaseAsync('booktime.db');
     // AsyncStorage.clear();
 
     useEffect(() => {

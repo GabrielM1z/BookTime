@@ -8,43 +8,19 @@ import axios from 'axios';
 
 const defaultCover = require('@/assets/images/logo_refait.png');
 
-// async function getImageAPI(book: BookInfos): Promise<string | number> {
-//   if (book.thumbnail) {
-//     try {
-//       console.log(book.thumbnail)
-//       const response = await axios.get(book.thumbnail, {
-//         responseType: 'blob',
-//       });
-//       if (response.status === 200) {
-//         return response.data; // Assurez-vous que response.data correspond à un type Image
-//       } else {
-//         return defaultCover; // Par défaut si le statut n'est pas 200
-//       }
-//     } catch (e) {
-//       console.log(e);
-//       return defaultCover; // En cas d'erreur dans la requête
-//     }
-//   } else {
-//     return defaultCover; // Si aucun thumbnail n'est fourni
-//   }
-// }
+async function getImageAsBase64(url: string): Promise<string | null> {
+  try {
+    const response = await axios.get(url, { responseType: 'arraybuffer' }); // Utilisez 'arraybuffer' pour manipuler des données binaires
+    const base64 = Buffer.from(response.data, 'binary').toString('base64'); // Convertissez les données en Base64
+    console.log('Image fetched successfully as Base64.');
+    return `data:image/jpeg;base64,${base64}`; // Retournez une chaîne Base64 utilisable dans React Native
+  } catch (error) {
+    console.error('Error fetching the image as Base64:', error);
+    return null;
+  }
+}
 
 export const LivreRecherche = ({ book }: { book: BookInfos }) => {
-
-  // const [imageSource, setImageSource] = useState<string | number>(defaultCover);
-  // console.log(("coucou"))
-  // useEffect(() => {
-  //   const fetchImage = async () => {
-  //     const image = await getImageAPI(book);
-  //     setImageSource(image);
-  //   };
-
-  //   fetchImage().catch((error) => {
-  //     console.error('Error loading image:', error);
-  //   });
-  // }, [book]);
-
-  console.log(book.thumbnail)
 
   const handleAddBook = () => {
     console.log(`Book added: ${book}`);
@@ -54,7 +30,7 @@ export const LivreRecherche = ({ book }: { book: BookInfos }) => {
     <View style={styles.itemContainer}>
 
       {/* <Image source={typeof imageSource === 'string' ? { uri: imageSource } : imageSource} style={styles.itemImage} resizeMode={'cover'}></Image> */}
-      <Image source={book.thumbnail ? { uri: 'data:image/png;base64,'+book.thumbnail, cache: "reload" } : defaultCover} style={styles.itemImage} resizeMode={'cover'} ></Image>
+      <Image source={{uri:"data:image/png;base64,"+getImageAsBase64(book.thumbnail)}} defaultSource={defaultCover}  style={styles.itemImage} resizeMode={'cover'} ></Image>
 
       <View style={styles.itemInfos}>
         <ThemedText type="titreLivreHorizontal" numberOfLines={1}>{book.title}</ThemedText>

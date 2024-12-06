@@ -18,6 +18,9 @@ export const initDB = async (db: SQLiteDatabase) => {
     initSharedLibrary(db)
     initUser(db)
     initAction(db)
+
+    // init des trigger
+    initTrigger(db)
 };
 
 export default initDB;
@@ -214,9 +217,9 @@ const initUser = async (db: SQLiteDatabase) => {
 const initAction = async (db: SQLiteDatabase) => {
     try {
         db.execAsync(`
-            CREATE TABLE IF NOT EXISTS library (
+            CREATE TABLE IF NOT EXISTS action (
                 id_action TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
-                id_action TEXT,
+                id_user TEXT,
                 table_name VARCHAR(50),
                 date TIMESTAMP,
                 type VARCHAR(50),
@@ -227,5 +230,463 @@ const initAction = async (db: SQLiteDatabase) => {
         console.log('Action initialized successfully');
     } catch (error) {
         console.error('Error initializing Action', error);
+    }
+}
+
+
+
+
+
+
+////////////////////////// Création des TRIGGER //////////////////////////
+
+// création des trigger
+const initTrigger = async (db: SQLiteDatabase) => {
+
+    // State
+    initTriggerInsertState(db);
+    initTriggerUpdateState(db);
+    initTriggerDeleteState(db);
+
+    // Library
+    initTriggerInsertLibrary(db);
+    initTriggerUpdateLibrary(db);
+    initTriggerDeleteLibrary(db);
+
+    // Library Book
+    initTriggerInsertLibraryBook(db);
+    initTriggerDeleteLibraryBook(db);
+
+    // Shared Library
+    initTriggerInsertSharedLibrary(db);
+    initTriggerDeleteSharedLibrary(db);
+}
+
+
+
+
+///////////// State : CUD /////////////
+
+/**
+ * Initialisation du trigger de'insertion d'un state
+ * @param db 
+ */
+const initTriggerInsertState = async (db: SQLiteDatabase) => {
+    try {
+        db.execAsync(`
+            CREATE TRIGGER IF NOT EXISTS trg_state_insert
+            AFTER INSERT
+            ON state
+            FOR EACH ROW
+            BEGIN
+                INSERT INTO Action (
+                    id_action, 
+                    table_name, 
+                    date, 
+                    type, 
+                    action, 
+                    executed_by
+                )
+                VALUES (
+                    lower(hex(randomblob(16))),
+                    'STATE', 
+                    CURRENT_TIMESTAMP, 
+                    'INSERT', 
+                    json_object(
+                        'id_state', NEW.id_state,
+                        'state', NEW.state,
+                        'progression', NEW.progression,
+                        'read_count', NEW.read_count,
+                        'last_read_date', NEW.last_read_date,
+                        'id_user', NEW.id_user,
+                        'id_book', NEW.id_book,
+                        'is_available', NEW.is_available
+                    ), 
+                    'CLIENT'
+                );
+            END;
+        `);
+        console.log('Trigger state insert initialized successfully');
+    } catch (error) {
+        console.error('Error initializing trigger state insert', error);
+    }
+}
+
+/**
+ * Initialisation du trigger de mise à jour d'un state
+ * @param db 
+ */
+const initTriggerUpdateState = async (db: SQLiteDatabase) => {
+    try {
+        db.execAsync(`
+            CREATE TRIGGER IF NOT EXISTS trg_state_update
+            AFTER UPDATE
+            ON state
+            FOR EACH ROW
+            BEGIN
+                INSERT INTO Action (
+                    id_action, 
+                    table_name, 
+                    date, 
+                    type, 
+                    action, 
+                    executed_by
+                )
+                VALUES (
+                    lower(hex(randomblob(16))),
+                    'STATE', 
+                    CURRENT_TIMESTAMP, 
+                    'INSERT', 
+                    json_object(
+                        'id_state', NEW.id_state,
+
+                        CASE WHEN OLD.state != NEW.state THEN 'state' ELSE NULL END, 
+                        CASE WHEN OLD.state != NEW.state THEN NEW.state ELSE NULL END,
+
+                        CASE WHEN OLD.progression != NEW.progression THEN 'progression' ELSE NULL END, 
+                        CASE WHEN OLD.progression != NEW.progression THEN NEW.progression ELSE NULL END,
+
+                        CASE WHEN OLD.read_count != NEW.read_count THEN 'read_count' ELSE NULL END, 
+                        CASE WHEN OLD.read_count != NEW.read_count THEN NEW.read_count ELSE NULL END,
+
+                        CASE WHEN OLD.last_read_date != NEW.last_read_date THEN 'last_read_date' ELSE NULL END, 
+                        CASE WHEN OLD.last_read_date != NEW.last_read_date THEN NEW.last_read_date ELSE NULL END,
+
+                        CASE WHEN OLD.id_user != NEW.id_user THEN 'id_user' ELSE NULL END, 
+                        CASE WHEN OLD.id_user != NEW.id_user THEN NEW.id_user ELSE NULL END,
+                        
+                        CASE WHEN OLD.id_book != NEW.id_book THEN 'id_book' ELSE NULL END, 
+                        CASE WHEN OLD.id_book != NEW.id_book THEN NEW.id_book ELSE NULL END,
+
+                        CASE WHEN OLD.is_available != NEW.is_available THEN 'is_available' ELSE NULL END, 
+                        CASE WHEN OLD.is_available != NEW.is_available THEN NEW.is_available ELSE NULL END
+                    ), 
+                    'CLIENT'
+                );
+            END;
+        `);
+        console.log('Trigger state update initialized successfully');
+    } catch (error) {
+        console.error('Error initializing trigger state update', error);
+    }
+}
+
+/**
+ * Initialisation du trigger de suppression d'un state
+ * @param db 
+ */
+const initTriggerDeleteState = async (db: SQLiteDatabase) => {
+    try {
+        db.execAsync(`
+            CREATE TRIGGER IF NOT EXISTS trg_state_delete
+            AFTER DELETE
+            ON state
+            FOR EACH ROW
+            BEGIN
+                INSERT INTO Action (
+                    id_action, 
+                    table_name, 
+                    date, 
+                    type, 
+                    action, 
+                    executed_by
+                )
+                VALUES (
+                    lower(hex(randomblob(16))),
+                    'STATE', 
+                    CURRENT_TIMESTAMP, 
+                    'DELETE', 
+                    json_object(
+                        'id_state', OLD.id_state
+                    ), 
+                    'CLIENT'
+                );
+            END;
+        `);
+        console.log('Trigger state delete initialized successfully');
+    } catch (error) {
+        console.error('Error initializing trigger state delete', error);
+    }
+}
+
+
+///////////// Library : CUD /////////////
+
+/**
+ * Initialisation du trigger d'insertion d'une library
+ * @param db 
+ */
+const initTriggerInsertLibrary = async (db: SQLiteDatabase) => {
+    try {
+        db.execAsync(`
+            CREATE TRIGGER IF NOT EXISTS trg_library_insert
+            AFTER INSERT
+            ON library
+            FOR EACH ROW
+            BEGIN
+                INSERT INTO Action (
+                    table_name, 
+                    date, 
+                    type, 
+                    action, 
+                    executed_by
+                )
+                VALUES (
+                    'LIBRARY', 
+                    CURRENT_TIMESTAMP, 
+                    'INSERT', 
+                    json_object(
+                        'id_library', NEW.id_library,
+                        'name', NEW.name
+                    ), 
+                    'CLIENT'
+                );
+            END;
+        `);
+        console.log('Trigger library insert initialized successfully');
+    } catch (error) {
+        console.error('Error initializing trigger library insert', error);
+    }
+}
+
+
+/**
+ * Initialisation du trigger de mise à jour d'un state
+ * @param db 
+ */
+const initTriggerUpdateLibrary = async (db: SQLiteDatabase) => {
+    try {
+        db.execAsync(`
+            CREATE TRIGGER IF NOT EXISTS trg_library_update
+            AFTER UPDATE
+            ON library
+            FOR EACH ROW
+            BEGIN
+                INSERT INTO Action (
+                    id_action, 
+                    table_name, 
+                    date, 
+                    type, 
+                    action, 
+                    executed_by
+                )
+                VALUES (
+                    lower(hex(randomblob(16))),
+                    'LIBRARY', 
+                    CURRENT_TIMESTAMP, 
+                    'UPDATE', 
+                    json_object(
+                        'id_library', NEW.id_library,
+                        CASE WHEN OLD.name != NEW.name THEN 'name' ELSE NULL END, 
+                        CASE WHEN OLD.name != NEW.name THEN NEW.name ELSE NULL END
+                    ), 
+                    'CLIENT'
+                );
+            END;
+        `);
+        console.log('Trigger library update initialized successfully');
+    } catch (error) {
+        console.error('Error initializing trigger library update', error);
+    }
+}
+
+/**
+ * Initialisation du trigger de suppression d'une library
+ * @param db 
+ */
+const initTriggerDeleteLibrary = async (db: SQLiteDatabase) => {
+    try {
+        db.execAsync(`
+            CREATE TRIGGER IF NOT EXISTS trg_library_delete
+            AFTER DELETE
+            ON library
+            FOR EACH ROW
+            BEGIN
+                INSERT INTO Action (
+                    id_action, 
+                    table_name, 
+                    date, 
+                    type, 
+                    action, 
+                    executed_by
+                )
+                VALUES (
+                    lower(hex(randomblob(16))),
+                    'LIBRARY', 
+                    CURRENT_TIMESTAMP, 
+                    'DELETE', 
+                    json_object(
+                        'id_library', OLD.id_library
+                    ), 
+                    'CLIENT'
+                );
+            END;
+        `);
+        console.log('Trigger state delete initialized successfully');
+    } catch (error) {
+        console.error('Error initializing trigger state delete', error);
+    }
+}
+
+
+///////////// SharedLibrary : CD /////////////
+
+/**
+ * Initialisation du trigger d'insertion d'une Library partagé
+ * @param db 
+ */
+const initTriggerInsertSharedLibrary = async (db: SQLiteDatabase) => {
+    try {
+        db.execAsync(`
+            CREATE TRIGGER IF NOT EXISTS trg_shared_library_insert
+            AFTER INSERT
+            ON shared_library
+            FOR EACH ROW
+            BEGIN
+                INSERT INTO Action (
+                    id_action, 
+                    table_name, 
+                    date, 
+                    type, 
+                    action, 
+                    executed_by
+                )
+                VALUES (
+                    lower(hex(randomblob(16))),
+                    'SHARED_LIBRARY', 
+                    CURRENT_TIMESTAMP, 
+                    'INSERT', 
+                    json_object(
+                        'id_user', NEW.id_user,
+                        'id_library', NEW.id_library
+                    ), 
+                    'CLIENT'
+                );
+            END;
+        `);
+        console.log('Trigger shared_library insert initialized successfully');
+    } catch (error) {
+        console.error('Error initializing trigger shared_library insert', error);
+    }
+}
+
+/**
+ * Initialisation du trigger de suppression d'une Library partagé
+ * @param db 
+ */
+const initTriggerDeleteSharedLibrary = async (db: SQLiteDatabase) => {
+    try {
+        db.execAsync(`
+            CREATE TRIGGER IF NOT EXISTS trg_shared_library_delete
+            AFTER DELETE
+            ON shared_library
+            FOR EACH ROW
+            BEGIN
+                INSERT INTO Action (
+                    id_action, 
+                    table_name, 
+                    date, 
+                    type, 
+                    action, 
+                    executed_by
+                )
+                VALUES (
+                    lower(hex(randomblob(16))),
+                    'SHARED_LIBRARY', 
+                    CURRENT_TIMESTAMP, 
+                    'DELETE', 
+                    json_object(
+                        'id_user', OLD.id_user,
+                        'id_library', OLD.id_library
+                    ), 
+                    'CLIENT'
+                );
+            END;
+        `);
+        console.log('Trigger shared_library delete initialized successfully');
+    } catch (error) {
+        console.error('Error initializing trigger shared_library delete', error);
+    }
+}
+
+
+///////////// LibraryBook : CD /////////////
+
+/**
+ * Initialisation du trigger d'insertion d'une library book
+ * @param db 
+ */
+const initTriggerInsertLibraryBook = async (db: SQLiteDatabase) => {
+    try {
+        db.execAsync(`
+            CREATE TRIGGER IF NOT EXISTS trg_library_book_insert
+            AFTER INSERT
+            ON library_book
+            FOR EACH ROW
+            BEGIN
+                INSERT INTO Action (
+                    id_action, 
+                    table_name, 
+                    date, 
+                    type, 
+                    action, 
+                    executed_by
+                )
+                VALUES (
+                    lower(hex(randomblob(16))),
+                    'LIBRARY_BOOK', 
+                    CURRENT_TIMESTAMP, 
+                    'INSERT', 
+                    json_object(
+                        'id_library', NEW.id_library,
+                        'id_book', NEW.id_book
+                    ), 
+                    'CLIENT'
+                );
+            END;
+        `);
+        console.log('Trigger library_book insert initialized successfully');
+    } catch (error) {
+        console.error('Error initializing trigger library_book insert', error);
+    }
+}
+
+
+/**
+ * Initialisation du trigger de suppression d'une library book
+ * @param db 
+ */
+const initTriggerDeleteLibraryBook = async (db: SQLiteDatabase) => {
+    try {
+        db.execAsync(`
+            CREATE TRIGGER IF NOT EXISTS trg_library_book_delete
+            AFTER DELETE
+            ON library_book
+            FOR EACH ROW
+            BEGIN
+                INSERT INTO Action (
+                    id_action, 
+                    table_name, 
+                    date, 
+                    type, 
+                    action, 
+                    executed_by
+                )
+                VALUES (
+                    lower(hex(randomblob(16))),
+                    'LIBRARY_BOOK', 
+                    CURRENT_TIMESTAMP, 
+                    'DELETE', 
+                    json_object(
+                        'id_library', OLD.id_library,
+                        'id_book', OLD.id_book
+                    ), 
+                    'CLIENT'
+                );
+            END;
+        `);
+        console.log('Trigger library_book delete initialized successfully');
+    } catch (error) {
+        console.error('Error initializing trigger library_book delete', error);
     }
 }
