@@ -1,7 +1,11 @@
 package interfaces
 
-import "book/model"
+import (
+	"book/model"
+
+	"github.com/google/uuid"
+)
 
 type SynchroServiceInterface interface {
-	Synchro([]model.Action) ([]model.Action, error)
+	Synchro(uuid.UUID, []model.Action) ([]model.Action, error)
 }

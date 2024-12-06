@@ -64,7 +64,7 @@ export default function HomeScreen() {
 		// formatResponse: (data: TBook) => data.items,
 	});
 
-	console.log(data);
+	// console.log(data);
 
 
 	return (
@@ -74,7 +74,7 @@ export default function HomeScreen() {
 				<FlatList
 					contentContainerStyle={styles.contentContainerStyle}
 					// keyExtractor={item => `${item.id}+${item.etag}`}
-					keyExtractor={item => item.title + item.isbn13}
+					keyExtractor={item => item.id}
 					initialNumToRender={10}
 					// data={removeDuplicates(data)}
 					data={data}

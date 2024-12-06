@@ -5,15 +5,47 @@ meta {
 }
 
 get {
-  url: {{base_book_url}}/synchro
+  url: {{base_book_url}}/synchro?jsonData=[{
+  "id_action": "0f720648-7645-4ddd-a501-c7b8d60585a6",
+  "id_user": "a18d0c1e-474e-4ea6-a334-eed99789e03b",
+  "table": "STATE",
+  "date": "2023-12-02T11:00:00Z",
+  "type": "INSERT",
+  "action": "eyJpZEJvb2siOiI3NGVhNWEwMy1kMDY2LTRjNTAtYjFhMy00NDlkN2VkNTFmMWEiLCJpZFVzZXIiOiJhMThkMGMxZS00NzRlLTRlYTYtYTMzNC1lZWQ5OTc4OWUwM2IiLCJpc0F2YWlsYWJsZSI6dHJ1ZSwibGFzdFJlYWREYXRlIjoiMTk4MC0wMS0wMSIsInByb2dyZXNzaW9uIjowLCJyZWFkQ291bnQiOjAsInN0YXRlIjoiVG9SZWFkIn0=",
+  "executed_by": "CLIENT"
+},
+{
+"id_action": "550e8400-e29b-41d4-a716-446655440001",
+"id_user": "a18d0c1e-474e-4ea6-a334-eed99789e03b",
+"table": "STATE",
+"date": "2023-12-02T11:00:00Z",
+"type": "UPDATE",
+"action": "eyJpZEJvb2siOiI3NGVhNWEwMy1kMDY2LTRjNTAtYjFhMy00NDlkN2VkNTFmMWEiLCJwcm9ncmVzc2lvbiI6ODJ9",
+"executed_by": "CLIENT"
+}]
   body: none
   auth: bearer
 }
 
 params:query {
-  ~genre: fiction
-  ~title: Harry Potter
-  ~author: J.K.
+  jsonData: [{
+    "id_action": "0f720648-7645-4ddd-a501-c7b8d60585a6",
+    "id_user": "a18d0c1e-474e-4ea6-a334-eed99789e03b",
+    "table": "STATE",
+    "date": "2023-12-02T11:00:00Z",
+    "type": "INSERT",
+    "action": "eyJpZEJvb2siOiI3NGVhNWEwMy1kMDY2LTRjNTAtYjFhMy00NDlkN2VkNTFmMWEiLCJpZFVzZXIiOiJhMThkMGMxZS00NzRlLTRlYTYtYTMzNC1lZWQ5OTc4OWUwM2IiLCJpc0F2YWlsYWJsZSI6dHJ1ZSwibGFzdFJlYWREYXRlIjoiMTk4MC0wMS0wMSIsInByb2dyZXNzaW9uIjowLCJyZWFkQ291bnQiOjAsInN0YXRlIjoiVG9SZWFkIn0=",
+    "executed_by": "CLIENT"
+  },
+  {
+  "id_action": "550e8400-e29b-41d4-a716-446655440001",
+  "id_user": "a18d0c1e-474e-4ea6-a334-eed99789e03b",
+  "table": "STATE",
+  "date": "2023-12-02T11:00:00Z",
+  "type": "UPDATE",
+  "action": "eyJpZEJvb2siOiI3NGVhNWEwMy1kMDY2LTRjNTAtYjFhMy00NDlkN2VkNTFmMWEiLCJwcm9ncmVzc2lvbiI6ODJ9",
+  "executed_by": "CLIENT"
+  }]
 }
 
 headers {

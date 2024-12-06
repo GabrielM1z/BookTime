@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"time"
 
@@ -20,7 +21,7 @@ func NewStateRepository(db *sql.DB) *StateRepository {
 	return &StateRepository{DB: db}
 }
 
-func (sr *StateRepository) InsertState(post model.PostState, idUser uuid.UUID) bool {
+func (sr *StateRepository) InsertState(state model.State) bool {
 	stmt, err := sr.DB.Prepare("INSERT INTO state (state, progression, read_count, last_read_date, is_available, id_user, id_book) VALUES ($1, $2, $3, $4, $5, $6, $7)")
 	if err != nil {
 		log.Println(err)
@@ -28,23 +29,23 @@ func (sr *StateRepository) InsertState(post model.PostState, idUser uuid.UUID) b
 	}
 	defer stmt.Close()
 
-	_, err2 := stmt.Exec(post.State, post.Progression, post.ReadCount, post.LastReadDate, post.IsAvailable, idUser, post.IdBook)
+	_, err2 := stmt.Exec(state.State, state.Progression, state.ReadCount, state.LastReadDate, state.IsAvailable, state.IdUser, state.IdBook)
 	if err2 != nil {
 		log.Println(err2)
 		return false
 	}
 
 	actionMap := map[string]interface{}{
-		"state":        post.State,
-		"progression":  post.Progression,
-		"readCount":    post.ReadCount,
-		"lastReadDate": post.LastReadDate,
-		"isAvailable":  post.IsAvailable,
-		"idUser":       idUser,
-		"idBook":       post.IdBook,
+		"state":          state.State,
+		"progression":    state.Progression,
+		"readcount":      state.ReadCount,
+		"last_read_date": state.LastReadDate,
+		"is_available":   state.IsAvailable,
+		"id_user":        state.IdUser,
+		"id_book":        state.IdBook,
 	}
 
-	return sr.LogAction(idUser, "STATE", "INSERT", actionMap)
+	return sr.LogAction(state.IdUser, "STATE", "INSERT", actionMap)
 }
 
 func (ar *StateRepository) SelectStates() []model.State {
@@ -66,7 +67,12 @@ func (ar *StateRepository) SelectStates() []model.State {
 	return states
 }
 
-func (sr *StateRepository) SelectStateByUserAndBook(idUser uuid.UUID, idBook uuid.UUID) model.State {
+func (sr StateRepository) SelectStateByUserAndBook(idUser uuid.UUID, idBook uuid.UUID) model.State {
+	log.Println("SelectStateByUserAndBook with : ")
+	log.Println("idUser")
+	log.Println(idUser)
+	log.Println("idBook")
+	log.Println(idBook)
 	rows, err := sr.DB.Query("SELECT * FROM state WHERE id_user = $1 AND id_book = $2", idUser, idBook)
 	if err != nil {
 		log.Fatal(err)
@@ -85,45 +91,89 @@ func (sr *StateRepository) SelectStateByUserAndBook(idUser uuid.UUID, idBook uui
 }
 
 func (sr *StateRepository) UpdateState(idUser uuid.UUID, idBook uuid.UUID, state model.State) bool {
+	log.Println("REPOSITORY : UpdateState")
+
 	baseState := sr.SelectStateByUserAndBook(idUser, idBook)
 
-	query := `UPDATE state SET state = $1, progression = $2, read_count = $3, last_read_date = $4, is_available = $5
-              WHERE id_user = $6 AND id_book = $7`
-	_, err := sr.DB.Exec(query, state.State, state.Progression, state.ReadCount, state.LastReadDate, state.IsAvailable, idUser, idBook)
-	if err != nil {
-		log.Println(err)
-		return false
-	}
+	log.Println("REPOSITORY : after basestate")
 
-	actionMap := map[string]interface{}{}
-	if baseState.State != state.State {
-		actionMap["state"] = state.State
-	}
-	if baseState.Progression != state.Progression {
-		actionMap["progression"] = state.Progression
-	}
-	if baseState.ReadCount != state.ReadCount {
-		actionMap["readCount"] = state.ReadCount
-	}
+	query := "UPDATE state SET "
+	params := []interface{}{}
+	counter := 1 // Compteur pour les paramètres SQL ($1, $2, etc.)
 
-	parsedBaseDate, _ := time.Parse(time.RFC3339, baseState.LastReadDate)
-	parsedStateDate, _ := time.Parse("2006-01-02", state.LastReadDate)
-	if !parsedBaseDate.Truncate(24 * time.Hour).Equal(parsedStateDate) {
-		actionMap["lastReadDate"] = state.LastReadDate
+	// Ajout des champs dynamiquement en fonction des valeurs non nulles
+	if state.State != "" || state.Progression != 0 || state.ReadCount != 0 || state.LastReadDate != "" || state.IsAvailable != baseState.IsAvailable {
+		if state.State != "" {
+			query += "state = $" + fmt.Sprint(counter) + ", "
+			params = append(params, state.State)
+			counter++
+		}
+		if state.Progression != 0 {
+			query += "progression = $" + fmt.Sprint(counter) + ", "
+			params = append(params, state.Progression)
+			counter++
+		}
+		if state.ReadCount != 0 {
+			query += "read_count = $" + fmt.Sprint(counter) + ", "
+			params = append(params, state.ReadCount)
+			counter++
+		}
+		if state.LastReadDate != "" {
+			query += "last_read_date = $" + fmt.Sprint(counter) + ", "
+			params = append(params, state.LastReadDate)
+			counter++
+		}
+		if state.IsAvailable != baseState.IsAvailable { // Comparaison avec l'état de base
+			query += "is_available = $" + fmt.Sprint(counter) + ", "
+			params = append(params, state.IsAvailable)
+			counter++
+		}
+
+		// Suppression de la virgule finale et ajout des conditions WHERE
+		query = query[:len(query)-2] + " WHERE id_user = $" + fmt.Sprint(counter) +
+			" AND id_book = $" + fmt.Sprint(counter+1)
+
+		// Ajout des paramètres pour les conditions WHERE
+		params = append(params, idUser, idBook)
+
+		// Exécution de la requête
+		_, err := sr.DB.Exec(query, params...)
+		if err != nil {
+			log.Println(err)
+			return false
+		}
+
+		actionMap := map[string]interface{}{}
+		if baseState.State != state.State {
+			actionMap["state"] = state.State
+		}
+		if baseState.Progression != state.Progression {
+			actionMap["progression"] = state.Progression
+		}
+		if baseState.ReadCount != state.ReadCount {
+			actionMap["read_count"] = state.ReadCount
+		}
+
+		parsedBaseDate, _ := time.Parse(time.RFC3339, baseState.LastReadDate)
+		parsedStateDate, _ := time.Parse("2006-01-02", state.LastReadDate)
+		if !parsedBaseDate.Truncate(24 * time.Hour).Equal(parsedStateDate) {
+			actionMap["last_read_date"] = state.LastReadDate
+		}
+
+		if baseState.IsAvailable != state.IsAvailable {
+			actionMap["is_available"] = state.IsAvailable
+		}
+
+		if len(actionMap) == 0 {
+			return true
+		}
+
+		actionMap["id_user"] = idUser.String()
+		actionMap["id_book"] = idBook.String()
+
+		return sr.LogAction(idUser, "STATE", "UPDATE", actionMap)
 	}
-
-	if baseState.IsAvailable != state.IsAvailable {
-		actionMap["isAvailable"] = state.IsAvailable
-	}
-
-	if len(actionMap) == 0 {
-		return true
-	}
-
-	actionMap["idUser"] = idUser.String()
-	actionMap["idBook"] = idBook.String()
-
-	return sr.LogAction(idUser, "STATE", "UPDATE", actionMap)
+	return true
 }
 
 func (sr *StateRepository) DeleteState(idUser uuid.UUID, idBook uuid.UUID) bool {
@@ -135,8 +185,8 @@ func (sr *StateRepository) DeleteState(idUser uuid.UUID, idBook uuid.UUID) bool 
 	}
 
 	actionMap := map[string]interface{}{
-		"idUser": idUser,
-		"idBook": idBook,
+		"id_user": idUser,
+		"id_book": idBook,
 	}
 
 	return sr.LogAction(idUser, "STATE", "DELETE", actionMap)

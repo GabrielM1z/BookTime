@@ -1,13 +1,17 @@
 meta {
-  name: Update state by Id
+  name: Update state by bookId
   type: http
   seq: 6
 }
 
 put {
-  url: {{base_book_url}}/states/"f18251e2-0134-46b8-a09b-8362b023764a"
+  url: {{base_book_url}}/states/:bookId
   body: json
   auth: bearer
+}
+
+params:path {
+  bookId: 39988601-0a6a-464e-8c71-09d7b56a3c4c
 }
 
 headers {
@@ -20,11 +24,11 @@ auth:bearer {
 
 body:json {
   {
-      "state": "ToRead",
+      "state": "Reading",
+      "read_count": 0,
       "progression": 12,
-      "read_count": 536,
-      "last_read_date": "1983-03-03",
-      "id_book": "f18251e2-0134-46b8-a09b-8362b023764a",
+      "last_read_date": "1980-01-01",
+      "id_book": "39988601-0a6a-464e-8c71-09d7b56a3c4c",
       "is_available": true
   }
 }

@@ -7,7 +7,7 @@ import (
 )
 
 type StateRepositoryInterface interface {
-	InsertState(post model.PostState, idUser uuid.UUID) bool
+	InsertState(state model.State) bool
 	SelectStates() []model.State
 	SelectStateByUserAndBook(idUser uuid.UUID, idBook uuid.UUID) model.State
 	UpdateState(idUser uuid.UUID, idBook uuid.UUID, state model.State) bool

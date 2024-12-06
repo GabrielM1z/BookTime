@@ -20,28 +20,30 @@ func NewLibraryRepository(db *sql.DB) *LibraryRepository {
 	return &LibraryRepository{DB: db}
 }
 
-// InsertLibrary - Insère une nouvelle bibliothèque
-func (lr *LibraryRepository) InsertLibrary(post model.PostLibrary, idUser uuid.UUID) bool {
-	var libraryID uuid.UUID
+func (lr *LibraryRepository) InsertLibrary(libary model.Library, idUser uuid.UUID) bool {
+	var IdLibrary uuid.UUID
+	var query string
 
-	query := "INSERT INTO library (name) VALUES ($1) RETURNING id_library"
-	stmt, err := lr.DB.Prepare(query)
-	if err != nil {
-		log.Println("Error preparing statement:", err)
-		return false
-	}
-	defer stmt.Close()
-
-	// Exécuter la requête et récupérer l'ID
-	err = stmt.QueryRow(post.Name).Scan(&libraryID)
-	if err != nil {
-		log.Println("Error executing query:", err)
-		return false
+	if libary.IdLibrary != uuid.Nil {
+		query = "INSERT INTO library (id_library, name) VALUES ($1, $2)"
+		_, err := lr.DB.Exec(query, libary.IdLibrary, libary.Name)
+		if err != nil {
+			log.Println("Error executing query with provided ID:", err)
+			return false
+		}
+		IdLibrary = libary.IdLibrary
+	} else {
+		query = "INSERT INTO library (name) VALUES ($1) RETURNING id_library"
+		err := lr.DB.QueryRow(query, libary.Name).Scan(&IdLibrary)
+		if err != nil {
+			log.Println("Error executing query with auto-generated ID:", err)
+			return false
+		}
 	}
 
 	actionMap := map[string]interface{}{
-		"name":      post.Name,
-		"idLibrary": libraryID,
+		"name":       libary.Name,
+		"id_library": IdLibrary,
 	}
 
 	return lr.LogAction(idUser, "LIBRARY", "INSERT", actionMap)
@@ -96,8 +98,8 @@ func (lr *LibraryRepository) SelectLibrary(id uuid.UUID) (model.Library, error) 
 }
 
 // UpdateLibrary - Met à jour une bibliothèque
-func (lr *LibraryRepository) UpdateLibrary(id uuid.UUID, library model.Library, idUser uuid.UUID) bool {
-	baseLibrary, error := lr.SelectLibrary(id)
+func (lr *LibraryRepository) UpdateLibrary(library model.Library, idUser uuid.UUID) bool {
+	baseLibrary, error := lr.SelectLibrary(library.IdLibrary)
 
 	if error != nil {
 		log.Println(error)
@@ -106,7 +108,7 @@ func (lr *LibraryRepository) UpdateLibrary(id uuid.UUID, library model.Library, 
 
 	query := `UPDATE library SET name = $1 WHERE id_library = $2`
 
-	_, err := lr.DB.Exec(query, library.Name, id)
+	_, err := lr.DB.Exec(query, library.Name, library.IdLibrary)
 	if err != nil {
 		log.Println(err)
 		return false
@@ -135,7 +137,7 @@ func (lr *LibraryRepository) DeleteLibrary(id uuid.UUID, idUser uuid.UUID) bool 
 	}
 
 	actionMap := map[string]interface{}{
-		"idLibrary": id,
+		"id_library": id,
 	}
 
 	return lr.LogAction(idUser, "LIBRARY", "DELETE", actionMap)
