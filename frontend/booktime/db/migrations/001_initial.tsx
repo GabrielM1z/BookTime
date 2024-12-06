@@ -219,7 +219,7 @@ const initAction = async (db: SQLiteDatabase) => {
         db.execAsync(`
             CREATE TABLE IF NOT EXISTS action (
                 id_action TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
-                id_action TEXT,
+                id_user TEXT,
                 table_name VARCHAR(50),
                 date TIMESTAMP,
                 type VARCHAR(50),
@@ -276,7 +276,7 @@ const initTriggerInsertState = async (db: SQLiteDatabase) => {
         db.execAsync(`
             CREATE TRIGGER IF NOT EXISTS trg_state_insert
             AFTER INSERT
-            ON State
+            ON state
             FOR EACH ROW
             BEGIN
                 INSERT INTO Action (
@@ -300,7 +300,7 @@ const initTriggerInsertState = async (db: SQLiteDatabase) => {
                         'last_read_date', NEW.last_read_date,
                         'id_user', NEW.id_user,
                         'id_book', NEW.id_book,
-                        'is_available', NEW.is_available,
+                        'is_available', NEW.is_available
                     ), 
                     'CLIENT'
                 );
@@ -321,7 +321,7 @@ const initTriggerUpdateState = async (db: SQLiteDatabase) => {
         db.execAsync(`
             CREATE TRIGGER IF NOT EXISTS trg_state_update
             AFTER UPDATE
-            ON State
+            ON state
             FOR EACH ROW
             BEGIN
                 INSERT INTO Action (
@@ -359,7 +359,7 @@ const initTriggerUpdateState = async (db: SQLiteDatabase) => {
                         CASE WHEN OLD.id_book != NEW.id_book THEN NEW.id_book ELSE NULL END,
 
                         CASE WHEN OLD.is_available != NEW.is_available THEN 'is_available' ELSE NULL END, 
-                        CASE WHEN OLD.is_available != NEW.is_available THEN NEW.is_available ELSE NULL END,
+                        CASE WHEN OLD.is_available != NEW.is_available THEN NEW.is_available ELSE NULL END
                     ), 
                     'CLIENT'
                 );
@@ -380,7 +380,7 @@ const initTriggerDeleteState = async (db: SQLiteDatabase) => {
         db.execAsync(`
             CREATE TRIGGER IF NOT EXISTS trg_state_delete
             AFTER DELETE
-            ON State
+            ON state
             FOR EACH ROW
             BEGIN
                 INSERT INTO Action (
@@ -397,7 +397,7 @@ const initTriggerDeleteState = async (db: SQLiteDatabase) => {
                     CURRENT_TIMESTAMP, 
                     'DELETE', 
                     json_object(
-                        'id_state', OLD.id_state,
+                        'id_state', OLD.id_state
                     ), 
                     'CLIENT'
                 );
@@ -421,11 +421,10 @@ const initTriggerInsertLibrary = async (db: SQLiteDatabase) => {
         db.execAsync(`
             CREATE TRIGGER IF NOT EXISTS trg_library_insert
             AFTER INSERT
-            ON Library
+            ON library
             FOR EACH ROW
             BEGIN
                 INSERT INTO Action (
-                    id_action, 
                     table_name, 
                     date, 
                     type, 
@@ -433,13 +432,12 @@ const initTriggerInsertLibrary = async (db: SQLiteDatabase) => {
                     executed_by
                 )
                 VALUES (
-                    lower(hex(randomblob(16))),
                     'LIBRARY', 
                     CURRENT_TIMESTAMP, 
                     'INSERT', 
                     json_object(
                         'id_library', NEW.id_library,
-                        'name', NEW.name,
+                        'name', NEW.name
                     ), 
                     'CLIENT'
                 );
@@ -461,7 +459,7 @@ const initTriggerUpdateLibrary = async (db: SQLiteDatabase) => {
         db.execAsync(`
             CREATE TRIGGER IF NOT EXISTS trg_library_update
             AFTER UPDATE
-            ON Library
+            ON library
             FOR EACH ROW
             BEGIN
                 INSERT INTO Action (
@@ -480,7 +478,7 @@ const initTriggerUpdateLibrary = async (db: SQLiteDatabase) => {
                     json_object(
                         'id_library', NEW.id_library,
                         CASE WHEN OLD.name != NEW.name THEN 'name' ELSE NULL END, 
-                        CASE WHEN OLD.name != NEW.name THEN NEW.name ELSE NULL END,
+                        CASE WHEN OLD.name != NEW.name THEN NEW.name ELSE NULL END
                     ), 
                     'CLIENT'
                 );
@@ -501,7 +499,7 @@ const initTriggerDeleteLibrary = async (db: SQLiteDatabase) => {
         db.execAsync(`
             CREATE TRIGGER IF NOT EXISTS trg_library_delete
             AFTER DELETE
-            ON Library
+            ON library
             FOR EACH ROW
             BEGIN
                 INSERT INTO Action (
@@ -518,7 +516,7 @@ const initTriggerDeleteLibrary = async (db: SQLiteDatabase) => {
                     CURRENT_TIMESTAMP, 
                     'DELETE', 
                     json_object(
-                        'id_library', OLD.id_library,
+                        'id_library', OLD.id_library
                     ), 
                     'CLIENT'
                 );
@@ -560,7 +558,7 @@ const initTriggerInsertSharedLibrary = async (db: SQLiteDatabase) => {
                     'INSERT', 
                     json_object(
                         'id_user', NEW.id_user,
-                        'id_library', NEW.id_library,
+                        'id_library', NEW.id_library
                     ), 
                     'CLIENT'
                 );
@@ -599,7 +597,7 @@ const initTriggerDeleteSharedLibrary = async (db: SQLiteDatabase) => {
                     'DELETE', 
                     json_object(
                         'id_user', OLD.id_user,
-                        'id_library', OLD.id_library,
+                        'id_library', OLD.id_library
                     ), 
                     'CLIENT'
                 );
@@ -641,7 +639,7 @@ const initTriggerInsertLibraryBook = async (db: SQLiteDatabase) => {
                     'INSERT', 
                     json_object(
                         'id_library', NEW.id_library,
-                        'id_book', NEW.id_book,
+                        'id_book', NEW.id_book
                     ), 
                     'CLIENT'
                 );
@@ -681,7 +679,7 @@ const initTriggerDeleteLibraryBook = async (db: SQLiteDatabase) => {
                     'DELETE', 
                     json_object(
                         'id_library', OLD.id_library,
-                        'id_book', OLD.id_book,
+                        'id_book', OLD.id_book
                     ), 
                     'CLIENT'
                 );
