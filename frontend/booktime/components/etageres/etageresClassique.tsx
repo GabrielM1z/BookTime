@@ -51,7 +51,7 @@ export default function pageEtageres() {
 
 	console.log("etagere", etageres)
     console.log("action", action)
-    console.log('trigger : ', trigger)
+    //console.log('trigger : ', trigger)
 
     return (
 		<ScrollView style={styles.etagereContainer}>
