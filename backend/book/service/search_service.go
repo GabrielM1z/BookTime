@@ -61,7 +61,7 @@ func (bs *SearchService) SearchBooks(startIndex, query, title, author, genre str
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, errors.New("API request failed with status: " + strconv.Itoa(resp.StatusCode))
+		return nil, errors.New("API request : ' " + apiURL + " 'failed with status: " + strconv.Itoa(resp.StatusCode))
 
 		// return nil, fmt.Errorf("API request failed with status: %d", resp.StatusCode)
 	}
