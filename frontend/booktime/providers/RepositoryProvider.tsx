@@ -4,7 +4,6 @@ import { LibraryRepositoryProps } from "@/repositories/library";
 import { UserRepositoryProps } from "@/repositories/user";
 import { SQLiteProvider, SQLiteProviderProps } from "expo-sqlite";
 import React, { createContext } from "react";
-import { ApiProvider } from "./api";
 import { actionRepositoryFactory } from "@/repositories/factories/action";
 import { ActionRepositoryProps } from "@/repositories/action";
 
