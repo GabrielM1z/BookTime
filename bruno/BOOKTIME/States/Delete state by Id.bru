@@ -1,13 +1,17 @@
 meta {
   name: Delete state by Id
   type: http
-  seq: 4
+  seq: 6
 }
 
 delete {
-  url: {{base_book_url}}/states
+  url: {{base_book_url}}/states/:bookId
   body: none
   auth: bearer
+}
+
+params:path {
+  bookId: 5d6ab4ae-67e8-4b84-90e9-9568595a7842
 }
 
 auth:bearer {
