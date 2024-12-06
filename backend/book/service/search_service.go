@@ -2,9 +2,11 @@ package service
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
 
 	"book/model"
 	"book/service/interfaces"
@@ -49,6 +51,7 @@ func (bs *SearchService) SearchBooks(startIndex, query, title, author, genre str
 	params.Add("startIndex", startIndex)
 	params.Add("maxResults", maxResults)
 	params.Add("key", bs.ApiKey)
+
 	apiURL := fmt.Sprintf("%s?%s", baseURL, params.Encode())
 
 	resp, err := http.Get(apiURL)
@@ -58,7 +61,9 @@ func (bs *SearchService) SearchBooks(startIndex, query, title, author, genre str
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("API request failed with status: %d", resp.StatusCode)
+		return nil, errors.New("API request failed with status: " + strconv.Itoa(resp.StatusCode))
+
+		// return nil, fmt.Errorf("API request failed with status: %d", resp.StatusCode)
 	}
 
 	var apiResponse model.BookAPIResponse

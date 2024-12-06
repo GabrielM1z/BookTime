@@ -9,6 +9,7 @@ import axios from 'axios';
 const defaultCover = require('@/assets/images/logo_refait.png');
 
 async function getImageAsBase64(url: string): Promise<string | null> {
+  console.log("coucou")
   try {
     const response = await axios.get(url, { responseType: 'arraybuffer' }); // Utilisez 'arraybuffer' pour manipuler des données binaires
     const base64 = Buffer.from(response.data, 'binary').toString('base64'); // Convertissez les données en Base64
