@@ -197,9 +197,6 @@ func (ss *SynchroService) Synchro(uuidUser uuid.UUID, client_actions []model.Act
 
 	server_actions_to_exec, client_actions_to_exec, err := ss.whoDoWhichActions(filtered_actions)
 
-	// log.Println("client_actions_to_exec : ")
-	// log.Println(client_actions_to_exec)
-
 	ss.executeActionsToSynchronizeServer(server_actions_to_exec)
 
 	return client_actions_to_exec, err
