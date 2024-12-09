@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"slices"
+	"time"
 
 	"book/service/interfaces"
 
@@ -26,158 +27,136 @@ func (ss *SynchroService) filteredActions(mixed_actions []model.Action) ([]model
 	return mixed_actions, nil
 }
 
-func (ss *SynchroService) whoDoWhichActions(filtered_actions []model.Action) ([]model.Action, []model.Action, error) {
-
-	//MANQUE DELETE DUPLIQUES SERV/TEL
-	//MANQUE UPDATE MIX DERNIERES UPDATE
-
-	type deletedLibraryBookActions struct {
-		idBook    uuid.UUID
-		idLibrary uuid.UUID
-	}
-	type deletedAction struct {
-		deletedStateActions         []uuid.UUID
-		deletedLibraryActions       []uuid.UUID
-		deletedSharedLibraryActions []uuid.UUID
-		deletedLibraryBookActions   []deletedLibraryBookActions
+func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]model.Action, []model.Action, error) {
+	type ObjectState struct {
+		ObjectID uuid.UUID
+		IdUser   uuid.UUID
+		Table    string
+		Data     map[string]interface{}
+		LastDate time.Time
 	}
 
-	var deletedActions deletedAction
-	var client_actions []model.Action
-	var server_actions []model.Action
+	// Map pour suivre les suppressions par table, ID et utilisateur
+	deletedObjects := make(map[string]map[uuid.UUID]map[uuid.UUID]bool) // table -> objectID -> userID -> deleted
+	// Map pour stocker la dernière version des objets mis à jour
+	lastUpdates := make(map[string]map[uuid.UUID]ObjectState) // table -> objectID -> ObjectState
 
-	// Fonction utilitaire pour vérifier si un UUID est dans une slice
-	extractUUIDFromAction := func(actionData []byte, key string) (uuid.UUID, error) {
-		var data map[string]interface{}
-		err := json.Unmarshal(actionData, &data)
-		if err != nil {
-			return uuid.Nil, fmt.Errorf("erreur lors du décodage JSON : %w", err)
+	clientActions := []model.Action{}
+	serverActions := []model.Action{}
+
+	// Identifier les actions DELETE et marquer les objets comme supprimés
+	for _, action := range filteredActions {
+		if action.Type == "DELETE" {
+			table := action.Table
+			idUser := action.IdUser
+
+			if _, ok := deletedObjects[table]; !ok {
+				deletedObjects[table] = make(map[uuid.UUID]map[uuid.UUID]bool)
+			}
+			if _, ok := deletedObjects[table][action.IdAction]; !ok {
+				deletedObjects[table][action.IdAction] = make(map[uuid.UUID]bool)
+			}
+
+			deletedObjects[table][action.IdAction][idUser] = true
+
+			// Ajouter les actions DELETE à exécuter par l'autre partie
+			if action.ExecutedBy == "SERVER" {
+				clientActions = append(clientActions, action)
+			} else {
+				serverActions = append(serverActions, action)
+			}
 		}
-
-		// Récupérer et convertir la valeur
-		value, ok := data[key]
-		if !ok {
-			return uuid.Nil, fmt.Errorf("clé '%s' non trouvée dans l'action", key)
-		}
-
-		valueStr, ok := value.(string)
-		if !ok {
-			return uuid.Nil, fmt.Errorf("la clé '%s' n'est pas une chaîne", key)
-		}
-
-		id, err := uuid.Parse(valueStr)
-		if err != nil {
-			return uuid.Nil, fmt.Errorf("erreur lors de la conversion de '%s' en UUID : %w", valueStr, err)
-		}
-
-		return id, nil
 	}
 
-	addActionIdToDeletedList := func(deletedActions deletedAction, action model.Action) deletedAction {
-		switch action.Table {
-		case "STATE":
-			idBook, err := extractUUIDFromAction(action.Action, "idBook")
-			if err != nil {
-				fmt.Println(err)
-				return deletedActions
-			}
-			deletedActions.deletedStateActions = append(deletedActions.deletedStateActions, idBook)
+	// Traiter les INSERT et UPDATE
+	for _, action := range filteredActions {
+		table := action.Table
+		idUser := action.IdUser
 
-		case "LIBRARY":
-			idLibrary, err := extractUUIDFromAction(action.Action, "idLibrary")
-			if err != nil {
-				fmt.Println(err)
-				return deletedActions
-			}
-			deletedActions.deletedLibraryActions = append(deletedActions.deletedLibraryActions, idLibrary)
-
-		case "SHARED_LIBRARY":
-			idLibrary, err := extractUUIDFromAction(action.Action, "idLibrary")
-			if err != nil {
-				fmt.Println(err)
-				return deletedActions
-			}
-			deletedActions.deletedSharedLibraryActions = append(deletedActions.deletedSharedLibraryActions, idLibrary)
-
-		case "LIBRARY_BOOK":
-			idLibrary, err := extractUUIDFromAction(action.Action, "idLibrary")
-			if err != nil {
-				fmt.Println(err)
-				return deletedActions
+		if action.Type == "INSERT" {
+			// Ne pas insérer si l'objet a un DELETE
+			if deletedObjects[table][action.IdAction][idUser] {
+				continue
 			}
 
-			idBook, err := extractUUIDFromAction(action.Action, "idBook")
-			if err != nil {
-				fmt.Println(err)
-				return deletedActions
+			// Ajouter les INSERT pour exécution
+			if action.ExecutedBy == "SERVER" {
+				clientActions = append(clientActions, action)
+			} else {
+				serverActions = append(serverActions, action)
+			}
+		} else if action.Type == "UPDATE" {
+			// Les updates ne concernent que State et Library
+			if table != "STATE" && table != "LIBRARY" {
+				continue
 			}
 
-			deletedActions.deletedLibraryBookActions = append(deletedActions.deletedLibraryBookActions, deletedLibraryBookActions{
-				idBook:    idBook,
-				idLibrary: idLibrary,
+			// Ignorer les updates si un DELETE existe pour l'objet
+			if deletedObjects[table][action.IdAction][idUser] {
+				continue
+			}
+
+			// Décoder les données de l'UPDATE
+			var data map[string]interface{}
+			if err := json.Unmarshal(action.Action, &data); err != nil {
+				return nil, nil, fmt.Errorf("erreur lors du décodage JSON : %w", err)
+			}
+
+			// Fusionner les updates en gardant la dernière version
+			if _, ok := lastUpdates[table]; !ok {
+				lastUpdates[table] = make(map[uuid.UUID]ObjectState)
+			}
+			if existing, ok := lastUpdates[table][action.IdAction]; ok {
+				// Fusionner les données et mettre à jour la date si nécessaire
+				for k, v := range data {
+					existing.Data[k] = v
+				}
+				if action.Date.After(existing.LastDate) {
+					existing.LastDate = action.Date
+				}
+				lastUpdates[table][action.IdAction] = existing
+			} else {
+				// Ajouter une nouvelle entrée pour l'objet
+				lastUpdates[table][action.IdAction] = ObjectState{
+					ObjectID: action.IdAction,
+					IdUser:   idUser,
+					Table:    action.Table,
+					Data:     data,
+					LastDate: action.Date,
+				}
+			}
+		}
+	}
+
+	// Ajouter les mises à jour combinées à la liste des actions
+	for table, updates := range lastUpdates {
+		for _, state := range updates {
+			actionData, err := json.Marshal(state.Data)
+			if err != nil {
+				return nil, nil, fmt.Errorf("erreur lors du réencodage JSON : %w", err)
+			}
+			clientActions = append(clientActions, model.Action{
+				IdAction:   state.ObjectID,
+				IdUser:     state.IdUser,
+				Table:      table,
+				Date:       state.LastDate,
+				Type:       "UPDATE",
+				Action:     actionData,
+				ExecutedBy: "SERVER",
+			})
+			serverActions = append(serverActions, model.Action{
+				IdAction:   state.ObjectID,
+				IdUser:     state.IdUser,
+				Table:      table,
+				Date:       state.LastDate,
+				Type:       "UPDATE",
+				Action:     actionData,
+				ExecutedBy: "CLIENT",
 			})
 		}
-
-		return deletedActions
 	}
 
-	contains := func(list []uuid.UUID, id uuid.UUID) bool {
-		for _, v := range list {
-			if v == id {
-				return true
-			}
-		}
-		return false
-	}
-
-	isDeleted := func(deletedActions deletedAction, table string, id uuid.UUID) bool {
-		switch table {
-		case "STATE":
-			return contains(deletedActions.deletedStateActions, id)
-		case "LIBRARY":
-			return contains(deletedActions.deletedLibraryActions, id)
-		case "SHARED_LIBRARY":
-			return contains(deletedActions.deletedSharedLibraryActions, id)
-		case "LIBRARY_BOOK":
-			for _, deleted := range deletedActions.deletedLibraryBookActions {
-				if deleted.idBook == id {
-					return true
-				}
-			}
-		}
-		return false
-	}
-
-	// Premier passage : trier les actions DELETE et compter les IDs supprimés
-	for _, action := range filtered_actions {
-		if action.Type == "DELETE" {
-			deletedActions = addActionIdToDeletedList(deletedActions, action)
-
-			if action.ExecutedBy == "SERVER" {
-				client_actions = append(client_actions, action)
-			} else {
-				server_actions = append(server_actions, action)
-			}
-		}
-	}
-
-	// Deuxième passage : trier INSERT et UPDATE, ignorer les IDs en doublons
-	for _, action := range filtered_actions {
-		if !isDeleted(deletedActions, action.Table, action.IdAction) {
-			if action.Type == "INSERT" {
-				if action.ExecutedBy == "SERVER" {
-					client_actions = append(client_actions, action)
-				} else {
-					server_actions = append(server_actions, action)
-				}
-			} else if action.Type == "UPDATE" {
-				client_actions = append(client_actions, action)
-				server_actions = append(server_actions, action)
-			}
-		}
-	}
-
-	return server_actions, client_actions, nil
+	return serverActions, clientActions, nil
 }
 
 // Service principal pour chercher un livre
@@ -196,6 +175,9 @@ func (ss *SynchroService) Synchro(uuidUser uuid.UUID, client_actions []model.Act
 	log.Println("PASS HERE")
 
 	server_actions_to_exec, client_actions_to_exec, err := ss.whoDoWhichActions(filtered_actions)
+
+	log.Println("SERVER ACTIONS exec :")
+	log.Println(server_actions_to_exec)
 
 	ss.executeActionsToSynchronizeServer(server_actions_to_exec)
 
