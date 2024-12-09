@@ -9,6 +9,7 @@ import (
 	"log"
 	"slices"
 	"time"
+	"sort"
 
 	"book/service/interfaces"
 
@@ -185,11 +186,22 @@ func (ss *SynchroService) Synchro(uuidUser uuid.UUID, client_actions []model.Act
 }
 
 func (ss *SynchroService) executeActionsToSynchronizeServer(clientActionsToExecute []model.Action) error {
+	log.Println("Avant tri :")
+	log.Println(clientActionsToExecute)
+
+	// Trier les actions par ordre chronologique
+	sort.Slice(clientActionsToExecute, func(i, j int) bool {
+		return clientActionsToExecute[i].Date.Before(clientActionsToExecute[j].Date)
+	})
+
+	log.Println("Après :")
+	log.Println(clientActionsToExecute)
+
 	for _, action := range clientActionsToExecute {
 		switch action.Table {
 		case "LIBRARIES":
 			var library model.Library
-			err := json.Unmarshal([]byte(action.Action), &library)
+			err := json.Unmarshal(action.Action, &library)
 			if err != nil {
 				log.Fatalf("Erreur lors du décodage du JSON : %v", err)
 			}
@@ -203,6 +215,8 @@ func (ss *SynchroService) executeActionsToSynchronizeServer(clientActionsToExecu
 					return fmt.Errorf("update failed for ID %s", action.IdAction)
 				}
 			case "DELETE":
+				log.Println("Modele library :")
+				log.Println(library)
 				if res := repository.NewLibraryRepository(ss.DB).DeleteLibrary(library.IdLibrary, action.IdUser); !res {
 					return fmt.Errorf("delete failed for ID %s", action.IdAction)
 				}
@@ -212,7 +226,7 @@ func (ss *SynchroService) executeActionsToSynchronizeServer(clientActionsToExecu
 
 		case "LIBRARY_BOOK":
 			var libraryBook model.PostLibraryBook
-			err := json.Unmarshal([]byte(action.Action), &libraryBook)
+			err := json.Unmarshal(action.Action, &libraryBook)
 			if err != nil {
 				log.Fatalf("Erreur lors du décodage du JSON : %v", err)
 			}
@@ -231,7 +245,7 @@ func (ss *SynchroService) executeActionsToSynchronizeServer(clientActionsToExecu
 
 		case "SHARED_LIBRARY":
 			var sharedLibrary model.PostSharedLibrary
-			err := json.Unmarshal([]byte(action.Action), &sharedLibrary)
+			err := json.Unmarshal(action.Action, &sharedLibrary)
 			if err != nil {
 				log.Fatalf("Erreur lors du décodage du JSON : %v", err)
 			}
@@ -258,18 +272,6 @@ func (ss *SynchroService) executeActionsToSynchronizeServer(clientActionsToExecu
 			if err != nil {
 				log.Fatalf("Erreur lors du décodage du JSON : %v", err)
 			}
-
-			var data map[string]interface{}
-			erer := json.Unmarshal([]byte(action.Action), &data)
-			if erer != nil {
-				log.Fatalf("erreur lors du décodage JSON : %w", erer)
-			}
-
-			log.Println("state : ")
-			log.Println(state)
-
-			log.Println("state : ")
-			log.Println(data)
 
 			switch action.Type {
 			case "INSERT":
