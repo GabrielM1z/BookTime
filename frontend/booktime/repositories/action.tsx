@@ -9,7 +9,7 @@ export interface ActionRepositoryProps {
     getTrigger: () => Promise<Trigger[]>;
 }
 
-export class SQLiteLibraryRepository implements ActionRepositoryProps {
+export class ActionLibraryRepository implements ActionRepositoryProps {
     private db: SQLiteDatabase;
 
     constructor() {

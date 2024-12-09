@@ -1,0 +1,63 @@
+meta {
+  name: synchronisation
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{base_book_url}}/synchro
+  body: json
+  auth: bearer
+}
+
+params:query {
+  ~jsonData: 
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  [
+    {
+      "id_action": "d1490a8a-6e99-4cd4-bbb9-7a854db6d903",
+      "id_user": "f3830821-5a8d-44c2-a4ab-dcf89530e68d",
+      "table": "LIBRARY",
+      "date": "2024-12-09T15:07:20.832616Z",
+      "type": "DELETE",
+      "action": "eyJpZF9saWJyYXJ5IjoiNjE3NWMzZmMtNmUwZS00NjExLWI2MGQtYzBkYjBkYjJmMTA0In0=",
+      "executed_by": "CLIENT"
+    },
+    {
+      "id_action": "7b1646b5-8f91-4054-ae64-d8d90a0c1b02",
+      "id_user": "f3830821-5a8d-44c2-a4ab-dcf89530e68d",
+      "table": "LIBRARY",
+      "date": "2024-12-09T15:05:09.343172Z",
+      "type": "INSERT",
+      "action": "eyJpZF9saWJyYXJ5IjoiOTkyMTYxMDgtOTViNi00NWNiLTg5NWItYTNmYTBhN2U4YWJiIiwibmFtZSI6IlRoZSBtYWduaWZpY2VudCBzd2VldCBwb3RhdG8ifQ==",
+      "executed_by": "CLIENT"
+    },
+    {
+      "id_action": "7daae4a3-bec7-4eef-9ebf-b583e19ba301",
+      "id_user": "f3830821-5a8d-44c2-a4ab-dcf89530e68d",
+      "table": "LIBRARY",
+      "date": "2024-12-09T15:06:51.678088Z",
+      "type": "UPDATE",
+      "action": "eyJuYW1lIjoiSXRzIHJlYWxseSBtYWduaWZpY2VudCAhIn0=",
+      "executed_by": "CLIENT"
+    }
+  ]
+}
+
+tests {
+  test("Status code is 200", function () {
+      expect(res.getStatus()).to.equal(200);
+  });
+}
+
+docs {
+  This is a GET request and it is used to "get" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).
+  
+  A successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data.
+}
