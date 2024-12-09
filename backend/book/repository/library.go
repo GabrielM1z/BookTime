@@ -123,6 +123,8 @@ func (lr *LibraryRepository) UpdateLibrary(library model.Library, idUser uuid.UU
 		return true
 	}
 
+	actionMap["id_library"] = library.IdLibrary
+
 	return lr.LogAction(idUser, "LIBRARY", "UPDATE", actionMap)
 }
 
