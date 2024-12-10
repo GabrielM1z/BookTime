@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"log"
 	"slices"
+	"sort"
+	"time"
 
 	"book/service/interfaces"
 
@@ -26,158 +28,513 @@ func (ss *SynchroService) filteredActions(mixed_actions []model.Action) ([]model
 	return mixed_actions, nil
 }
 
-func (ss *SynchroService) whoDoWhichActions(filtered_actions []model.Action) ([]model.Action, []model.Action, error) {
+type libraryBookIDs struct {
+	BookId    uuid.UUID
+	LibraryId uuid.UUID
+}
 
-	//MANQUE DELETE DUPLIQUES SERV/TEL
-	//MANQUE UPDATE MIX DERNIERES UPDATE
+type libraryActionInfo struct {
+	ActionId uuid.UUID
+	Name     string
+	Date     time.Time
+}
 
-	type deletedLibraryBookActions struct {
-		idBook    uuid.UUID
-		idLibrary uuid.UUID
+type stateProgressionActionInfo struct {
+	ActionId    uuid.UUID
+	Progression uint
+	Date        time.Time
+}
+
+type stateIsAvailableActionInfo struct {
+	ActionId    uuid.UUID
+	IsAvailable bool
+	Date        time.Time
+}
+
+type stateLastReadDateActionInfo struct {
+	ActionId     uuid.UUID
+	LastReadDate string
+	Date         time.Time
+}
+
+type stateReadCountActionInfo struct {
+	ActionId  uuid.UUID
+	ReadCount uint
+	Date      time.Time
+}
+
+type stateStateActionInfo struct {
+	ActionId uuid.UUID
+	State    string
+	Date     time.Time
+}
+
+// Vérifie si un uuid.UUID est présent dans une slice
+func contains(list []uuid.UUID, id uuid.UUID) bool {
+	for _, item := range list {
+		if item == id {
+			return true
+		}
 	}
-	type deletedAction struct {
-		deletedStateActions         []uuid.UUID
-		deletedLibraryActions       []uuid.UUID
-		deletedSharedLibraryActions []uuid.UUID
-		deletedLibraryBookActions   []deletedLibraryBookActions
+	return false
+}
+
+// Vérifie si un libraryBookIDs est présent dans une slice
+func containsLibraryBook(list []libraryBookIDs, item libraryBookIDs) bool {
+	for _, elem := range list {
+		if elem.BookId == item.BookId && elem.LibraryId == item.LibraryId {
+			return true
+		}
+	}
+	return false
+}
+
+func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]model.Action, []model.Action, error) {
+
+	clientActions := []model.Action{}
+	serverActions := []model.Action{}
+
+	// var updateStateActions []model.Action
+	updateStateActions := make(map[uuid.UUID]model.Action)
+	updateLibraryActions := make(map[uuid.UUID]model.Action)
+
+	// var updateLibraryActions []model.Action
+	var insertActions []model.Action
+	var deleteActions []model.Action
+	var deletedLibraries uuid.UUIDs
+	var deletedStates uuid.UUIDs
+	var deletedSharedLibraries uuid.UUIDs
+	var deletedLibrariesBooks []libraryBookIDs
+
+	//On met chaque action dans une liste qui regroupe toutes les actions de meme type UPDATE INSERT DELETE
+	for _, action := range filteredActions {
+		if action.Type == "UPDATE" {
+			if action.Table == "STATE" {
+				updateStateActions[action.IdAction] = action
+			} else if action.Table == "LIBRARY" {
+				updateLibraryActions[action.IdAction] = action
+			}
+		} else if action.Type == "INSERT" {
+			insertActions = append(insertActions, action)
+		} else if action.Type == "DELETE" {
+			deleteActions = append(deleteActions, action)
+		}
 	}
 
-	var deletedActions deletedAction
-	var client_actions []model.Action
-	var server_actions []model.Action
+	// --== DELETE ==--
 
-	// Fonction utilitaire pour vérifier si un UUID est dans une slice
-	extractUUIDFromAction := func(actionData []byte, key string) (uuid.UUID, error) {
-		var data map[string]interface{}
-		err := json.Unmarshal(actionData, &data)
-		if err != nil {
-			return uuid.Nil, fmt.Errorf("erreur lors du décodage JSON : %w", err)
-		}
+	// On initialise des maps pour détecter les doublons.
+	deletedLibrariesMap := make(map[uuid.UUID]bool)
+	deletedStatesMap := make(map[uuid.UUID]bool)
+	deletedLibrariesBooksMap := make(map[libraryBookIDs]bool)
+	deletedSharedLibrariesMap := make(map[uuid.UUID]bool)
 
-		// Récupérer et convertir la valeur
-		value, ok := data[key]
-		if !ok {
-			return uuid.Nil, fmt.Errorf("clé '%s' non trouvée dans l'action", key)
-		}
+	// On initialise des listes temporaires pour filtrer les actions.
+	var filteredServerActions, filteredClientActions []model.Action
 
-		valueStr, ok := value.(string)
-		if !ok {
-			return uuid.Nil, fmt.Errorf("la clé '%s' n'est pas une chaîne", key)
-		}
+	// On met chaque action DELETE dans une liste des actions à exécuter pour le CLIENT ou SERVER
+	for _, action := range deleteActions {
+		var isDuplicate bool // Indicateur de doublon
 
-		id, err := uuid.Parse(valueStr)
-		if err != nil {
-			return uuid.Nil, fmt.Errorf("erreur lors de la conversion de '%s' en UUID : %w", valueStr, err)
-		}
-
-		return id, nil
-	}
-
-	addActionIdToDeletedList := func(deletedActions deletedAction, action model.Action) deletedAction {
-		switch action.Table {
-		case "STATE":
-			idBook, err := extractUUIDFromAction(action.Action, "idBook")
+		if action.Table == "LIBRARY" {
+			var library model.Library
+			err := json.Unmarshal(action.Action, &library)
 			if err != nil {
-				fmt.Println(err)
-				return deletedActions
-			}
-			deletedActions.deletedStateActions = append(deletedActions.deletedStateActions, idBook)
-
-		case "LIBRARY":
-			idLibrary, err := extractUUIDFromAction(action.Action, "idLibrary")
-			if err != nil {
-				fmt.Println(err)
-				return deletedActions
-			}
-			deletedActions.deletedLibraryActions = append(deletedActions.deletedLibraryActions, idLibrary)
-
-		case "SHARED_LIBRARY":
-			idLibrary, err := extractUUIDFromAction(action.Action, "idLibrary")
-			if err != nil {
-				fmt.Println(err)
-				return deletedActions
-			}
-			deletedActions.deletedSharedLibraryActions = append(deletedActions.deletedSharedLibraryActions, idLibrary)
-
-		case "LIBRARY_BOOK":
-			idLibrary, err := extractUUIDFromAction(action.Action, "idLibrary")
-			if err != nil {
-				fmt.Println(err)
-				return deletedActions
+				log.Fatalf("Erreur lors du décodage du JSON : %v", err)
 			}
 
-			idBook, err := extractUUIDFromAction(action.Action, "idBook")
-			if err != nil {
-				fmt.Println(err)
-				return deletedActions
-			}
+			deletedLibraries = append(deletedLibraries, library.IdLibrary)
 
-			deletedActions.deletedLibraryBookActions = append(deletedActions.deletedLibraryBookActions, deletedLibraryBookActions{
-				idBook:    idBook,
-				idLibrary: idLibrary,
-			})
-		}
-
-		return deletedActions
-	}
-
-	contains := func(list []uuid.UUID, id uuid.UUID) bool {
-		for _, v := range list {
-			if v == id {
-				return true
-			}
-		}
-		return false
-	}
-
-	isDeleted := func(deletedActions deletedAction, table string, id uuid.UUID) bool {
-		switch table {
-		case "STATE":
-			return contains(deletedActions.deletedStateActions, id)
-		case "LIBRARY":
-			return contains(deletedActions.deletedLibraryActions, id)
-		case "SHARED_LIBRARY":
-			return contains(deletedActions.deletedSharedLibraryActions, id)
-		case "LIBRARY_BOOK":
-			for _, deleted := range deletedActions.deletedLibraryBookActions {
-				if deleted.idBook == id {
-					return true
-				}
-			}
-		}
-		return false
-	}
-
-	// Premier passage : trier les actions DELETE et compter les IDs supprimés
-	for _, action := range filtered_actions {
-		if action.Type == "DELETE" {
-			deletedActions = addActionIdToDeletedList(deletedActions, action)
-
-			if action.ExecutedBy == "SERVER" {
-				client_actions = append(client_actions, action)
+			if deletedLibrariesMap[library.IdLibrary] {
+				isDuplicate = true // Doublon détecté
 			} else {
-				server_actions = append(server_actions, action)
+				deletedLibrariesMap[library.IdLibrary] = true
+			}
+
+		} else if action.Table == "STATE" {
+			var state model.State
+			err := json.Unmarshal(action.Action, &state)
+			if err != nil {
+				log.Fatalf("Erreur lors du décodage du JSON : %v", err)
+			}
+
+			deletedStates = append(deletedStates, state.IdBook)
+
+			if deletedStatesMap[state.IdBook] {
+				isDuplicate = true // Doublon détecté
+			} else {
+				deletedStatesMap[state.IdBook] = true
+			}
+
+		} else if action.Table == "LIBRARY_BOOK" {
+			var libraryBook model.LibraryBook
+			err := json.Unmarshal(action.Action, &libraryBook)
+			if err != nil {
+				log.Fatalf("Erreur lors du décodage du JSON : %v", err)
+			}
+
+			libraryBookKey := libraryBookIDs{libraryBook.IdBook, libraryBook.IdLibrary}
+
+			deletedLibrariesBooks = append(deletedLibrariesBooks, libraryBookKey)
+
+			if deletedLibrariesBooksMap[libraryBookKey] {
+				isDuplicate = true // Doublon détecté
+			} else {
+				deletedLibrariesBooksMap[libraryBookKey] = true
+			}
+
+		} else if action.Table == "SHARED_LIBRARY" {
+			var sharedLibrary model.SharedLibrary
+			err := json.Unmarshal(action.Action, &sharedLibrary)
+			if err != nil {
+				log.Fatalf("Erreur lors du décodage du JSON : %v", err)
+			}
+
+			deletedSharedLibraries = append(deletedSharedLibraries, sharedLibrary.IdLibrary)
+
+			if deletedSharedLibrariesMap[sharedLibrary.IdLibrary] {
+				isDuplicate = true // Doublon détecté
+			} else {
+				deletedSharedLibrariesMap[sharedLibrary.IdLibrary] = true
+			}
+		}
+
+		// Ajout aux listes si pas de doublon
+		if !isDuplicate {
+			if action.ExecutedBy == "CLIENT" {
+				filteredServerActions = append(filteredServerActions, action)
+			} else if action.ExecutedBy == "SERVER" {
+				filteredClientActions = append(filteredClientActions, action)
 			}
 		}
 	}
 
-	// Deuxième passage : trier INSERT et UPDATE, ignorer les IDs en doublons
-	for _, action := range filtered_actions {
-		if !isDeleted(deletedActions, action.Table, action.IdAction) {
-			if action.Type == "INSERT" {
-				if action.ExecutedBy == "SERVER" {
-					client_actions = append(client_actions, action)
-				} else {
-					server_actions = append(server_actions, action)
+	// Mise à jour des listes d'actions après suppression des doublons
+	serverActions = append(serverActions, filteredServerActions...)
+	clientActions = append(clientActions, filteredClientActions...)
+
+	// --== INSERT ==--
+
+	//On met chaque action INSERT dans une liste des actions a executer pour le CLIENT ou SERVER si l'objet n'est pas dans la liste des objets supprimes
+	for _, action := range insertActions {
+
+		if action.Table == "LIBRARY" {
+			var library model.Library
+			err := json.Unmarshal(action.Action, &library)
+			if err != nil {
+				log.Fatalf("Erreur lors du décodage du JSON : %v", err)
+			} else if !contains(deletedLibraries, library.IdLibrary) {
+				log.Println("passed THROUGHT !contains(deletedLibraries, library.IdLibrary)")
+				log.Println("deletedLibraries")
+				log.Println(deletedLibraries)
+				log.Println("library.IdLibrary")
+				log.Println(library.IdLibrary)
+				if action.ExecutedBy == "CLIENT" {
+					serverActions = append(serverActions, action)
+				} else if action.ExecutedBy == "SERVER" {
+					clientActions = append(clientActions, action)
 				}
-			} else if action.Type == "UPDATE" {
-				client_actions = append(client_actions, action)
-				server_actions = append(server_actions, action)
+			}
+		} else if action.Table == "STATE" {
+			var state model.State
+			err := json.Unmarshal(action.Action, &state)
+			if err != nil {
+				log.Fatalf("Erreur lors du décodage du JSON : %v", err)
+			} else if !contains(deletedStates, state.IdBook) {
+				if action.ExecutedBy == "CLIENT" {
+					serverActions = append(serverActions, action)
+				} else if action.ExecutedBy == "SERVER" {
+					clientActions = append(clientActions, action)
+				}
+			}
+		} else if action.Table == "LIBRARY_BOOK" {
+			var libraryBook model.LibraryBook
+			err := json.Unmarshal(action.Action, &libraryBook)
+			if err != nil {
+				log.Fatalf("Erreur lors du décodage du JSON : %v", err)
+			} else if !containsLibraryBook(deletedLibrariesBooks, libraryBookIDs{libraryBook.IdBook, libraryBook.IdLibrary}) {
+				if action.ExecutedBy == "CLIENT" {
+					serverActions = append(serverActions, action)
+				} else if action.ExecutedBy == "SERVER" {
+					clientActions = append(clientActions, action)
+				}
+			}
+		} else if action.Table == "SHARED_LIBRARY" {
+			var sharedLibrary model.SharedLibrary
+			err := json.Unmarshal(action.Action, &sharedLibrary)
+			if err != nil {
+				log.Fatalf("Erreur lors du décodage du JSON : %v", err)
+			} else if !contains(deletedSharedLibraries, sharedLibrary.IdLibrary) {
+				if action.ExecutedBy == "CLIENT" {
+					serverActions = append(serverActions, action)
+				} else if action.ExecutedBy == "SERVER" {
+					clientActions = append(clientActions, action)
+				}
 			}
 		}
 	}
 
-	return server_actions, client_actions, nil
+	// --== UPDATE ==--
+
+	//LIBRARY
+	libraryiesActionsInfos := make(map[uuid.UUID]libraryActionInfo)
+	// dict{idlibrary OBJET(idaction  name date)}
+	// si name correspond au last update DEVICE alors rien
+	// Sinon ajout a la liste !DEVICE
+	for _, action := range updateLibraryActions {
+		var library model.Library
+		err := json.Unmarshal(action.Action, &library)
+		if err != nil {
+			log.Fatalf("Erreur lors du décodage du JSON : %v", err)
+		}
+		if !contains(deletedLibraries, library.IdLibrary) {
+			if _, exists := libraryiesActionsInfos[library.IdLibrary]; exists {
+				if action.Date.After(libraryiesActionsInfos[library.IdLibrary].Date) {
+					libraryiesActionsInfos[library.IdLibrary] = libraryActionInfo{action.IdAction, library.Name, action.Date}
+				}
+			} else {
+				libraryiesActionsInfos[library.IdLibrary] = libraryActionInfo{action.IdAction, library.Name, action.Date}
+			}
+		}
+	}
+
+	for _, action := range libraryiesActionsInfos {
+		actionToAdd := updateLibraryActions[action.ActionId]
+		if actionToAdd.ExecutedBy == "CLIENT" {
+			serverActions = append(serverActions, actionToAdd)
+		} else if actionToAdd.ExecutedBy == "SERVER" {
+			clientActions = append(clientActions, actionToAdd)
+		}
+	}
+
+	//STATE
+	statesProgressionActionsInfos := make(map[uuid.UUID]stateProgressionActionInfo)
+	statesIsAvailableActionInfo := make(map[uuid.UUID]stateIsAvailableActionInfo)
+	statesLastReadDateActionInfo := make(map[uuid.UUID]stateLastReadDateActionInfo)
+	statesReadCountActionInfo := make(map[uuid.UUID]stateReadCountActionInfo)
+	statesStateActionInfo := make(map[uuid.UUID]stateStateActionInfo)
+
+	log.Println("uPDATE state")
+	log.Println("updateStateActions")
+	log.Println(updateStateActions)
+	for _, action := range updateStateActions {
+		var stateActionData map[string]interface{}
+		err := json.Unmarshal(action.Action, &stateActionData)
+		if err != nil {
+			log.Fatalf("Erreur lors du décodage du JSON : %v", err)
+		}
+
+		// Vérifie si "book_id" existe
+		log.Println("if idBook, ok := stateActionData[]; ok {")
+		log.Println(stateActionData)
+		if idBook, ok := stateActionData["id_book"]; ok {
+			log.Println("if idBook, ok := stateActionData[]; ok {")
+			log.Println(stateActionData["id_book"])
+			// Conversion de idBook en uuid.UUID
+			idBookStr, ok := idBook.(string)
+			if !ok {
+				log.Fatalf("Erreur : id_book n'est pas une chaîne de caractères")
+			}
+			idBookUUID, err := uuid.Parse(idBookStr)
+			if err != nil {
+				log.Fatalf("Erreur : impossible de convertir id_book en UUID : %v", err)
+			}
+
+			log.Println("Verification que if !contains(deletedStates, idBookUUID) {")
+			log.Println("deletedStates")
+			log.Println(deletedStates)
+			log.Println("idBookUUID")
+			log.Println(idBookUUID)
+			if !contains(deletedStates, idBookUUID) {
+
+				log.Println("Verification PASSEE")
+
+				// Vérifie si "progression" existe
+				log.Println("progression test")
+				if progression, ok := stateActionData["progression"]; ok {
+					log.Println("progression PASSEE")
+					progressionUint, ok := progression.(float64) // JSON utilise float64 pour les nombres
+					if !ok {
+						log.Fatalf("Erreur : progression n'est pas un nombre valide")
+					}
+
+					// Ajout à la map si l'ID existe ou si la date est plus récente
+					if _, exists := statesProgressionActionsInfos[idBookUUID]; exists {
+						if action.Date.After(statesProgressionActionsInfos[idBookUUID].Date) {
+							log.Println("progression add in statesProgressionActionsInfos")
+							statesProgressionActionsInfos[idBookUUID] = stateProgressionActionInfo{
+								ActionId:    action.IdAction,
+								Progression: uint(progressionUint),
+								Date:        action.Date,
+							}
+						}
+					} else {
+						log.Println("progression add in statesProgressionActionsInfos")
+						statesProgressionActionsInfos[idBookUUID] = stateProgressionActionInfo{
+							ActionId:    action.IdAction,
+							Progression: uint(progressionUint),
+							Date:        action.Date,
+						}
+					}
+				}
+				log.Println("Status of statesProgressionActionsInfos")
+				log.Println(statesProgressionActionsInfos)
+
+				if isAvailable, ok := stateActionData["is_available"]; ok {
+					isAvailableBool, ok := isAvailable.(bool)
+					if !ok {
+						log.Fatalf("Erreur : is_available n'est pas un booléen")
+					}
+
+					if _, exists := statesIsAvailableActionInfo[idBookUUID]; exists {
+						if action.Date.After(statesIsAvailableActionInfo[idBookUUID].Date) {
+							statesIsAvailableActionInfo[idBookUUID] = stateIsAvailableActionInfo{
+								ActionId:    action.IdAction,
+								IsAvailable: isAvailableBool,
+								Date:        action.Date,
+							}
+						}
+					} else {
+						statesIsAvailableActionInfo[idBookUUID] = stateIsAvailableActionInfo{
+							ActionId:    action.IdAction,
+							IsAvailable: isAvailableBool,
+							Date:        action.Date,
+						}
+					}
+				}
+
+				if lastReadDate, ok := stateActionData["last_read_date"]; ok {
+					lastReadDateStr, ok := lastReadDate.(string)
+					if !ok {
+						log.Fatalf("Erreur : last_read_date n'est pas une chaîne valide")
+					}
+
+					if _, exists := statesLastReadDateActionInfo[idBookUUID]; exists {
+						if action.Date.After(statesLastReadDateActionInfo[idBookUUID].Date) {
+							statesLastReadDateActionInfo[idBookUUID] = stateLastReadDateActionInfo{
+								ActionId:     action.IdAction,
+								LastReadDate: lastReadDateStr,
+								Date:         action.Date,
+							}
+						}
+					} else {
+						statesLastReadDateActionInfo[idBookUUID] = stateLastReadDateActionInfo{
+							ActionId:     action.IdAction,
+							LastReadDate: lastReadDateStr,
+							Date:         action.Date,
+						}
+					}
+				}
+
+				if readCount, ok := stateActionData["read_count"]; ok {
+					readCountFloat, ok := readCount.(float64)
+					if !ok {
+						log.Fatalf("Erreur : read_count n'est pas un nombre valide")
+					}
+
+					if _, exists := statesReadCountActionInfo[idBookUUID]; exists {
+						if action.Date.After(statesReadCountActionInfo[idBookUUID].Date) {
+							statesReadCountActionInfo[idBookUUID] = stateReadCountActionInfo{
+								ActionId:  action.IdAction,
+								ReadCount: uint(readCountFloat),
+								Date:      action.Date,
+							}
+						}
+					} else {
+						statesReadCountActionInfo[idBookUUID] = stateReadCountActionInfo{
+							ActionId:  action.IdAction,
+							ReadCount: uint(readCountFloat),
+							Date:      action.Date,
+						}
+					}
+				}
+
+				if state, ok := stateActionData["state"]; ok {
+					stateStr, ok := state.(string)
+					if !ok {
+						log.Fatalf("Erreur : state n'est pas une chaîne valide")
+					}
+
+					if _, exists := statesStateActionInfo[idBookUUID]; exists {
+						if action.Date.After(statesStateActionInfo[idBookUUID].Date) {
+							statesStateActionInfo[idBookUUID] = stateStateActionInfo{
+								ActionId: action.IdAction,
+								State:    stateStr,
+								Date:     action.Date,
+							}
+						}
+					} else {
+						statesStateActionInfo[idBookUUID] = stateStateActionInfo{
+							ActionId: action.IdAction,
+							State:    stateStr,
+							Date:     action.Date,
+						}
+					}
+				}
+			}
+		}
+	}
+
+	log.Println("for _, action := range statesProgressionActionsInfos")
+	for _, action := range statesProgressionActionsInfos {
+		log.Println("action : ")
+		log.Println(action)
+		actionToAdd := updateStateActions[action.ActionId]
+		log.Println("actionToAdd : ")
+		log.Println(actionToAdd)
+		if actionToAdd.ExecutedBy == "CLIENT" {
+			serverActions = append(serverActions, actionToAdd)
+			log.Println("== client")
+		} else if actionToAdd.ExecutedBy == "SERVER" {
+			clientActions = append(clientActions, actionToAdd)
+			log.Println("== server")
+		}
+	}
+	log.Println("serverActions : ")
+	log.Println(serverActions)
+	log.Println("clientActions : ")
+	log.Println(clientActions)
+
+	for _, action := range statesIsAvailableActionInfo {
+		actionToAdd := updateStateActions[action.ActionId]
+		if actionToAdd.ExecutedBy == "CLIENT" {
+			serverActions = append(serverActions, actionToAdd)
+		} else if actionToAdd.ExecutedBy == "SERVER" {
+			clientActions = append(clientActions, actionToAdd)
+		}
+	}
+
+	for _, action := range statesLastReadDateActionInfo {
+		actionToAdd := updateStateActions[action.ActionId]
+		if actionToAdd.ExecutedBy == "CLIENT" {
+			serverActions = append(serverActions, actionToAdd)
+		} else if actionToAdd.ExecutedBy == "SERVER" {
+			clientActions = append(clientActions, actionToAdd)
+		}
+	}
+
+	for _, action := range statesReadCountActionInfo {
+		actionToAdd := updateStateActions[action.ActionId]
+		if actionToAdd.ExecutedBy == "CLIENT" {
+			serverActions = append(serverActions, actionToAdd)
+		} else if actionToAdd.ExecutedBy == "SERVER" {
+			clientActions = append(clientActions, actionToAdd)
+		}
+	}
+
+	for _, action := range statesStateActionInfo {
+		actionToAdd := updateStateActions[action.ActionId]
+		if actionToAdd.ExecutedBy == "CLIENT" {
+			serverActions = append(serverActions, actionToAdd)
+		} else if actionToAdd.ExecutedBy == "SERVER" {
+			clientActions = append(clientActions, actionToAdd)
+		}
+	}
+
+	log.Println("return ing clientActions : ")
+	log.Println(clientActions)
+
+	return serverActions, clientActions, nil
 }
 
 // Service principal pour chercher un livre
@@ -197,8 +554,8 @@ func (ss *SynchroService) Synchro(uuidUser uuid.UUID, client_actions []model.Act
 
 	server_actions_to_exec, client_actions_to_exec, err := ss.whoDoWhichActions(filtered_actions)
 
-	// log.Println("client_actions_to_exec : ")
-	// log.Println(client_actions_to_exec)
+	log.Println("SERVER ACTIONS exec :")
+	log.Println(server_actions_to_exec)
 
 	ss.executeActionsToSynchronizeServer(server_actions_to_exec)
 
@@ -206,11 +563,22 @@ func (ss *SynchroService) Synchro(uuidUser uuid.UUID, client_actions []model.Act
 }
 
 func (ss *SynchroService) executeActionsToSynchronizeServer(clientActionsToExecute []model.Action) error {
+	log.Println("Avant tri :")
+	log.Println(clientActionsToExecute)
+
+	// Trier les actions par ordre chronologique
+	sort.Slice(clientActionsToExecute, func(i, j int) bool {
+		return clientActionsToExecute[i].Date.Before(clientActionsToExecute[j].Date)
+	})
+
+	log.Println("Après :")
+	log.Println(clientActionsToExecute)
+
 	for _, action := range clientActionsToExecute {
 		switch action.Table {
-		case "LIBRARIES":
+		case "LIBRARY":
 			var library model.Library
-			err := json.Unmarshal([]byte(action.Action), &library)
+			err := json.Unmarshal(action.Action, &library)
 			if err != nil {
 				log.Fatalf("Erreur lors du décodage du JSON : %v", err)
 			}
@@ -224,6 +592,8 @@ func (ss *SynchroService) executeActionsToSynchronizeServer(clientActionsToExecu
 					return fmt.Errorf("update failed for ID %s", action.IdAction)
 				}
 			case "DELETE":
+				log.Println("Modele library :")
+				log.Println(library)
 				if res := repository.NewLibraryRepository(ss.DB).DeleteLibrary(library.IdLibrary, action.IdUser); !res {
 					return fmt.Errorf("delete failed for ID %s", action.IdAction)
 				}
@@ -233,7 +603,7 @@ func (ss *SynchroService) executeActionsToSynchronizeServer(clientActionsToExecu
 
 		case "LIBRARY_BOOK":
 			var libraryBook model.PostLibraryBook
-			err := json.Unmarshal([]byte(action.Action), &libraryBook)
+			err := json.Unmarshal(action.Action, &libraryBook)
 			if err != nil {
 				log.Fatalf("Erreur lors du décodage du JSON : %v", err)
 			}
@@ -252,7 +622,7 @@ func (ss *SynchroService) executeActionsToSynchronizeServer(clientActionsToExecu
 
 		case "SHARED_LIBRARY":
 			var sharedLibrary model.PostSharedLibrary
-			err := json.Unmarshal([]byte(action.Action), &sharedLibrary)
+			err := json.Unmarshal(action.Action, &sharedLibrary)
 			if err != nil {
 				log.Fatalf("Erreur lors du décodage du JSON : %v", err)
 			}
@@ -279,18 +649,6 @@ func (ss *SynchroService) executeActionsToSynchronizeServer(clientActionsToExecu
 			if err != nil {
 				log.Fatalf("Erreur lors du décodage du JSON : %v", err)
 			}
-
-			var data map[string]interface{}
-			erer := json.Unmarshal([]byte(action.Action), &data)
-			if erer != nil {
-				log.Fatalf("erreur lors du décodage JSON : %w", erer)
-			}
-
-			log.Println("state : ")
-			log.Println(state)
-
-			log.Println("state : ")
-			log.Println(data)
 
 			switch action.Type {
 			case "INSERT":

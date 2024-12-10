@@ -5,9 +5,13 @@ meta {
 }
 
 delete {
-  url: {{base_book_url}}/libraries/2
+  url: {{base_book_url}}/libraries/:id_library
   body: none
   auth: bearer
+}
+
+params:path {
+  id_library: b7b0d5f9-6542-4ce4-914c-ab272cc5a814
 }
 
 auth:bearer {
