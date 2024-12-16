@@ -63,9 +63,14 @@ services:
   api_books:
     container_name: api_books
     hostname: books
-    build: ./book
+    build: 
+      context: ./book
+      target: debug
     ports:
       - 8083:8080
+      - 4200:4200
+    security_opt:
+      - "seccomp:unconfined"
     restart: always
     environment:
       DB_HOST: postgres
