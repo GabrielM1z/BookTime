@@ -57,7 +57,7 @@ func (lc *LibraryBookController) GetLibraryBook(c *gin.Context) {
 		return
 	}
 
-	if libraryBook.IdLibrary != uuid.Nil && libraryBook.IdBook != uuid.Nil {
+	if libraryBook.LibraryId != uuid.Nil && libraryBook.IdBook != uuid.Nil {
 		c.JSON(http.StatusOK, gin.H{"status": "success", "data": libraryBook, "msg": "library book retrieved successfully"})
 	} else {
 		c.JSON(http.StatusNotFound, gin.H{"status": "error", "data": nil, "msg": "library book not found"})
@@ -84,7 +84,7 @@ func (ldc *LibraryBookController) GetLibraryBookByLibraryId(c *gin.Context) {
 func (lc *LibraryBookController) InsertLibraryBook(c *gin.Context) {
 	db := lc.DB
 	idUser := getUserID(c)
-	var post model.PostLibraryBook
+	var post model.LibraryBook
 	if err := c.ShouldBindJSON(&post); err == nil {
 		repoLibraryBook := repository.NewLibraryBookRepository(db)
 		insert := repoLibraryBook.InsertLibraryBook(post, idUser)

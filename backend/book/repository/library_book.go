@@ -30,7 +30,7 @@ func (lbr *LibraryBookRepository) SelectLibraryBooks() []model.LibraryBook {
 
 	for rows.Next() {
 		var libraryBook model.LibraryBook
-		err := rows.Scan(&libraryBook.IdLibrary, &libraryBook.IdBook)
+		err := rows.Scan(&libraryBook.LibraryId, &libraryBook.IdBook)
 		if err != nil {
 			log.Println(err)
 		} else {
@@ -51,7 +51,7 @@ func (lbr *LibraryBookRepository) SelectLibraryBook(idLibrary uuid.UUID, idBook 
 	defer stmt.Close()
 
 	row := stmt.QueryRow(idLibrary, idBook)
-	err = row.Scan(&libraryBook.IdLibrary, &libraryBook.IdBook)
+	err = row.Scan(&libraryBook.LibraryId, &libraryBook.IdBook)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return libraryBook, nil // Pas de lien trouvé
@@ -101,7 +101,7 @@ func (lbr *LibraryBookRepository) SelectLibraryBookByLibrary(idLibrary string) [
 }
 
 // InsertLibraryBook - Insère un lien bibliothèque-livre
-func (lbr *LibraryBookRepository) InsertLibraryBook(post model.PostLibraryBook, idUser uuid.UUID) bool {
+func (lbr *LibraryBookRepository) InsertLibraryBook(post model.LibraryBook, idUser uuid.UUID) bool {
 	stmt, err := lbr.DB.Prepare("INSERT INTO library_book (id_library, id_book) VALUES ($1, $2)")
 	if err != nil {
 		log.Println(err)
@@ -109,14 +109,14 @@ func (lbr *LibraryBookRepository) InsertLibraryBook(post model.PostLibraryBook, 
 	}
 	defer stmt.Close()
 
-	_, err2 := stmt.Exec(post.LibraryId, post.BookId)
+	_, err2 := stmt.Exec(post.LibraryId, post.IdBook)
 	if err2 != nil {
 		log.Println(err2)
 		return false
 	}
 
 	actionMap := map[string]interface{}{
-		"id_book":    post.BookId,
+		"id_book":    post.IdBook,
 		"id_library": post.LibraryId,
 	}
 
@@ -126,7 +126,7 @@ func (lbr *LibraryBookRepository) InsertLibraryBook(post model.PostLibraryBook, 
 // UpdateLibraryBook - Met à jour un lien bibliothèque-livre
 func (r *LibraryBookRepository) UpdateLibraryBook(idLibrary, idBook uuid.UUID, libraryBook model.LibraryBook) bool {
 	query := `UPDATE library_book SET id_library = $1, id_book = $2 WHERE id_library = $3 AND id_book = $4`
-	_, err := r.DB.Exec(query, libraryBook.IdLibrary, libraryBook.IdBook, idLibrary, idBook)
+	_, err := r.DB.Exec(query, libraryBook.LibraryId, libraryBook.IdBook, idLibrary, idBook)
 	if err != nil {
 		log.Println(err)
 		return false
