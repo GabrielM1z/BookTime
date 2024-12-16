@@ -1,11 +1,11 @@
-import { ActionRepositoryProps } from "@/repositories/action";
-import { actionRepositoryFactory } from "@/repositories/factories/action";
-import { libraryRepositoryFactory } from "@/repositories/factories/library";
-import { userRepositoryFactory } from "@/repositories/factories/user";
-import { LibraryRepositoryProps } from "@/repositories/library";
-import { UserRepositoryProps } from "@/repositories/user";
+import { ActionRepositoryProps } from "@/repositories/ActionRepository";
+import { actionRepositoryFactory } from "@/repositories/factories/actionRepositoryFactory";
+import { libraryRepositoryFactory } from "@/repositories/factories/libraryRepositoryFactory";
+import { userRepositoryFactory } from "@/repositories/factories/userRepositoryFactory";
+import { LibraryRepositoryProps } from "@/repositories/LibraryRepository";
+import { UserRepositoryProps } from "@/repositories/UserRepository";
 import { SessionRepositoryProps } from "@/repositories/session";
-import { sessionRepositoryFactory } from "@/repositories/factories/session";
+import { sessionRepositoryFactory } from "@/repositories/factories/sessionRepositoryFactory";
 import { SQLiteProvider, SQLiteProviderProps } from "expo-sqlite";
 import React, { createContext } from "react";
 
