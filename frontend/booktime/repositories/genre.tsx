@@ -6,6 +6,7 @@ import { syncDB } from '@/core/syncService';
 export interface GenreRepositoryProps {
     getAll: () => Promise<Genre[]>
     get: (id: string) => Promise<Genre|null>;
+    add: (genre: Genre) => Promise<void>;
 }
 
 export class SQLiteGenreRepository implements GenreRepositoryProps {
@@ -34,8 +35,14 @@ export class SQLiteGenreRepository implements GenreRepositoryProps {
         return result ? (result as unknown as Genre) : null;
     }
 
-    async add(name: string): Promise<void> {
-        return;
+    async add(genre: Genre): Promise<void> {
+        const statement = await this.db.prepareAsync(
+            'INSERT INTO genre (name) VALUES ($name);'
+        );
+        
+        await statement.executeAsync({
+            $name: genre.name
+        });
     }
 }
 
@@ -49,7 +56,7 @@ export class APIGenreRepository implements GenreRepositoryProps {
         return null;
     }
 
-    async add(name: string): Promise<void> {
+    async add(genre: Genre): Promise<void> {
         return;
     }
 }

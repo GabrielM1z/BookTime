@@ -5,7 +5,8 @@ import { syncDB } from '@/core/syncService';
 
 export interface StateRepositoryProps {
     getAll: () => Promise<State[]>;
-    get: (id: string) => Promise<State|null>;;
+    get: (id: string) => Promise<State|null>;
+    add: (state: State) => Promise<void>;
 }
 
 export class SQLiteStateRepository implements StateRepositoryProps {
@@ -34,8 +35,20 @@ export class SQLiteStateRepository implements StateRepositoryProps {
         return result ? (result as unknown as State) : null;
     }
 
-    async add(name: string): Promise<void> {
-        return;
+    async add(state: State): Promise<void> {
+        const statement = await this.db.prepareAsync(
+            'INSERT INTO state (state, progression, read_count, last_read_date, id_user, id_book, is_available) VALUES ($state, $progression, $read_count, $last_read_date, $id_user, $id_book, $is_available);'
+        );
+        
+        await statement.executeAsync({
+            $state: state.state,
+            $progression: state.progression,
+            $read_count: state.read_count,
+            $last_read_date: state.last_read_date,
+            $id_user: state.id_user,
+            $id_book: state.id_book,
+            $is_available: state.is_available,
+        });
     }
 }
 
@@ -49,7 +62,7 @@ export class APIStateRepository implements StateRepositoryProps {
         return null;
     }
 
-    async add(name: string): Promise<void> {
+    async add(state: State): Promise<void> {
         return;
     }
 }

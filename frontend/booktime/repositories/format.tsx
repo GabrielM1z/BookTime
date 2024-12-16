@@ -6,6 +6,7 @@ import { syncDB } from '@/core/syncService';
 export interface FormatRepositoryProps {
     getAll: () => Promise<Format[]>
     get: (id: string) => Promise<Format|null>;
+    add: (format: Format) => Promise<void>;
 }
 
 export class SQLiteFormatRepository implements FormatRepositoryProps {
@@ -34,8 +35,14 @@ export class SQLiteFormatRepository implements FormatRepositoryProps {
         return result ? (result as unknown as Format) : null;
     }
 
-    async add(name: string): Promise<void> {
-        return;
+    async add(format: Format): Promise<void> {
+        const statement = await this.db.prepareAsync(
+            'INSERT INTO format (name) VALUES ($name);'
+        );
+        
+        await statement.executeAsync({
+            $name: format.name
+        });
     }
 }
 
@@ -49,7 +56,7 @@ export class APIFormatRepository implements FormatRepositoryProps {
         return null;
     }
 
-    async add(name: string): Promise<void> {
+    async add(format: Format): Promise<void> {
         return;
     }
 }

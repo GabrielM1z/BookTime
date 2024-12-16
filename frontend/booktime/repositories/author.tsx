@@ -6,6 +6,7 @@ import { Author } from '@/models/Author';
 export interface AuthorRepositoryProps {
     getAll: () => Promise<Author[]>
     get: (id: string) => Promise<Author|null>;
+    add: (author: Author) => Promise<void>;
 }
 
 export class SQLiteAuthorRepository implements AuthorRepositoryProps {
@@ -34,8 +35,16 @@ export class SQLiteAuthorRepository implements AuthorRepositoryProps {
         return result ? (result as unknown as Author) : null;
     }
 
-    async add(name: string): Promise<void> {
-        return;
+    async add(author: Author): Promise<void> {
+        const statement = await this.db.prepareAsync(
+            'INSERT INTO author (first_name, last_name, description) VALUES ($first_name, $last_name, $description);'
+        );
+        
+        await statement.executeAsync({
+            $first_name: author.first_name,
+            $last_name: author.last_name,
+            $description: author.description
+        });
     }
 }
 
@@ -49,7 +58,7 @@ export class APIAuthorRepository implements AuthorRepositoryProps {
         return null;
     }
 
-    async add(name: string): Promise<void> {
+    async add(author: Author): Promise<void> {
         return;
     }
 }
