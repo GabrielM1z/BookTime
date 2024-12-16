@@ -5,6 +5,7 @@
 // }
 
 export interface BookInfos {
+	id : string;
 	title: string
 	description: string;    
 	isbn13: string;    

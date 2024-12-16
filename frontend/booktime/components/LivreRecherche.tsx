@@ -1,7 +1,7 @@
 import { StyleSheet, View, Image, Pressable } from 'react-native';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { ThemedText } from './ThemedText';
-import { Book, BookInfos } from '@/models/Book';
+import { BookInfos } from '@/models/Book';
 import { Book2 } from '@/models/Book2';
 import React, { useEffect, useState } from 'react';
 
