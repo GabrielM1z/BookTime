@@ -1,25 +1,31 @@
 import { StyleSheet, View, Image, Pressable } from 'react-native';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { ThemedText } from './ThemedText';
-import { Book, BookInfos } from '@/models/Book';
+import { BookInfos } from '@/models/Book';
 import { Book2 } from '@/models/Book2';
 import React, { useEffect, useState } from 'react';
+
 import axios from 'axios';
+import { Buffer } from 'buffer'; 
+import { Colors } from '@/constants/Colors';
+
+
 
 const defaultCover = require('@/assets/images/logo_refait.png');
 
-async function getImageAsBase64(url: string): Promise<string | null> {
-  console.log("coucou")
-  try {
-    const response = await axios.get(url, { responseType: 'arraybuffer' }); // Utilisez 'arraybuffer' pour manipuler des données binaires
-    const base64 = Buffer.from(response.data, 'binary').toString('base64'); // Convertissez les données en Base64
-    console.log('Image fetched successfully as Base64.');
-    return `data:image/jpeg;base64,${base64}`; // Retournez une chaîne Base64 utilisable dans React Native
-  } catch (error) {
-    console.error('Error fetching the image as Base64:', error);
-    return null;
-  }
-}
+// async function getImageAsBase64(url: string): Promise<string | null> {
+//   console.log("coucou")
+  
+//   try {
+//     const response = await axios.get(url, { responseType: 'arraybuffer' }); // Utilisez 'arraybuffer' pour manipuler des données binaires
+//     const base64 = Buffer.from(response.data, 'binary').toString('base64'); // Convertissez les données en Base64
+//     console.log('Image fetched successfully as Base64.');
+//     return `data:image/jpeg;base64,${base64}`; // Retournez une chaîne Base64 utilisable dans React Native
+//   } catch (error) {
+//     console.error('Error fetching the image as Base64:', error);
+//     return null;
+//   }
+// }
 
 export const LivreRecherche = ({ book }: { book: BookInfos }) => {
 
@@ -27,11 +33,29 @@ export const LivreRecherche = ({ book }: { book: BookInfos }) => {
     console.log(`Book added: ${book}`);
   };
 
+  const [imageSource, setImageSource] = useState<string | number>(defaultCover);
+
+  useEffect(() => {
+    const fetchAndConvertImage = async () => {
+      try {
+        // Téléchargez l'image et convertissez-la en Base64
+        const response = await axios.get(book.thumbnail, { responseType: 'arraybuffer' });
+        const base64Image = `data:image/jpeg;base64,${Buffer.from(response.data, 'binary').toString('base64')}`;
+        setImageSource(base64Image); // Mettez à jour l'état avec l'image en Base64
+      } catch (error) {
+        console.error('Error fetching and converting image:', error);
+        // En cas d'échec, vous pouvez garder l'image temporaire ou définir une image d'erreur
+      }
+    };
+
+    fetchAndConvertImage();
+  }, [book.thumbnail]);
+
   return (
     <View style={styles.itemContainer}>
 
-      {/* <Image source={typeof imageSource === 'string' ? { uri: imageSource } : imageSource} style={styles.itemImage} resizeMode={'cover'}></Image> */}
-      <Image source={{uri:"data:image/png;base64,"+getImageAsBase64(book.thumbnail)}} defaultSource={defaultCover}  style={styles.itemImage} resizeMode={'cover'} ></Image>
+      <Image source={typeof imageSource === 'string' ? { uri: imageSource } : imageSource} style={styles.itemImage} resizeMode={'cover'}></Image>
+      {/* <Image source={{uri:"data:image/png;base64,"+getImageAsBase64(book.thumbnail)}} defaultSource={defaultCover}  style={styles.itemImage} resizeMode={'cover'} ></Image> */}
 
       <View style={styles.itemInfos}>
         <ThemedText type="titreLivreHorizontal" numberOfLines={1}>{book.title}</ThemedText>
@@ -54,7 +78,7 @@ const styles = StyleSheet.create({
     marginBottom: 10
   },
   itemImage: {
-    backgroundColor: 'yellow',
+    backgroundColor: Colors.dark.primary,
     width: 100,
     height: 100,
     borderRadius: 10,

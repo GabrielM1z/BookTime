@@ -5,9 +5,13 @@ meta {
 }
 
 put {
-  url: {{base_book_url}}/libraries/1
+  url: {{base_book_url}}/libraries/:id_library
   body: json
   auth: bearer
+}
+
+params:path {
+  id_library: 66640bbb-86bc-455e-b182-7fae59185319
 }
 
 auth:bearer {
@@ -16,7 +20,7 @@ auth:bearer {
 
 body:json {
   {
-      "name": "The pone Library"
+      "name": "is this really beautiful ?(first update from server)"
   }
 }
 

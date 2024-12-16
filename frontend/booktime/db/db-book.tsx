@@ -1,11 +1,11 @@
-import { Book2 } from '@/models/Book2';
+import { BookInfos } from '@/models/Book';
 import { Library } from '@/models/Library';
 import { useSQLiteContext } from 'expo-sqlite';
 
 ////////////////////////// REQUETE INSERT //////////////////////////
 
 // requete pour inserer un livre + liaison avec une étagère
-export const insertBook = async (library: Library, book: Book2) => 
+export const insertBook = async (library: Library, book: BookInfos) => 
 {
 	const db = useSQLiteContext();
 	const statement = await db.prepareAsync(`
@@ -36,7 +36,7 @@ export const insertBook = async (library: Library, book: Book2) =>
 			$bookPublicationDate: book.publicationDate,
 			$bookNbPage: book.pageNumber,
 			$bookLangage: book.language,
-			$bookCover: book.coverImageUrl,
+			$bookCover: book.thumbnail,
 			$libraryId: library.id,
 		});
 		console.log("result : ", result)        
@@ -49,7 +49,7 @@ export const insertBook = async (library: Library, book: Book2) =>
 ////////////////////////// REQUETE DELETE //////////////////////////
 
 // Suppr la liason entre le livre et une étagère
-export const deleteBookFromLibrairy = async (library: Library, book: Book2) => 
+export const deleteBookFromLibrairy = async (library: Library, book: BookInfos) => 
 {
 	const db = useSQLiteContext();
 	const statement = await db.prepareAsync(`

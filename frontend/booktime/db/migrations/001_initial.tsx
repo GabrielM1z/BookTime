@@ -89,7 +89,7 @@ const initBook = async (db: SQLiteDatabase) => {
     try {
         db.execAsync(`
             CREATE TABLE IF NOT EXISTS book (
-                id_book TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+                id_book VARCHAR(13) PRIMARY KEY,
                 title VARCHAR(255) NOT NULL,
                 description TEXT,
                 id_format TEXT,
@@ -112,7 +112,7 @@ const initBookAuthor = async (db: SQLiteDatabase) => {
         db.execAsync(`
             CREATE TABLE IF NOT EXISTS book_author (
                 id_author TEXT,
-                id_book TEXT,
+                id_book VARCHAR(13),
                 PRIMARY KEY (id_author, id_book),
                 FOREIGN KEY (id_author) REFERENCES author(id_author) ON DELETE CASCADE,
                 FOREIGN KEY (id_book) REFERENCES book(id_book) ON DELETE CASCADE
@@ -129,7 +129,7 @@ const initBookGenre = async (db: SQLiteDatabase) => {
         db.execAsync(`
             CREATE TABLE IF NOT EXISTS book_genre (
                 id_genre TEXT,
-                id_book TEXT,
+                id_book VARCHAR(13),
                 PRIMARY KEY (id_genre, id_book),
                 FOREIGN KEY (id_genre) REFERENCES genre(id_genre) ON DELETE CASCADE,
                 FOREIGN KEY (id_book) REFERENCES book(id_book) ON DELETE CASCADE
@@ -145,13 +145,12 @@ const initState = async (db: SQLiteDatabase) => {
     try {
         db.execAsync(`
             CREATE TABLE IF NOT EXISTS state (
-                id_state TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
                 state VARCHAR(50),
                 progression INT,
                 read_count INT DEFAULT 0,
                 last_read_date TIMESTAMP,
-                id_user INT,
-                id_book INT,
+                id_user TEXT PRIMARY KEY,
+                id_book VARCHAR(13) PRIMARY KEY,
                 is_available BOOLEAN DEFAULT FALSE,
                 FOREIGN KEY (id_book) REFERENCES book(id_book) ON DELETE CASCADE
             );
@@ -167,7 +166,7 @@ const initLibraryBook = async (db: SQLiteDatabase) => {
         db.execAsync(`
             CREATE TABLE IF NOT EXISTS library_book (
                 id_library TEXT,
-                id_book TEXT,
+                id_book VARCHAR(13),
                 PRIMARY KEY (id_library, id_book),
                 FOREIGN KEY (id_library) REFERENCES library(id_library) ON DELETE CASCADE,
                 FOREIGN KEY (id_book) REFERENCES book(id_book) ON DELETE CASCADE

@@ -1,10 +1,11 @@
-import api from '@/services/api';
 import { Library } from '@/models/Library';
 import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite';
 import { Synchronisable } from './synchronisable';
 
+
 export interface LibraryRepositoryProps {
     getAll: () => Promise<Library[]>;
+    get: (id: string) => Promise<Library | null>;
     add: (name: string) => Promise<void>;
 }
 
@@ -25,6 +26,18 @@ export class SQLiteLibraryRepository extends Synchronisable implements LibraryRe
         return allRows;
     }
 
+    async get(id: string): Promise<Library | null> {
+        const statement = await this.db.prepareAsync(
+            'SELECT * FROM library WHERE id_library == $id'
+        );
+
+        const result = await statement.executeAsync({
+            $id: id
+        });
+
+        return result ? (result as unknown as Library) : null;
+    }
+
     async add(name: string): Promise<void> {
         const statement = await this.db.prepareAsync(
             'INSERT INTO library (name) VALUES ($name);'
@@ -32,6 +45,7 @@ export class SQLiteLibraryRepository extends Synchronisable implements LibraryRe
 
         this.sync();
         console.log("oui")
+
 
         await statement.executeAsync({
             $name: name
@@ -42,6 +56,10 @@ export class SQLiteLibraryRepository extends Synchronisable implements LibraryRe
 export class APILibraryRepository implements LibraryRepositoryProps {
     async getAll(): Promise<Library[]> {
         return [];
+    }
+
+    async get(id: string): Promise<Library | null> {
+        return null;
     }
 
     async add(name: string): Promise<void> {

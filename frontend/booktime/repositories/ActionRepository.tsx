@@ -21,6 +21,18 @@ export class ActionRepository implements ActionRepositoryProps {
         return allRows;
     }
 
+    async get(id: string): Promise<Action|null> {
+        const statement = await this.db.prepareAsync(
+            'SELECT * FROM action WHERE id_action == $id'
+        );
+
+        const result = await statement.executeAsync({
+            $id: id
+        });
+
+        return result ? (result as unknown as Action) : null;
+    }
+
     async getTrigger(): Promise<Trigger[]> {
         let allRows = await this.db.getAllAsync<Trigger>(
             'SELECT name, tbl_name,type, sql FROM sqlite_master WHERE type = \'trigger\';'
