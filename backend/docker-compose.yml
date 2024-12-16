@@ -65,7 +65,7 @@ services:
     hostname: books
     build: 
       context: ./book
-      target: debug
+      target: prod
     ports:
       - 8083:8080
       - 4200:4200

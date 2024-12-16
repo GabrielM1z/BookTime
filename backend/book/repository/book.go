@@ -19,7 +19,7 @@ func NewBookRepository(db *sql.DB) *BookRepository {
 
 func (br *BookRepository) SelectBooks() []*model.Book {
 	query := `
-        SELECT id_book, title, description, isbn13, id_format, publisher, 
+        SELECT id_book, title, description, id_format, publisher, 
                TO_CHAR(publication_date,'YYYY-MM-DD') as publication_date, page_number, language, cover_image_url
         FROM book;`
 
@@ -34,7 +34,7 @@ func (br *BookRepository) SelectBooks() []*model.Book {
 
 	for rows.Next() {
 		var book model.Book
-		if err := rows.Scan(&book.IdBook, &book.Title, &book.Description, &book.ISBN13, &IDFormat, &book.Publisher, &book.PublicationDate, &book.PageNumber, &book.Language, &book.CoverImageUrl); err != nil {
+		if err := rows.Scan(&book.IdBook, &book.Title, &book.Description, &IDFormat, &book.Publisher, &book.PublicationDate, &book.PageNumber, &book.Language, &book.CoverImageUrl); err != nil {
 			log.Fatal(err)
 		}
 		format, _ := NewFormatRepository(br.DB).SelectFormat(IDFormat)
@@ -50,7 +50,7 @@ func (br *BookRepository) SelectBooks() []*model.Book {
 	return books
 }
 
-func (br *BookRepository) SelectAuthorsByBookID(bookID uuid.UUID) []model.Author {
+func (br *BookRepository) SelectAuthorsByBookID(bookID string) []model.Author {
 	query := `
 		SELECT a.id_author, a.first_name, a.last_name, a.description as author_desc
 		FROM author a
@@ -75,7 +75,7 @@ func (br *BookRepository) SelectAuthorsByBookID(bookID uuid.UUID) []model.Author
 	return authors
 }
 
-func (br *BookRepository) SelectGenresByBookID(bookID uuid.UUID) []model.Genre {
+func (br *BookRepository) SelectGenresByBookID(bookID string) []model.Genre {
 	query := `
         SELECT g.id_genre, g.name as genre_name
         FROM genre g
@@ -101,8 +101,8 @@ func (br *BookRepository) SelectGenresByBookID(bookID uuid.UUID) []model.Genre {
 }
 
 func (br *BookRepository) InsertBook(post model.PostBook) bool {
-	_, err := br.DB.Exec("INSERT INTO book (title, description, isbn13, id_format, publisher, publication_date, page_number, language, cover_image_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)",
-		post.Title, post.Description, post.ISBN13, post.IdFormat, post.Publisher, post.PublicationDate, post.PageNumber, post.Language, post.CoverImageUrl)
+	_, err := br.DB.Exec("INSERT INTO book (title, description, id_format, publisher, publication_date, page_number, language, cover_image_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)",
+		post.Title, post.Description, post.IdFormat, post.Publisher, post.PublicationDate, post.PageNumber, post.Language, post.CoverImageUrl)
 	if err != nil {
 		log.Println(err)
 		return false
@@ -110,9 +110,9 @@ func (br *BookRepository) InsertBook(post model.PostBook) bool {
 	return true
 }
 
-func (br *BookRepository) SelectBook(id uuid.UUID) (*model.Book, error) {
+func (br *BookRepository) SelectBook(id string) (*model.Book, error) {
 	query := `
-        SELECT id_book, title, description, isbn13, id_format, publisher, 
+        SELECT id_book, title, description, id_format, publisher, 
                TO_CHAR(publication_date,'YYYY-MM-DD') as publication_date, page_number, language, cover_image_url
         FROM book WHERE id_book = $1`
 
@@ -121,7 +121,7 @@ func (br *BookRepository) SelectBook(id uuid.UUID) (*model.Book, error) {
 	IDFormat := uuid.New()
 
 	var book model.Book
-	err := row.Scan(&book.IdBook, &book.Title, &book.Description, &book.ISBN13, &IDFormat, &book.Publisher, &book.PublicationDate, &book.PageNumber, &book.Language, &book.CoverImageUrl)
+	err := row.Scan(&book.IdBook, &book.Title, &book.Description, &IDFormat, &book.Publisher, &book.PublicationDate, &book.PageNumber, &book.Language, &book.CoverImageUrl)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
@@ -139,12 +139,12 @@ func (br *BookRepository) SelectBook(id uuid.UUID) (*model.Book, error) {
 	return &book, nil
 }
 
-func (br *BookRepository) UpdateBook(id uuid.UUID, book model.Book) bool {
-	query := `UPDATE book SET title = $1, description = $2, isbn13 = $3, id_format = $4, publisher = $5, publication_date = $6, 
-			  page_number = $7, language = $8, cover_image_url = $9 WHERE id_book = $10`
+func (br *BookRepository) UpdateBook(book model.Book) bool {
+	query := `UPDATE book SET title = $1, description = $2, id_format = $3, publisher = $4, publication_date = $5, 
+			  page_number = $6, language = $7, cover_image_url = $8 WHERE id_book = $9`
 
-	_, err := br.DB.Exec(query, book.Title, book.Description, book.ISBN13, book.Format.IdFormat, book.Publisher, book.PublicationDate,
-		book.PageNumber, book.Language, book.CoverImageUrl, id)
+	_, err := br.DB.Exec(query, book.Title, book.Description, book.Format.IdFormat, book.Publisher, book.PublicationDate,
+		book.PageNumber, book.Language, book.CoverImageUrl, book.IdBook)
 	if err != nil {
 		log.Println(err)
 		return false
@@ -152,7 +152,7 @@ func (br *BookRepository) UpdateBook(id uuid.UUID, book model.Book) bool {
 	return true
 }
 
-func (br *BookRepository) DeleteBook(id uuid.UUID) bool {
+func (br *BookRepository) DeleteBook(id string) bool {
 	query := "DELETE FROM book WHERE id_book = $1"
 
 	_, err := br.DB.Exec(query, id)

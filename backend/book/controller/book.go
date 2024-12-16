@@ -9,7 +9,6 @@ import (
 	"book/repository"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 type BookController struct {
@@ -32,17 +31,13 @@ func (bc *BookController) GetBooks(c *gin.Context) {
 	}
 }
 
+// LE GET BOOK DOIT MAINTENANT ACCEPTER UN ISBN EN TANT QU'ID => PUIS FAIRE LA RECHERCHE SUR L'API GOOGLE SI LE BOOK NEST PAS PRESENT DANS LA BBD SERVER
 func (bc *BookController) GetBook(c *gin.Context) {
 	db := bc.DB
 	idParam := c.Param("id")
-	id, err := uuid.Parse(idParam)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid book ID"})
-		return
-	}
 
 	repoBook := repository.NewBookRepository(db)
-	book, err := repoBook.SelectBook(id)
+	book, err := repoBook.SelectBook(idParam)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve book"})
 		return
@@ -74,22 +69,19 @@ func (bc *BookController) InsertBook(c *gin.Context) {
 }
 
 func (bc *BookController) UpdateBook(c *gin.Context) {
+	var book model.Book
+
 	db := bc.DB
 	idParam := c.Param("id")
-	id, err := uuid.Parse(idParam)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid book ID"})
-		return
-	}
+	book.IdBook = idParam
 
-	var book model.Book
 	if err := c.ShouldBindJSON(&book); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	repoBook := repository.NewBookRepository(db)
-	success := repoBook.UpdateBook(id, book)
+	success := repoBook.UpdateBook(book)
 	if !success {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update book"})
 		return
@@ -101,14 +93,9 @@ func (bc *BookController) UpdateBook(c *gin.Context) {
 func (bc *BookController) DeleteBook(c *gin.Context) {
 	db := bc.DB
 	idParam := c.Param("id")
-	id, err := uuid.Parse(idParam)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid book ID"})
-		return
-	}
 
 	repoBook := repository.NewBookRepository(db)
-	success := repoBook.DeleteBook(id)
+	success := repoBook.DeleteBook(idParam)
 	if !success {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete book"})
 		return
