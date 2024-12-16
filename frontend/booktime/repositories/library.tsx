@@ -1,9 +1,6 @@
-import api from '@/services/api';
 import { Library } from '@/models/Library';
-import { Api } from '@/services/api';
 import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite';
 import { syncDB } from '@/core/syncService';
-import { useRepository } from '@/hooks/useRepository';
 
 export interface LibraryRepositoryProps {
     getAll: () => Promise<Library[]>;
