@@ -173,7 +173,7 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 				log.Fatalf("Erreur lors du décodage du JSON : %v", err)
 			}
 
-			libraryBookKey := libraryBookIDs{libraryBook.IdBook, libraryBook.IdLibrary}
+			libraryBookKey := libraryBookIDs{libraryBook.IdBook, libraryBook.LibraryId}
 
 			deletedLibrariesBooks = append(deletedLibrariesBooks, libraryBookKey)
 
@@ -224,11 +224,6 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 			if err != nil {
 				log.Fatalf("Erreur lors du décodage du JSON : %v", err)
 			} else if !contains(deletedLibraries, library.IdLibrary) {
-				log.Println("passed THROUGHT !contains(deletedLibraries, library.IdLibrary)")
-				log.Println("deletedLibraries")
-				log.Println(deletedLibraries)
-				log.Println("library.IdLibrary")
-				log.Println(library.IdLibrary)
 				if action.ExecutedBy == "CLIENT" {
 					serverActions = append(serverActions, action)
 				} else if action.ExecutedBy == "SERVER" {
@@ -252,7 +247,7 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 			err := json.Unmarshal(action.Action, &libraryBook)
 			if err != nil {
 				log.Fatalf("Erreur lors du décodage du JSON : %v", err)
-			} else if !containsLibraryBook(deletedLibrariesBooks, libraryBookIDs{libraryBook.IdBook, libraryBook.IdLibrary}) {
+			} else if !containsLibraryBook(deletedLibrariesBooks, libraryBookIDs{libraryBook.IdBook, libraryBook.LibraryId}) {
 				if action.ExecutedBy == "CLIENT" {
 					serverActions = append(serverActions, action)
 				} else if action.ExecutedBy == "SERVER" {
@@ -314,9 +309,6 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 	statesReadCountActionInfo := make(map[uuid.UUID]stateReadCountActionInfo)
 	statesStateActionInfo := make(map[uuid.UUID]stateStateActionInfo)
 
-	log.Println("uPDATE state")
-	log.Println("updateStateActions")
-	log.Println(updateStateActions)
 	for _, action := range updateStateActions {
 		var stateActionData map[string]interface{}
 		err := json.Unmarshal(action.Action, &stateActionData)
@@ -325,11 +317,7 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 		}
 
 		// Vérifie si "book_id" existe
-		log.Println("if idBook, ok := stateActionData[]; ok {")
-		log.Println(stateActionData)
 		if idBook, ok := stateActionData["id_book"]; ok {
-			log.Println("if idBook, ok := stateActionData[]; ok {")
-			log.Println(stateActionData["id_book"])
 			// Conversion de idBook en uuid.UUID
 			idBookStr, ok := idBook.(string)
 			if !ok {
@@ -340,19 +328,10 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 				log.Fatalf("Erreur : impossible de convertir id_book en UUID : %v", err)
 			}
 
-			log.Println("Verification que if !contains(deletedStates, idBookUUID) {")
-			log.Println("deletedStates")
-			log.Println(deletedStates)
-			log.Println("idBookUUID")
-			log.Println(idBookUUID)
 			if !contains(deletedStates, idBookUUID) {
 
-				log.Println("Verification PASSEE")
-
 				// Vérifie si "progression" existe
-				log.Println("progression test")
 				if progression, ok := stateActionData["progression"]; ok {
-					log.Println("progression PASSEE")
 					progressionUint, ok := progression.(float64) // JSON utilise float64 pour les nombres
 					if !ok {
 						log.Fatalf("Erreur : progression n'est pas un nombre valide")
@@ -361,7 +340,6 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 					// Ajout à la map si l'ID existe ou si la date est plus récente
 					if _, exists := statesProgressionActionsInfos[idBookUUID]; exists {
 						if action.Date.After(statesProgressionActionsInfos[idBookUUID].Date) {
-							log.Println("progression add in statesProgressionActionsInfos")
 							statesProgressionActionsInfos[idBookUUID] = stateProgressionActionInfo{
 								ActionId:    action.IdAction,
 								Progression: uint(progressionUint),
@@ -369,7 +347,6 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 							}
 						}
 					} else {
-						log.Println("progression add in statesProgressionActionsInfos")
 						statesProgressionActionsInfos[idBookUUID] = stateProgressionActionInfo{
 							ActionId:    action.IdAction,
 							Progression: uint(progressionUint),
@@ -377,8 +354,6 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 						}
 					}
 				}
-				log.Println("Status of statesProgressionActionsInfos")
-				log.Println(statesProgressionActionsInfos)
 
 				if isAvailable, ok := stateActionData["is_available"]; ok {
 					isAvailableBool, ok := isAvailable.(bool)
@@ -475,25 +450,14 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 		}
 	}
 
-	log.Println("for _, action := range statesProgressionActionsInfos")
 	for _, action := range statesProgressionActionsInfos {
-		log.Println("action : ")
-		log.Println(action)
 		actionToAdd := updateStateActions[action.ActionId]
-		log.Println("actionToAdd : ")
-		log.Println(actionToAdd)
 		if actionToAdd.ExecutedBy == "CLIENT" {
 			serverActions = append(serverActions, actionToAdd)
-			log.Println("== client")
 		} else if actionToAdd.ExecutedBy == "SERVER" {
 			clientActions = append(clientActions, actionToAdd)
-			log.Println("== server")
 		}
 	}
-	log.Println("serverActions : ")
-	log.Println(serverActions)
-	log.Println("clientActions : ")
-	log.Println(clientActions)
 
 	for _, action := range statesIsAvailableActionInfo {
 		actionToAdd := updateStateActions[action.ActionId]
@@ -531,9 +495,6 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 		}
 	}
 
-	log.Println("return ing clientActions : ")
-	log.Println(clientActions)
-
 	return serverActions, clientActions, nil
 }
 
@@ -542,20 +503,11 @@ func (ss *SynchroService) Synchro(uuidUser uuid.UUID, client_actions []model.Act
 
 	server_actions := repository.NewActionRepository(ss.DB).SelectActions(uuidUser)
 
-	log.Println("PASS THERE")
-
 	mixed_actions := slices.Concat(server_actions, client_actions)
-
-	log.Println("PASS LA")
 
 	filtered_actions, err := ss.filteredActions(mixed_actions)
 
-	log.Println("PASS HERE")
-
 	server_actions_to_exec, client_actions_to_exec, err := ss.whoDoWhichActions(filtered_actions)
-
-	log.Println("SERVER ACTIONS exec :")
-	log.Println(server_actions_to_exec)
 
 	ss.executeActionsToSynchronizeServer(server_actions_to_exec)
 
@@ -563,16 +515,11 @@ func (ss *SynchroService) Synchro(uuidUser uuid.UUID, client_actions []model.Act
 }
 
 func (ss *SynchroService) executeActionsToSynchronizeServer(clientActionsToExecute []model.Action) error {
-	log.Println("Avant tri :")
-	log.Println(clientActionsToExecute)
 
 	// Trier les actions par ordre chronologique
 	sort.Slice(clientActionsToExecute, func(i, j int) bool {
 		return clientActionsToExecute[i].Date.Before(clientActionsToExecute[j].Date)
 	})
-
-	log.Println("Après :")
-	log.Println(clientActionsToExecute)
 
 	for _, action := range clientActionsToExecute {
 		switch action.Table {
@@ -592,8 +539,6 @@ func (ss *SynchroService) executeActionsToSynchronizeServer(clientActionsToExecu
 					return fmt.Errorf("update failed for ID %s", action.IdAction)
 				}
 			case "DELETE":
-				log.Println("Modele library :")
-				log.Println(library)
 				if res := repository.NewLibraryRepository(ss.DB).DeleteLibrary(library.IdLibrary, action.IdUser); !res {
 					return fmt.Errorf("delete failed for ID %s", action.IdAction)
 				}
@@ -602,7 +547,7 @@ func (ss *SynchroService) executeActionsToSynchronizeServer(clientActionsToExecu
 			}
 
 		case "LIBRARY_BOOK":
-			var libraryBook model.PostLibraryBook
+			var libraryBook model.LibraryBook
 			err := json.Unmarshal(action.Action, &libraryBook)
 			if err != nil {
 				log.Fatalf("Erreur lors du décodage du JSON : %v", err)
@@ -613,7 +558,7 @@ func (ss *SynchroService) executeActionsToSynchronizeServer(clientActionsToExecu
 					return fmt.Errorf("insert failed for ID %s", action.IdAction)
 				}
 			case "DELETE":
-				if res := repository.NewLibraryBookRepository(ss.DB).DeleteLibraryBook(libraryBook.LibraryId, libraryBook.BookId, action.IdUser); !res {
+				if res := repository.NewLibraryBookRepository(ss.DB).DeleteLibraryBook(libraryBook.LibraryId, libraryBook.IdBook, action.IdUser); !res {
 					return fmt.Errorf("delete failed for ID %s", action.IdAction)
 				}
 			default:
@@ -640,9 +585,6 @@ func (ss *SynchroService) executeActionsToSynchronizeServer(clientActionsToExecu
 			}
 
 		case "STATE":
-			log.Println("PASS THERE STATE")
-			log.Println(" action : ")
-			log.Println(action)
 			var state model.State
 			err := json.Unmarshal(action.Action, &state)
 
@@ -652,17 +594,14 @@ func (ss *SynchroService) executeActionsToSynchronizeServer(clientActionsToExecu
 
 			switch action.Type {
 			case "INSERT":
-				log.Println("PASS THERE STATE INSERT")
 				if res := repository.NewStateRepository(ss.DB).InsertState(state); !res {
 					return fmt.Errorf("insert failed for ID %s", action.IdAction)
 				}
 			case "UPDATE":
-				log.Println("PASS THERE STATE U")
 				if res := repository.NewStateRepository(ss.DB).UpdateState(state.IdUser, state.IdBook, state); !res {
 					return fmt.Errorf("update failed for ID %s", action.IdAction)
 				}
 			case "DELETE":
-				log.Println("PASS THERE STATE DEL")
 				if res := repository.NewStateRepository(ss.DB).DeleteState(state.IdBook, state.IdUser); !res {
 					return fmt.Errorf("delete failed for ID %s", action.IdAction)
 				}

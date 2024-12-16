@@ -24,8 +24,6 @@ export class SQLiteLibraryRepository implements LibraryRepositoryProps {
 
         syncDB(actionRepository)
         console.log("oui")
-        
-
 
         await statement.executeAsync({
             $name: name
