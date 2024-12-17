@@ -70,7 +70,6 @@ export function ApiWrapper({ children }: ApiWrapperProps) {
 }
 
 export const authenticate = async (username: string, password: string): Promise<AuthResponseProps> => {
-    console.log(keycloakClientId);
     const response = await api.post(
         keycloakAuthUrl,
         new URLSearchParams({
