@@ -5,13 +5,14 @@ meta {
 }
 
 get {
-  url: {{base_book_url}}/search?query=école
+  url: {{base_book_url}}/search?query=école&startIndex=10
   body: none
   auth: none
 }
 
 params:query {
   query: école
+  startIndex: 10
   ~genre: fiction
   ~title: Harry Potter
   ~author: J.K.
