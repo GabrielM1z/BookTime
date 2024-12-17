@@ -1,6 +1,8 @@
 import { State } from "@/models/State";
 import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite';
 import { Synchronisable } from './synchronisable';
+import { v4 as uuidv4 } from 'uuid';
+
 
 
 export interface StateRepositoryProps {

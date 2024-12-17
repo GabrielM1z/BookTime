@@ -1,6 +1,8 @@
 import { Genre } from "@/models/Genre";
 import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite';
 import { Synchronisable } from './synchronisable';
+import { v4 as uuidv4 } from 'uuid';
+
 
 
 export interface GenreRepositoryProps {
@@ -40,10 +42,11 @@ export class SQLiteGenreRepository extends Synchronisable implements GenreReposi
 
     async add(genre: Genre): Promise<void> {
         const statement = await this.db.prepareAsync(
-            'INSERT INTO genre (name) VALUES ($name);'
+            'INSERT INTO genre (id_genre, name) VALUES ($id_genre, $name);'
         );
 
         await statement.executeAsync({
+            $id_genre: uuidv4(),
             $name: genre.name
         });
     }
