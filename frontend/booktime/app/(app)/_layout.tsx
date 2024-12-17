@@ -13,8 +13,10 @@ export default function AppLayout() {
         return <Text>Chargement...</Text>;
     }
 
-    if (!session && !session?.isGuest) {
-        return <Redirect href="/sign-in" />;
+    console.log("session", session);
+
+    if (!session) {
+        return <Redirect href="/SignIn" />;
     }
 
     return (

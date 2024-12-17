@@ -54,8 +54,7 @@ export default function App()
 				<Text
 					onPress={() => {
 						// The `app/(app)/_layout.tsx` will redirect to the sign-in screen.
-						logOut();
-						
+						logOut();						
 					}}>
 					Sign Out
 				</Text>
