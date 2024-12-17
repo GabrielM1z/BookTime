@@ -1,18 +1,22 @@
 import { Format } from "@/models/Format";
 import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite';
-import { syncDB } from '@/core/syncService';
+import { Synchronisable } from './synchronisable';
 
 
 export interface FormatRepositoryProps {
     getAll: () => Promise<Format[]>
-    get: (id: string) => Promise<Format|null>;
+    get: (id: string) => Promise<Format | null>;
+    add: (format: Format) => Promise<void>;
 }
 
-export class SQLiteFormatRepository implements FormatRepositoryProps {
+export class SQLiteFormatRepository extends Synchronisable implements FormatRepositoryProps {
     private db: SQLiteDatabase;
+    private api: APIFormatRepository;
 
     constructor() {
+        super();
         this.db = useSQLiteContext();
+        this.api = new APIFormatRepository();
     }
 
     async getAll(): Promise<Format[]> {
@@ -22,7 +26,7 @@ export class SQLiteFormatRepository implements FormatRepositoryProps {
         return allRows;
     }
 
-    async get(id: string): Promise<Format|null> {
+    async get(id: string): Promise<Format | null> {
         const statement = await this.db.prepareAsync(
             'SELECT * FROM format WHERE id_format == $id'
         );
@@ -34,8 +38,14 @@ export class SQLiteFormatRepository implements FormatRepositoryProps {
         return result ? (result as unknown as Format) : null;
     }
 
-    async add(name: string): Promise<void> {
-        return;
+    async add(format: Format): Promise<void> {
+        const statement = await this.db.prepareAsync(
+            'INSERT INTO format (name) VALUES ($name);'
+        );
+
+        await statement.executeAsync({
+            $name: format.name
+        });
     }
 }
 
@@ -45,11 +55,11 @@ export class APIFormatRepository implements FormatRepositoryProps {
         return [];
     }
 
-    async get(id: string): Promise<Format|null> {
+    async get(id: string): Promise<Format | null> {
         return null;
     }
 
-    async add(name: string): Promise<void> {
+    async add(format: Format): Promise<void> {
         return;
     }
 }

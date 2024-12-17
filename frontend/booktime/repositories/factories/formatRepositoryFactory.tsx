@@ -1,5 +1,5 @@
 import { Platform } from "react-native";
-import { APIFormatRepository, FormatRepositoryProps, SQLiteFormatRepository } from "../format";
+import { APIFormatRepository, FormatRepositoryProps, SQLiteFormatRepository } from "../FormatRepository";
 
 
 export const formatRepositoryFactory = (): FormatRepositoryProps => {

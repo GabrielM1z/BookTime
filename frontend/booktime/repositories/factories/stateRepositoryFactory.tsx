@@ -1,5 +1,5 @@
 import { Platform } from "react-native";
-import { APIStateRepository, SQLiteStateRepository, StateRepositoryProps } from "../state";
+import { APIStateRepository, SQLiteStateRepository, StateRepositoryProps } from "../StateRepository";
 
 
 export const stateRepositoryFactory = (): StateRepositoryProps => {

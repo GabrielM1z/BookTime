@@ -1,18 +1,22 @@
 import { Genre } from "@/models/Genre";
 import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite';
-import { syncDB } from '@/core/syncService';
+import { Synchronisable } from './synchronisable';
 
 
 export interface GenreRepositoryProps {
     getAll: () => Promise<Genre[]>
-    get: (id: string) => Promise<Genre|null>;
+    get: (id: string) => Promise<Genre | null>;
+    add: (genre: Genre) => Promise<void>;
 }
 
-export class SQLiteGenreRepository implements GenreRepositoryProps {
+export class SQLiteGenreRepository extends Synchronisable implements GenreRepositoryProps {
     private db: SQLiteDatabase;
+    private api: APIGenreRepository;
 
     constructor() {
+        super();
         this.db = useSQLiteContext();
+        this.api = new APIGenreRepository();
     }
 
     async getAll(): Promise<Genre[]> {
@@ -22,7 +26,7 @@ export class SQLiteGenreRepository implements GenreRepositoryProps {
         return allRows;
     }
 
-    async get(id: string): Promise<Genre|null> {
+    async get(id: string): Promise<Genre | null> {
         const statement = await this.db.prepareAsync(
             'SELECT * FROM genre WHERE id_genre == $id'
         );
@@ -34,8 +38,14 @@ export class SQLiteGenreRepository implements GenreRepositoryProps {
         return result ? (result as unknown as Genre) : null;
     }
 
-    async add(name: string): Promise<void> {
-        return;
+    async add(genre: Genre): Promise<void> {
+        const statement = await this.db.prepareAsync(
+            'INSERT INTO genre (name) VALUES ($name);'
+        );
+
+        await statement.executeAsync({
+            $name: genre.name
+        });
     }
 }
 
@@ -45,11 +55,11 @@ export class APIGenreRepository implements GenreRepositoryProps {
         return [];
     }
 
-    async get(id: string): Promise<Genre|null> {
+    async get(id: string): Promise<Genre | null> {
         return null;
     }
 
-    async add(name: string): Promise<void> {
+    async add(genre: Genre): Promise<void> {
         return;
     }
 }

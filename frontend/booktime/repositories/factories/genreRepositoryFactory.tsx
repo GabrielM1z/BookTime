@@ -1,5 +1,5 @@
 import { Platform } from "react-native";
-import { APIGenreRepository, GenreRepositoryProps, SQLiteGenreRepository } from "../genre";
+import { APIGenreRepository, GenreRepositoryProps, SQLiteGenreRepository } from "../GenreRepository";
 
 
 export const genreRepositoryFactory = (): GenreRepositoryProps => {

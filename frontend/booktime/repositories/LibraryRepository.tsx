@@ -1,18 +1,22 @@
 import { Library } from '@/models/Library';
 import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite';
-import { syncDB } from '@/core/syncService';
+import { Synchronisable } from './synchronisable';
+
 
 export interface LibraryRepositoryProps {
     getAll: () => Promise<Library[]>;
-    get: (id: string) => Promise<Library|null>;
-    add: (name: string, actionRepository: ActionRepository) => Promise<void>;
+    get: (id: string) => Promise<Library | null>;
+    add: (name: string) => Promise<void>;
 }
 
-export class SQLiteLibraryRepository implements LibraryRepositoryProps {
+export class SQLiteLibraryRepository extends Synchronisable implements LibraryRepositoryProps {
     private db: SQLiteDatabase;
+    private api: APILibraryRepository;
 
     constructor() {
+        super();
         this.db = useSQLiteContext();
+        this.api = new APILibraryRepository();
     }
 
     async getAll(): Promise<Library[]> {
@@ -22,7 +26,7 @@ export class SQLiteLibraryRepository implements LibraryRepositoryProps {
         return allRows;
     }
 
-    async get(id: string): Promise<Library|null> {
+    async get(id: string): Promise<Library | null> {
         const statement = await this.db.prepareAsync(
             'SELECT * FROM library WHERE id_library == $id'
         );
@@ -34,14 +38,15 @@ export class SQLiteLibraryRepository implements LibraryRepositoryProps {
         return result ? (result as unknown as Library) : null;
     }
 
-    async add(name: string, actionRepository: ActionRepository): Promise<void> {
+    async add(name: string): Promise<void> {
         const statement = await this.db.prepareAsync(
             'INSERT INTO library (name) VALUES ($name);'
         );
 
-        syncDB(actionRepository)
+        this.sync();
         console.log("oui")
-        
+
+
         await statement.executeAsync({
             $name: name
         });
@@ -53,7 +58,7 @@ export class APILibraryRepository implements LibraryRepositoryProps {
         return [];
     }
 
-    async get(id: string): Promise<Library|null> {
+    async get(id: string): Promise<Library | null> {
         return null;
     }
 

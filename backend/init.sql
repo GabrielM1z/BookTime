@@ -36,10 +36,9 @@ CREATE TABLE IF NOT EXISTS genre (
 
 -- Table BOOK
 CREATE TABLE IF NOT EXISTS book (
-    id_book UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    id_book VARCHAR(13) PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     description TEXT,
-    isbn13 VARCHAR(13),
     id_format UUID,
     publisher VARCHAR(255),
     publication_date DATE,
@@ -52,7 +51,7 @@ CREATE TABLE IF NOT EXISTS book (
 -- Table BOOK_AUTHOR (Many-to-Many relation between BOOK and AUTHOR)
 CREATE TABLE IF NOT EXISTS book_author (
     id_author UUID,
-    id_book UUID,
+    id_book VARCHAR(13),
     PRIMARY KEY (id_author, id_book),
     FOREIGN KEY (id_author) REFERENCES author(id_author) ON DELETE CASCADE,
     FOREIGN KEY (id_book) REFERENCES book(id_book) ON DELETE CASCADE
@@ -61,7 +60,7 @@ CREATE TABLE IF NOT EXISTS book_author (
 -- Table BOOK_GENRE (Many-to-Many relation between BOOK and GENRE)
 CREATE TABLE IF NOT EXISTS book_genre (
     id_genre UUID,
-    id_book UUID,
+    id_book VARCHAR(13),
     PRIMARY KEY (id_genre, id_book),
     FOREIGN KEY (id_genre) REFERENCES genre(id_genre) ON DELETE CASCADE,
     FOREIGN KEY (id_book) REFERENCES book(id_book) ON DELETE CASCADE
@@ -74,7 +73,7 @@ CREATE TABLE IF NOT EXISTS state (
     read_count INT DEFAULT 0,
     last_read_date TIMESTAMP,
     id_user UUID,
-    id_book UUID,
+    id_book VARCHAR(13),
     is_available BOOLEAN DEFAULT FALSE,
     PRIMARY KEY (id_user, id_book),
     FOREIGN KEY (id_book) REFERENCES book(id_book) ON DELETE CASCADE
@@ -83,7 +82,7 @@ CREATE TABLE IF NOT EXISTS state (
 -- Table LIBRARY_BOOK (Many-to-Many relation between LIBRARY and BOOK)
 CREATE TABLE IF NOT EXISTS library_book (
     id_library UUID,
-    id_book UUID,
+    id_book VARCHAR(13),
     PRIMARY KEY (id_library, id_book),
     FOREIGN KEY (id_library) REFERENCES library(id_library) ON DELETE CASCADE,
     FOREIGN KEY (id_book) REFERENCES book(id_book) ON DELETE CASCADE

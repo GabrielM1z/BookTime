@@ -1,5 +1,5 @@
 import { Platform } from "react-native";
-import { APIAuthorRepository, AuthorRepositoryProps, SQLiteAuthorRepository } from "../author";
+import { APIAuthorRepository, AuthorRepositoryProps, SQLiteAuthorRepository } from "../AuthorRepository";
 
 
 export const authorRepositoryFactory = (): AuthorRepositoryProps => {

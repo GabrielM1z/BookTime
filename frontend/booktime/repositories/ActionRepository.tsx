@@ -1,15 +1,13 @@
 import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite';
-import { Action } from '@/models/action';
-import { Trigger } from '@/models/trigger';
-
-
+import { Action } from '@/models/Action';
+import { Trigger } from '@/models/Trigger';
 
 export interface ActionRepositoryProps {
     getAll: () => Promise<Action[]>;
     getTrigger: () => Promise<Trigger[]>;
 }
 
-export class ActionLibraryRepository implements ActionRepositoryProps {
+export class ActionRepository implements ActionRepositoryProps {
     private db: SQLiteDatabase;
 
     constructor() {

@@ -1,4 +1,4 @@
-import { SessionRepositoryProps, SessionRepository } from "../session";
+import { SessionRepositoryProps, SessionRepository } from "../SessionRepository";
 
 export const sessionRepositoryFactory = (): SessionRepositoryProps => {
     return new SessionRepository();
