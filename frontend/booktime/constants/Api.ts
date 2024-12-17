@@ -8,7 +8,9 @@ export const apiLink = "https://www.googleapis.com/books/v1/volumes?" + key;
 export const keycloakClientSecret = process.env.KEYCLOAK_CLIENT_SECRET || "szM12JEwNGOLLUuLnIRfYEdEqcH1LDFq";
 export const keycloakClientId = process.env.KEYCLOAK_CLIENT_ID || "gateway-client";
 
-export const baseURL = process.env.REACT_APP_BACKEND_URL || "http://booktime.ddns.net";
+export const baseURL = process.env.REACT_APP_BACKEND_URL || "http://159.31.247.130:8082";
+// export const baseURL = process.env.REACT_APP_BACKEND_URL || "http://booktime.ddns.net";
+
 
 export const keycloakAuthUrl = baseURL +  "/auth/realms/booktime/protocol/openid-connect/token";
 export const apiLinkServeur = baseURL + "/api/books/search/?";
