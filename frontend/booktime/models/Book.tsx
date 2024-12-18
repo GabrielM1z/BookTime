@@ -19,6 +19,13 @@ export interface BookInfos {
 	genres?: string[];   
 }
 
+export interface BookInfosSearch {
+	id : string;
+	title: string
+	isbn13: string;    
+	thumbnail : string;
+	authors?: string[];  
+}
 
 export interface Book{
     id : string;

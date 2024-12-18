@@ -1,8 +1,7 @@
 import { StyleSheet, View, Image, Pressable } from 'react-native';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { ThemedText } from './ThemedText';
-import { BookInfos } from '@/models/Book';
-import { Book2 } from '@/models/Book2';
+import { BookInfosSearch } from '@/models/Book';
 import React, { useEffect, useState } from 'react';
 
 import axios from 'axios';
@@ -27,7 +26,7 @@ const defaultCover = require('@/assets/images/logo_refait.png');
 //   }
 // }
 
-export const LivreRecherche = ({ book }: { book: BookInfos }) => {
+export const LivreRecherche = ({ book }: { book: BookInfosSearch }) => {
 
   const handleAddBook = () => {
     console.log(`Book added: ${book}`);
