@@ -1,4 +1,6 @@
 import { Serializable } from './serializable';
+import { jwtDecode } from 'jwt-decode';
+import { PayloadProps } from './keycloak';
 
 export interface UserProps {
     id: string;
@@ -45,5 +47,17 @@ export class User extends Serializable<User> implements UserProps {
         this.givenName = json.given_name;
         this.familyName = json.family_name;
         this.email = json.email;
+    }
+
+    static fromToken(token: string): User {
+        const payload = jwtDecode<PayloadProps>(token);
+        return new User({
+            id: payload.sub,
+            emailVerified: payload.email_verified,
+            username: payload.preferred_username,
+            givenName: payload.given_name,
+            familyName: payload.family_name,
+            email: payload.email
+        });
     }
 }

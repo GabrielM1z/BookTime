@@ -3,13 +3,13 @@ import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite';
 import { Synchronisable } from './synchronisable';
 
 
-export interface GenreRepositoryProps {
+export interface GenreRepository {
     getAll: () => Promise<Genre[]>
     get: (id: string) => Promise<Genre | null>;
     add: (genre: Genre) => Promise<void>;
 }
 
-export class SQLiteGenreRepository extends Synchronisable implements GenreRepositoryProps {
+export class SQLiteGenreRepository extends Synchronisable implements GenreRepository {
     private db: SQLiteDatabase;
     private api: APIGenreRepository;
 
@@ -50,7 +50,7 @@ export class SQLiteGenreRepository extends Synchronisable implements GenreReposi
 }
 
 
-export class APIGenreRepository implements GenreRepositoryProps {
+export class APIGenreRepository implements GenreRepository {
     async getAll(): Promise<Genre[]> {
         return [];
     }

@@ -1,7 +1,7 @@
 import { Session } from "@/models/Session";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export interface SessionRepositoryProps {
+export interface SessionRepository {
     getById(id: string): Promise<Session | null>;
     getAll(): Promise<Session[]>;
     save(session: Session): Promise<void>;
@@ -11,7 +11,7 @@ export interface SessionRepositoryProps {
     getGuestSession(): Promise<Session | null>;
 }
 
-export class SessionRepository implements SessionRepositoryProps {
+export class CacheSessionRepository implements SessionRepository {
     private sessionsKey = "@sessions";
     private currentSessionKey = "@currentSessionId";
 

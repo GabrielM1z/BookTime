@@ -2,11 +2,11 @@ import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite';
 import { Synchronisable } from './synchronisable';
 
 
-export interface BookRepositoryProps {
+export interface BookRepository {
 
 }
 
-export class SQLiteBookRepository extends Synchronisable implements BookRepositoryProps {
+export class SQLiteBookRepository extends Synchronisable implements BookRepository {
     private db: SQLiteDatabase;
     private api: APIBookRepository;
 
@@ -18,6 +18,6 @@ export class SQLiteBookRepository extends Synchronisable implements BookReposito
 
 }
 
-export class APIBookRepository implements BookRepositoryProps {
+export class APIBookRepository implements BookRepository {
 
 }

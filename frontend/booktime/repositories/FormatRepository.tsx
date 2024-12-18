@@ -3,13 +3,13 @@ import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite';
 import { Synchronisable } from './synchronisable';
 
 
-export interface FormatRepositoryProps {
+export interface FormatRepository {
     getAll: () => Promise<Format[]>
     get: (id: string) => Promise<Format | null>;
     add: (format: Format) => Promise<void>;
 }
 
-export class SQLiteFormatRepository extends Synchronisable implements FormatRepositoryProps {
+export class SQLiteFormatRepository extends Synchronisable implements FormatRepository {
     private db: SQLiteDatabase;
     private api: APIFormatRepository;
 
@@ -50,7 +50,7 @@ export class SQLiteFormatRepository extends Synchronisable implements FormatRepo
 }
 
 
-export class APIFormatRepository implements FormatRepositoryProps {
+export class APIFormatRepository implements FormatRepository {
     async getAll(): Promise<Format[]> {
         return [];
     }

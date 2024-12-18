@@ -13,8 +13,6 @@ export default function AppLayout() {
         return <Text>Chargement...</Text>;
     }
 
-    console.log("session", session);
-
     if (!session) {
         return <Redirect href="/SignIn" />;
     }
@@ -22,21 +20,20 @@ export default function AppLayout() {
     return (
         <Stack>
 
-            <Stack.Screen 
-                name='(tabs)' 
+            <Stack.Screen
+                name='(tabs)'
                 options={{ headerShown: false }}
             />
 
-            <Stack.Screen 
+            <Stack.Screen
                 name='author/[idAuthor]'
                 options={{ headerShown: false }}
             />
 
-            <Stack.Screen 
+            <Stack.Screen
                 name='book/[idBook]'
                 options={{ headerShown: false }}
             />
-
         </Stack>
     );
 }

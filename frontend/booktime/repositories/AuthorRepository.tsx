@@ -3,13 +3,13 @@ import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite';
 import { Synchronisable } from './synchronisable';
 
 
-export interface AuthorRepositoryProps {
+export interface AuthorRepository {
     getAll: () => Promise<Author[]>
     get: (id: string) => Promise<Author | null>;
     add: (author: Author) => Promise<void>;
 }
 
-export class SQLiteAuthorRepository extends Synchronisable implements AuthorRepositoryProps {
+export class SQLiteAuthorRepository extends Synchronisable implements AuthorRepository {
     private db: SQLiteDatabase;
 
     constructor() {
@@ -50,7 +50,7 @@ export class SQLiteAuthorRepository extends Synchronisable implements AuthorRepo
 }
 
 
-export class APIAuthorRepository implements AuthorRepositoryProps {
+export class APIAuthorRepository implements AuthorRepository {
     async getAll(): Promise<Author[]> {
         return [];
     }

@@ -1,10 +1,10 @@
-import { ActionRepositoryProps } from "@/repositories/ActionRepository";
-import { AuthorRepositoryProps } from "@/repositories/AuthorRepository";
-import { FormatRepositoryProps } from "@/repositories/FormatRepository";
-import { GenreRepositoryProps } from "@/repositories/GenreRepository";
-import { LibraryRepositoryProps } from "@/repositories/LibraryRepository";
-import { SessionRepositoryProps } from "@/repositories/SessionRepository";
-import { UserRepositoryProps } from "@/repositories/UserRepository";
+import { ActionRepository } from "@/repositories/ActionRepository";
+import { AuthorRepository } from "@/repositories/AuthorRepository";
+import { FormatRepository } from "@/repositories/FormatRepository";
+import { GenreRepository } from "@/repositories/GenreRepository";
+import { LibraryRepository } from "@/repositories/LibraryRepository";
+import { SessionRepository } from "@/repositories/SessionRepository";
+import { UserRepository } from "@/repositories/UserRepository";
 import { actionRepositoryFactory } from "@/repositories/factories/actionRepositoryFactory";
 import { authorRepositoryFactory } from "@/repositories/factories/authorRepositoryFactory";
 import { formatRepositoryFactory } from "@/repositories/factories/formatRepositoryFactory";
@@ -17,13 +17,13 @@ import React, { createContext } from "react";
 
 
 export interface RepositoryContextProps {
-    userRepository: UserRepositoryProps;
-    libraryRepository: LibraryRepositoryProps;
-    actionRepository: ActionRepositoryProps;
-    sessionRepository: SessionRepositoryProps;
-    formatRepository: FormatRepositoryProps;
-    genreRepository: GenreRepositoryProps;
-    authorRepository: AuthorRepositoryProps;
+    userRepository: UserRepository;
+    libraryRepository: LibraryRepository;
+    actionRepository: ActionRepository;
+    sessionRepository: SessionRepository;
+    formatRepository: FormatRepository;
+    genreRepository: GenreRepository;
+    authorRepository: AuthorRepository;
 }
 
 export const RepositoryContext = createContext<RepositoryContextProps | undefined>(undefined);
