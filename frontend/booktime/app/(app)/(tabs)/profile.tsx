@@ -5,25 +5,14 @@ import Animated, { Extrapolation, interpolate, useAnimatedRef, useAnimatedStyle,
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ModalProfileList } from '@/components/ModalProfileList';
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
+import styles, { headerMaxHeight, headerMinHeight, profileImageMaxSize } from './profile.style';
 
 const profileImage = require('@/assets/images/profil.png');
 const bannerImage = require('@/assets/images/banner.jpg');
 
-const profileImageMaxSize = 100; // Taille maximale de la photo de profil
-export const { height: sHeight, width: sWidth } = Dimensions.get('screen');
-const ImageHeight = 280; // Hauteur initiale de l'image
-const Colors = {
-    darkGray: '#22313a',
-    gray: '#3b6978',
-    orange: '#f9a03f',
-    black: '#000',
-};
-
-const headerHeight = 60;
-
 export const headerPageText = "Embark on a journey of transformation with our innovative app designed to enhance every aspect of your life. Whether you're seeking to boost productivity, ignite creativity, or simply streamline daily tasks, our platform empowers you to reach new heights.";
 
-export default function Profil() {
+export default function Profile() {
     const scrollRef = useAnimatedRef<Animated.ScrollView>();
     const scrollOffset = useScrollViewOffset(scrollRef);
     const bottomSheetRef = useRef<BottomSheetModal>(null);
@@ -32,11 +21,15 @@ export default function Profil() {
         bottomSheetRef.current?.present();
     }, []);
 
+    const handleSheetChanges = useCallback((index: number) => {
+        console.log('handleSheetChanges', index);
+      }, []);
+
     const insets = useSafeAreaInsets();
     const verticalPadding = 20;
-    const headerMinHeight = insets.top + headerHeight;
-    const inputRange = [0, ImageHeight - headerMinHeight];
-    const profileImageMinSize = headerHeight - verticalPadding;
+    const headerReelMinHeight = insets.top + headerMinHeight;
+    const inputRange = [0, headerMaxHeight - headerReelMinHeight];
+    const profileImageMinSize = headerMinHeight - verticalPadding;
 
 
     // Style animé pour le header
@@ -44,7 +37,7 @@ export default function Profil() {
         const height = interpolate(
             scrollOffset.value,
             inputRange,
-            [ImageHeight, headerMinHeight],
+            [headerMaxHeight, headerReelMinHeight],
             Extrapolation.CLAMP
         );
         return { height };
@@ -123,9 +116,9 @@ export default function Profil() {
 
     // TODO: Ca marche mais c pas fluide, a refaire
     const handleScrollEndDrag = () => {
-        if (scrollOffset.value < ImageHeight - headerMinHeight) {
-            if (scrollOffset.value > (ImageHeight - headerMinHeight) / 2) {
-                scrollRef.current?.scrollTo({ y: ImageHeight - headerMinHeight, animated: true });
+        if (scrollOffset.value < headerMaxHeight - headerReelMinHeight) {
+            if (scrollOffset.value > (headerMaxHeight - headerReelMinHeight) / 2) {
+                scrollRef.current?.scrollTo({ y: headerMaxHeight - headerReelMinHeight, animated: true });
             }
             else {
                 scrollRef.current?.scrollTo({ y: 0, animated: true });
@@ -135,7 +128,7 @@ export default function Profil() {
 
     return (
         <SafeAreaView style={{ flex: 1, alignItems: 'center' }}>
-            <ModalProfileList ref={bottomSheetRef} />
+            <ModalProfileList ref={bottomSheetRef} onChange={handleSheetChanges} />
             <Animated.View style={[styles.header, headerAnimatedStyles]}>
                 <Animated.Image source={bannerImage} style={[styles.bannerImage, bannerImageAnimatedStyles]} />
                 <Animated.View style={[
@@ -152,7 +145,7 @@ export default function Profil() {
                     styles.menuContainer,
                     {
                         paddingTop: insets.top,
-                        height: headerMinHeight
+                        height: headerReelMinHeight
                     }
                 ]}>
                     <TouchableOpacity style={styles.menuButton} onPress={handlePresentModalPress}>
@@ -171,68 +164,3 @@ export default function Profil() {
     );
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: Colors.black,
-    },
-    header: {
-        position: 'absolute', // Need by banner image to be on top
-        top: 0,
-        left: 0,
-        right: 0,
-        backgroundColor: Colors.darkGray,
-        overflow: 'hidden',
-        zIndex: 10,
-    },
-    innerHeader: {
-        flex: 1,
-        paddingHorizontal: 20,
-        position: 'relative',
-        flexDirection: 'row',
-        alignItems: 'flex-end',
-    },
-    menuContainer: {
-        position: 'absolute',
-        right: 20,
-        justifyContent: 'center',
-    },
-    menuButton: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: Colors.gray + '30',
-        zIndex: 9999,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    bannerImage: {
-        width: '100%',
-        height: ImageHeight,
-        position: 'absolute',
-        top: 0,
-    },
-    profileImage: {
-        borderWidth: 2,
-        borderColor: 'white',
-        borderRadius: 50,
-    },
-    profileName: {
-        position: 'relative',
-        marginLeft: 10,
-        color: Colors.orange,
-        fontWeight: 'bold',
-    },
-    scrollContent: {
-        paddingTop: ImageHeight,
-    },
-    innerContainer: {
-        margin: 20,
-    },
-    description: {
-        color: 'white',
-        fontSize: 16,
-        lineHeight: 22,
-        textAlign: 'justify',
-    },
-});

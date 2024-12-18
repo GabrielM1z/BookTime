@@ -109,6 +109,9 @@ export class SQLiteUserRepository extends Synchronisable implements UserReposito
 
 export class APIUserRepository implements UserRepository {
     async getBySession(session: Session): Promise<User> {
+        // if (!session.isGuest) {
+        //     return User.
+        // }
         if (!session.accessToken) {
             throw new Error('No access token in session');
         }

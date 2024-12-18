@@ -19,6 +19,8 @@ export class User extends Serializable<User> implements UserProps {
     familyName: string;
     email: string;
 
+    guestId: string = 'guest';
+
     constructor(data: UserProps) {
         super();
         this.id = data.id;
