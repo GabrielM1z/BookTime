@@ -11,6 +11,7 @@ import (
 	"strconv"
 
 	"book/model"
+	"book/repository"
 	"book/service/interfaces"
 )
 
@@ -68,7 +69,7 @@ func (bs *SearchService) SearchBookByISBN(isbn string) (*model.Book, error) {
 
 	var book model.Book
 	var authors []model.Author
-	//var genres []model.Genre
+	var genres []model.Genre
 	for _, authorName := range respBook.Authors {
 		author, err := NewSearchAuthorService(db).GetAuthorByName(authorName)
 		if err != nil {
@@ -77,9 +78,32 @@ func (bs *SearchService) SearchBookByISBN(isbn string) (*model.Book, error) {
 		}
 		authors = append(authors, *author)
 	}
-	// for _, genre := range apiResponse.Categories {
 
-	// }
+	log.Println("for _, genreName := range respBook.Categories")
+	log.Println("respBook.Categories : ")
+	log.Println(respBook.Categories)
+	for _, genreName := range respBook.Categories {
+		log.Println("genreName : ")
+		log.Println(genreName)
+
+		var genre model.Genre
+		genre, err = repository.NewGenreRepository(bs.DB).SelectGenreByName(genreName)
+
+		log.Println("		genre, err = repository.NewGenreRepository(bs.DB).SelectGenreByName(genreName)")
+		log.Println("genre")
+		log.Println(genre)
+
+		if genre.Name == "" {
+			repository.NewGenreRepository(bs.DB).InsertGenre(model.PostGenre{Name: genreName})
+			genre, err = repository.NewGenreRepository(bs.DB).SelectGenreByName(genreName)
+			log.Println("INSERT")
+			log.Println("		genre, err = repository.NewGenreRepository(bs.DB).SelectGenreByName(genreName)")
+			log.Println("genre")
+			log.Println(genre)
+		}
+		genres = append(genres, genre)
+	}
+
 	book = model.Book{
 		IdBook:          isbn,
 		Title:           respBook.Title,
@@ -91,7 +115,7 @@ func (bs *SearchService) SearchBookByISBN(isbn string) (*model.Book, error) {
 		Language:        respBook.Language,
 		CoverImageUrl:   respBook.ImageLinks.Thumbnail,
 		Authors:         authors,
-		// Categories:      item.VolumeInfo.Categories,
+		Genres:          genres,
 	}
 
 	return &book, nil

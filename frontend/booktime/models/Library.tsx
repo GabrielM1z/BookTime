@@ -1,4 +1,4 @@
-import { BookAllInfos } from "./Book";
+import { BookAllInfos, BookMinInfos } from "./Book";
 import { Book2 } from "./Book2";
 
 export interface Library {
@@ -10,4 +10,10 @@ export interface LibraryWithBooks {
 	id: string;
 	name: string;
 	books: BookAllInfos[]
+}
+
+export interface LibraryWithBooksMin {
+	id: string;
+	name: string;
+	books: BookMinInfos[]
 }

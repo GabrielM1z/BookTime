@@ -1,16 +1,11 @@
 package model
 
-type User struct {
-	IdUser      string `json:"idUser"`
-	Private     string `json:"private"`
-	ProfilImage string `json:"profilImage"`
-	BannerImage string `json:"bannerImage"`
-	Birthday    string `json:"birthdate"`
-}
+import "github.com/google/uuid"
 
-type PostUser struct {
-	Private     string `json:"private"`
-	ProfilImage string `json:"profilImage"`
-	BannerImage string `json:"bannerImage"`
-	Birthday    string `json:"birthdate"`
+type User struct {
+	IdUser      uuid.UUID `json:"idUser"`
+	Private     string    `json:"private"`
+	ProfilImage string    `json:"profilImage"`
+	BannerImage string    `json:"bannerImage"`
+	Birthday    string    `json:"birthdate"`
 }

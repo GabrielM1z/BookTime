@@ -1,38 +1,61 @@
 import { StyleSheet, View, Image } from 'react-native';
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import { ThemedView } from '@/components/ThemedView';
 import { useLocalSearchParams } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { Colors } from '@/constants/Colors';
 import { Link } from 'expo-router';
+import { useRepository } from '@/hooks/useRepository';
 
 
 export default function LivreDetail() {
 
 	const cover1 = require('@/assets/images/logo_refait.png');
 	const { idBook } = useLocalSearchParams();
+	console.log("idbook : ", idBook)
+
+	// TODO get les info du livre
+
+	const [book, setBook] = useState([]);
+	const { bookRepository } = useRepository();
+
+	useEffect(() => {
+		refreshBook();
+	}, []);
+
+	const refreshBook = async () => {
+		try {
+			const data = await bookRepository.get("1");
+			console.log("Data received from bookRepository.get:", data);
+			setBook(data);
+		} catch (error) {
+			console.error('Error fetching etageres:', error);
+		}
+	};
+
+	console.log("book : ", book)
 
 	return (
 		<ThemedView style={styles.container}>
 
 			<View style={styles.containerTitre}>
 				<Image source={cover1} style={styles.coverLivre}></Image>
-				<ThemedText type='titreLivreHorizontal'>{idBook}</ThemedText>
+				<ThemedText type='titreLivreHorizontal'>{book.title}</ThemedText>
 				<Link push href={{
 					pathname: "/author/[idAuthor]",
 					params: {
 						idAuthor: "ouiouioui",
 						}
 					}}>
-					<ThemedText type='auteurLivreHorizontal'>{idBook}</ThemedText>
+					<ThemedText type='auteurLivreHorizontal'>{book.title}</ThemedText>
 		  		</Link>
 				
 			</View>
 
 			<View style={styles.containerResume}>
 				<ThemedText type='sousTab'>Résumé</ThemedText>
-				<ThemedText>Lorem zvze zef zefjz eflz efz lef ZLKE PQ VKQ V QKVJ KJV EKR V j ks dvjs fdvj lsd vls dvs vlk sdv sldv sljdv sld vlsd vlsd vls d</ThemedText>
+				<ThemedText>{book.description}</ThemedText>
 			</View>
 		</ThemedView>
 	);

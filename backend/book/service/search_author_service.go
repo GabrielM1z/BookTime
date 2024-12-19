@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 
 	"book/model"
@@ -40,14 +41,58 @@ func (sas *SearchAuthorService) GetAuthorByName(name string) (*model.Author, err
 	return author, nil
 }
 
-func (sas *SearchAuthorService) SearchAuthor(name string) (model.PostAuthor, error) {
-	name = strings.Replace(name, " ", "_", 100)
+// formatAuthorName met le nom d'un auteur au format de recherche Wikipedia
+func formatAuthorNameold(authorName string) string {
+	// Supprimer les espaces supplémentaires au début/fin et normaliser les espaces
+	authorName = strings.TrimSpace(authorName)
+	authorName = strings.ReplaceAll(authorName, "  ", " ")
 
+	// Remplacer les espaces par "_"
+	parts := strings.Fields(authorName) // Découpe les mots en fonction des espaces
+	for i, part := range parts {
+		// Ajouter un point s'il n'existe pas déjà
+		if len(part) == 1 && !strings.HasSuffix(part, ".") {
+			parts[i] = part + "._"
+		}
+	}
+
+	// Joindre les parties avec "_"
+	return strings.Join(parts, "_")
+}
+
+func formatAuthorName(authorName string) string {
+	// Supprimer les espaces supplémentaires au début/fin
+	authorName = strings.TrimSpace(authorName)
+
+	// Ajouter des espaces après les points pour séparer correctement les initiales
+	// Exemple : "J.K.Rowling" -> "J. K. Rowling"
+	re := regexp.MustCompile(`([A-Z])\.([A-Z])`)
+	authorName = re.ReplaceAllString(authorName, "$1. $2")
+
+	// Normaliser les espaces multiples
+	authorName = strings.ReplaceAll(authorName, "  ", " ")
+
+	// Découper en parties
+	parts := strings.Fields(authorName) // Découpe les mots en fonction des espaces
+
+	// Ajouter un point à chaque initiale et transformer en format avec underscore
+	for i, part := range parts {
+		// Ajouter un point si la partie est une initiale sans point
+		if len(part) == 1 || (len(part) == 2 && strings.HasSuffix(part, ".")) {
+			parts[i] = strings.TrimSuffix(part, ".") + "."
+		}
+	}
+
+	// Joindre les parties avec "_"
+	return strings.Join(parts, "_")
+}
+
+func (sas *SearchAuthorService) SearchAuthor(name string) (model.PostAuthor, error) {
 	baseURL := "https://fr.wikipedia.org/w/api.php"
 	params := url.Values{}
 	params.Add("action", "query")
 	params.Add("prop", "extracts")
-	params.Add("titles", name)
+	params.Add("titles", formatAuthorName(name))
 	params.Add("format", "json")
 	params.Add("exintro", "true")
 	params.Add("explaintext", "true")

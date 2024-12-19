@@ -95,6 +95,28 @@ func (gr *GenreRepository) SelectGenres() []model.Genre {
 	return result
 }
 
+func (gr *GenreRepository) SelectGenreByName(name string) (model.Genre, error) {
+	var genre model.Genre
+	stmt, err := gr.DB.Prepare("SELECT * FROM genre WHERE name = $1")
+	if err != nil {
+		log.Println(err)
+		return genre, err
+	}
+	defer stmt.Close()
+
+	row := stmt.QueryRow(name)
+	err = row.Scan(&genre.IdGenre, &genre.Name)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return genre, nil // Pas de genre trouvé
+		}
+		log.Println(err)
+		return genre, err // Erreur de lecture
+	}
+
+	return genre, nil
+}
+
 func (gr *GenreRepository) SelectGenre(id uuid.UUID) (model.Genre, error) {
 	var genre model.Genre
 	stmt, err := gr.DB.Prepare("SELECT * FROM genre WHERE id_genre = $1")
