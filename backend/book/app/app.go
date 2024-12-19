@@ -41,8 +41,8 @@ func (a *App) CreateRoutes() {
 
 	//Service & Api
 	apiKey := os.Getenv("GOOGLE_BOOKS_API_KEY")
-	bookSearchService := service.NewSearchService(apiKey)
-	// bookSearchAuthorService := service.NewSearchAuthorService()
+	bookSearchService := service.NewSearchService(apiKey, a.DB)
+	//bookSearchAuthorService := service.NewSearchAuthorService(a.DB)
 	bookShopsService := service.NewShopsService(apiKey)
 	bookSynchroService := service.NewSynchroService(a.DB)
 	prefix := "/books"

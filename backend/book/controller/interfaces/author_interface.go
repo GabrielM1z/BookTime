@@ -6,4 +6,5 @@ type AuthorControllerInterface interface {
 	InsertAuthor(c *gin.Context)
 	GetAuthor(c *gin.Context)
 	UpdateAuthor(c *gin.Context)
+	GetAuthorByName(c *gin.Context)
 }

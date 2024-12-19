@@ -2,7 +2,6 @@ package controller
 
 import (
 	"database/sql"
-	"log"
 	"net/http"
 
 	"book/controller/interfaces"
@@ -62,29 +61,10 @@ func (ac *AuthorController) GetAuthorByName(c *gin.Context) {
 	db := ac.DB
 	name := c.Param("name")
 
-	log.Println("name : ")
-	log.Println(name)
-
-	repoAuthor := repository.NewAuthorRepository(db)
-	author, err := repoAuthor.SelectAuthorByName(name)
-
-	log.Println("author : ")
-	log.Println(author)
-
+	author, err := service.NewSearchAuthorService(db).GetAuthorByName(name)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get author"})
 		return
-	}
-
-	if author == nil {
-		foundAuthor, err := service.NewSearchAuthorService().SearchAuthor(name)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid author "})
-			return
-		} else {
-			repoAuthor.InsertAuthor(foundAuthor)
-			author, err = repoAuthor.SelectAuthorByName(foundAuthor.Name)
-		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{"status": "success", "data": author})

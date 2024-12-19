@@ -3,10 +3,12 @@ package controller
 import (
 	"database/sql"
 	"net/http"
+	"os"
 
 	"book/controller/interfaces"
 	"book/model"
 	"book/repository"
+	"book/service"
 
 	"github.com/gin-gonic/gin"
 )
@@ -44,11 +46,15 @@ func (bc *BookController) GetBook(c *gin.Context) {
 	}
 
 	if book == nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Book not found"})
-		return
+		apiKey := os.Getenv("GOOGLE_BOOKS_API_KEY")
+		searchService := service.NewSearchService(apiKey, bc.DB)
+		book, err = searchService.SearchBookByISBN(idParam)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
 	}
-
-	// bookAuthor :=
+	
 	// repoAuthor := repository.NewAuthorRepository(db)
 	// author, errors := repoAuthor.SelectAuthorByName(bookAuthor)
 

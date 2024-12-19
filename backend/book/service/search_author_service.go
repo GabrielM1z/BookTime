@@ -1,24 +1,48 @@
 package service
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"book/model"
+	"book/repository"
 	"book/service/interfaces"
 )
 
 type SearchAuthorService struct {
+	DB *sql.DB
 }
 
-func NewSearchAuthorService() *SearchAuthorService {
-	return &SearchAuthorService{}
+func NewSearchAuthorService(db *sql.DB) *SearchAuthorService {
+	return &SearchAuthorService{DB: db}
+}
+
+func (sas *SearchAuthorService) GetAuthorByName(name string) (*model.Author, error) {
+	db := sas.DB
+	repoAuthor := repository.NewAuthorRepository(db)
+	author, _ := repoAuthor.SelectAuthorByName(name)
+
+	if author == nil {
+		foundAuthor, err := sas.SearchAuthor(name)
+		if err != nil {
+			return nil, fmt.Errorf("Invalid author: %w", err)
+		} else {
+			repoAuthor.InsertAuthor(foundAuthor)
+			author, err = repoAuthor.SelectAuthorByName(foundAuthor.Name)
+		}
+	}
+
+	return author, nil
 }
 
 func (sas *SearchAuthorService) SearchAuthor(name string) (model.PostAuthor, error) {
+	name = strings.Replace(name, " ", "_", 100)
+
 	baseURL := "https://fr.wikipedia.org/w/api.php"
 	params := url.Values{}
 	params.Add("action", "query")

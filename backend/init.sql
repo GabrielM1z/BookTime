@@ -15,10 +15,10 @@ CREATE TABLE IF NOT EXISTS library (
     name VARCHAR(255) NOT NULL
 );
 -- Table FORMAT
-CREATE TABLE IF NOT EXISTS formats (
-    id_format UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    name VARCHAR(100) NOT NULL
-);
+-- CREATE TABLE IF NOT EXISTS formats (
+--     id_format UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+--     name VARCHAR(100) NOT NULL
+-- );
 
 -- Table AUTHOR
 CREATE TABLE IF NOT EXISTS author (
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS book (
     id_book VARCHAR(13) PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     description TEXT,
-    id_format UUID,
+    id_format VARCHAR(25),
     publisher VARCHAR(255),
     publication_date DATE,
     page_number INT,

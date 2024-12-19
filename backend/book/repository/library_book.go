@@ -85,8 +85,8 @@ func (lbr *LibraryBookRepository) SelectLibraryBookByLibrary(idLibrary string) [
 		if err := rows.Scan(&book.IdBook, &book.Title, &book.Description, &IDFormat, &book.Publisher, &book.PublicationDate, &book.PageNumber, &book.Language, &book.CoverImageUrl); err != nil {
 			log.Fatal(err)
 		}
-		format, _ := NewFormatRepository(lbr.DB).SelectFormat(IDFormat)
-		book.Format = format
+		//format, _ := NewFormatRepository(lbr.DB).SelectFormat(IDFormat)
+		book.Format = "BOOK"
 		books = append(books, &book)
 	}
 
