@@ -106,21 +106,21 @@ export default StyleSheet.create({
         flexDirection: "row",
         justifyContent: "center",
         alignItems: "center",
-        marginBottom: 16, // Ajoute un espace en bas
+        marginBottom: 16,
     },
     socialBubble: {
         width: 50,
         height: 50,
         borderRadius: 25,
-        backgroundColor: "#EA4335", // Google red color
+        backgroundColor: "#EA4335",
         justifyContent: "center",
         alignItems: "center",
         marginHorizontal: 8,
     },
     facebookBubble: {
-        backgroundColor: "#4267B2", // Facebook blue color
+        backgroundColor: "#4267B2",
     },
     twitterBubble: {
-        backgroundColor: "#1DA1F2", // Twitter blue color
+        backgroundColor: "#1DA1F2",
     },
 });

@@ -1,5 +1,6 @@
 import { ActionRepositoryProps } from "@/repositories/ActionRepository";
 import { AuthorRepositoryProps } from "@/repositories/AuthorRepository";
+import { BookRepositoryProps } from "@/repositories/BookRepository";
 import { FormatRepositoryProps } from "@/repositories/FormatRepository";
 import { GenreRepositoryProps } from "@/repositories/GenreRepository";
 import { LibraryRepositoryProps } from "@/repositories/LibraryRepository";
@@ -7,6 +8,7 @@ import { SessionRepositoryProps } from "@/repositories/SessionRepository";
 import { UserRepositoryProps } from "@/repositories/UserRepository";
 import { actionRepositoryFactory } from "@/repositories/factories/actionRepositoryFactory";
 import { authorRepositoryFactory } from "@/repositories/factories/authorRepositoryFactory";
+import { bookRepositoryFactory } from "@/repositories/factories/bookRepositoryFactory";
 import { formatRepositoryFactory } from "@/repositories/factories/formatRepositoryFactory";
 import { genreRepositoryFactory } from "@/repositories/factories/genreRepositoryFactory";
 import { libraryRepositoryFactory } from "@/repositories/factories/libraryRepositoryFactory";
@@ -19,6 +21,7 @@ import React, { createContext } from "react";
 export interface RepositoryContextProps {
     userRepository: UserRepositoryProps;
     libraryRepository: LibraryRepositoryProps;
+    bookRepository: BookRepositoryProps;
     actionRepository: ActionRepositoryProps;
     sessionRepository: SessionRepositoryProps;
     formatRepository: FormatRepositoryProps;
@@ -31,6 +34,7 @@ export const RepositoryContext = createContext<RepositoryContextProps | undefine
 function RepositoryProvider({ children }: { children: React.ReactNode }) {
     const userRepository = userRepositoryFactory();
     const libraryRepository = libraryRepositoryFactory();
+    const bookRepository = bookRepositoryFactory();
     const actionRepository = actionRepositoryFactory();
     const sessionRepository = sessionRepositoryFactory();
     const formatRepository = formatRepositoryFactory();
@@ -41,6 +45,7 @@ function RepositoryProvider({ children }: { children: React.ReactNode }) {
         <RepositoryContext.Provider value={{
             userRepository,
             libraryRepository,
+            bookRepository,
             actionRepository,
             sessionRepository,
             formatRepository,

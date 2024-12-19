@@ -48,6 +48,20 @@ func (bc *BookController) GetBook(c *gin.Context) {
 		return
 	}
 
+	// bookAuthor :=
+	// repoAuthor := repository.NewAuthorRepository(db)
+	// author, errors := repoAuthor.SelectAuthorByName(bookAuthor)
+
+	// if errors != nil {
+	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve book"})
+	// 	return
+	// }
+
+	// if author == nil {
+	// 	//il faut ajouter l'auteur en bdd
+	// }
+	// //il faut faire la liaision entre le livre et
+
 	c.JSON(http.StatusOK, gin.H{"status": "success", "data": book, "msg": "get book successfully"})
 }
 

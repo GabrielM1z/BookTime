@@ -1,15 +1,17 @@
 import { Genre } from "@/models/Genre";
 import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite';
 import { Synchronisable } from './synchronisable';
+import { v4 as uuidv4 } from 'uuid';
 
 
-export interface GenreRepositoryProps {
+
+export interface GenreRepository {
     getAll: () => Promise<Genre[]>
     get: (id: string) => Promise<Genre | null>;
     add: (genre: Genre) => Promise<void>;
 }
 
-export class SQLiteGenreRepository extends Synchronisable implements GenreRepositoryProps {
+export class SQLiteGenreRepository extends Synchronisable implements GenreRepository {
     private db: SQLiteDatabase;
     private api: APIGenreRepository;
 
@@ -40,17 +42,18 @@ export class SQLiteGenreRepository extends Synchronisable implements GenreReposi
 
     async add(genre: Genre): Promise<void> {
         const statement = await this.db.prepareAsync(
-            'INSERT INTO genre (name) VALUES ($name);'
+            'INSERT INTO genre (id_genre, name) VALUES ($id_genre, $name);'
         );
 
         await statement.executeAsync({
+            $id_genre: uuidv4(),
             $name: genre.name
         });
     }
 }
 
 
-export class APIGenreRepository implements GenreRepositoryProps {
+export class APIGenreRepository implements GenreRepository {
     async getAll(): Promise<Genre[]> {
         return [];
     }

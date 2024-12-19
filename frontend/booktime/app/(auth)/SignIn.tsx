@@ -7,6 +7,7 @@ import { ActivityIndicator, Alert, Image, Keyboard, StatusBar, Switch, Text, Tex
 import { SafeAreaView } from 'react-native-safe-area-context';
 import styles from "./SignIn.style";
 
+
 export default function SignIn() {
     const { logIn, logAsGuest } = useAuth();
     const [username, setUsername] = useState('');

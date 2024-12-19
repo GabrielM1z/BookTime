@@ -1,15 +1,17 @@
 import { Library } from '@/models/Library';
 import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite';
 import { Synchronisable } from './synchronisable';
+import { v4 as uuidv4 } from 'uuid';
 
 
-export interface LibraryRepositoryProps {
+
+export interface LibraryRepository {
     getAll: () => Promise<Library[]>;
     get: (id: string) => Promise<Library | null>;
     add: (name: string) => Promise<void>;
 }
 
-export class SQLiteLibraryRepository extends Synchronisable implements LibraryRepositoryProps {
+export class SQLiteLibraryRepository extends Synchronisable implements LibraryRepository {
     private db: SQLiteDatabase;
     private api: APILibraryRepository;
 
@@ -40,20 +42,18 @@ export class SQLiteLibraryRepository extends Synchronisable implements LibraryRe
 
     async add(name: string): Promise<void> {
         const statement = await this.db.prepareAsync(
-            'INSERT INTO library (name) VALUES ($name);'
+            'INSERT INTO library (id_library, name) VALUES ($id_library, $name);'
         );
-
         this.sync();
-        console.log("oui")
-
 
         await statement.executeAsync({
+            $id_library: uuidv4(),
             $name: name
         });
     }
 }
 
-export class APILibraryRepository implements LibraryRepositoryProps {
+export class APILibraryRepository implements LibraryRepository {
     async getAll(): Promise<Library[]> {
         return [];
     }

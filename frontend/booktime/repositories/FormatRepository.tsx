@@ -1,15 +1,17 @@
 import { Format } from "@/models/Format";
 import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite';
 import { Synchronisable } from './synchronisable';
+import { v4 as uuidv4 } from 'uuid';
 
 
-export interface FormatRepositoryProps {
+
+export interface FormatRepository {
     getAll: () => Promise<Format[]>
     get: (id: string) => Promise<Format | null>;
     add: (format: Format) => Promise<void>;
 }
 
-export class SQLiteFormatRepository extends Synchronisable implements FormatRepositoryProps {
+export class SQLiteFormatRepository extends Synchronisable implements FormatRepository {
     private db: SQLiteDatabase;
     private api: APIFormatRepository;
 
@@ -40,17 +42,18 @@ export class SQLiteFormatRepository extends Synchronisable implements FormatRepo
 
     async add(format: Format): Promise<void> {
         const statement = await this.db.prepareAsync(
-            'INSERT INTO format (name) VALUES ($name);'
+            'INSERT INTO format (id_format, name) VALUES ($id_format, $name);'
         );
 
         await statement.executeAsync({
+            $id_format: uuidv4(),
             $name: format.name
         });
     }
 }
 
 
-export class APIFormatRepository implements FormatRepositoryProps {
+export class APIFormatRepository implements FormatRepository {
     async getAll(): Promise<Format[]> {
         return [];
     }
