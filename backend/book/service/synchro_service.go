@@ -28,11 +28,6 @@ func (ss *SynchroService) filteredActions(mixed_actions []model.Action) ([]model
 	return mixed_actions, nil
 }
 
-type libraryBookIDs struct {
-	BookId    uuid.UUID
-	LibraryId uuid.UUID
-}
-
 type libraryActionInfo struct {
 	ActionId uuid.UUID
 	Name     string
@@ -70,19 +65,19 @@ type stateStateActionInfo struct {
 }
 
 // Vérifie si un uuid.UUID est présent dans une slice
-func contains(list []uuid.UUID, id uuid.UUID) bool {
-	for _, item := range list {
-		if item == id {
+func contains[T comparable](list []T, item T) bool {
+	for _, element := range list {
+		if element == item {
 			return true
 		}
 	}
 	return false
 }
 
-// Vérifie si un libraryBookIDs est présent dans une slice
-func containsLibraryBook(list []libraryBookIDs, item libraryBookIDs) bool {
+// Vérifie si un model.LibraryBook est présent dans une slice
+func containsLibraryBook(list []model.LibraryBook, item model.LibraryBook) bool {
 	for _, elem := range list {
-		if elem.BookId == item.BookId && elem.LibraryId == item.LibraryId {
+		if elem.IdBook == item.IdBook && elem.LibraryId == item.LibraryId {
 			return true
 		}
 	}
@@ -102,9 +97,9 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 	var insertActions []model.Action
 	var deleteActions []model.Action
 	var deletedLibraries uuid.UUIDs
-	var deletedStates uuid.UUIDs
+	var deletedStates []string
 	var deletedSharedLibraries uuid.UUIDs
-	var deletedLibrariesBooks []libraryBookIDs
+	var deletedLibrariesBooks []model.LibraryBook
 
 	//On met chaque action dans une liste qui regroupe toutes les actions de meme type UPDATE INSERT DELETE
 	for _, action := range filteredActions {
@@ -125,8 +120,8 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 
 	// On initialise des maps pour détecter les doublons.
 	deletedLibrariesMap := make(map[uuid.UUID]bool)
-	deletedStatesMap := make(map[uuid.UUID]bool)
-	deletedLibrariesBooksMap := make(map[libraryBookIDs]bool)
+	deletedStatesMap := make(map[string]bool)
+	deletedLibrariesBooksMap := make(map[model.LibraryBook]bool)
 	deletedSharedLibrariesMap := make(map[uuid.UUID]bool)
 
 	// On initialise des listes temporaires pour filtrer les actions.
@@ -173,7 +168,7 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 				log.Fatalf("Erreur lors du décodage du JSON : %v", err)
 			}
 
-			libraryBookKey := libraryBookIDs{libraryBook.IdBook, libraryBook.LibraryId}
+			libraryBookKey := model.LibraryBook{LibraryId: libraryBook.LibraryId, IdBook: libraryBook.IdBook}
 
 			deletedLibrariesBooks = append(deletedLibrariesBooks, libraryBookKey)
 
@@ -247,7 +242,7 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 			err := json.Unmarshal(action.Action, &libraryBook)
 			if err != nil {
 				log.Fatalf("Erreur lors du décodage du JSON : %v", err)
-			} else if !containsLibraryBook(deletedLibrariesBooks, libraryBookIDs{libraryBook.IdBook, libraryBook.LibraryId}) {
+			} else if !containsLibraryBook(deletedLibrariesBooks, model.LibraryBook{LibraryId: libraryBook.LibraryId, IdBook: libraryBook.IdBook}) {
 				if action.ExecutedBy == "CLIENT" {
 					serverActions = append(serverActions, action)
 				} else if action.ExecutedBy == "SERVER" {
@@ -303,11 +298,11 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 	}
 
 	//STATE
-	statesProgressionActionsInfos := make(map[uuid.UUID]stateProgressionActionInfo)
-	statesIsAvailableActionInfo := make(map[uuid.UUID]stateIsAvailableActionInfo)
-	statesLastReadDateActionInfo := make(map[uuid.UUID]stateLastReadDateActionInfo)
-	statesReadCountActionInfo := make(map[uuid.UUID]stateReadCountActionInfo)
-	statesStateActionInfo := make(map[uuid.UUID]stateStateActionInfo)
+	statesProgressionActionsInfos := make(map[string]stateProgressionActionInfo)
+	statesIsAvailableActionInfo := make(map[string]stateIsAvailableActionInfo)
+	statesLastReadDateActionInfo := make(map[string]stateLastReadDateActionInfo)
+	statesReadCountActionInfo := make(map[string]stateReadCountActionInfo)
+	statesStateActionInfo := make(map[string]stateStateActionInfo)
 
 	for _, action := range updateStateActions {
 		var stateActionData map[string]interface{}
@@ -319,16 +314,11 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 		// Vérifie si "book_id" existe
 		if idBook, ok := stateActionData["id_book"]; ok {
 			// Conversion de idBook en uuid.UUID
-			idBookStr, ok := idBook.(string)
+			idBook, ok := idBook.(string)
 			if !ok {
 				log.Fatalf("Erreur : id_book n'est pas une chaîne de caractères")
 			}
-			idBookUUID, err := uuid.Parse(idBookStr)
-			if err != nil {
-				log.Fatalf("Erreur : impossible de convertir id_book en UUID : %v", err)
-			}
-
-			if !contains(deletedStates, idBookUUID) {
+			if !contains(deletedStates, idBook) {
 
 				// Vérifie si "progression" existe
 				if progression, ok := stateActionData["progression"]; ok {
@@ -338,16 +328,16 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 					}
 
 					// Ajout à la map si l'ID existe ou si la date est plus récente
-					if _, exists := statesProgressionActionsInfos[idBookUUID]; exists {
-						if action.Date.After(statesProgressionActionsInfos[idBookUUID].Date) {
-							statesProgressionActionsInfos[idBookUUID] = stateProgressionActionInfo{
+					if _, exists := statesProgressionActionsInfos[idBook]; exists {
+						if action.Date.After(statesProgressionActionsInfos[idBook].Date) {
+							statesProgressionActionsInfos[idBook] = stateProgressionActionInfo{
 								ActionId:    action.IdAction,
 								Progression: uint(progressionUint),
 								Date:        action.Date,
 							}
 						}
 					} else {
-						statesProgressionActionsInfos[idBookUUID] = stateProgressionActionInfo{
+						statesProgressionActionsInfos[idBook] = stateProgressionActionInfo{
 							ActionId:    action.IdAction,
 							Progression: uint(progressionUint),
 							Date:        action.Date,
@@ -361,16 +351,16 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 						log.Fatalf("Erreur : is_available n'est pas un booléen")
 					}
 
-					if _, exists := statesIsAvailableActionInfo[idBookUUID]; exists {
-						if action.Date.After(statesIsAvailableActionInfo[idBookUUID].Date) {
-							statesIsAvailableActionInfo[idBookUUID] = stateIsAvailableActionInfo{
+					if _, exists := statesIsAvailableActionInfo[idBook]; exists {
+						if action.Date.After(statesIsAvailableActionInfo[idBook].Date) {
+							statesIsAvailableActionInfo[idBook] = stateIsAvailableActionInfo{
 								ActionId:    action.IdAction,
 								IsAvailable: isAvailableBool,
 								Date:        action.Date,
 							}
 						}
 					} else {
-						statesIsAvailableActionInfo[idBookUUID] = stateIsAvailableActionInfo{
+						statesIsAvailableActionInfo[idBook] = stateIsAvailableActionInfo{
 							ActionId:    action.IdAction,
 							IsAvailable: isAvailableBool,
 							Date:        action.Date,
@@ -384,16 +374,16 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 						log.Fatalf("Erreur : last_read_date n'est pas une chaîne valide")
 					}
 
-					if _, exists := statesLastReadDateActionInfo[idBookUUID]; exists {
-						if action.Date.After(statesLastReadDateActionInfo[idBookUUID].Date) {
-							statesLastReadDateActionInfo[idBookUUID] = stateLastReadDateActionInfo{
+					if _, exists := statesLastReadDateActionInfo[idBook]; exists {
+						if action.Date.After(statesLastReadDateActionInfo[idBook].Date) {
+							statesLastReadDateActionInfo[idBook] = stateLastReadDateActionInfo{
 								ActionId:     action.IdAction,
 								LastReadDate: lastReadDateStr,
 								Date:         action.Date,
 							}
 						}
 					} else {
-						statesLastReadDateActionInfo[idBookUUID] = stateLastReadDateActionInfo{
+						statesLastReadDateActionInfo[idBook] = stateLastReadDateActionInfo{
 							ActionId:     action.IdAction,
 							LastReadDate: lastReadDateStr,
 							Date:         action.Date,
@@ -407,16 +397,16 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 						log.Fatalf("Erreur : read_count n'est pas un nombre valide")
 					}
 
-					if _, exists := statesReadCountActionInfo[idBookUUID]; exists {
-						if action.Date.After(statesReadCountActionInfo[idBookUUID].Date) {
-							statesReadCountActionInfo[idBookUUID] = stateReadCountActionInfo{
+					if _, exists := statesReadCountActionInfo[idBook]; exists {
+						if action.Date.After(statesReadCountActionInfo[idBook].Date) {
+							statesReadCountActionInfo[idBook] = stateReadCountActionInfo{
 								ActionId:  action.IdAction,
 								ReadCount: uint(readCountFloat),
 								Date:      action.Date,
 							}
 						}
 					} else {
-						statesReadCountActionInfo[idBookUUID] = stateReadCountActionInfo{
+						statesReadCountActionInfo[idBook] = stateReadCountActionInfo{
 							ActionId:  action.IdAction,
 							ReadCount: uint(readCountFloat),
 							Date:      action.Date,
@@ -430,16 +420,16 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 						log.Fatalf("Erreur : state n'est pas une chaîne valide")
 					}
 
-					if _, exists := statesStateActionInfo[idBookUUID]; exists {
-						if action.Date.After(statesStateActionInfo[idBookUUID].Date) {
-							statesStateActionInfo[idBookUUID] = stateStateActionInfo{
+					if _, exists := statesStateActionInfo[idBook]; exists {
+						if action.Date.After(statesStateActionInfo[idBook].Date) {
+							statesStateActionInfo[idBook] = stateStateActionInfo{
 								ActionId: action.IdAction,
 								State:    stateStr,
 								Date:     action.Date,
 							}
 						}
 					} else {
-						statesStateActionInfo[idBookUUID] = stateStateActionInfo{
+						statesStateActionInfo[idBook] = stateStateActionInfo{
 							ActionId: action.IdAction,
 							State:    stateStr,
 							Date:     action.Date,
@@ -602,7 +592,7 @@ func (ss *SynchroService) executeActionsToSynchronizeServer(clientActionsToExecu
 					return fmt.Errorf("update failed for ID %s", action.IdAction)
 				}
 			case "DELETE":
-				if res := repository.NewStateRepository(ss.DB).DeleteState(state.IdBook, state.IdUser); !res {
+				if res := repository.NewStateRepository(ss.DB).DeleteState(state.IdUser, state.IdBook); !res {
 					return fmt.Errorf("delete failed for ID %s", action.IdAction)
 				}
 			default:

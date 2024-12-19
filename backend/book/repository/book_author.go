@@ -51,7 +51,7 @@ func (repo *BookAuthorRepository) SelectBookAuthors() []model.BookAuthor {
 }
 
 // SelectBookAuthor récupère une relation spécifique entre un livre et un auteur
-func (repo *BookAuthorRepository) SelectBookAuthor(idAuthor uuid.UUID, idBook uuid.UUID) (model.BookAuthor, error) {
+func (repo *BookAuthorRepository) SelectBookAuthor(idAuthor uuid.UUID, idBook string) (model.BookAuthor, error) {
 	query := "SELECT id_author, id_book FROM book_author WHERE id_author = $1 AND id_book = $2"
 	row := repo.DB.QueryRow(query, idAuthor, idBook)
 
@@ -67,7 +67,7 @@ func (repo *BookAuthorRepository) SelectBookAuthor(idAuthor uuid.UUID, idBook uu
 }
 
 // DeleteBookAuthor supprime une relation entre un livre et un auteur
-func (repo *BookAuthorRepository) DeleteBookAuthor(idAuthor uuid.UUID, idBook uuid.UUID) bool {
+func (repo *BookAuthorRepository) DeleteBookAuthor(idAuthor uuid.UUID, idBook string) bool {
 	query := "DELETE FROM book_author WHERE id_author = $1 AND id_book = $2"
 	_, err := repo.DB.Exec(query, idAuthor, idBook)
 	if err != nil {

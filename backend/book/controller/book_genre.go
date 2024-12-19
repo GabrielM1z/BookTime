@@ -38,13 +38,13 @@ func (bgc *BookGenreController) GetBookGenre(c *gin.Context) {
 	repoBookGenre := repository.NewBookGenreRepository(db)
 
 	idGenreParam := c.Param("id_genre")
-	idBookParam := c.Param("id_book")
+	idBook := c.Param("id_book")
 	idGenre, err := uuid.Parse(idGenreParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "msg": "invalid book genre ID"})
 		return
 	}
-	idBook, err := uuid.Parse(idBookParam)
+
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "msg": "invalid book genre ID"})
 		return
@@ -84,13 +84,13 @@ func (bgc *BookGenreController) InsertBookGenre(c *gin.Context) {
 func (bgc *BookGenreController) DeleteBookGenre(c *gin.Context) {
 	db := bgc.DB
 	idGenreParam := c.Param("id_genre")
-	idBookParam := c.Param("id_book")
+	idBook := c.Param("id_book")
 	idGenre, err := uuid.Parse(idGenreParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "msg": "invalid book genre ID"})
 		return
 	}
-	idBook, err := uuid.Parse(idBookParam)
+
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "msg": "invalid book genre ID"})
 		return
