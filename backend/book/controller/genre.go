@@ -62,6 +62,29 @@ func (gc *GenreController) GetGenres(c *gin.Context) {
 }
 
 // GetGenre implements GenreControllerInterface
+func (gc *GenreController) GetGenreByName(c *gin.Context) {
+	db := gc.DB
+	repoGenre := repository.NewGenreRepository(db)
+
+	// Récupère l'ID depuis les paramètres de la requête
+	name := c.Param("name")
+
+	// Récupère le genre avec l'ID
+	genre, err := repoGenre.SelectGenreByName(name)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "msg": "error retrieving genre"})
+		return
+	}
+
+	// Vérification si le genre existe via son ID
+	if genre.IdGenre != uuid.Nil {
+		c.JSON(http.StatusOK, gin.H{"status": "success", "data": genre, "msg": "genre retrieved successfully"})
+	} else {
+		c.JSON(http.StatusNotFound, gin.H{"status": "error", "data": nil, "msg": "genre not found"})
+	}
+}
+
+// GetGenre implements GenreControllerInterface
 func (gc *GenreController) GetGenre(c *gin.Context) {
 	db := gc.DB
 	repoGenre := repository.NewGenreRepository(db)

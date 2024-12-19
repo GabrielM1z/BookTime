@@ -8,6 +8,7 @@ import (
 	"user/repository"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type UserController struct {
@@ -23,7 +24,12 @@ func (bc *UserController) GetUser(c *gin.Context) {
 	idParam := c.Param("id")
 
 	repoUser := repository.NewUserRepository(db)
-	User, err := repoUser.SelectUser(idParam)
+	id, err := uuid.Parse(idParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "msg": "invalid user ID"})
+		return
+	}
+	User, err := repoUser.SelectUser(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve User"})
 		return
@@ -52,6 +58,25 @@ func (bc *UserController) InsertUser(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "failed", "msg": err.Error()})
 	}
+}
+
+func (bc *UserController) DeleteUser(c *gin.Context) {
+	db := bc.DB
+	idParam := c.Param("id")
+	id, err := uuid.Parse(idParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	repoUser := repository.NewUserRepository(db)
+	success := repoUser.DeleteUser(id)
+	if !success {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete user"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "User deleted successfully"})
 }
 
 var _ interfaces.UserControllerInterface = &UserController{}

@@ -87,6 +87,7 @@ func (a *App) CreateRoutes() {
 	// Genre routes
 	genreController := controller.NewGenreController(a.DB)
 	routes.GET(prefix+"/genres", genreController.GetGenres)
+	routes.GET(prefix+"/genres/name/:name", genreController.GetGenreByName)
 	routes.GET(prefix+"/genres/:id", genreController.GetGenre)
 	routes.POST(prefix+"/genres", genreController.InsertGenre)
 	routes.PUT(prefix+"/genres/:id", genreController.UpdateGenre)
