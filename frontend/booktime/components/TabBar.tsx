@@ -12,13 +12,13 @@ export function TabBar ({ state, descriptors, navigation} : BottomTabBarProps){
 		library: (props: any) => <Feather name='book' size={24} color={Colors.dark.text} {...props}/>,
 		search: (props: any) => <Feather name='search' size={24} color={Colors.dark.text} {...props}/>,
 		news: (props: any) => <Feather name='mail' size={24} color={Colors.dark.text} {...props}/>,
-		profil: (props: any) => <Feather name='user' size={24} color={Colors.dark.text} {...props}/>,
+		profile: (props: any) => <Feather name='user' size={24} color={Colors.dark.text} {...props}/>,
 	}
 
 	return (
 		<View style={styles.tabbar}>
 			{state.routes
-				.filter(route => route.name !== 'index')
+				.filter(route => route.name !== 'index' && !route.name.includes('style'))
 				.map((route, index) => {
 				const {options} = descriptors[route.key];
 				const label =

@@ -30,6 +30,7 @@ type BookAPIResponse struct {
 	Items []BookItem `json:"items"`
 }
 
+// change to formatted book
 type SimplifiedBook struct {
 	Title         string   `json:"title"`
 	Authors       []string `json:"authors"`
@@ -41,4 +42,11 @@ type SimplifiedBook struct {
 	Language      string   `json:"language"`
 	ISBN13        string   `json:"isbn13"`
 	Thumbnail     string   `json:"thumbnail"`
+}
+
+type FormattedBookSearch struct {
+	Title     string   `json:"title"`
+	Authors   []string `json:"authors"`
+	ISBN13    string   `json:"isbn13"`
+	Thumbnail string   `json:"thumbnail"`
 }

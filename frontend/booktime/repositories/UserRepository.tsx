@@ -1,20 +1,19 @@
 import api from '@/services/api';
 import { AuthResponseProps, PayloadProps } from '@/models/keycloak';
 import { User } from '@/models/User';
+import { Session } from '@/models/Session';
 import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite';
-import { jwtDecode } from 'jwt-decode';
 import { Synchronisable } from './synchronisable';
 
-export interface UserRepositoryProps {
-    getFromKeycloakToken(data: AuthResponseProps): User;
+export interface UserRepository {
+    getBySession(session: Session): Promise<User>;
     getById(id: string): Promise<User | null>;
     getAll(): Promise<User[]>;
-    add(user: User): Promise<void>;
     update(user: User): Promise<void>;
     delete(user: User): Promise<void>;
 }
 
-export class SQLiteUserRepository extends Synchronisable implements UserRepositoryProps {
+export class SQLiteUserRepository extends Synchronisable implements UserRepository {
     private db: SQLiteDatabase;
     private api: APIUserRepository;
 
@@ -24,8 +23,13 @@ export class SQLiteUserRepository extends Synchronisable implements UserReposito
         this.api = new APIUserRepository();
     }
 
-    getFromKeycloakToken(data: AuthResponseProps): User {
-        return this.api.getFromKeycloakToken(data);
+    async getBySession(session: Session): Promise<User> {
+        let user = await this.getById(session.idUser);
+        if (!user) {
+            user = await this.api.getBySession(session);
+            this.add(user);
+        }
+        return user;
     }
 
     async getById(id: string): Promise<User | null> {
@@ -103,20 +107,19 @@ export class SQLiteUserRepository extends Synchronisable implements UserReposito
 }
 
 
-export class APIUserRepository implements UserRepositoryProps {
-    getFromKeycloakToken(data: AuthResponseProps): User {
-        const payload = jwtDecode<PayloadProps>(data.access_token);
+export class APIUserRepository implements UserRepository {
+    async getBySession(session: Session): Promise<User> {
+        // if (!session.isGuest) {
+        //     return User.
+        // }
+        if (!session.accessToken) {
+            throw new Error('No access token in session');
+        }
 
-        // call api pour avoir le reste des info
-
-        return new User({
-            id: payload.sub,
-            emailVerified: payload.email_verified,
-            username: payload.preferred_username,
-            givenName: payload.given_name,
-            familyName: payload.family_name,
-            email: payload.email
-        });
+        const tokenUser = User.fromToken(session.accessToken);
+        const apiUser = await this.getById(tokenUser.id);
+        const user = new User({...tokenUser, ...apiUser});
+        return user;
     }
 
     async getById(id: string): Promise<User | null> {
@@ -127,10 +130,6 @@ export class APIUserRepository implements UserRepositoryProps {
     async getAll(): Promise<User[]> {
         const response = await api.get('/api/user');
         return response.data;
-    }
-
-    async add(user: User): Promise<void> {
-        await api.post('/api/user', user);
     }
 
     async update(user: User): Promise<void> {

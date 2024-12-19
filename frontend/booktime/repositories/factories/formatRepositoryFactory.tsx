@@ -1,8 +1,8 @@
 import { Platform } from "react-native";
-import { APIFormatRepository, FormatRepositoryProps, SQLiteFormatRepository } from "../FormatRepository";
+import { APIFormatRepository, FormatRepository, SQLiteFormatRepository } from "../FormatRepository";
 
 
-export const formatRepositoryFactory = (): FormatRepositoryProps => {
+export const formatRepositoryFactory = (): FormatRepository => {
     if (Platform.OS === 'web') {
         return new APIFormatRepository();
     }

@@ -1,7 +1,7 @@
 import { Platform } from "react-native";
-import { APILibraryRepository, LibraryRepositoryProps, SQLiteLibraryRepository } from "../LibraryRepository";
+import { APILibraryRepository, LibraryRepository, SQLiteLibraryRepository } from "../LibraryRepository";
 
-export const libraryRepositoryFactory = (): LibraryRepositoryProps => {
+export const libraryRepositoryFactory = (): LibraryRepository => {
     if (Platform.OS === 'web') {
         return new APILibraryRepository();
     }

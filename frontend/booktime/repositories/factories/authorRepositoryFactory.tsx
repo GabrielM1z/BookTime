@@ -1,8 +1,8 @@
 import { Platform } from "react-native";
-import { APIAuthorRepository, AuthorRepositoryProps, SQLiteAuthorRepository } from "../AuthorRepository";
+import { APIAuthorRepository, AuthorRepository, SQLiteAuthorRepository } from "../AuthorRepository";
 
 
-export const authorRepositoryFactory = (): AuthorRepositoryProps => {
+export const authorRepositoryFactory = (): AuthorRepository => {
     if (Platform.OS === 'web') {
         return new APIAuthorRepository();
     }

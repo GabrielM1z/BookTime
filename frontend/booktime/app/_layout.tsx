@@ -14,6 +14,8 @@ import { RepositoryProviderWrapper } from '@/providers/RepositoryProvider';
 import { AuthProvider } from '@/providers/AuthProvider';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ApiWrapper } from '@/services/api';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -40,21 +42,25 @@ export default function RootLayout() {
 
     return (
         <SafeAreaProvider>
-            <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-                <RepositoryProviderWrapper databaseName='booktime.db' onInit={migrateDbIfNeeded}>
-                    <AuthProvider>
-                        <ApiWrapper>
-                            <QueryProvider>
-                                <Stack>
-                                    <Stack.Screen name="(app)" options={{ headerShown: false }} />
-                                    <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-                                    <Stack.Screen name="+not-found" />
-                                </Stack>
-                            </QueryProvider>
-                        </ApiWrapper>
-                    </AuthProvider>
-                </RepositoryProviderWrapper>
-            </ThemeProvider>
+            <GestureHandlerRootView>
+                <BottomSheetModalProvider>
+                    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+                        <RepositoryProviderWrapper databaseName='booktime.db' onInit={migrateDbIfNeeded}>
+                            <AuthProvider>
+                                <ApiWrapper>
+                                    <QueryProvider>
+                                        <Stack>
+                                            <Stack.Screen name="(app)" options={{ headerShown: false }} />
+                                            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                                            <Stack.Screen name="+not-found" />
+                                        </Stack>
+                                    </QueryProvider>
+                                </ApiWrapper>
+                            </AuthProvider>
+                        </RepositoryProviderWrapper>
+                    </ThemeProvider>
+                </BottomSheetModalProvider>
+            </GestureHandlerRootView>
         </SafeAreaProvider>
     );
 }

@@ -1,5 +1,5 @@
-import { SessionRepositoryProps, SessionRepository } from "../SessionRepository";
+import { SessionRepository, CacheSessionRepository } from "../SessionRepository";
 
-export const sessionRepositoryFactory = (): SessionRepositoryProps => {
-    return new SessionRepository();
+export const sessionRepositoryFactory = (): SessionRepository => {
+    return new CacheSessionRepository();
 }

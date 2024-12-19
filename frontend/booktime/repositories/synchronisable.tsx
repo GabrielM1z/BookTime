@@ -1,14 +1,10 @@
 import api from '@/services/api';
-import { ActionRepository, ActionRepositoryProps } from './ActionRepository';
+import { ActionRepository } from './ActionRepository';
+import { useRepository } from '@/hooks/useRepository';
 
 export class Synchronisable {
-    private sqlite: ActionRepositoryProps;
-
-    constructor() {
-        this.sqlite = new ActionRepository
-    }
-
     async sync() {
+        const { actionRepository } = useRepository();
         try {
             console.log("pre action")
     
