@@ -6,7 +6,7 @@ CREATE DATABASE book_db;
 
 \connect book_db;
 
--- Activer l'extension pgcrypto si ce n'est pas déjà fait
+-- Activer extension pgcrypto si cest pas déjà fait
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- Table LIBRARY
@@ -15,16 +15,15 @@ CREATE TABLE IF NOT EXISTS library (
     name VARCHAR(255) NOT NULL
 );
 -- Table FORMAT
-CREATE TABLE IF NOT EXISTS formats (
-    id_format UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    name VARCHAR(100) NOT NULL
-);
+-- CREATE TABLE IF NOT EXISTS formats (
+--     id_format UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+--     name VARCHAR(100) NOT NULL
+-- );
 
 -- Table AUTHOR
 CREATE TABLE IF NOT EXISTS author (
     id_author UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    first_name VARCHAR(100) NOT NULL,
-    last_name VARCHAR(100) NOT NULL,
+    name VARCHAR(100) NOT NULL UNIQUE,
     description TEXT
 );
 
@@ -39,13 +38,13 @@ CREATE TABLE IF NOT EXISTS book (
     id_book VARCHAR(13) PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     description TEXT,
-    id_format UUID,
+    id_format VARCHAR(25),
     publisher VARCHAR(255),
     publication_date DATE,
     page_number INT,
     language VARCHAR(50),
-    cover_image_url VARCHAR(255),
-    FOREIGN KEY (id_format) REFERENCES formats(id_format) ON DELETE CASCADE
+    cover_image_url VARCHAR(255)
+    --FOREIGN KEY (id_format) REFERENCES formats(id_format) ON DELETE CASCADE
 );
 
 -- Table BOOK_AUTHOR (Many-to-Many relation between BOOK and AUTHOR)
@@ -115,11 +114,11 @@ CREATE DATABASE user_db;
 -- Table USER
 -- A refaire ==> mauvais format (Matthieu <3)
 CREATE TABLE IF NOT EXISTS userBooktime (
-    id_user SERIAL PRIMARY KEY,
-    id_keycloak VARCHAR(255) UNIQUE,
-    user_name VARCHAR(255) UNIQUE NOT NULL,
-    first_name VARCHAR(255) NOT NULL,
-    last_name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    birthdate DATE NOT NULL
+    id_user UUID,
+    private BOOLEAN UNIQUE,
+    profil_image VARCHAR(255) UNIQUE NOT NULL,
+    banner_image VARCHAR(255) NOT NULL,
+    birthdate DATE NOT NULL,
+    PRIMARY KEY (id_user)
+
 );

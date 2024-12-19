@@ -7,6 +7,7 @@ import (
 	"book/controller/interfaces"
 	"book/model"
 	"book/repository"
+	"book/service"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -50,6 +51,19 @@ func (ac *AuthorController) GetAuthor(c *gin.Context) {
 
 	if author == nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Author not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"status": "success", "data": author})
+}
+
+func (ac *AuthorController) GetAuthorByName(c *gin.Context) {
+	db := ac.DB
+	name := c.Param("name")
+
+	author, err := service.NewSearchAuthorService(db).GetAuthorByName(name)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get author"})
 		return
 	}
 

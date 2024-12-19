@@ -8,6 +8,6 @@ type State struct {
 	ReadCount    uint      `json:"read_count"`
 	LastReadDate string    `json:"last_read_date"`
 	IdUser       uuid.UUID `json:"id_user"`
-	IdBook       uuid.UUID `json:"id_book" binding:"required"`
+	IdBook       string    `json:"id_book" binding:"required"`
 	IsAvailable  bool      `json:"is_available"`
 }

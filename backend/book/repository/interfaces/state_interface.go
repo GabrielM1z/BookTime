@@ -9,7 +9,7 @@ import (
 type StateRepositoryInterface interface {
 	InsertState(state model.State) bool
 	SelectStates() []model.State
-	SelectStateByUserAndBook(idUser uuid.UUID, idBook uuid.UUID) model.State
-	UpdateState(idUser uuid.UUID, idBook uuid.UUID, state model.State) bool
-	DeleteState(idUser uuid.UUID, idBook uuid.UUID) bool
+	SelectStateByUserAndBook(idUser uuid.UUID, idBook string) model.State
+	UpdateState(idUser uuid.UUID, idBook string, state model.State) bool
+	DeleteState(idUser uuid.UUID, idBook string) bool
 }

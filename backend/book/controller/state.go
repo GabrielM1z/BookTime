@@ -31,23 +31,12 @@ func (sc *StateController) GetStateByUserAndBook(c *gin.Context) {
 	uuidUser := getUserID(c)
 	idBook := c.Param("bookId")
 
-	uuidBook, err := uuid.Parse(idBook)
-	log.Println(err)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "msg": "invalid book UUID"})
-		return
-	}
-
 	var getState model.State
-	if uuidUser != uuid.Nil && uuidBook != uuid.Nil {
-		getState = repoState.SelectStateByUserAndBook(uuidUser, uuidBook)
+	if uuidUser != uuid.Nil {
+		getState = repoState.SelectStateByUserAndBook(uuidUser, idBook)
 	}
 
-	if getState.IdBook != uuid.Nil {
-		c.JSON(http.StatusOK, gin.H{"status": "success", "data": getState, "msg": "get state successfully"})
-	} else {
-		c.JSON(http.StatusOK, gin.H{"status": "success", "data": nil, "msg": "get state successfully"})
-	}
+	c.JSON(http.StatusOK, gin.H{"status": "success", "data": getState, "msg": "get state successfully"})
 }
 
 // GetState implements StateControllerInterface
@@ -135,17 +124,8 @@ func (sc *StateController) GetState(c *gin.Context) {
 	uuidUser := getUserID(c)
 	idBook := c.Param("bookId")
 
-	uuidBook, err := uuid.Parse(idBook)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "msg": "invalid book UUID"})
-		return
-	}
-	state := repoState.SelectStateByUserAndBook(uuidUser, uuidBook)
-	if state.IdBook != uuid.Nil {
-		c.JSON(http.StatusOK, gin.H{"status": "success", "data": state, "msg": "state retrieved successfully"})
-	} else {
-		c.JSON(http.StatusNotFound, gin.H{"status": "error", "msg": "state not found"})
-	}
+	state := repoState.SelectStateByUserAndBook(uuidUser, idBook)
+	c.JSON(http.StatusOK, gin.H{"status": "success", "data": state, "msg": "state retrieved successfully"})
 }
 
 func (sc *StateController) UpdateState(c *gin.Context) {
@@ -157,13 +137,6 @@ func (sc *StateController) UpdateState(c *gin.Context) {
 	idBook := c.Param("bookId")
 	log.Println(idBook)
 
-	uuidBook, err := uuid.Parse(idBook)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "msg": "invalid book UUID"})
-		log.Println(err)
-		return
-	}
-
 	// Liaison JSON avec le modèle
 	var state model.State
 	if err := c.ShouldBindJSON(&state); err != nil {
@@ -172,7 +145,7 @@ func (sc *StateController) UpdateState(c *gin.Context) {
 	}
 
 	// Mise à jour de l'état
-	updatedRows := repoState.UpdateState(uuidUser, uuidBook, state)
+	updatedRows := repoState.UpdateState(uuidUser, idBook, state)
 	if updatedRows {
 		c.JSON(http.StatusOK, gin.H{"status": "success", "msg": "state updated successfully"})
 	} else {
@@ -187,14 +160,8 @@ func (sc *StateController) DeleteState(c *gin.Context) {
 	uuidUser := getUserID(c)
 	idBook := c.Param("bookId")
 
-	uuidBook, err := uuid.Parse(idBook)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "msg": "invalid book UUID"})
-		return
-	}
-
 	// Suppression de l'état
-	deletedRows := repoState.DeleteState(uuidUser, uuidBook)
+	deletedRows := repoState.DeleteState(uuidUser, idBook)
 	if deletedRows {
 		c.JSON(http.StatusOK, gin.H{"status": "success", "msg": "state deleted successfully"})
 	} else {

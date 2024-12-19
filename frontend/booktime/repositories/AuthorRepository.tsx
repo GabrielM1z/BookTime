@@ -1,6 +1,7 @@
 import { Author } from '@/models/Author';
 import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite';
 import { Synchronisable } from './synchronisable';
+import { v4 as uuidv4 } from 'uuid';
 
 
 export interface AuthorRepository {
@@ -38,10 +39,11 @@ export class SQLiteAuthorRepository extends Synchronisable implements AuthorRepo
 
     async add(author: Author): Promise<void> {
         const statement = await this.db.prepareAsync(
-            'INSERT INTO author (first_name, last_name, description) VALUES ($first_name, $last_name, $description);'
+            'INSERT INTO author (id_author, first_name, last_name, description) VALUES ($id_author, $first_name, $last_name, $description);'
         );
 
         await statement.executeAsync({
+            $id_author: uuidv4(),
             $first_name: author.first_name,
             $last_name: author.last_name,
             $description: author.description

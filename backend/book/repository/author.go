@@ -19,8 +19,8 @@ func NewAuthorRepository(db *sql.DB) *AuthorRepository {
 }
 
 func (ar *AuthorRepository) InsertAuthor(post model.PostAuthor) bool {
-	_, err := ar.DB.Exec("INSERT INTO author (first_name, last_name, description) VALUES ($1, $2, $3)",
-		post.FirstName, post.LastName, post.Description)
+	_, err := ar.DB.Exec("INSERT INTO author (name, description) VALUES ($1, $2)",
+		post.Name, post.Description)
 	if err != nil {
 		log.Println(err)
 		return false
@@ -39,7 +39,7 @@ func (ar *AuthorRepository) SelectAuthors() []model.Author {
 	authors := []model.Author{}
 	for rows.Next() {
 		var author model.Author
-		if err := rows.Scan(&author.IdAuthor, &author.FirstName, &author.LastName, &author.Description); err != nil {
+		if err := rows.Scan(&author.IdAuthor, &author.Name, &author.Description); err != nil {
 			log.Fatal(err)
 		}
 		authors = append(authors, author)
@@ -48,11 +48,28 @@ func (ar *AuthorRepository) SelectAuthors() []model.Author {
 }
 
 func (ar *AuthorRepository) SelectAuthor(id uuid.UUID) (*model.Author, error) {
-	query := "SELECT id_author, first_name, last_name, description FROM author WHERE id_author = $1"
+	query := "SELECT id_author, name, description FROM author WHERE id_author = $1"
 	row := ar.DB.QueryRow(query, id)
 
 	var author model.Author
-	err := row.Scan(&author.IdAuthor, &author.FirstName, &author.LastName, &author.Description)
+	err := row.Scan(&author.IdAuthor, &author.Name, &author.Description)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		log.Println(err)
+		return nil, err
+	}
+
+	return &author, nil
+}
+
+func (ar *AuthorRepository) SelectAuthorByName(name string) (*model.Author, error) {
+	query := "SELECT id_author, name, description FROM author WHERE name = $1"
+	row := ar.DB.QueryRow(query, name)
+
+	var author model.Author
+	err := row.Scan(&author.IdAuthor, &author.Name, &author.Description)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
@@ -65,14 +82,14 @@ func (ar *AuthorRepository) SelectAuthor(id uuid.UUID) (*model.Author, error) {
 }
 
 func (ar *AuthorRepository) UpdateAuthor(id uuid.UUID, author model.Author) bool {
-	stmt, err := ar.DB.Prepare("UPDATE author SET first_name = $1, last_name = $2, description = $3 WHERE id_author = $4")
+	stmt, err := ar.DB.Prepare("UPDATE author SET name = $1, description = $3 WHERE id_author = $4")
 	if err != nil {
 		log.Println(err)
 		return false
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(author.FirstName, author.LastName, author.Description, id)
+	_, err = stmt.Exec(author.Name, author.Description, id)
 	if err != nil {
 		log.Println(err)
 		return false
