@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"user/model"
+	"user/repository/interfaces"
 
 	"github.com/google/uuid"
 )
@@ -17,9 +18,36 @@ func NewUserRepository(db *sql.DB) *UserRepository {
 	return &UserRepository{DB: db}
 }
 
+<<<<<<< HEAD
 func (br *UserRepository) InsertUser(post model.PostUser) bool {
+=======
+// func (br *UserRepository) SelectUsers() []*model.User {
+// 	query := `
+//         SELECT id_user, private, profil_image, banner_image, birthdate
+//         FROM user;`
+
+// 	rows, err := br.DB.Query(query)
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// 	defer rows.Close()
+
+// 	users := []*model.User{}
+
+// 	for rows.Next() {
+// 		var user model.User
+// 		if err := rows.Scan(&user.IdUser, &user.Private, &user.ProfilImage, &user.BannerImage, &user.Birthday); err != nil {
+// 			log.Fatal(err)
+// 		}
+// 	}
+
+// 	return users
+// }
+
+func (br *UserRepository) InsertUser(user model.User) bool {
+>>>>>>> cc614070cd902714365a79baa1e91c484913acb5
 	_, err := br.DB.Exec("INSERT INTO userBooktime (private, profil_image, banner_image, birthdate) VALUES ($1, $2, $3, $4)",
-		post.Private, post.ProfilImage, post.BannerImage, post.Birthday)
+		user.Private, user.ProfilImage, user.BannerImage, user.Birthday)
 	if err != nil {
 		log.Println(err)
 		return false
@@ -96,3 +124,4 @@ func (ur *UserRepository) UpdateUser(user model.User) bool {
 
 	return true
 }
+var _ interfaces.UserRepositoryInterface = &UserRepository{}
