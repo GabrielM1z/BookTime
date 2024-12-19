@@ -42,7 +42,7 @@ func (a *App) CreateRoutes() {
 	routes.GET(prefix+"/:id", userController.GetUser)
 	routes.POST(prefix, userController.InsertUser)
 	// routes.PUT(prefix+"/:id", userController.UpdateUser)
-	// routes.DELETE(prefix+"/:id", userController.DeleteUser)
+	routes.DELETE(prefix+"/:id", userController.DeleteUser)
 
 	a.Routes = routes
 }

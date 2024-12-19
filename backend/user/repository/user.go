@@ -5,6 +5,8 @@ import (
 	"log"
 
 	"user/model"
+
+	"github.com/google/uuid"
 )
 
 type UserRepository struct {
@@ -48,7 +50,7 @@ func (br *UserRepository) InsertUser(post model.PostUser) bool {
 	return true
 }
 
-func (br *UserRepository) SelectUser(id string) (*model.User, error) {
+func (br *UserRepository) SelectUser(id uuid.UUID) (*model.User, error) {
 	query := `
         SELECT id_user, private, profil_image, banner_image, birthdate
         FROM userBooktime WHERE id_user = $1;`
@@ -66,4 +68,15 @@ func (br *UserRepository) SelectUser(id string) (*model.User, error) {
 	}
 
 	return &user, nil
+}
+
+func (ur *UserRepository) DeleteUser(id uuid.UUID) bool {
+	query := "DELETE FROM user WHERE id_user = $1"
+
+	_, err := ur.DB.Exec(query, id)
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+	return true
 }
