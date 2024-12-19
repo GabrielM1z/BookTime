@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"user/model"
+	"user/repository/interfaces"
 
 	"github.com/google/uuid"
 )
@@ -40,9 +41,9 @@ func NewUserRepository(db *sql.DB) *UserRepository {
 // 	return users
 // }
 
-func (br *UserRepository) InsertUser(post model.PostUser) bool {
+func (br *UserRepository) InsertUser(user model.User) bool {
 	_, err := br.DB.Exec("INSERT INTO userBooktime (private, profil_image, banner_image, birthdate) VALUES ($1, $2, $3, $4)",
-		post.Private, post.ProfilImage, post.BannerImage, post.Birthday)
+		user.Private, user.ProfilImage, user.BannerImage, user.Birthday)
 	if err != nil {
 		log.Println(err)
 		return false
@@ -80,3 +81,5 @@ func (ur *UserRepository) DeleteUser(id uuid.UUID) bool {
 	}
 	return true
 }
+
+var _ interfaces.UserRepositoryInterface = &UserRepository{}

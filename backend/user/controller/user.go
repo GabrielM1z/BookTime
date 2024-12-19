@@ -46,7 +46,7 @@ func (bc *UserController) GetUser(c *gin.Context) {
 // InsertUser implements UserControllerInterface
 func (bc *UserController) InsertUser(c *gin.Context) {
 	db := bc.DB
-	var post model.PostUser
+	var post model.User
 	if err := c.ShouldBindJSON(&post); err == nil {
 		repoUser := repository.NewUserRepository(db)
 		insert := repoUser.InsertUser(post)
