@@ -1,17 +1,17 @@
 meta {
-  name: Get author by name
+  name: Get genre by name
   type: http
   seq: 6
 }
 
 get {
-  url: {{base_book_url}}/authors/name/:name
+  url: {{base_book_url}}/genres/:name
   body: none
   auth: bearer
 }
 
 params:path {
-  name: Isaac Asimov
+  name: Horro
 }
 
 auth:bearer {
