@@ -15,6 +15,8 @@ export default function Etagere({ label, livres, index })
 		'#77dd77',
 		'#84b6f4'
     ]; 
+
+	console.log("livres : ", livres)
 	
 	// on fait une rotation sur les coouleurs
 	const randomindex = index%3;
@@ -27,10 +29,12 @@ export default function Etagere({ label, livres, index })
             </View>
 
             <ScrollView horizontal style={styles.livresContainer}>
-                {livres.map((livre, index) => (
+                {livres.map((livre, index) =>  livre.id_book !== null ? (
                     <LivreEtagere key={index} label={livre.title} cover={livre.url}></LivreEtagere>
-                ))}
+                ) : null
+				)}
             </ScrollView>
+			
 
 		</View>
 	);
