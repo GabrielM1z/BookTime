@@ -23,7 +23,8 @@ export default function TestBtn({})
 
 	const handleSubmit = async () => {
 		try {
-		
+	
+			await bookRepository.add(book1)
 			const result = await bookRepository.getAll()
 			console.log(result);
 			

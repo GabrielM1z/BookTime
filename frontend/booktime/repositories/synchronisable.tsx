@@ -30,6 +30,13 @@ export class Synchronisable {
     
     
             // TODO éxecution des actions dans l'ordre
+
+
+            // TODO recup des isbn des livres
+
+            // TODO comparaison des isbn server et client
+
+            // TODO faire un getBook si il manque des livres
     
         } catch (error) {
             console.error("Erreur lors de la synchronisation :", error);

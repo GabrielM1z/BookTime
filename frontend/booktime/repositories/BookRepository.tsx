@@ -54,16 +54,14 @@ export class SQLiteBookRepository extends Synchronisable implements BookReposito
 		return result ? (result as unknown as BookAllInfos[]) : [];
 	}
 
-	async get(id: string): Promise<BookAllInfos | null> {
-		const statement = await this.db.prepareAsync(
-			'SELECT * FROM book WHERE id_book == $id'
+	async get(id: string): Promise<BookAllInfos | null> 
+	{	
+		const result = await this.db.getFirstAsync<BookAllInfos>(
+			'SELECT * FROM book WHERE id_book == $id',
+			{ $id: id }
 		);
 
-		const result = await statement.executeAsync({
-			$id: id
-		});
-
-		return result ? (result as unknown as BookAllInfos) : null;
+		return result ? result : null;
 	}
 	
 	async add(book: BookAllInfos): Promise<void> {

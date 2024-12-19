@@ -2,14 +2,14 @@ import { StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { Link } from 'expo-router';
 
 // component représentant la COUVERTURE du livre qui est CLIQUABLE
-export default function CoverPressable({ cover }) 
+export default function CoverPressable({ id_book, cover }) 
 {
 	
 	return (
 		<Link push href={{
 			pathname: "/book/[idBook]",
 			params: {
-				idBook: "nononon",
+				idBook: id_book,
 			  }
 		  }} asChild>
 			<TouchableOpacity>
