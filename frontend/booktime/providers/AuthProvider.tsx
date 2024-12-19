@@ -54,6 +54,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     const logOut = async () => {
+        console.log('logOut');
         if (session) {
             await sessionRepository.delete(session.id);
             setSession(null);

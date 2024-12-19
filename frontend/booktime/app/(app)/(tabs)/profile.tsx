@@ -1,9 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { Extrapolation, interpolate, useAnimatedRef, useAnimatedStyle, useScrollViewOffset } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ModalProfileList } from '@/components/ModalProfileList';
+import { ProfileCenter } from '@/components/profileCenter';
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import styles, { headerMaxHeight, headerMinHeight, profileImageMaxSize } from './profile.style';
 
@@ -20,10 +20,6 @@ export default function Profile() {
     const handlePresentModalPress = useCallback(() => {
         bottomSheetRef.current?.present();
     }, []);
-
-    const handleSheetChanges = useCallback((index: number) => {
-        console.log('handleSheetChanges', index);
-      }, []);
 
     const insets = useSafeAreaInsets();
     const verticalPadding = 20;
@@ -128,7 +124,7 @@ export default function Profile() {
 
     return (
         <SafeAreaView style={{ flex: 1, alignItems: 'center' }}>
-            <ModalProfileList ref={bottomSheetRef} onChange={handleSheetChanges} />
+            <ProfileCenter ref={bottomSheetRef} />
             <Animated.View style={[styles.header, headerAnimatedStyles]}>
                 <Animated.Image source={bannerImage} style={[styles.bannerImage, bannerImageAnimatedStyles]} />
                 <Animated.View style={[

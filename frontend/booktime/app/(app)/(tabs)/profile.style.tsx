@@ -24,7 +24,7 @@ export default StyleSheet.create({
         right: 0,
         backgroundColor: Colors.darkGray,
         overflow: 'hidden',
-        zIndex: 10,
+        zIndex: 5,
     },
     innerHeader: {
         flex: 1,
@@ -43,7 +43,7 @@ export default StyleSheet.create({
         height: 40,
         borderRadius: 20,
         backgroundColor: Colors.gray + '30',
-        zIndex: 9999,
+        zIndex: 10,
         alignItems: 'center',
         justifyContent: 'center',
     },

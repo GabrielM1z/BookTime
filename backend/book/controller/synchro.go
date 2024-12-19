@@ -43,7 +43,7 @@ func (bc *synchroController) Synchro(c *gin.Context) {
 			if err != nil {
 				log.Fatalf("Erreur lors du décodage du JSON : %v", err)
 			}
-			required_books = append(required_books, libraryBook.IdBook.String())
+			required_books = append(required_books, libraryBook.IdBook)
 		}
 	}
 
