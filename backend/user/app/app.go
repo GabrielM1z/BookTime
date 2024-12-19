@@ -40,8 +40,9 @@ func (a *App) CreateRoutes() {
 	// Book routes
 	userController := controller.NewUserController(a.DB)
 	routes.GET(prefix+"/:id", userController.GetUser)
+	routes.GET(prefix+"/", userController.GetUsers)
 	routes.POST(prefix, userController.InsertUser)
-	// routes.PUT(prefix+"/:id", userController.UpdateUser)
+	routes.PUT(prefix+"/:id", userController.UpdateUser)
 	routes.DELETE(prefix+"/:id", userController.DeleteUser)
 
 	a.Routes = routes
