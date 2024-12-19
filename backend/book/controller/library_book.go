@@ -44,8 +44,7 @@ func (lc *LibraryBookController) GetLibraryBook(c *gin.Context) {
 		return
 	}
 
-	idBookParam := c.Param("id_book")
-	idBook, err := uuid.Parse(idBookParam)
+	idBook := c.Param("id_book")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "msg": "invalid book ID"})
 		return
@@ -57,7 +56,7 @@ func (lc *LibraryBookController) GetLibraryBook(c *gin.Context) {
 		return
 	}
 
-	if libraryBook.LibraryId != uuid.Nil && libraryBook.IdBook != uuid.Nil {
+	if libraryBook.LibraryId != uuid.Nil {
 		c.JSON(http.StatusOK, gin.H{"status": "success", "data": libraryBook, "msg": "library book retrieved successfully"})
 	} else {
 		c.JSON(http.StatusNotFound, gin.H{"status": "error", "data": nil, "msg": "library book not found"})
@@ -108,8 +107,7 @@ func (lc *LibraryBookController) UpdateLibraryBook(c *gin.Context) {
 		return
 	}
 
-	idBookParam := c.Param("id_book")
-	idBook, err := uuid.Parse(idBookParam)
+	idBook := c.Param("id_book")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid book ID"})
 		return
@@ -142,8 +140,7 @@ func (lc *LibraryBookController) DeleteLibraryBook(c *gin.Context) {
 		return
 	}
 
-	idBookParam := c.Param("id_book")
-	idBook, err := uuid.Parse(idBookParam)
+	idBook := c.Param("id_book")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid book ID"})
 		return

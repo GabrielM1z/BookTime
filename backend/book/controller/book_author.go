@@ -38,13 +38,13 @@ func (bac *BookAuthorController) GetBookAuthor(c *gin.Context) {
 	repoBookAuthor := repository.NewBookAuthorRepository(db)
 
 	idAuthorParam := c.Param("id_author")
-	idBookParam := c.Param("id_book")
+	idBook := c.Param("id_book")
 	idAuthor, err := uuid.Parse(idAuthorParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "msg": "invalid book author ID"})
 		return
 	}
-	idBook, err := uuid.Parse(idBookParam)
+
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "msg": "invalid book author ID"})
 		return
@@ -66,7 +66,7 @@ func (bac *BookAuthorController) GetBookAuthor(c *gin.Context) {
 // InsertBookAuthor ajoute une nouvelle relation entre un livre et un auteur
 func (bac *BookAuthorController) InsertBookAuthor(c *gin.Context) {
 	db := bac.DB
-	var post model.PostBookAuthor
+	var post model.BookAuthor
 	if err := c.ShouldBindJSON(&post); err == nil {
 		repoBookAuthor := repository.NewBookAuthorRepository(db)
 		insert := repoBookAuthor.InsertBookAuthor(post)
@@ -84,13 +84,13 @@ func (bac *BookAuthorController) InsertBookAuthor(c *gin.Context) {
 func (bac *BookAuthorController) DeleteBookAuthor(c *gin.Context) {
 	db := bac.DB
 	idAuthorParam := c.Param("id_author")
-	idBookParam := c.Param("id_book")
+	idBook := c.Param("id_book")
 	idAuthor, err := uuid.Parse(idAuthorParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "msg": "invalid book author ID"})
 		return
 	}
-	idBook, err := uuid.Parse(idBookParam)
+
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "msg": "invalid book author ID"})
 		return

@@ -1,23 +1,27 @@
 package service
 
 import (
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 	"strconv"
 
 	"book/model"
+	"book/repository"
 	"book/service/interfaces"
 )
 
 type SearchService struct {
+	DB     *sql.DB
 	ApiKey string
 }
 
-func NewSearchService(apiKey string) *SearchService {
-	return &SearchService{ApiKey: apiKey}
+func NewSearchService(apiKey string, db *sql.DB) *SearchService {
+	return &SearchService{ApiKey: apiKey, DB: db}
 }
 
 // Function to check if a book with the same ID exists
@@ -28,6 +32,93 @@ func bookExists(books []model.BookItem, id string) bool {
 		}
 	}
 	return false
+}
+
+func (bs *SearchService) SearchBookByISBN(isbn string) (*model.Book, error) {
+	db := bs.DB
+	baseURL := "https://www.googleapis.com/books/v1/volumes"
+	params := url.Values{}
+
+	maxResults := "1"
+
+	params.Add("q", "isbn:"+isbn)
+	params.Add("maxResults", maxResults)
+	params.Add("key", bs.ApiKey)
+
+	apiURL := fmt.Sprintf("%s?%s", baseURL, params.Encode())
+
+	resp, err := http.Get(apiURL)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.New("API request : ' " + apiURL + " 'failed with status: " + strconv.Itoa(resp.StatusCode))
+	}
+
+	var apiResponse model.BookAPIResponse
+	if err := json.NewDecoder(resp.Body).Decode(&apiResponse); err != nil {
+		return nil, err
+	}
+
+	if len(apiResponse.Items) == 0 {
+		return nil, fmt.Errorf("no books found for ISBN %s", isbn)
+	}
+	respBook := apiResponse.Items[0].VolumeInfo
+
+	var book model.Book
+	var authors []model.Author
+	var genres []model.Genre
+	for _, authorName := range respBook.Authors {
+		author, err := NewSearchAuthorService(db).GetAuthorByName(authorName)
+		if err != nil {
+			log.Printf("Error fetching author %s: %v", authorName, err)
+			continue
+		}
+		authors = append(authors, *author)
+	}
+
+	log.Println("for _, genreName := range respBook.Categories")
+	log.Println("respBook.Categories : ")
+	log.Println(respBook.Categories)
+	for _, genreName := range respBook.Categories {
+		log.Println("genreName : ")
+		log.Println(genreName)
+
+		var genre model.Genre
+		genre, err = repository.NewGenreRepository(bs.DB).SelectGenreByName(genreName)
+
+		log.Println("		genre, err = repository.NewGenreRepository(bs.DB).SelectGenreByName(genreName)")
+		log.Println("genre")
+		log.Println(genre)
+
+		if genre.Name == "" {
+			repository.NewGenreRepository(bs.DB).InsertGenre(model.PostGenre{Name: genreName})
+			genre, err = repository.NewGenreRepository(bs.DB).SelectGenreByName(genreName)
+			log.Println("INSERT")
+			log.Println("		genre, err = repository.NewGenreRepository(bs.DB).SelectGenreByName(genreName)")
+			log.Println("genre")
+			log.Println(genre)
+		}
+		genres = append(genres, genre)
+	}
+
+	book = model.Book{
+		IdBook:          isbn,
+		Title:           respBook.Title,
+		Description:     respBook.Description,
+		Format:          "BOOK",
+		Publisher:       respBook.Publisher,
+		PublicationDate: respBook.PublishedDate,
+		PageNumber:      uint(respBook.PageCount),
+		Language:        respBook.Language,
+		CoverImageUrl:   respBook.ImageLinks.Thumbnail,
+		Authors:         authors,
+		Genres:          genres,
+	}
+
+	return &book, nil
 }
 
 func (bs *SearchService) SearchBooks(startIndex, query, title, author, genre string) ([]model.FormattedBookSearch, error) {

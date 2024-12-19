@@ -41,8 +41,8 @@ func (a *App) CreateRoutes() {
 
 	//Service & Api
 	apiKey := os.Getenv("GOOGLE_BOOKS_API_KEY")
-	bookSearchService := service.NewSearchService(apiKey)
-	// bookSearchAuthorService := service.NewSearchAuthorService()
+	bookSearchService := service.NewSearchService(apiKey, a.DB)
+	//bookSearchAuthorService := service.NewSearchAuthorService(a.DB)
 	bookShopsService := service.NewShopsService(apiKey)
 	bookSynchroService := service.NewSynchroService(a.DB)
 	prefix := "/books"
@@ -87,6 +87,7 @@ func (a *App) CreateRoutes() {
 	// Genre routes
 	genreController := controller.NewGenreController(a.DB)
 	routes.GET(prefix+"/genres", genreController.GetGenres)
+	routes.GET(prefix+"/genres/name/:name", genreController.GetGenreByName)
 	routes.GET(prefix+"/genres/:id", genreController.GetGenre)
 	routes.POST(prefix+"/genres", genreController.InsertGenre)
 	routes.PUT(prefix+"/genres/:id", genreController.UpdateGenre)

@@ -41,7 +41,7 @@ func (lbr *LibraryBookRepository) SelectLibraryBooks() []model.LibraryBook {
 }
 
 // SelectLibraryBook - Récupère un lien bibliothèque-livre spécifique
-func (lbr *LibraryBookRepository) SelectLibraryBook(idLibrary uuid.UUID, idBook uuid.UUID) (model.LibraryBook, error) {
+func (lbr *LibraryBookRepository) SelectLibraryBook(idLibrary uuid.UUID, idBook string) (model.LibraryBook, error) {
 	var libraryBook model.LibraryBook
 	stmt, err := lbr.DB.Prepare("SELECT * FROM library_book WHERE id_library = $1 AND id_book = $2")
 	if err != nil {
@@ -78,15 +78,15 @@ func (lbr *LibraryBookRepository) SelectLibraryBookByLibrary(idLibrary string) [
 	defer rows.Close()
 
 	books := []*model.Book{}
-	IDFormat := uuid.New()
+	//IDFormat := uuid.New()
 
 	for rows.Next() {
 		var book model.Book
-		if err := rows.Scan(&book.IdBook, &book.Title, &book.Description, &IDFormat, &book.Publisher, &book.PublicationDate, &book.PageNumber, &book.Language, &book.CoverImageUrl); err != nil {
+		if err := rows.Scan(&book.IdBook, &book.Title, &book.Description, &book.Format, &book.Publisher, &book.PublicationDate, &book.PageNumber, &book.Language, &book.CoverImageUrl); err != nil {
 			log.Fatal(err)
 		}
-		format, _ := NewFormatRepository(lbr.DB).SelectFormat(IDFormat)
-		book.Format = format
+		//format, _ := NewFormatRepository(lbr.DB).SelectFormat(IDFormat)
+		book.Format = "BOOK"
 		books = append(books, &book)
 	}
 
@@ -124,7 +124,7 @@ func (lbr *LibraryBookRepository) InsertLibraryBook(post model.LibraryBook, idUs
 }
 
 // UpdateLibraryBook - Met à jour un lien bibliothèque-livre
-func (r *LibraryBookRepository) UpdateLibraryBook(idLibrary, idBook uuid.UUID, libraryBook model.LibraryBook) bool {
+func (r *LibraryBookRepository) UpdateLibraryBook(idLibrary uuid.UUID, idBook string, libraryBook model.LibraryBook) bool {
 	query := `UPDATE library_book SET id_library = $1, id_book = $2 WHERE id_library = $3 AND id_book = $4`
 	_, err := r.DB.Exec(query, libraryBook.LibraryId, libraryBook.IdBook, idLibrary, idBook)
 	if err != nil {
@@ -135,7 +135,7 @@ func (r *LibraryBookRepository) UpdateLibraryBook(idLibrary, idBook uuid.UUID, l
 }
 
 // DeleteLibraryBook - Supprime un lien bibliothèque-livre
-func (lbr *LibraryBookRepository) DeleteLibraryBook(idLibrary, idBook uuid.UUID, idUser uuid.UUID) bool {
+func (lbr *LibraryBookRepository) DeleteLibraryBook(idLibrary uuid.UUID, idBook string, idUser uuid.UUID) bool {
 	stmt, err := lbr.DB.Prepare("DELETE FROM library_book WHERE id_library = $1 AND id_book = $2")
 	if err != nil {
 		log.Println(err)

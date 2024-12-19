@@ -67,7 +67,7 @@ func (ar *StateRepository) SelectStates() []model.State {
 	return states
 }
 
-func (sr StateRepository) SelectStateByUserAndBook(idUser uuid.UUID, idBook uuid.UUID) model.State {
+func (sr StateRepository) SelectStateByUserAndBook(idUser uuid.UUID, idBook string) model.State {
 	log.Println("SelectStateByUserAndBook with : ")
 	log.Println("idUser")
 	log.Println(idUser)
@@ -90,7 +90,7 @@ func (sr StateRepository) SelectStateByUserAndBook(idUser uuid.UUID, idBook uuid
 	return states[0]
 }
 
-func (sr *StateRepository) UpdateState(idUser uuid.UUID, idBook uuid.UUID, state model.State) bool {
+func (sr *StateRepository) UpdateState(idUser uuid.UUID, idBook string, state model.State) bool {
 	log.Println("REPOSITORY : UpdateState")
 
 	baseState := sr.SelectStateByUserAndBook(idUser, idBook)
@@ -169,14 +169,14 @@ func (sr *StateRepository) UpdateState(idUser uuid.UUID, idBook uuid.UUID, state
 		}
 
 		actionMap["id_user"] = idUser.String()
-		actionMap["id_book"] = idBook.String()
+		actionMap["id_book"] = idBook
 
 		return sr.LogAction(idUser, "STATE", "UPDATE", actionMap)
 	}
 	return true
 }
 
-func (sr *StateRepository) DeleteState(idUser uuid.UUID, idBook uuid.UUID) bool {
+func (sr *StateRepository) DeleteState(idUser uuid.UUID, idBook string) bool {
 	query := "DELETE FROM state WHERE id_user = $1 AND id_book = $2"
 	_, err := sr.DB.Exec(query, idUser, idBook)
 	if err != nil {

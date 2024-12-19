@@ -3,10 +3,12 @@ package controller
 import (
 	"database/sql"
 	"net/http"
+	"os"
 
 	"book/controller/interfaces"
 	"book/model"
 	"book/repository"
+	"book/service"
 
 	"github.com/gin-gonic/gin"
 )
@@ -43,14 +45,28 @@ func (bc *BookController) GetBook(c *gin.Context) {
 		return
 	}
 
+	//Search the book with ibsn in google book & add it to our database
 	if book == nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Book not found"})
-		return
-	}
+		apiKey := os.Getenv("GOOGLE_BOOKS_API_KEY")
+		searchService := service.NewSearchService(apiKey, bc.DB)
+		book, err = searchService.SearchBookByISBN(idParam)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		repoBook.InsertBook(*book)
 
-	// bookAuthor :=
-	// repoAuthor := repository.NewAuthorRepository(db)
-	// author, errors := repoAuthor.SelectAuthorByName(bookAuthor)
+		//Add new book-author when book is added to bdd
+		repoBookAuthor := repository.NewBookAuthorRepository(db)
+		for _, author := range book.Authors {
+			var bookAuthor = model.BookAuthor{
+				IdAuthor: author.IdAuthor,
+				IdBook:   book.IdBook,
+			}
+			repoBookAuthor.InsertBookAuthor(bookAuthor)
+		}
+
+	}
 
 	// if errors != nil {
 	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve book"})
@@ -68,7 +84,7 @@ func (bc *BookController) GetBook(c *gin.Context) {
 // InsertBook implements BookControllerInterface
 func (bc *BookController) InsertBook(c *gin.Context) {
 	db := bc.DB
-	var post model.PostBook
+	var post model.Book
 	if err := c.ShouldBindJSON(&post); err == nil {
 		repoBook := repository.NewBookRepository(db)
 		insert := repoBook.InsertBook(post)

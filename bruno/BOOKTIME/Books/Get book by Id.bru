@@ -5,9 +5,13 @@ meta {
 }
 
 get {
-  url: {{base_book_url}}/books/2
+  url: {{base_book_url}}/books/:isbn
   body: none
   auth: bearer
+}
+
+params:path {
+  isbn: 9782701178165
 }
 
 auth:bearer {
