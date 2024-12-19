@@ -1,21 +1,21 @@
 meta {
-  name: Get search book
+  name: Get author by name
   type: http
-  seq: 1
+  seq: 6
 }
 
 get {
-  url: {{base_book_url}}/search?query=école&startIndex=10
+  url: {{base_book_url}}/authors/name/:name
   body: none
-  auth: none
+  auth: bearer
 }
 
-params:query {
-  query: école
-  startIndex: 10
-  ~genre: fiction
-  ~title: Harry Potter
-  ~author: J.K.
+params:path {
+  name: Jennette_McCurdy
+}
+
+auth:bearer {
+  token: {{access_token}}
 }
 
 tests {

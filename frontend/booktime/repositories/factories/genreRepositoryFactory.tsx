@@ -1,8 +1,8 @@
 import { Platform } from "react-native";
-import { APIGenreRepository, GenreRepositoryProps, SQLiteGenreRepository } from "../GenreRepository";
+import { APIGenreRepository, GenreRepository, SQLiteGenreRepository } from "../GenreRepository";
 
 
-export const genreRepositoryFactory = (): GenreRepositoryProps => {
+export const genreRepositoryFactory = (): GenreRepository => {
     if (Platform.OS === 'web') {
         return new APIGenreRepository();
     }

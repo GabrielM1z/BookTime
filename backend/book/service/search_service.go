@@ -30,7 +30,7 @@ func bookExists(books []model.BookItem, id string) bool {
 	return false
 }
 
-func (bs *SearchService) SearchBooks(startIndex, query, title, author, genre string) ([]model.SimplifiedBook, error) {
+func (bs *SearchService) SearchBooks(startIndex, query, title, author, genre string) ([]model.FormattedBookSearch, error) {
 	baseURL := "https://www.googleapis.com/books/v1/volumes"
 	params := url.Values{}
 	searchQuery := query
@@ -46,10 +46,12 @@ func (bs *SearchService) SearchBooks(startIndex, query, title, author, genre str
 	}
 
 	maxResults := "10"
+	fields := "items(volumeInfo/title, volumeInfo/authors, volumeInfo/industryIdentifiers, volumeInfo/imageLinks/thumbnail)"
 
 	params.Add("q", searchQuery)
 	params.Add("startIndex", startIndex)
 	params.Add("maxResults", maxResults)
+	params.Add("fields", fields)
 	params.Add("key", bs.ApiKey)
 
 	apiURL := fmt.Sprintf("%s?%s", baseURL, params.Encode())
@@ -71,32 +73,26 @@ func (bs *SearchService) SearchBooks(startIndex, query, title, author, genre str
 		return nil, err
 	}
 
-	var simplifiedBooks []model.SimplifiedBook
+	var formattedBookSearchList []model.FormattedBookSearch
 	for _, item := range apiResponse.Items {
-		simplifiedBook := model.SimplifiedBook{
-			Title:         item.VolumeInfo.Title,
-			Authors:       item.VolumeInfo.Authors,
-			Categories:    item.VolumeInfo.Categories,
-			Publisher:     item.VolumeInfo.Publisher,
-			PublishedDate: item.VolumeInfo.PublishedDate,
-			Description:   item.VolumeInfo.Description,
-			PageCount:     item.VolumeInfo.PageCount,
-			Language:      item.VolumeInfo.Language,
-			Thumbnail:     item.VolumeInfo.ImageLinks.Thumbnail,
+		formattedBookSearch := model.FormattedBookSearch{
+			Title:     item.VolumeInfo.Title,
+			Authors:   item.VolumeInfo.Authors,
+			Thumbnail: item.VolumeInfo.ImageLinks.Thumbnail,
 		}
 
 		// Ajouter ISBN10
 		for _, id := range item.VolumeInfo.IndustryIdentifiers {
 			if id.Type == "ISBN_13" {
-				simplifiedBook.ISBN13 = id.Identifier
+				formattedBookSearch.ISBN13 = id.Identifier
 				break
 			}
 		}
 
-		simplifiedBooks = append(simplifiedBooks, simplifiedBook)
+		formattedBookSearchList = append(formattedBookSearchList, formattedBookSearch)
 	}
 
-	return simplifiedBooks, nil
+	return formattedBookSearchList, nil
 }
 
 var _ interfaces.SearchServiceInterface = &SearchService{}

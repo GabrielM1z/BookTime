@@ -13,28 +13,27 @@ export default function AppLayout() {
         return <Text>Chargement...</Text>;
     }
 
-    if (!session && !session?.isGuest) {
-        return <Redirect href="/sign-in" />;
+    if (!session) {
+        return <Redirect href="/SignIn" />;
     }
 
     return (
         <Stack>
 
-            <Stack.Screen 
-                name='(tabs)' 
+            <Stack.Screen
+                name='(tabs)'
                 options={{ headerShown: false }}
             />
 
-            <Stack.Screen 
+            <Stack.Screen
                 name='author/[idAuthor]'
                 options={{ headerShown: false }}
             />
 
-            <Stack.Screen 
+            <Stack.Screen
                 name='book/[idBook]'
                 options={{ headerShown: false }}
             />
-
         </Stack>
     );
 }

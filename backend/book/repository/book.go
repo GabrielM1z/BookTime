@@ -52,7 +52,7 @@ func (br *BookRepository) SelectBooks() []*model.Book {
 
 func (br *BookRepository) SelectAuthorsByBookID(bookID string) []model.Author {
 	query := `
-		SELECT a.id_author, a.first_name, a.last_name, a.description as author_desc
+		SELECT a.id_author, a.name, a.description as author_desc
 		FROM author a
 		JOIN book_author ba ON a.id_author = ba.id_author
 		WHERE ba.id_book = $1;`
@@ -66,7 +66,7 @@ func (br *BookRepository) SelectAuthorsByBookID(bookID string) []model.Author {
 	authors := []model.Author{}
 	for rows.Next() {
 		var author model.Author
-		if err := rows.Scan(&author.IdAuthor, &author.FirstName, &author.LastName, &author.Description); err != nil {
+		if err := rows.Scan(&author.IdAuthor, &author.Name, &author.Description); err != nil {
 			log.Fatal(err)
 		}
 		authors = append(authors, author)

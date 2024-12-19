@@ -76,7 +76,7 @@ export const authenticate = async (username: string, password: string): Promise<
         new URLSearchParams({
             grant_type: 'password',
             client_id: keycloakClientId,
-            client_secret: keycloakClientSecret,
+            client_secret: "xIkFqIPnNTBKO9p5OUz0hiyjSThgfo1t",
             username: username,
             password: password,
             audience: 'gateway-client',

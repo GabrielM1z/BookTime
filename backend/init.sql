@@ -23,8 +23,7 @@ CREATE TABLE IF NOT EXISTS formats (
 -- Table AUTHOR
 CREATE TABLE IF NOT EXISTS author (
     id_author UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    first_name VARCHAR(100) NOT NULL,
-    last_name VARCHAR(100) NOT NULL,
+    name VARCHAR(100) NOT NULL UNIQUE,
     description TEXT
 );
 

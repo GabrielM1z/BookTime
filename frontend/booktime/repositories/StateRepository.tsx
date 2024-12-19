@@ -5,13 +5,13 @@ import { v4 as uuidv4 } from 'uuid';
 
 
 
-export interface StateRepositoryProps {
+export interface StateRepository {
     getAll: () => Promise<State[]>;
     get: (id: string) => Promise<State | null>;
     add: (state: State) => Promise<void>;
 }
 
-export class SQLiteStateRepository extends Synchronisable implements StateRepositoryProps {
+export class SQLiteStateRepository extends Synchronisable implements StateRepository {
     private db: SQLiteDatabase;
     private api: APIStateRepository;
 
@@ -58,7 +58,7 @@ export class SQLiteStateRepository extends Synchronisable implements StateReposi
 }
 
 
-export class APIStateRepository implements StateRepositoryProps {
+export class APIStateRepository implements StateRepository {
     async getAll(): Promise<State[]> {
         return [];
     }
