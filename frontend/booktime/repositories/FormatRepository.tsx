@@ -1,6 +1,8 @@
 import { Format } from "@/models/Format";
 import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite';
 import { Synchronisable } from './synchronisable';
+import { v4 as uuidv4 } from 'uuid';
+
 
 
 export interface FormatRepository {
@@ -40,10 +42,11 @@ export class SQLiteFormatRepository extends Synchronisable implements FormatRepo
 
     async add(format: Format): Promise<void> {
         const statement = await this.db.prepareAsync(
-            'INSERT INTO format (name) VALUES ($name);'
+            'INSERT INTO format (id_format, name) VALUES ($id_format, $name);'
         );
 
         await statement.executeAsync({
+            $id_format: uuidv4(),
             $name: format.name
         });
     }

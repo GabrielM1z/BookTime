@@ -114,11 +114,11 @@ CREATE DATABASE user_db;
 -- Table USER
 -- A refaire ==> mauvais format (Matthieu <3)
 CREATE TABLE IF NOT EXISTS userBooktime (
-    id_user SERIAL PRIMARY KEY,
-    id_keycloak VARCHAR(255) UNIQUE,
-    user_name VARCHAR(255) UNIQUE NOT NULL,
-    first_name VARCHAR(255) NOT NULL,
-    last_name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    birthdate DATE NOT NULL
+    id_user UUID,
+    private BOOLEAN UNIQUE,
+    profil_image VARCHAR(255) UNIQUE NOT NULL,
+    banner_image VARCHAR(255) NOT NULL,
+    birthdate DATE NOT NULL,
+    PRIMARY KEY (id_user)
+
 );

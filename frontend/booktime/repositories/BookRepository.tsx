@@ -1,23 +1,105 @@
 import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite';
 import { Synchronisable } from './synchronisable';
+import { v4 as uuidv4 } from 'uuid';
+import { Book, BookAllInfos } from '@/models/Book';
+import { LibraryWithBooks } from '@/models/Library';
 
 
-export interface BookRepository {
-
+export interface BookRepositoryProps {
+	getAll: () => Promise<BookAllInfos[]>;
+	getAllFromLib: (id_lib: string) => Promise<BookAllInfos[]> 
+	get: (id: string) => Promise<BookAllInfos | null>;
+	add: (state: BookAllInfos) => Promise<void>;
 }
 
-export class SQLiteBookRepository extends Synchronisable implements BookRepository {
-    private db: SQLiteDatabase;
-    private api: APIBookRepository;
+export class SQLiteBookRepository extends Synchronisable implements BookRepositoryProps {
+	private db: SQLiteDatabase;
+	private api: APIBookRepository;
 
-    constructor() {
-        super();
-        this.db = useSQLiteContext();
-        this.api = new APIBookRepository();
-    }
+	constructor() {
+		super();
+		this.db = useSQLiteContext();
+		this.api = new APIBookRepository();
+	}
 
+	async getAll(): Promise<BookAllInfos[]> {
+		let allRows = await this.db.getAllAsync<BookAllInfos>(
+			'SELECT * FROM book'
+		);
+		return allRows;
+	}
+
+	async getAllFromLib(id_library: string): Promise<BookAllInfos[]> {
+
+		const statement = await this.db.prepareAsync(
+			'SELECT *' + 
+			'FROM book ' + 
+			'JOIN library_book ON book.id_book = library_book.id_library ' +
+			'JOIN library ON library_book.id_book = library.id_library' +
+			'WHERE library_book.id_library == $id_library '
+		);
+
+		const result = await statement.executeAsync({
+			$id_library: id_library
+		});
+
+		const libraryWithBooks: LibraryWithBooks = {
+			id: '',
+			name: '',
+			books: [],
+		};
+
+		console.log(result)
+
+		return result ? (result as unknown as BookAllInfos[]) : [];
+	}
+
+	async get(id: string): Promise<BookAllInfos | null> {
+		const statement = await this.db.prepareAsync(
+			'SELECT * FROM book WHERE id_book == $id'
+		);
+
+		const result = await statement.executeAsync({
+			$id: id
+		});
+
+		return result ? (result as unknown as BookAllInfos) : null;
+	}
+	
+	async add(book: BookAllInfos): Promise<void> {
+		const statement = await this.db.prepareAsync(
+			'INSERT INTO book (id_book, title, description, publisher, publication_date, page_number, language, cover_image_url) VALUES ($id_book, $title, $description, $publisher, $publication_date, $page_number, $language, $cover_image_url);'
+		);
+
+		await statement.executeAsync({
+			$id_book: book.id_book,
+			$title: book.title,
+			$description: book.description,
+			$publisher: book.publisher,
+			$publication_date: book.publication_date,
+			$page_number: book.page_number,
+			$language: book.language,
+			$cover_image_url: book.cover_image_url,
+		});
+	}
 }
 
-export class APIBookRepository implements BookRepository {
+export class APIBookRepository implements BookRepositoryProps {
+	
+	async getAll(): Promise<BookAllInfos[]> {
+		return [];
+	}
+
+	async getAllFromLib(): Promise<BookAllInfos[]> {
+		return [];
+	}
+
+	async get(id: string): Promise<BookAllInfos | null> {
+		return null;
+	}
+
+	async add(book: BookAllInfos): Promise<void> {
+		return;
+	}
 
 }
