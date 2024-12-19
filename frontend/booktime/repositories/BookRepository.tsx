@@ -2,10 +2,12 @@ import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite';
 import { Synchronisable } from './synchronisable';
 import { v4 as uuidv4 } from 'uuid';
 import { Book, BookAllInfos } from '@/models/Book';
+import { LibraryWithBooks } from '@/models/Library';
 
 
 export interface BookRepositoryProps {
 	getAll: () => Promise<BookAllInfos[]>;
+	getAllFromLib: (id_lib: string) => Promise<BookAllInfos[]> 
 	get: (id: string) => Promise<BookAllInfos | null>;
 	add: (state: BookAllInfos) => Promise<void>;
 }
@@ -27,6 +29,31 @@ export class SQLiteBookRepository extends Synchronisable implements BookReposito
 		return allRows;
 	}
 
+	async getAllFromLib(id_library: string): Promise<BookAllInfos[]> {
+
+		const statement = await this.db.prepareAsync(
+			'SELECT *' + 
+			'FROM book ' + 
+			'JOIN library_book ON book.id_book = library_book.id_library ' +
+			'JOIN library ON library_book.id_book = library.id_library' +
+			'WHERE library_book.id_library == $id_library '
+		);
+
+		const result = await statement.executeAsync({
+			$id_library: id_library
+		});
+
+		const libraryWithBooks: LibraryWithBooks = {
+			id: '',
+			name: '',
+			books: [],
+		};
+
+		console.log(result)
+
+		return result ? (result as unknown as BookAllInfos[]) : [];
+	}
+
 	async get(id: string): Promise<BookAllInfos | null> {
 		const statement = await this.db.prepareAsync(
 			'SELECT * FROM book WHERE id_book == $id'
@@ -41,14 +68,13 @@ export class SQLiteBookRepository extends Synchronisable implements BookReposito
 	
 	async add(book: BookAllInfos): Promise<void> {
 		const statement = await this.db.prepareAsync(
-			'INSERT INTO book (id_book, title, description, id_format, publisher, publication_date, page_number, language, cover_image_url) VALUES ($id_book, $title, $description, $id_format, $publisher, $publication_date, $page_number, $language, $cover_image_url);'
+			'INSERT INTO book (id_book, title, description, publisher, publication_date, page_number, language, cover_image_url) VALUES ($id_book, $title, $description, $publisher, $publication_date, $page_number, $language, $cover_image_url);'
 		);
 
 		await statement.executeAsync({
 			$id_book: book.id_book,
 			$title: book.title,
 			$description: book.description,
-			$id_format: book.id_format,
 			$publisher: book.publisher,
 			$publication_date: book.publication_date,
 			$page_number: book.page_number,
@@ -61,6 +87,10 @@ export class SQLiteBookRepository extends Synchronisable implements BookReposito
 export class APIBookRepository implements BookRepositoryProps {
 	
 	async getAll(): Promise<BookAllInfos[]> {
+		return [];
+	}
+
+	async getAllFromLib(): Promise<BookAllInfos[]> {
 		return [];
 	}
 

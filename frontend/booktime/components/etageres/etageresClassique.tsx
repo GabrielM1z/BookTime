@@ -3,6 +3,7 @@ import Etagere from '@/components/Etagere';
 import NewEtagere from '@/components/NewEtagere';
 import React, { useEffect, useState } from 'react';
 import { useRepository } from '@/hooks/useRepository';
+import TestBtn from '@/components/TestBtn';
 
 // import des images
 const cover1 = require('@/assets/images/logo_refait.png');
@@ -56,6 +57,7 @@ export default function pageEtageres() {
     return (
 		<ScrollView style={styles.etagereContainer}>
 			<NewEtagere onAddEtagere={handleAddEtagere}></NewEtagere>
+            <TestBtn></TestBtn>
 			{etageres.map((etagere, index) => (
 				<Etagere key={index} index={index} label={etagere.name} livres={books}></Etagere>
 			))}

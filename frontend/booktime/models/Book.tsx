@@ -30,7 +30,6 @@ export interface BookAllInfos {
 	id_book : string;
 	title : string;
 	description : string;
-	id_format : string;
 	publisher : string;
 	publication_date : string;
 	page_number : number;

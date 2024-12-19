@@ -95,13 +95,11 @@ const initBook = async (db: SQLiteDatabase) => {
 				id_book VARCHAR(13) PRIMARY KEY,
 				title VARCHAR(255) NOT NULL,
 				description TEXT,
-				id_format TEXT,
 				publisher VARCHAR(255),
 				publication_date DATE,
 				page_number INT,
 				language VARCHAR(50),
-				cover_image_url VARCHAR(255),
-				FOREIGN KEY (id_format) REFERENCES formats(id_format) ON DELETE CASCADE
+				cover_image_url VARCHAR(255)
 			);
 		`);
 		console.log('book initialized successfully');
