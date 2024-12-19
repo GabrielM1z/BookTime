@@ -7,7 +7,7 @@ import (
 )
 
 type BookGenreRepositoryInterface interface {
-	InsertBookGenre(post model.PostBookGenre) bool
+	InsertBookGenre(post model.BookGenre) bool
 	SelectBookGenres() []model.BookGenre
 	SelectBookGenre(idGenre uuid.UUID, idBook uuid.UUID) (model.BookGenre, error)
 	DeleteBookGenre(idGenre uuid.UUID, idBook uuid.UUID) bool

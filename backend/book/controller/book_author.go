@@ -66,7 +66,7 @@ func (bac *BookAuthorController) GetBookAuthor(c *gin.Context) {
 // InsertBookAuthor ajoute une nouvelle relation entre un livre et un auteur
 func (bac *BookAuthorController) InsertBookAuthor(c *gin.Context) {
 	db := bac.DB
-	var post model.PostBookAuthor
+	var post model.BookAuthor
 	if err := c.ShouldBindJSON(&post); err == nil {
 		repoBookAuthor := repository.NewBookAuthorRepository(db)
 		insert := repoBookAuthor.InsertBookAuthor(post)

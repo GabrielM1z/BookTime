@@ -66,7 +66,7 @@ func (bgc *BookGenreController) GetBookGenre(c *gin.Context) {
 // InsertBookGenre ajoute une nouvelle relation entre un livre et un genre
 func (bgc *BookGenreController) InsertBookGenre(c *gin.Context) {
 	db := bgc.DB
-	var post model.PostBookGenre
+	var post model.BookGenre
 	if err := c.ShouldBindJSON(&post); err == nil {
 		repoBookGenre := repository.NewBookGenreRepository(db)
 		insert := repoBookGenre.InsertBookGenre(post)

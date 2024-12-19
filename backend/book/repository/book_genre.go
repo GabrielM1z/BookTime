@@ -18,7 +18,7 @@ func NewBookGenreRepository(db *sql.DB) *BookGenreRepository {
 }
 
 // InsertBookGenre insère une relation entre un livre et un genre
-func (repo *BookGenreRepository) InsertBookGenre(post model.PostBookGenre) bool {
+func (repo *BookGenreRepository) InsertBookGenre(post model.BookGenre) bool {
 	query := "INSERT INTO book_genre (id_genre, id_book) VALUES ($1, $2)"
 	_, err := repo.DB.Exec(query, post.IdGenre, post.IdBook)
 	if err != nil {

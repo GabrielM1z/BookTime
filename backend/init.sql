@@ -6,7 +6,7 @@ CREATE DATABASE book_db;
 
 \connect book_db;
 
--- Activer l'extension pgcrypto si ce n'est pas déjà fait
+-- Activer extension pgcrypto si cest pas déjà fait
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- Table LIBRARY
@@ -43,8 +43,8 @@ CREATE TABLE IF NOT EXISTS book (
     publication_date DATE,
     page_number INT,
     language VARCHAR(50),
-    cover_image_url VARCHAR(255),
-    FOREIGN KEY (id_format) REFERENCES formats(id_format) ON DELETE CASCADE
+    cover_image_url VARCHAR(255)
+    --FOREIGN KEY (id_format) REFERENCES formats(id_format) ON DELETE CASCADE
 );
 
 -- Table BOOK_AUTHOR (Many-to-Many relation between BOOK and AUTHOR)

@@ -18,7 +18,7 @@ func NewBookAuthorRepository(db *sql.DB) *BookAuthorRepository {
 }
 
 // InsertBookAuthor insère une relation entre un livre et un auteur
-func (repo *BookAuthorRepository) InsertBookAuthor(post model.PostBookAuthor) bool {
+func (repo *BookAuthorRepository) InsertBookAuthor(post model.BookAuthor) bool {
 	query := "INSERT INTO book_author (id_author, id_book) VALUES ($1, $2)"
 	_, err := repo.DB.Exec(query, post.IdAuthor, post.IdBook)
 	if err != nil {

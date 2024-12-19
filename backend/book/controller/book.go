@@ -45,6 +45,7 @@ func (bc *BookController) GetBook(c *gin.Context) {
 		return
 	}
 
+	//Search the book with ibsn in google book & add it to our database
 	if book == nil {
 		apiKey := os.Getenv("GOOGLE_BOOKS_API_KEY")
 		searchService := service.NewSearchService(apiKey, bc.DB)
@@ -53,10 +54,19 @@ func (bc *BookController) GetBook(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
+		repoBook.InsertBook(*book)
+
+		//Add new book-author when book is added to bdd
+		repoBookAuthor := repository.NewBookAuthorRepository(db)
+		for _, author := range book.Authors {
+			var bookAuthor = model.BookAuthor{
+				IdAuthor: author.IdAuthor,
+				IdBook:   book.IdBook,
+			}
+			repoBookAuthor.InsertBookAuthor(bookAuthor)
+		}
+
 	}
-	
-	// repoAuthor := repository.NewAuthorRepository(db)
-	// author, errors := repoAuthor.SelectAuthorByName(bookAuthor)
 
 	// if errors != nil {
 	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve book"})
@@ -74,7 +84,7 @@ func (bc *BookController) GetBook(c *gin.Context) {
 // InsertBook implements BookControllerInterface
 func (bc *BookController) InsertBook(c *gin.Context) {
 	db := bc.DB
-	var post model.PostBook
+	var post model.Book
 	if err := c.ShouldBindJSON(&post); err == nil {
 		repoBook := repository.NewBookRepository(db)
 		insert := repoBook.InsertBook(post)
