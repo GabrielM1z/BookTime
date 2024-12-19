@@ -42,6 +42,7 @@ func (a *App) CreateRoutes() {
 	//Service & Api
 	apiKey := os.Getenv("GOOGLE_BOOKS_API_KEY")
 	bookSearchService := service.NewSearchService(apiKey)
+	// bookSearchAuthorService := service.NewSearchAuthorService()
 	bookShopsService := service.NewShopsService(apiKey)
 	bookSynchroService := service.NewSynchroService(a.DB)
 	prefix := "/books"
@@ -70,6 +71,7 @@ func (a *App) CreateRoutes() {
 	authorController := controller.NewAuthorController(a.DB)
 	routes.GET(prefix+"/authors", authorController.GetAuthors)
 	routes.GET(prefix+"/authors/:id", authorController.GetAuthor)
+	routes.GET(prefix+"/authors/name/:name", authorController.GetAuthorByName)
 	routes.POST(prefix+"/authors", authorController.InsertAuthor)
 	routes.PUT(prefix+"/authors/:id", authorController.UpdateAuthor)
 	routes.DELETE(prefix+"/authors/:id", authorController.DeleteAuthor)

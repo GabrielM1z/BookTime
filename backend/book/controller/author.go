@@ -2,11 +2,13 @@ package controller
 
 import (
 	"database/sql"
+	"log"
 	"net/http"
 
 	"book/controller/interfaces"
 	"book/model"
 	"book/repository"
+	"book/service"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -51,6 +53,38 @@ func (ac *AuthorController) GetAuthor(c *gin.Context) {
 	if author == nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Author not found"})
 		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"status": "success", "data": author})
+}
+
+func (ac *AuthorController) GetAuthorByName(c *gin.Context) {
+	db := ac.DB
+	name := c.Param("name")
+
+	log.Println("name : ")
+	log.Println(name)
+
+	repoAuthor := repository.NewAuthorRepository(db)
+	author, err := repoAuthor.SelectAuthorByName(name)
+
+	log.Println("author : ")
+	log.Println(author)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get author"})
+		return
+	}
+
+	if author == nil {
+		foundAuthor, err := service.NewSearchAuthorService().SearchAuthor(name)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid author "})
+			return
+		} else {
+			repoAuthor.InsertAuthor(foundAuthor)
+			author, err = repoAuthor.SelectAuthorByName(foundAuthor.Name)
+		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{"status": "success", "data": author})
