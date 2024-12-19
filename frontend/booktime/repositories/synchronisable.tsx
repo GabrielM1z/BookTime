@@ -9,7 +9,7 @@ export class Synchronisable {
             console.log("pre action")
     
             // TODO appel DB front : fetch action
-            const actionsFront = await this.sqlite.getAll();
+            const actionsFront = await actionRepository.getAll();
     
             const actionsWithBase64 = actionsFront.map((actionItem) => {
                 const actionBase64 = btoa(JSON.stringify(actionItem.action)); // Encodage en Base64

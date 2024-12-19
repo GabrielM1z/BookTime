@@ -34,6 +34,10 @@ export default function AppLayout() {
                 name='book/[idBook]'
                 options={{ headerShown: false }}
             />
+            <Stack.Screen
+                name='settings'
+                options={{ headerShown: true }}
+            />
         </Stack>
     );
 }
