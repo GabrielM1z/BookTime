@@ -1,23 +1,31 @@
 meta {
-  name: Get author by Id
+  name: Update user by id
   type: http
-  seq: 3
+  seq: 4
 }
 
-get {
-  url: {{base_book_url}}/authors/1
-  body: none
+put {
+  url: {{base_user_url}}/user/:id
+  body: json
   auth: bearer
+}
+
+params:path {
+  id: a86d013c-8ddf-4f17-b7c5-82e0b5ddaf2e
 }
 
 auth:bearer {
   token: {{access_token}}
 }
 
-tests {
-  test("Status code is 200", function () {
-      expect(res.getStatus()).to.equal(200);
-  });
+body:json {
+  {
+    "idUser": "a86d013c-8ddf-4f17-b7c5-82e0b5ddaf2e",
+    "pseudo": "Moodlys",
+    "description": "C'est plus moi :(",
+    "private": true,
+    "birthdate": "2024-09-27"
+  }
 }
 
 docs {

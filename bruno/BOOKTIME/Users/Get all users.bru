@@ -1,23 +1,17 @@
 meta {
-  name: Get author by Id
+  name: Get all users
   type: http
-  seq: 3
+  seq: 1
 }
 
 get {
-  url: {{base_book_url}}/authors/1
+  url: {{base_user_url}}/users
   body: none
   auth: bearer
 }
 
 auth:bearer {
   token: {{access_token}}
-}
-
-tests {
-  test("Status code is 200", function () {
-      expect(res.getStatus()).to.equal(200);
-  });
 }
 
 docs {
