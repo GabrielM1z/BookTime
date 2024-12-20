@@ -10,17 +10,6 @@ export default StyleSheet.create({
         justifyContent: 'space-between', // Ajoute de l'espace entre le contenu principal et le bas
 
     },
-    loadingOverlay: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fond semi-transparent
-        zIndex: 10, // Assurez-vous que le spinner est au-dessus de tout
-    },
     logoImageStyle: {
         width: 150,
         height: 150,

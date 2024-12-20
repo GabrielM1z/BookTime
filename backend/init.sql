@@ -112,13 +112,13 @@ CREATE DATABASE user_db;
 \connect user_db;
 
 -- Table USER
--- A refaire ==> mauvais format (Matthieu <3)
 CREATE TABLE IF NOT EXISTS userBooktime (
     id_user UUID,
-    private BOOLEAN UNIQUE,
-    profil_image VARCHAR(255) UNIQUE NOT NULL,
-    banner_image VARCHAR(255) NOT NULL,
+    pseudo VARCHAR(25) UNIQUE,
+    description VARCHAR(300),
+    private BOOLEAN DEFAULT FALSE,
+    profil_image VARCHAR(150),
+    banner_image VARCHAR(150),
     birthdate DATE NOT NULL,
     PRIMARY KEY (id_user)
-
 );

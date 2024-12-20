@@ -4,11 +4,11 @@ import CoverPressable from './CoverPressable';
 import React from 'react';
 
 // component représentant le LIVRE de l'ETAGERE
-export default function LivreEtagere({ label, cover }) {
+export default function LivreEtagere({ id_book, label, cover }) {
 	
 	return (
 		<View style={styles.livreContainer}>
-            <CoverPressable cover={cover} ></CoverPressable>
+            <CoverPressable id_book={id_book} cover={cover} ></CoverPressable>
             <ThemedText type="titreLivreVertical">{label}</ThemedText>
 		</View>
 	);

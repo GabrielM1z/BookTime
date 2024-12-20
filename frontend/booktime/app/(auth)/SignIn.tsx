@@ -6,6 +6,7 @@ import React, { useState } from 'react';
 import { ActivityIndicator, Alert, Image, Keyboard, StatusBar, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import styles from "./SignIn.style";
+import commonStyles from '@/styles/commonStyles';
 
 
 export default function SignIn() {
@@ -46,7 +47,7 @@ export default function SignIn() {
         <SafeAreaView style={styles.container}>
             <StatusBar barStyle="dark-content" />
             {isLoading && (
-                <View style={styles.loadingOverlay}>
+                <View style={commonStyles.loadingOverlay}>
                     <ActivityIndicator size="large" color="#25a9e2" />
                 </View>
             )}

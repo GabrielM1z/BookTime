@@ -44,3 +44,9 @@ export interface BookAllInfos {
 	language : string;
 	cover_image_url : string;
 }
+
+export interface BookMinInfos {
+	id_book : string;
+	title : string;
+	cover_image_url : string;
+}

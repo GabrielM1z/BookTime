@@ -1,8 +1,8 @@
 import { Format } from "@/models/Format";
-import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite';
+import { SQLiteDatabase } from 'expo-sqlite';
+import { useSQLite } from "@/hooks/useSQLite";
 import { Synchronisable } from './synchronisable';
-import { v4 as uuidv4 } from 'uuid';
-
+import uuid from 'react-native-uuid';
 
 
 export interface FormatRepository {
@@ -17,7 +17,7 @@ export class SQLiteFormatRepository extends Synchronisable implements FormatRepo
 
     constructor() {
         super();
-        this.db = useSQLiteContext();
+        this.db = useSQLite().db;
         this.api = new APIFormatRepository();
     }
 
@@ -46,7 +46,7 @@ export class SQLiteFormatRepository extends Synchronisable implements FormatRepo
         );
 
         await statement.executeAsync({
-            $id_format: uuidv4(),
+            $id_format: uuid.v4(),
             $name: format.name
         });
     }

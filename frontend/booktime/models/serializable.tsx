@@ -1,28 +1,50 @@
 export abstract class Serializable<T> {
+    abstract toJSON(): T;
+
     /**
-     * Sérialise l'objet en une chaîne JSON.
+     * Méthode statique pour créer une instance depuis JSON.
+     * Doit être implémentée par les classes dérivées.
      */
-    serialize(): string {
-        return JSON.stringify(this.toJSON());
+    static fromJSON<U>(json: U): Serializable<U> {
+        throw new Error("fromJSON must be implemented in derived classes");
     }
 
     /**
-     * Désérialise une chaîne JSON et retourne une instance de l'objet.
-     * @param json Chaîne JSON à désérialiser.
+     * Sérialise un seul objet en JSON.
      */
-    static deserialize<U extends Serializable<U>>(this: new () => U, json: string): U {
-        const instance = new this();
-        instance.fromJSON(JSON.parse(json));
-        return instance;
+    static serializeSingle<U, T extends Serializable<U>>(input: T): string {
+        return JSON.stringify(input.toJSON());
     }
 
     /**
-     * Méthode à implémenter pour convertir l'objet en un format sérialisable.
+     * Sérialise une liste d'objets en JSON.
      */
-    abstract toJSON(): object;
+    static serializeList<U, T extends Serializable<U>>(input: T[]): string {
+        return JSON.stringify(input.map(item => item.toJSON()));
+    }
 
     /**
-     * Méthode à implémenter pour hydrater l'objet à partir d'un format JSON.
+     * Désérialise un JSON string en un seul objet.
      */
-    abstract fromJSON(json: any): void;
+    static deserializeSingle<U, T extends Serializable<U>>(
+        jsonString: string
+    ): T {
+        const jsonData = JSON.parse(jsonString);
+        return (this as unknown as { fromJSON(json: U): T }).fromJSON(jsonData);
+    }
+
+    /**
+     * Désérialise un JSON string en une liste d'objets.
+     */
+    static deserializeList<U, T extends Serializable<U>>(
+        jsonString: string
+    ): T[] {
+        const jsonData = JSON.parse(jsonString);
+        if (!Array.isArray(jsonData)) {
+            throw new Error("Expected a JSON array.");
+        }
+        return jsonData.map(itemData =>
+            (this as unknown as { fromJSON(json: U): T }).fromJSON(itemData)
+        );
+    }
 }

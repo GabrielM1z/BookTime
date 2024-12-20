@@ -1,11 +1,12 @@
-import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite';
+import { SQLiteDatabase } from 'expo-sqlite';
+import { useSQLite } from "@/hooks/useSQLite";
 import { Synchronisable } from './synchronisable';
-import { v4 as uuidv4 } from 'uuid';
+import uuid from 'react-native-uuid';
 import { Book, BookAllInfos } from '@/models/Book';
 import { LibraryWithBooks } from '@/models/Library';
 
 
-export interface BookRepositoryProps {
+export interface BookRepository {
 	getAll: () => Promise<BookAllInfos[]>;
 	getAllFromLib: (id_lib: string) => Promise<BookAllInfos[]> 
 	get: (id: string) => Promise<BookAllInfos | null>;
@@ -13,13 +14,13 @@ export interface BookRepositoryProps {
 	addBookToLibrary: (id_library: string, book: BookAllInfos) => Promise<void>
 }
 
-export class SQLiteBookRepository extends Synchronisable implements BookRepositoryProps {
+export class SQLiteBookRepository extends Synchronisable implements BookRepository {
 	private db: SQLiteDatabase;
 	private api: APIBookRepository;
 
 	constructor() {
 		super();
-		this.db = useSQLiteContext();
+		this.db = useSQLite().db;
 		this.api = new APIBookRepository();
 	}
 
@@ -55,16 +56,14 @@ export class SQLiteBookRepository extends Synchronisable implements BookReposito
 		return result ? (result as unknown as BookAllInfos[]) : [];
 	}
 
-	async get(id: string): Promise<BookAllInfos | null> {
-		const statement = await this.db.prepareAsync(
-			'SELECT * FROM book WHERE id_book == $id'
+	async get(id: string): Promise<BookAllInfos | null> 
+	{	
+		const result = await this.db.getFirstAsync<BookAllInfos>(
+			'SELECT * FROM book WHERE id_book == $id',
+			{ $id: id }
 		);
 
-		const result = await statement.executeAsync({
-			$id: id
-		});
-
-		return result ? (result as unknown as BookAllInfos) : null;
+		return result ? result : null;
 	}
 	
 	async add(book: BookAllInfos): Promise<void> {
@@ -107,7 +106,7 @@ export class SQLiteBookRepository extends Synchronisable implements BookReposito
     }
 }
 
-export class APIBookRepository implements BookRepositoryProps {
+export class APIBookRepository implements BookRepository {
 	
 	async getAll(): Promise<BookAllInfos[]> {
 		return [];

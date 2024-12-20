@@ -78,11 +78,11 @@ func (lbr *LibraryBookRepository) SelectLibraryBookByLibrary(idLibrary string) [
 	defer rows.Close()
 
 	books := []*model.Book{}
-	IDFormat := uuid.New()
+	//IDFormat := uuid.New()
 
 	for rows.Next() {
 		var book model.Book
-		if err := rows.Scan(&book.IdBook, &book.Title, &book.Description, &IDFormat, &book.Publisher, &book.PublicationDate, &book.PageNumber, &book.Language, &book.CoverImageUrl); err != nil {
+		if err := rows.Scan(&book.IdBook, &book.Title, &book.Description, &book.Format, &book.Publisher, &book.PublicationDate, &book.PageNumber, &book.Language, &book.CoverImageUrl); err != nil {
 			log.Fatal(err)
 		}
 		//format, _ := NewFormatRepository(lbr.DB).SelectFormat(IDFormat)

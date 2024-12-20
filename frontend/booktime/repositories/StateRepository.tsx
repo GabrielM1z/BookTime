@@ -1,7 +1,8 @@
 import { State } from "@/models/State";
-import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite';
+import { SQLiteDatabase } from 'expo-sqlite';
+import { useSQLite } from "@/hooks/useSQLite";
 import { Synchronisable } from './synchronisable';
-import { v4 as uuidv4 } from 'uuid';
+import uuid from 'react-native-uuid';
 
 
 
@@ -17,7 +18,7 @@ export class SQLiteStateRepository extends Synchronisable implements StateReposi
 
     constructor() {
         super();
-        this.db = useSQLiteContext();
+        this.db = useSQLite().db;
         this.api = new APIStateRepository();
     }
 

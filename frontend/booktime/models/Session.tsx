@@ -1,87 +1,65 @@
-import { randomUUID } from 'expo-crypto';
-import { AuthResponseProps } from './keycloak';
 import { Serializable } from './serializable';
+import { guestUserId } from '@/constants';
 
 export interface SessionProps {
     id: string;
-    idUser?: string;
-    isGuest: boolean;
-    accessToken?: string;
-    expiresIn?: number;
-    refreshToken?: string;
-    refreshExpiresIn?: number;
-    tokenType?: string;
-
-    serialize?: () => string;
-    deserialize?: (data: string) => Session;
-    fromKeycloak?: (data: any) => Session;
-    guestSession?: () => Session;
+    id_user: string;
+    access_token?: string;
+    expires_in?: number;
+    refresh_token?: string;
+    refresh_expires_in?: number;
+    token_type?: string;
 }
 
-export class Session extends Serializable<Session> implements SessionProps {
+export class Session extends Serializable<SessionProps> implements SessionProps {
     id: string;
-    idUser?: string;
-    isGuest: boolean;
-    accessToken?: string;
-    expiresIn?: number;
-    refreshToken?: string;
-    refreshExpiresIn?: number;
-    tokenType?: string;
+    id_user: string;
+    access_token?: string;
+    expires_in?: number;
+    refresh_token?: string;
+    refresh_expires_in?: number;
+    token_type?: string;
 
     constructor(data: SessionProps) {
         super();
         this.id = data.id;
-        this.idUser = data.idUser;
-        this.isGuest = data.isGuest;
-        this.accessToken = data.accessToken;
-        this.expiresIn = data.expiresIn;
-        this.refreshToken = data.refreshToken;
-        this.refreshExpiresIn = data.refreshExpiresIn;
-        this.tokenType = data.tokenType;
+        this.id_user = data.id_user;
+        this.access_token = data.access_token;
+        this.expires_in = data.expires_in;
+        this.refresh_token = data.refresh_token;
+        this.refresh_expires_in = data.refresh_expires_in;
+        this.token_type = data.token_type;
     }
 
-    toJSON(): object {
+    toString(): string {
+        return "<Session id=" + this.id + " id_user=" + this.id_user + ">";
+    }
+
+    toJSON(): any {
         return {
             id: this.id,
-            id_user: this.idUser,
-            is_guest: this.isGuest,
-            access_token: this.accessToken,
-            expires_in: this.expiresIn,
-            refresh_token: this.refreshToken,
-            refresh_expires_in: this.refreshExpiresIn,
-            token_type: this.tokenType,
+            id_user: this.id_user,
+            access_token: this.access_token,
+            expires_in: this.expires_in,
+            refresh_token: this.refresh_token,
+            refresh_expires_in: this.refresh_expires_in,
+            token_type: this.token_type,
         };
     }
 
-    fromJSON(json: any): void {
-        this.id = json.id;
-        this.idUser = json.id_user;
-        this.isGuest = json.is_guest;
-        this.accessToken = json.access_token;
-        this.expiresIn = json.expires_in;
-        this.refreshToken = json.refresh_token;
-        this.refreshExpiresIn = json.refresh_expires_in;
-        this.tokenType = json.token_type;
-    }
-
-    static fromKeycloak(data: AuthResponseProps): Session {
+    static fromJSON(json: any): Session {
         return new Session({
-            id: randomUUID(),
-            idUser: undefined,
-            isGuest: false,
-            accessToken: data.access_token,
-            expiresIn: data.expires_in,
-            refreshToken: data.refresh_token,
-            refreshExpiresIn: data.refresh_expires_in,
-            tokenType: data.token_type,
+            id: json.id,
+            id_user: json.id_user,
+            access_token: json.access_token,
+            expires_in: json.expires_in,
+            refresh_token: json.refresh_token,
+            refresh_expires_in: json.refresh_expires_in,
+            token_type: json.token_type,
         });
     }
 
-    static guestSession(): Session {
-        return new Session({
-            id: randomUUID(),
-            isGuest: true,
-        });
+    isGuest(): boolean {
+        return this.id_user === guestUserId;
     }
-
 }

@@ -5,8 +5,6 @@ import (
 	"log"
 
 	"book/model"
-
-	"github.com/google/uuid"
 )
 
 type BookRepository struct {
@@ -117,10 +115,8 @@ func (br *BookRepository) SelectBook(id string) (*model.Book, error) {
 
 	row := br.DB.QueryRow(query, id)
 
-	IDFormat := uuid.New()
-
 	var book model.Book
-	err := row.Scan(&book.IdBook, &book.Title, &book.Description, &IDFormat, &book.Publisher, &book.PublicationDate, &book.PageNumber, &book.Language, &book.CoverImageUrl)
+	err := row.Scan(&book.IdBook, &book.Title, &book.Description, &book.Format, &book.Publisher, &book.PublicationDate, &book.PageNumber, &book.Language, &book.CoverImageUrl)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil

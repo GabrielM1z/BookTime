@@ -1,30 +1,26 @@
 import { useBottomSheetModal } from "@gorhom/bottom-sheet";
-import React, {  } from "react";
+import React, { } from "react";
 import { StyleSheet, TouchableOpacity } from "react-native";
 import Animated, { useAnimatedStyle, SharedValue } from "react-native-reanimated";
 
 export interface OpacityBackgroundBottomSheetProps {
-    modalIndex: SharedValue<number>;
+    isOpen: boolean[];
 }
 
 export const OpacityBackgroundBottomSheet = (props: OpacityBackgroundBottomSheetProps) => {
     const { dismiss } = useBottomSheetModal();
 
-    // Style animé pour l'overlay avec effet d'opacité
     const overlayAnimatedStyle = useAnimatedStyle(() => {
-        console.log('props.isModalOpen.value', props.modalIndex.value);
-        const cond = props.modalIndex.value !== -1;
+        const cond = props.isOpen.reduce((acc: boolean, value: boolean) => acc || value, false);
         return {
             opacity: cond ? 0.6 : 0,
             zIndex: cond ? 10 : -1,
         };
-    }, [props.modalIndex]);
+    }, [props.isOpen]);
 
     return (
         <Animated.View style={[styles.overlay, overlayAnimatedStyle]}>
-            {props.modalIndex && (
-                <TouchableOpacity style={{ flex: 1 }} onPress={() => dismiss()} />
-            )}
+            <TouchableOpacity style={{ flex: 1 }} onPress={() => dismiss()} />
         </Animated.View>
     )
 };

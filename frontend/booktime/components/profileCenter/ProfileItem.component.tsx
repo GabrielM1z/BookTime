@@ -14,17 +14,18 @@ export interface ProfileItemProps {
 };
 
 export const ProfileItem = (props: ProfileItemProps) => {
+    const user: User = {... props.item, given_name: 'Guest', family_name: 'User', email: '', email_verified: false, username: 'guest'};
     return (
         <View style={styles.profileItem}>
             <TouchableScale
                 style={[styles.profileItemTouchable, { backgroundColor: props.isSelected ? '#E0E0E0' : '#F5F5F5' }]}
-                onPress={() => props.onItemClicked && props.onItemClicked(props.item.id)}
+                onPress={() => props.onItemClicked && props.onItemClicked(props.item.id_user)}
                 scaleTo={0.98}
                 duration={100}
             >
                 <Image source={profileImage} style={styles.profileImage} />
                 <View style={styles.profileTextContainer}>
-                    <Text style={styles.profileName}>{props.item.givenName}</Text>
+                    <Text style={styles.profileName}>{user.given_name} {user.family_name}</Text>
                 </View>
             </TouchableScale>
             {props.isSelected && (

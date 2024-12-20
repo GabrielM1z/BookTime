@@ -1,17 +1,17 @@
 meta {
-  name: Get book by Id
+  name: Get genre by name
   type: http
-  seq: 4
+  seq: 6
 }
 
 get {
-  url: {{base_book_url}}/books/:isbn
+  url: {{base_book_url}}/genres/:name
   body: none
   auth: bearer
 }
 
 params:path {
-  isbn: 9782701178165
+  name: Horro
 }
 
 auth:bearer {
