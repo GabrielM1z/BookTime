@@ -2,7 +2,7 @@ import { jwtDecode } from 'jwt-decode';
 import { PayloadProps, AuthResponseProps } from '@/models/keycloak';
 import { User } from '@/models/User';
 import { Session } from '@/models/Session';
-import { randomUUID } from 'expo-crypto';
+import uuid from 'react-native-uuid';
 import { guestUserId } from '@/constants';
 
 
@@ -20,7 +20,7 @@ export const userFromToken = (token: string): User => {
 
 export const sessionFromKeycloak = (data: AuthResponseProps): Session => {
     return new Session({
-        id: randomUUID(),
+        id: uuid.v4(),
         id_user: userFromToken(data.access_token).id_user,
         access_token: data.access_token,
         expires_in: data.expires_in,
@@ -32,7 +32,7 @@ export const sessionFromKeycloak = (data: AuthResponseProps): Session => {
 
 export const guestSessionFactory = (): Session => {
     return new Session({
-        id: randomUUID(),
+        id: uuid.v4(),
         id_user: guestUserId,
     });
 }
