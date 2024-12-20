@@ -22,7 +22,6 @@ export const CustomBottomSheet = forwardRef<BottomSheetModal, CustomBottomSheetP
     }, []);
 
     const handleBackPress = useCallback(() => {
-        console.log('isOpen', isOpen);
         if (isOpen) {
             dismiss();
             return true;

@@ -1,12 +1,12 @@
 meta {
-  name: Get author by Id
+  name: Create an user
   type: http
   seq: 3
 }
 
-get {
-  url: {{base_book_url}}/authors/1
-  body: none
+post {
+  url: {{base_user_url}}/user
+  body: json
   auth: bearer
 }
 
@@ -14,10 +14,14 @@ auth:bearer {
   token: {{access_token}}
 }
 
-tests {
-  test("Status code is 200", function () {
-      expect(res.getStatus()).to.equal(200);
-  });
+body:json {
+  {
+    "idUser": "a86d013c-8ddf-4f17-b7c5-82e0b5ddaf2e",
+    "pseudo": "Majelan",
+    "description": "C'est moi :)",
+    "private": false,
+    "birthdate": "2024-12-20"
+  }
 }
 
 docs {

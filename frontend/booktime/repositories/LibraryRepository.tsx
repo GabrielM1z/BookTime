@@ -1,5 +1,6 @@
 import { Library, LibraryWithBooks, LibraryWithBooksMin } from '@/models/Library';
-import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite';
+import { SQLiteDatabase } from 'expo-sqlite';
+import { useSQLite } from "@/hooks/useSQLite";
 import { Synchronisable } from './synchronisable';
 import uuid from 'react-native-uuid';
 
@@ -18,7 +19,7 @@ export class SQLiteLibraryRepository extends Synchronisable implements LibraryRe
 
     constructor() {
         super();
-        this.db = useSQLiteContext();
+        this.db = useSQLite().db;
         this.api = new APILibraryRepository();
     }
 

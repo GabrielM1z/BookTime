@@ -1,7 +1,7 @@
 import { Platform } from "react-native";
-import { BookRepositoryProps, APIBookRepository, SQLiteBookRepository } from "../BookRepository";
+import { BookRepository, APIBookRepository, SQLiteBookRepository } from "../BookRepository";
 
-export const bookRepositoryFactory = (): BookRepositoryProps => {
+export const bookRepositoryFactory = (): BookRepository => {
     if (Platform.OS === 'web') {
         return new APIBookRepository();
     }

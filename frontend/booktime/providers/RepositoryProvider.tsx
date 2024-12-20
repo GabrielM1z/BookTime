@@ -1,32 +1,30 @@
-import { ActionRepositoryProps } from "@/repositories/ActionRepository";
-import { AuthorRepositoryProps } from "@/repositories/AuthorRepository";
-import { BookRepositoryProps } from "@/repositories/BookRepository";
-import { FormatRepositoryProps } from "@/repositories/FormatRepository";
-import { GenreRepositoryProps } from "@/repositories/GenreRepository";
-import { LibraryRepositoryProps } from "@/repositories/LibraryRepository";
-import { SessionRepositoryProps } from "@/repositories/SessionRepository";
-import { UserRepositoryProps } from "@/repositories/UserRepository";
+import { ActionRepository } from "@/repositories/ActionRepository";
+import { AuthorRepository } from "@/repositories/AuthorRepository";
+import { BookRepository } from "@/repositories/BookRepository";
+import { FormatRepository } from "@/repositories/FormatRepository";
+import { GenreRepository } from "@/repositories/GenreRepository";
+import { LibraryRepository } from "@/repositories/LibraryRepository";
+import { UserRepository } from "@/repositories/UserRepository";
 import { actionRepositoryFactory } from "@/repositories/factories/actionRepositoryFactory";
 import { authorRepositoryFactory } from "@/repositories/factories/authorRepositoryFactory";
 import { bookRepositoryFactory } from "@/repositories/factories/bookRepositoryFactory";
 import { formatRepositoryFactory } from "@/repositories/factories/formatRepositoryFactory";
 import { genreRepositoryFactory } from "@/repositories/factories/genreRepositoryFactory";
 import { libraryRepositoryFactory } from "@/repositories/factories/libraryRepositoryFactory";
-import { sessionRepositoryFactory } from "@/repositories/factories/sessionRepositoryFactory";
 import { userRepositoryFactory } from "@/repositories/factories/userRepositoryFactory";
-import { SQLiteProvider, SQLiteProviderProps } from "expo-sqlite";
+import { SQLiteProviderProps } from "expo-sqlite";
+import { SQLiteProvider } from "./SQLiteProvider";
 import React, { createContext } from "react";
 
 
 export interface RepositoryContextProps {
-    userRepository: UserRepositoryProps;
-    libraryRepository: LibraryRepositoryProps;
-    bookRepository: BookRepositoryProps;
-    actionRepository: ActionRepositoryProps;
-    sessionRepository: SessionRepositoryProps;
-    formatRepository: FormatRepositoryProps;
-    genreRepository: GenreRepositoryProps;
-    authorRepository: AuthorRepositoryProps;
+    userRepository: UserRepository;
+    libraryRepository: LibraryRepository;
+    bookRepository: BookRepository;
+    actionRepository: ActionRepository;
+    formatRepository: FormatRepository;
+    genreRepository: GenreRepository;
+    authorRepository: AuthorRepository;
 }
 
 export const RepositoryContext = createContext<RepositoryContextProps | undefined>(undefined);
@@ -36,7 +34,6 @@ function RepositoryProvider({ children }: { children: React.ReactNode }) {
     const libraryRepository = libraryRepositoryFactory();
     const bookRepository = bookRepositoryFactory();
     const actionRepository = actionRepositoryFactory();
-    const sessionRepository = sessionRepositoryFactory();
     const formatRepository = formatRepositoryFactory();
     const genreRepository = genreRepositoryFactory();
     const authorRepository = authorRepositoryFactory();
@@ -47,7 +44,6 @@ function RepositoryProvider({ children }: { children: React.ReactNode }) {
             libraryRepository,
             bookRepository,
             actionRepository,
-            sessionRepository,
             formatRepository,
             genreRepository,
             authorRepository

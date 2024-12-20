@@ -2,7 +2,7 @@ import { keycloakAuthUrl, keycloakClientId, keycloakClientSecret, baseURL } from
 import { AuthResponseProps } from '@/models/keycloak';
 import axios, { AxiosInstance } from 'axios';
 import { useAuth } from '@/hooks/useAuth';
-import { useRouter } from 'expo-router';
+import { Href, useRouter } from 'expo-router';
 
 export type Api = AxiosInstance;
 
@@ -26,8 +26,8 @@ export function ApiWrapper({ children }: ApiWrapperProps) {
 
     api.interceptors.request.use(
         (config) => {
-            if (session && session.accessToken) {
-                config.headers.Authorization = `${session.tokenType || 'Bearer'} ${session.accessToken}`;
+            if (session && session.access_token) {
+                config.headers.Authorization = `${session.token_type || 'Bearer'} ${session.access_token}`;
             }
             return config;
         },
@@ -38,7 +38,7 @@ export function ApiWrapper({ children }: ApiWrapperProps) {
     api.interceptors.response.use(
         (response) => response,
         async (error) => {
-            if (session && session.refreshToken) {
+            if (session && session.refresh_token) {
                 const originalRequest = error.config;
 
                 // If the error status is 401 and there is no originalRequest._retry flag,
@@ -48,15 +48,15 @@ export function ApiWrapper({ children }: ApiWrapperProps) {
 
                     try {
 
-                        const response = await refresh(session?.refreshToken!);
+                        const response = await refresh(session?.refresh_token!);
                         await updateSessionTokens(response);
 
                         // Retry the original request with the new token
-                        originalRequest.headers.Authorization = `${session?.tokenType || 'Bearer'} ${session?.accessToken}`;
+                        originalRequest.headers.Authorization = `${session?.token_type || 'Bearer'} ${session?.access_token}`;
                         return axios(originalRequest);
                     } catch (error) {
                         const router = useRouter();
-                        router.push('/sign-in');
+                        router.push('/signIn' as Href<'signIn'>);
                         return;
                     }
                 }
@@ -71,12 +71,16 @@ export function ApiWrapper({ children }: ApiWrapperProps) {
 }
 
 export const authenticate = async (username: string, password: string): Promise<AuthResponseProps> => {
+    if (!keycloakClientId || !keycloakClientSecret) {
+        throw new Error('Keycloak not configured');
+    }
+    
     const response = await api.post(
         keycloakAuthUrl,
         new URLSearchParams({
             grant_type: 'password',
             client_id: keycloakClientId,
-            client_secret: "xIkFqIPnNTBKO9p5OUz0hiyjSThgfo1t",
+            client_secret: keycloakClientSecret,
             username: username,
             password: password,
             audience: 'gateway-client',
@@ -97,6 +101,10 @@ export const authenticate = async (username: string, password: string): Promise<
 }
 
 export const refresh = async (refreshToken: string): Promise<AuthResponseProps> => {
+    if (!keycloakClientId || !keycloakClientSecret) {
+        throw new Error('Keycloak not configured');
+    }
+
     const response = await api.post(
         keycloakAuthUrl,
         new URLSearchParams({

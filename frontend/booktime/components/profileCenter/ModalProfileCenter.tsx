@@ -1,14 +1,15 @@
 import { useAuth } from '@/hooks/useAuth';
 import { useRepository } from '@/hooks/useRepository';
-import { User } from '@/models/User';
 import { Ionicons } from '@expo/vector-icons';
 import { BottomSheetFlatList, BottomSheetModal, BottomSheetView, useBottomSheetModal } from '@gorhom/bottom-sheet';
 import { Href, useRouter } from 'expo-router';
-import React, { forwardRef, useCallback, useRef, useState } from 'react';
+import React, { forwardRef, useCallback, useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { CustomBottomSheet, OpacityBackgroundBottomSheet } from '.';
+import { CustomBottomSheet } from './CustomBottomSheet.component';
+import { OpacityBackgroundBottomSheet } from './OpacityBackgroundBottomSheet.component';
 import TouchableScale from '../TouchableScale';
 import { ProfileItem } from './ProfileItem.component';
+import { User } from '@/models/User';
 
 
 export interface ProfileCenterProps {
@@ -23,19 +24,33 @@ export const ModalProfileCenter = forwardRef<BottomSheetModal>((props, ref) => {
 
     const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
     const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
+    const [transitioning, setTransitioning] = useState(false);
 
-    const { sessionRepository } = useRepository();
-    const { switchSession, logOut } = useAuth();
+    const { userRepository } = useRepository();
+    const { switchSession, logOut, session, getAllSessions } = useAuth();
 
-    // Mock data des utilisateurs
-    const users = [
-        new User({ id: '1', givenName: 'John', familyName: 'Doe', emailVerified: true, username: 'johndoe', email: '' }),
-        new User({ id: '2', givenName: 'Jane', familyName: 'Doe', emailVerified: true, username: 'janedoe', email: '' }),
-        new User({ id: '3', givenName: 'Alice', familyName: 'Smith', emailVerified: true, username: 'alicesmith', email: '' }),
-        new User({ id: '4', givenName: 'Bob', familyName: 'Smith', emailVerified: true, username: 'bobsmith', email: '' }),
-    ];
+    const [users, setUsers] = useState<User[]>([]);
+
+    useEffect(() => {
+        const fetchSessions = async () => {
+            const sessions = await getAllSessions();
+            const usersData = await Promise.all(sessions.map(session => userRepository.getBySession(session)));
+            setUsers(usersData);
+        }
+        if (isFirstModalOpen) {
+            fetchSessions();
+            setSelectedUserId(session?.id_user || null);
+        }
+    }, [isFirstModalOpen]);
+
+    useEffect(() => {
+        if (!isSecondModalOpen && transitioning) {
+            setTransitioning(false);
+        }
+    }, [isSecondModalOpen]);
 
     const handleMenuClicked = useCallback(() => {
+        setTransitioning(true);
         subModalRef.current?.present();
     }, [subModalRef]);
 
@@ -47,14 +62,14 @@ export const ModalProfileCenter = forwardRef<BottomSheetModal>((props, ref) => {
 
     return (
         <>
-            <OpacityBackgroundBottomSheet isOpen={[isFirstModalOpen, isSecondModalOpen]} />
+            <OpacityBackgroundBottomSheet isOpen={[isFirstModalOpen, isSecondModalOpen, transitioning]} />
             <CustomBottomSheet ref={ref} setIsOpen={setIsFirstModalOpen}>
                 <BottomSheetFlatList
                     data={users}
-                    keyExtractor={(item) => item.id.toString()}
+                    keyExtractor={(item) => item.id_user.toString()}
                     renderItem={({ item }) => ProfileItem({
                         item,
-                        isSelected: item.id == selectedUserId,
+                        isSelected: item.id_user == selectedUserId,
                         onItemClicked: setSelectedUserId,
                         onMenuClicked: handleMenuClicked,
                     })}
@@ -93,6 +108,7 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         padding: 8,
         margin: 8,
+        minHeight: 200, // FIXME: marche pas
     },
     profileItem: {
         flexDirection: 'row',
