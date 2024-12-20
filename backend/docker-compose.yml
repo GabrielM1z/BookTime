@@ -85,7 +85,6 @@ services:
       - backend
     env_file: ".env"
 
-
   api_news:
     container_name: api_news
     hostname: news
@@ -93,6 +92,26 @@ services:
     ports:
       - 8084:8080
     restart: always
+    networks:
+      - backend
+    env_file: ".env"
+
+  api_user:
+    container_name: api_user
+    hostname: user
+    build: ./user
+    ports:
+      - 8085:8080
+    restart: always
+    environment:
+      DB_HOST: postgres
+      DB_NAME: book_db
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - api_volume:/usr/src/app/
+    depends_on:
+      - postgres
     networks:
       - backend
     env_file: ".env"

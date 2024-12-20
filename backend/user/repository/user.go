@@ -19,8 +19,8 @@ func NewUserRepository(db *sql.DB) *UserRepository {
 }
 
 func (br *UserRepository) InsertUser(user model.User) bool {
-	_, err := br.DB.Exec("INSERT INTO userBooktime (private, profil_image, banner_image, birthdate) VALUES ($1, $2, $3, $4)",
-		user.Private, user.ProfilImage, user.BannerImage, user.Birthday)
+	_, err := br.DB.Exec("INSERT INTO userBooktime (id_user, private, profil_image, banner_image, birthdate) VALUES ($1, $2, $3, $4, $5)",
+		user.IdUser, user.Private, user.ProfilImage, user.BannerImage, user.Birthday)
 	if err != nil {
 		log.Println(err)
 		return false
@@ -49,28 +49,20 @@ func (ur *UserRepository) SelectUser(id uuid.UUID) (*model.User, error) {
 }
 
 func (ur *UserRepository) SelectUsers() []model.User {
-	var users []model.User
-	rows, err := ur.DB.Query("SELECT * FROM userBooktime")
+	query := "SELECT * FROM userBooktime"
+	rows, err := ur.DB.Query(query)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer rows.Close()
 
+	users := []model.User{}
 	for rows.Next() {
-		var (
-			id        uuid.UUID
-			private   string
-			profilImg string
-			bannerImg string
-			birthday  string
-		)
-		err := rows.Scan(&id, &private, &profilImg, &bannerImg, &birthday)
-		if err != nil {
-			log.Println(err)
-		} else {
-			user := model.User{IdUser: id, Private: private, ProfilImage: profilImg, BannerImage: bannerImg, Birthday: birthday}
-			users = append(users, user)
+		var user model.User
+		if err := rows.Scan(&user.IdUser, &user.Private, &user.ProfilImage, &user.BannerImage, &user.Birthday); err != nil {
+			log.Fatal(err)
 		}
+		users = append(users, user)
 	}
 	return users
 }
