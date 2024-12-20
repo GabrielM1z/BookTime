@@ -1,7 +1,7 @@
 import { Session } from "@/models/Session";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export interface SessionRepository {
+export interface SessionController {
     getById(id: string): Promise<Session | null>;
     getAll(): Promise<Session[]>;
     save(session: Session): Promise<void>;
@@ -11,7 +11,7 @@ export interface SessionRepository {
     getGuestSession(): Promise<Session | null>;
 }
 
-export class CacheSessionRepository implements SessionRepository {
+export class CacheSessionController implements SessionController {
     private sessionsKey = "@sessions";
     private currentSessionKey = "@currentSessionId";
 
@@ -22,7 +22,7 @@ export class CacheSessionRepository implements SessionRepository {
         const sessions = await this.getAll();
         const updatedSessions = sessions.filter(s => s.id !== session.id); // Retirer l'ancienne version
         updatedSessions.push(session);
-        await AsyncStorage.setItem(this.sessionsKey, JSON.stringify(updatedSessions));
+        await AsyncStorage.setItem(this.sessionsKey, Session.serializeList(updatedSessions));
     }
 
     /**
@@ -39,7 +39,7 @@ export class CacheSessionRepository implements SessionRepository {
      */
     async getAll(): Promise<Session[]> {
         const sessionsJson = await AsyncStorage.getItem(this.sessionsKey);
-        return sessionsJson ? JSON.parse(sessionsJson) : [];
+        return sessionsJson ? Session.deserializeList(sessionsJson) : [];
     }
 
     /**
@@ -48,7 +48,7 @@ export class CacheSessionRepository implements SessionRepository {
     async delete(id: string): Promise<void> {
         const sessions = await this.getAll();
         const updatedSessions = sessions.filter(s => s.id !== id);
-        await AsyncStorage.setItem(this.sessionsKey, JSON.stringify(updatedSessions));
+        await AsyncStorage.setItem(this.sessionsKey, Session.serializeList(updatedSessions));
     }
 
     /**
@@ -74,6 +74,10 @@ export class CacheSessionRepository implements SessionRepository {
      */
     async getGuestSession(): Promise<Session | null> {
         const sessions = await this.getAll();
-        return sessions.find(session => session.isGuest) || null;
+        return sessions.find(session => session.isGuest()) || null;
     }
+}
+
+export const sessionControllerFactory = (): SessionController => {
+    return new CacheSessionController();
 }

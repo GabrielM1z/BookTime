@@ -1,9 +1,10 @@
 import api from '@/services/api';
-import { AuthResponseProps, PayloadProps } from '@/models/keycloak';
 import { User } from '@/models/User';
 import { Session } from '@/models/Session';
 import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite';
 import { Synchronisable } from './synchronisable';
+import { userFromToken, guestUserFactory } from '@/helpers/keycloak';
+import { useSQLite } from '@/hooks/useSQLite';
 
 export interface UserRepository {
     getBySession(session: Session): Promise<User>;
@@ -19,26 +20,26 @@ export class SQLiteUserRepository extends Synchronisable implements UserReposito
 
     constructor() {
         super();
-        this.db = useSQLiteContext();
+        this.db = useSQLite().db;
         this.api = new APIUserRepository();
     }
 
     async getBySession(session: Session): Promise<User> {
-        let user = await this.getById(session.idUser);
+        let user = await this.getById(session.id_user);
         if (!user) {
-            user = await this.api.getBySession(session);
-            this.add(user);
+            user = session.isGuest() ? guestUserFactory() : await this.api.getBySession(session);
+            await this.add(user);
         }
         return user;
     }
 
     async getById(id: string): Promise<User | null> {
         const statement = await this.db.prepareAsync(`
-            SELECT * FROM user WHERE id = $id;
+            SELECT * FROM user WHERE id_user = $id_user;
         `);
 
         let result = await statement.executeAsync<User>({
-            $id: id
+            $id_user: id
         });
 
         return result.getFirstAsync();
@@ -53,9 +54,9 @@ export class SQLiteUserRepository extends Synchronisable implements UserReposito
 
     async add(user: User): Promise<void> {
         const statement = await this.db.prepareAsync(`
-            INSERT INTO user (id, username, email, email_verified, given_name, family_name)
+            INSERT INTO user (id_user, username, email, email_verified, given_name, family_name)
             VALUES (
-                $id,
+                $id_user,
                 $username,
                 $email,
                 $email_verified,
@@ -65,12 +66,12 @@ export class SQLiteUserRepository extends Synchronisable implements UserReposito
         `);
 
         await statement.executeAsync({
-            $id: user.id,
+            $id_user: user.id_user,
             $username: user.username,
             $email: user.email,
-            $email_verified: user.emailVerified,
-            $given_name: user.givenName,
-            $family_name: user.familyName
+            $email_verified: user.email_verified,
+            $given_name: user.given_name,
+            $family_name: user.family_name
         });
     }
 
@@ -82,26 +83,26 @@ export class SQLiteUserRepository extends Synchronisable implements UserReposito
                 email_verified = $email_verified,
                 given_name = $given_name,
                 family_name = $family_name
-            WHERE id = $id;
+            WHERE id_user = $id_user;
         `);
 
         await statement.executeAsync({
-            $id: user.id,
+            $id_user: user.id_user,
             $username: user.username,
             $email: user.email,
-            $email_verified: user.emailVerified,
-            $given_name: user.givenName,
-            $family_name: user.familyName
+            $email_verified: user.email_verified,
+            $given_name: user.given_name,
+            $family_name: user.family_name
         });
     }
 
     async delete(user: User): Promise<void> {
         const statement = await this.db.prepareAsync(`
-            DELETE FROM user WHERE id = $id;
+            DELETE FROM user WHERE id_user = $id_user;
         `);
 
         await statement.executeAsync({
-            $id: user.id
+            $id_user: user.id_user
         });
     }
 }
@@ -112,13 +113,13 @@ export class APIUserRepository implements UserRepository {
         // if (!session.isGuest) {
         //     return User.
         // }
-        if (!session.accessToken) {
+        if (!session.access_token) {
             throw new Error('No access token in session');
         }
 
-        const tokenUser = User.fromToken(session.accessToken);
-        const apiUser = await this.getById(tokenUser.id);
-        const user = new User({...tokenUser, ...apiUser});
+        const tokenUser = userFromToken(session.access_token);
+        const apiUser = await this.getById(tokenUser.id_user);
+        const user = { ...tokenUser, ...apiUser };
         return user;
     }
 
@@ -133,10 +134,10 @@ export class APIUserRepository implements UserRepository {
     }
 
     async update(user: User): Promise<void> {
-        await api.put(`/api/user/${user.id}`, user);
+        await api.put(`/api/user/${user.id_user}`, user);
     }
 
     async delete(user: User): Promise<void> {
-        await api.delete(`/api/user/${user.id}`);
+        await api.delete(`/api/user/${user.id_user}`);
     }
 }

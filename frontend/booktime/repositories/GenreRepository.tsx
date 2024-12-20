@@ -1,5 +1,6 @@
 import { Genre } from "@/models/Genre";
-import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite';
+import { SQLiteDatabase } from 'expo-sqlite';
+import { useSQLite } from "@/hooks/useSQLite";
 import { Synchronisable } from './synchronisable';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -17,7 +18,7 @@ export class SQLiteGenreRepository extends Synchronisable implements GenreReposi
 
     constructor() {
         super();
-        this.db = useSQLiteContext();
+        this.db = useSQLite().db;
         this.api = new APIGenreRepository();
     }
 

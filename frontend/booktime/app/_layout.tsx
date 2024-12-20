@@ -27,8 +27,8 @@ export default function RootLayout() {
     });
     const colorScheme = useColorScheme();
 
-    deleteDatabaseAsync('booktime.db');
-    // AsyncStorage.clear();
+    // deleteDatabaseAsync('booktime.db');
+    AsyncStorage.clear();
 
     useEffect(() => {
         if (loaded) {
@@ -40,13 +40,17 @@ export default function RootLayout() {
         return null;
     }
 
+    const handleSQLiteError = (error: Error) => {
+        throw error;
+    }
+
     return (
         <SafeAreaProvider>
             <GestureHandlerRootView>
                 <BottomSheetModalProvider>
                     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-                        <RepositoryProviderWrapper databaseName='booktime.db' onInit={migrateDbIfNeeded}>
-                            <AuthProvider>
+                        <AuthProvider>
+                            <RepositoryProviderWrapper databaseName='booktime.db' onInit={migrateDbIfNeeded} onError={handleSQLiteError}>
                                 <ApiWrapper>
                                     <QueryProvider>
                                         <Stack>
@@ -56,8 +60,8 @@ export default function RootLayout() {
                                         </Stack>
                                     </QueryProvider>
                                 </ApiWrapper>
-                            </AuthProvider>
-                        </RepositoryProviderWrapper>
+                            </RepositoryProviderWrapper>
+                        </AuthProvider>
                     </ThemeProvider>
                 </BottomSheetModalProvider>
             </GestureHandlerRootView>

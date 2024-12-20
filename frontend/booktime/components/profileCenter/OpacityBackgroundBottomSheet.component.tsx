@@ -4,7 +4,7 @@ import { StyleSheet, TouchableOpacity } from "react-native";
 import Animated, { useAnimatedStyle, SharedValue } from "react-native-reanimated";
 
 export interface OpacityBackgroundBottomSheetProps {
-    isOpen: Array<boolean>;
+    isOpen: boolean[];
 }
 
 export const OpacityBackgroundBottomSheet = (props: OpacityBackgroundBottomSheetProps) => {

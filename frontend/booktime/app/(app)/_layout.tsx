@@ -1,16 +1,19 @@
-import 'react-native-reanimated';
-
-import { Redirect, Stack } from "expo-router";
-import { Text } from "react-native";
-
 import { useAuth } from "@/hooks/useAuth";
+import commonStyles from "@/styles/commonStyles";
+import { Redirect, Stack } from "expo-router";
 import React from 'react';
+import { ActivityIndicator, View } from "react-native";
+import 'react-native-reanimated';
 
 export default function AppLayout() {
     const { session, isLoading } = useAuth();
 
     if (isLoading) {
-        return <Text>Chargement...</Text>;
+        return (
+            <View style={commonStyles.loadingOverlay}>
+                <ActivityIndicator size="large" color="#25a9e2" />
+            </View>
+        );
     }
 
     if (!session) {

@@ -1,24 +1,25 @@
-import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite';
+import { SQLiteDatabase } from 'expo-sqlite';
+import { useSQLite } from "@/hooks/useSQLite";
 import { Synchronisable } from './synchronisable';
 import { v4 as uuidv4 } from 'uuid';
 import { Book, BookAllInfos } from '@/models/Book';
 import { LibraryWithBooks } from '@/models/Library';
 
 
-export interface BookRepositoryProps {
+export interface BookRepository {
 	getAll: () => Promise<BookAllInfos[]>;
 	getAllFromLib: (id_lib: string) => Promise<BookAllInfos[]> 
 	get: (id: string) => Promise<BookAllInfos | null>;
 	add: (state: BookAllInfos) => Promise<void>;
 }
 
-export class SQLiteBookRepository extends Synchronisable implements BookRepositoryProps {
+export class SQLiteBookRepository extends Synchronisable implements BookRepository {
 	private db: SQLiteDatabase;
 	private api: APIBookRepository;
 
 	constructor() {
 		super();
-		this.db = useSQLiteContext();
+		this.db = useSQLite().db;
 		this.api = new APIBookRepository();
 	}
 
@@ -82,7 +83,7 @@ export class SQLiteBookRepository extends Synchronisable implements BookReposito
 	}
 }
 
-export class APIBookRepository implements BookRepositoryProps {
+export class APIBookRepository implements BookRepository {
 	
 	async getAll(): Promise<BookAllInfos[]> {
 		return [];
