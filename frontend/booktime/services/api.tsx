@@ -71,12 +71,16 @@ export function ApiWrapper({ children }: ApiWrapperProps) {
 }
 
 export const authenticate = async (username: string, password: string): Promise<AuthResponseProps> => {
+    if (!keycloakClientId || !keycloakClientSecret) {
+        throw new Error('Keycloak not configured');
+    }
+    
     const response = await api.post(
         keycloakAuthUrl,
         new URLSearchParams({
             grant_type: 'password',
             client_id: keycloakClientId,
-            client_secret: "xIkFqIPnNTBKO9p5OUz0hiyjSThgfo1t",
+            client_secret: keycloakClientSecret,
             username: username,
             password: password,
             audience: 'gateway-client',
@@ -97,6 +101,10 @@ export const authenticate = async (username: string, password: string): Promise<
 }
 
 export const refresh = async (refreshToken: string): Promise<AuthResponseProps> => {
+    if (!keycloakClientId || !keycloakClientSecret) {
+        throw new Error('Keycloak not configured');
+    }
+
     const response = await api.post(
         keycloakAuthUrl,
         new URLSearchParams({
