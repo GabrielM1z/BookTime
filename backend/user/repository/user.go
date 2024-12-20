@@ -19,8 +19,8 @@ func NewUserRepository(db *sql.DB) *UserRepository {
 }
 
 func (br *UserRepository) InsertUser(user model.User) bool {
-	_, err := br.DB.Exec("INSERT INTO userBooktime (private, profil_image, banner_image, birthdate) VALUES ($1, $2, $3, $4)",
-		user.Private, user.ProfilImage, user.BannerImage, user.Birthday)
+	_, err := br.DB.Exec("INSERT INTO userBooktime (id_user, pseudo, description, private, profil_image, banner_image, birthdate) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+		user.IdUser, user.Pseudo, user.Description, user.Private, user.ProfilImage, user.BannerImage, user.Birthday)
 	if err != nil {
 		log.Println(err)
 		return false
@@ -30,13 +30,13 @@ func (br *UserRepository) InsertUser(user model.User) bool {
 
 func (ur *UserRepository) SelectUser(id uuid.UUID) (*model.User, error) {
 	query := `
-        SELECT id_user, private, profil_image, banner_image, birthdate
+        SELECT id_user, pseudo, description, private, profil_image, banner_image, birthdate
         FROM userBooktime WHERE id_user = $1;`
 
 	row := ur.DB.QueryRow(query, id)
 
 	var user model.User
-	err := row.Scan(&user.IdUser, &user.Private, &user.ProfilImage, &user.BannerImage, &user.Birthday)
+	err := row.Scan(&user.IdUser, &user.Pseudo, &user.Description, &user.Private, &user.ProfilImage, &user.BannerImage, &user.Birthday)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
@@ -49,28 +49,20 @@ func (ur *UserRepository) SelectUser(id uuid.UUID) (*model.User, error) {
 }
 
 func (ur *UserRepository) SelectUsers() []model.User {
-	var users []model.User
-	rows, err := ur.DB.Query("SELECT * FROM userBooktime")
+	query := "SELECT * FROM userBooktime"
+	rows, err := ur.DB.Query(query)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer rows.Close()
 
+	users := []model.User{}
 	for rows.Next() {
-		var (
-			id        uuid.UUID
-			private   string
-			profilImg string
-			bannerImg string
-			birthday  string
-		)
-		err := rows.Scan(&id, &private, &profilImg, &bannerImg, &birthday)
-		if err != nil {
-			log.Println(err)
-		} else {
-			user := model.User{IdUser: id, Private: private, ProfilImage: profilImg, BannerImage: bannerImg, Birthday: birthday}
-			users = append(users, user)
+		var user model.User
+		if err := rows.Scan(&user.IdUser, &user.Pseudo, &user.Description, &user.Private, &user.ProfilImage, &user.BannerImage, &user.Birthday); err != nil {
+			log.Fatal(err)
 		}
+		users = append(users, user)
 	}
 	return users
 }
@@ -87,9 +79,9 @@ func (ur *UserRepository) DeleteUser(id uuid.UUID) bool {
 }
 
 func (ur *UserRepository) UpdateUser(user model.User) bool {
-	query := `UPDATE userBooktime SET private = $1, profil_image = $2, banner_image = $3, birthdate = $4 WHERE id_user = $5`
+	query := `UPDATE userBooktime SET pseudo = $1, description = $2, private = $3, profil_image = $4, banner_image = $5, birthdate = $6 WHERE id_user = $7`
 
-	_, err := ur.DB.Exec(query, user.Private, user.ProfilImage, user.BannerImage, user.Birthday, user.IdUser)
+	_, err := ur.DB.Exec(query, user.Pseudo, user.Description, user.Private, user.ProfilImage, user.BannerImage, user.Birthday, user.IdUser)
 	if err != nil {
 		log.Println(err)
 		return false

@@ -1,7 +1,7 @@
 import { SQLiteDatabase } from 'expo-sqlite';
 import { useSQLite } from "@/hooks/useSQLite";
 import { Synchronisable } from './synchronisable';
-import { v4 as uuidv4 } from 'uuid';
+import uuid from 'react-native-uuid';
 import { Book, BookAllInfos } from '@/models/Book';
 import { LibraryWithBooks } from '@/models/Library';
 
