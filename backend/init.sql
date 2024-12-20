@@ -114,10 +114,11 @@ CREATE DATABASE user_db;
 -- Table USER
 CREATE TABLE IF NOT EXISTS userBooktime (
     id_user UUID,
+    pseudo VARCHAR(25) UNIQUE,
+    description VARCHAR(300),
     private BOOLEAN DEFAULT FALSE,
-    profil_image VARCHAR(255) UNIQUE NOT NULL,
-    banner_image VARCHAR(255) NOT NULL,
+    profil_image VARCHAR(150),
+    banner_image VARCHAR(150),
     birthdate DATE NOT NULL,
     PRIMARY KEY (id_user)
-
 );
