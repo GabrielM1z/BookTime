@@ -5,7 +5,9 @@ import { BottomSheetModal, BottomSheetModalProps, useBottomSheetModal } from "@g
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 const MAX_HEIGHT = SCREEN_HEIGHT / 2;
 
-export type CustomBottomSheetProps = BottomSheetModalProps
+export type CustomBottomSheetProps = BottomSheetModalProps & {
+    setIsOpen?: (isOpen: boolean) => void;
+}
 
 export const CustomBottomSheet = forwardRef<BottomSheetModal, CustomBottomSheetProps>((props, ref) => {
     const { onAnimate, ...restProps } = props;
@@ -15,6 +17,7 @@ export const CustomBottomSheet = forwardRef<BottomSheetModal, CustomBottomSheetP
 
     const handleAnimated = useCallback((fromIndex: number, toIndex: number) => {
         setIsOpen(toIndex !== -1);
+        props.setIsOpen && props.setIsOpen(toIndex !== -1);
         onAnimate && onAnimate(fromIndex, toIndex);
     }, []);
 
@@ -38,7 +41,7 @@ export const CustomBottomSheet = forwardRef<BottomSheetModal, CustomBottomSheetP
             bottomInset={8}
             detached
             style={styles.sheetContainer}
-            // stackBehavior='switch'
+            // stackBehavior='push'
             maxDynamicContentSize={MAX_HEIGHT}
             onAnimate={handleAnimated}
             {...restProps} />

@@ -43,6 +43,17 @@ func (bc *UserController) GetUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "success", "data": User, "msg": "get User successfully"})
 }
 
+func (bc *UserController) GetUsers(c *gin.Context) {
+	db := bc.DB
+	repoUser := repository.NewUserRepository(db)
+	getUser := repoUser.SelectUsers()
+	if getUser != nil {
+		c.JSON(http.StatusOK, gin.H{"status": "success", "data": getUser, "msg": "get users successfully"})
+	} else {
+		c.JSON(http.StatusOK, gin.H{"status": "success", "data": nil, "msg": "get users successfully"})
+	}
+}
+
 // InsertUser implements UserControllerInterface
 func (bc *UserController) InsertUser(c *gin.Context) {
 	db := bc.DB
@@ -77,6 +88,32 @@ func (bc *UserController) DeleteUser(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "User deleted successfully"})
+}
+
+func (uc *UserController) UpdateUser(c *gin.Context) {
+	db := uc.DB
+	idParam := c.Param("id")
+	id, err := uuid.Parse(idParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid library ID"})
+		return
+	}
+
+	var user model.User
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	user.IdUser = id
+
+	repoUser := repository.NewUserRepository(db)
+	success := repoUser.UpdateUser(user)
+	if !success {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "user updated successfully"})
 }
 
 var _ interfaces.UserControllerInterface = &UserController{}
