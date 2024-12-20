@@ -10,6 +10,7 @@ export interface BookRepositoryProps {
 	getAllFromLib: (id_lib: string) => Promise<BookAllInfos[]> 
 	get: (id: string) => Promise<BookAllInfos | null>;
 	add: (state: BookAllInfos) => Promise<void>;
+	addBookToLibrary: (id_library: string, book: BookAllInfos) => Promise<void>
 }
 
 export class SQLiteBookRepository extends Synchronisable implements BookRepositoryProps {
@@ -82,6 +83,28 @@ export class SQLiteBookRepository extends Synchronisable implements BookReposito
 			$cover_image_url: book.cover_image_url,
 		});
 	}
+
+	async addBookToLibrary(id_library: string, book: BookAllInfos): Promise<void> {
+        const statement = await this.db.prepareAsync(
+            'INSERT INTO book (id_book, title, description, publisher, publication_date, page_number, language, cover_image_url) VALUES ($id_book, $title, $description, $publisher, $publication_date, $page_number, $language, $cover_image_url);' +
+            'INSERT INTO library_book (id_library, id_book) VALUES ($id_library, $id_book);'
+        );
+
+        await statement.executeAsync({
+            $id_library: id_library,
+
+            $id_book: book.id_book,
+            $title: book.title,
+            $description: book.description,
+            $publisher: book.publisher,
+            $publication_date: book.publication_date,
+            $page_number: book.page_number,
+            $language: book.language,
+            $cover_image_url: book.cover_image_url,
+        });
+
+		console.log("addBookToLibrary: success")
+    }
 }
 
 export class APIBookRepository implements BookRepositoryProps {
@@ -101,5 +124,8 @@ export class APIBookRepository implements BookRepositoryProps {
 	async add(book: BookAllInfos): Promise<void> {
 		return;
 	}
-
+	
+	async addBookToLibrary(id_library: string, book: BookAllInfos): Promise<void> {
+		return;
+	}
 }

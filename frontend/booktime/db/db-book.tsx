@@ -5,8 +5,7 @@ import { useSQLiteContext } from 'expo-sqlite';
 ////////////////////////// REQUETE INSERT //////////////////////////
 
 // requete pour inserer un livre + liaison avec une étagère
-export const insertBook = async (library: Library, book: BookInfos) => 
-{
+export const insertBook = async (library: Library, book: BookInfos) => {
 	const db = useSQLiteContext();
 	const statement = await db.prepareAsync(`
 		INSERT INTO BOOK (title, description, id_format, publisher, publication_date, page_number, language, cover_image_url)
@@ -28,7 +27,7 @@ export const insertBook = async (library: Library, book: BookInfos) =>
 	`);
 
 	try {
-		let result = await statement.executeAsync({ 
+		let result = await statement.executeAsync({
 			$bookTitle: book.title,
 			$bookDescription: book.description,
 			$formatId: book.format,
@@ -39,7 +38,7 @@ export const insertBook = async (library: Library, book: BookInfos) =>
 			$bookCover: book.thumbnail,
 			$libraryId: library.id,
 		});
-		console.log("result : ", result)        
+		console.log("result : ", result)
 	} catch (error) {
 		console.error('Error insert into Librairy', error);
 	}
@@ -49,8 +48,7 @@ export const insertBook = async (library: Library, book: BookInfos) =>
 ////////////////////////// REQUETE DELETE //////////////////////////
 
 // Suppr la liason entre le livre et une étagère
-export const deleteBookFromLibrairy = async (library: Library, book: BookInfos) => 
-{
+export const deleteBookFromLibrairy = async (library: Library, book: BookInfos) => {
 	const db = useSQLiteContext();
 	const statement = await db.prepareAsync(`
 		DELETE FROM LIBRARY_BOOK
@@ -62,7 +60,7 @@ export const deleteBookFromLibrairy = async (library: Library, book: BookInfos) 
 			$bookId: book.id,
 			$libraryId: library.id,
 		});
-		console.log("result : ", result)        
+		console.log("result : ", result)
 	} catch (error) {
 		console.error('Error insert into Librairy', error);
 	}
@@ -72,22 +70,20 @@ export const deleteBookFromLibrairy = async (library: Library, book: BookInfos) 
 ////////////////////////// REQUETE SELECT //////////////////////////
 
 // Fonction pour recupérer tout les livres
-export const getAllBooks = async () => 
-{
+export const getAllBooks = async () => {
 	const db = useSQLiteContext();
 	try {
-        let allRows = await db.getAllAsync('SELECT * FROM book');
-        console.log(allRows)
-        return allRows;
+		let allRows = await db.getAllAsync('SELECT * FROM book');
+		console.log(allRows)
+		return allRows;
 	} catch (error) {
 		console.error('Error get all books', error);
 	}
-    return [];
+	return [];
 }
 
 // Fonction pour recupérer tout les livres avec toutes les infos
-export const getAllBooksWithAllInfo = async () => 
-{
+export const getAllBooksWithAllInfo = async () => {
 	const db = useSQLiteContext();
 	try {
 		let allRows = await db.getAllAsync(`
@@ -125,8 +121,7 @@ export const getAllBooksWithAllInfo = async () =>
 }
 
 // fonction pour récupérer tout les livres d'1 seule étagère
-export const getBooksFromLibrary = async (idLibrary: any) => 
-{
+export const getBooksFromLibrary = async (idLibrary: any) => {
 	const db = useSQLiteContext();
 	const statement = await db.prepareAsync(`
 		SELECT 
@@ -160,11 +155,74 @@ export const getBooksFromLibrary = async (idLibrary: any) =>
 	`);
 
 	try {
-		let result = await statement.executeAsync({ 
+		let result = await statement.executeAsync({
 			$idLibrary: idLibrary
 		});
-		console.log("result : ", result)        
+		console.log("result : ", result)
 	} catch (error) {
+		console.error('Error insert into Librairy', error);
+	}
+
+
+	return [];
+}
+
+// fonction pour récupérer tout les livres d'1 seule étagère
+export const getBookByIsbn13 = async (isbn13: any) => {
+	const db = useSQLiteContext();
+	const statement = await db.prepareAsync(`
+			SELECT 
+				book.*
+			FROM book
+			WHERE book.isbn13 = $isbn13;
+		`);
+
+	try {
+		let result = await statement.executeAsync({
+			$isbn13: isbn13
+		});
+		console.log("getBookByIsbn13 : ", result)
+	} catch (error) {
+		console.error('Error insert into Librairy', error);
+	}
+
+
+	return [];
+}
+
+// fonction pour récupérer tout les livres d'1 seule étagère
+export const createBook = async (book: BookInfos) => {
+	console.log(`test1`);
+	const db = useSQLiteContext();
+	const statement = await db.prepareAsync(`
+			INSERT INTO BOOK (isbn13, title, description, id_format, publisher, publication_date, page_number, language, cover_image_url)
+		VALUES (
+		    $bookIsbn13
+			$bookTitle,
+			$bookDescription,
+			$formatId,
+			$bookEditorName,
+			$bookPublicationDate,
+			$bookNbPage,
+			$bookLangage,
+			$bookCover
+		);
+		`);
+		try {
+			let result = await statement.executeAsync({
+			$bookIsbn13: book.isbn13,
+			$bookTitle: book.title,
+			$bookDescription: book.description,
+			$formatId: book.format,
+			$bookEditorName: book.publisher,
+			$bookPublicationDate: book.publicationDate,
+			$bookNbPage: book.pageNumber,
+			$bookLangage: book.language,
+			$bookCover: book.thumbnail,
+		});
+		console.log("createBook : ", result)
+	} catch (error) {
+		console.log(`test2`);
 		console.error('Error insert into Librairy', error);
 	}
 

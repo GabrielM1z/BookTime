@@ -2,6 +2,7 @@ import { Library } from '@/models/Library';
 import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite';
 import { Synchronisable } from './synchronisable';
 import { v4 as uuidv4 } from 'uuid';
+import { BookAllInfos } from '@/models/Book';
 
 
 

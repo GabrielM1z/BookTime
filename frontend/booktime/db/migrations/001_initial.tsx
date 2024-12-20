@@ -34,7 +34,7 @@ const initLibrary = async (db: SQLiteDatabase) => {
 	try {
 		db.execAsync(`
 			CREATE TABLE IF NOT EXISTS library (
-				id_library TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+				id_library TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))) ,
 				name VARCHAR(255) NOT NULL
 			);
 		`);
@@ -92,7 +92,7 @@ const initBook = async (db: SQLiteDatabase) => {
 	try {
 		db.execAsync(`
 			CREATE TABLE IF NOT EXISTS book (
-				id_book VARCHAR(13) PRIMARY KEY,
+				isbn13 VARCHAR(13) PRIMARY KEY,
 				title VARCHAR(255) NOT NULL,
 				description TEXT,
 				publisher VARCHAR(255),
