@@ -57,7 +57,7 @@ func (a *App) CreateRoutes() {
 
 	// Synchro routes
 	synchroController := controller.NewSynchroController(bookSynchroService)
-	routes.POST(prefix+"/synchro", synchroController.Synchro)
+	routes.POST(prefix+"/synchro/:lastSyncDate", synchroController.Synchro)
 
 	// Book routes
 	bookController := controller.NewBookController(a.DB)

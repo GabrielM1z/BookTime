@@ -112,7 +112,7 @@ CREATE DATABASE user_db;
 \connect user_db;
 
 -- Table USER
-CREATE TABLE IF NOT EXISTS userBooktime (
+CREATE TABLE IF NOT EXISTS user_booktime (
     id_user UUID,
     pseudo VARCHAR(25) UNIQUE,
     description VARCHAR(300),

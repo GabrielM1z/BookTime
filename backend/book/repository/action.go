@@ -2,7 +2,9 @@ package repository
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
+	"time"
 
 	"book/model"
 	"book/repository/interfaces"
@@ -36,6 +38,30 @@ func (ar *ActionRepository) InsertAction(post model.PostAction, idUser uuid.UUID
 func (ar *ActionRepository) SelectActions(idUser uuid.UUID) []model.Action {
 	query := "SELECT * FROM action WHERE id_user = $1"
 	rows, err := ar.DB.Query(query, idUser)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	actions := []model.Action{}
+	for rows.Next() {
+		var action model.Action
+		if err := rows.Scan(&action.IdAction, &action.IdUser, &action.Table, &action.Date, &action.Type, &action.Action, &action.ExecutedBy); err != nil {
+			log.Fatal(err)
+		}
+		actions = append(actions, action)
+	}
+	return actions
+}
+
+func (ar *ActionRepository) SelectActionsFromDate(idUser uuid.UUID, lastSyncDate string) []model.Action {
+	layout := time.RFC3339
+	parsedTime, err := time.Parse(layout, lastSyncDate)
+	if err != nil {
+		fmt.Println("Erreur lors de la conversion :", err)
+	}
+	query := "SELECT * FROM action WHERE id_user = $1 and date >= $2"
+	rows, err := ar.DB.Query(query, idUser, parsedTime)
 	if err != nil {
 		log.Fatal(err)
 	}

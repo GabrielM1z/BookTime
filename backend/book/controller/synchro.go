@@ -21,6 +21,7 @@ func NewSynchroController(SynchroService *service.SynchroService) *synchroContro
 }
 
 func (bc *synchroController) Synchro(c *gin.Context) {
+	lastSyncDate := c.Param("lastSyncDate")
 	var uuidUser = getUserID(c)
 	var actions []model.Action
 	if err := c.ShouldBindJSON(&actions); err != nil {
@@ -28,7 +29,7 @@ func (bc *synchroController) Synchro(c *gin.Context) {
 		return
 	}
 
-	actions_to_exec, err := bc.SynchroService.Synchro(uuidUser, actions)
+	actions_to_exec, err := bc.SynchroService.Synchro(uuidUser, actions, lastSyncDate)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

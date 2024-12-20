@@ -5,13 +5,13 @@ meta {
 }
 
 post {
-  url: {{base_book_url}}/synchro
+  url: {{base_book_url}}/synchro/:lastSyncDate
   body: json
   auth: bearer
 }
 
-params:query {
-  ~jsonData: 
+params:path {
+  lastSyncDate: 2070-11-09T18:30:20.832616Z
 }
 
 auth:bearer {

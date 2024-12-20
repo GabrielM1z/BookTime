@@ -24,10 +24,6 @@ func NewSynchroService(db *sql.DB) *SynchroService {
 	return &SynchroService{DB: db}
 }
 
-func (ss *SynchroService) filteredActions(mixed_actions []model.Action) ([]model.Action, error) {
-	return mixed_actions, nil
-}
-
 type libraryActionInfo struct {
 	ActionId uuid.UUID
 	Name     string
@@ -489,15 +485,13 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 }
 
 // Service principal pour chercher un livre
-func (ss *SynchroService) Synchro(uuidUser uuid.UUID, client_actions []model.Action) ([]model.Action, error) {
+func (ss *SynchroService) Synchro(uuidUser uuid.UUID, client_actions []model.Action, lastSyncDate string) ([]model.Action, error) {
 
-	server_actions := repository.NewActionRepository(ss.DB).SelectActions(uuidUser)
+	server_actions := repository.NewActionRepository(ss.DB).SelectActionsFromDate(uuidUser, lastSyncDate)
 
 	mixed_actions := slices.Concat(server_actions, client_actions)
 
-	filtered_actions, err := ss.filteredActions(mixed_actions)
-
-	server_actions_to_exec, client_actions_to_exec, err := ss.whoDoWhichActions(filtered_actions)
+	server_actions_to_exec, client_actions_to_exec, err := ss.whoDoWhichActions(mixed_actions)
 
 	ss.executeActionsToSynchronizeServer(server_actions_to_exec)
 

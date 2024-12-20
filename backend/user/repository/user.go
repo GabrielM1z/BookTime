@@ -19,7 +19,7 @@ func NewUserRepository(db *sql.DB) *UserRepository {
 }
 
 func (br *UserRepository) InsertUser(user model.User) bool {
-	_, err := br.DB.Exec("INSERT INTO userBooktime (id_user, pseudo, description, private, profil_image, banner_image, birthdate) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+	_, err := br.DB.Exec("INSERT INTO user_booktime (id_user, pseudo, description, private, profil_image, banner_image, birthdate) VALUES ($1, $2, $3, $4, $5, $6, $7)",
 		user.IdUser, user.Pseudo, user.Description, user.Private, user.ProfilImage, user.BannerImage, user.Birthday)
 	if err != nil {
 		log.Println(err)
@@ -31,7 +31,7 @@ func (br *UserRepository) InsertUser(user model.User) bool {
 func (ur *UserRepository) SelectUser(id uuid.UUID) (*model.User, error) {
 	query := `
         SELECT id_user, pseudo, description, private, profil_image, banner_image, birthdate
-        FROM userBooktime WHERE id_user = $1;`
+        FROM user_booktime WHERE id_user = $1;`
 
 	row := ur.DB.QueryRow(query, id)
 
@@ -49,7 +49,7 @@ func (ur *UserRepository) SelectUser(id uuid.UUID) (*model.User, error) {
 }
 
 func (ur *UserRepository) SelectUsers() []model.User {
-	query := "SELECT * FROM userBooktime"
+	query := "SELECT * FROM user_booktime"
 	rows, err := ur.DB.Query(query)
 	if err != nil {
 		log.Fatal(err)
@@ -68,7 +68,7 @@ func (ur *UserRepository) SelectUsers() []model.User {
 }
 
 func (ur *UserRepository) DeleteUser(id uuid.UUID) bool {
-	query := "DELETE FROM userBooktime WHERE id_user = $1"
+	query := "DELETE FROM user_booktime WHERE id_user = $1"
 
 	_, err := ur.DB.Exec(query, id)
 	if err != nil {
@@ -79,7 +79,7 @@ func (ur *UserRepository) DeleteUser(id uuid.UUID) bool {
 }
 
 func (ur *UserRepository) UpdateUser(user model.User) bool {
-	query := `UPDATE userBooktime SET pseudo = $1, description = $2, private = $3, profil_image = $4, banner_image = $5, birthdate = $6 WHERE id_user = $7`
+	query := `UPDATE user_booktime SET pseudo = $1, description = $2, private = $3, profil_image = $4, banner_image = $5, birthdate = $6 WHERE id_user = $7`
 
 	_, err := ur.DB.Exec(query, user.Pseudo, user.Description, user.Private, user.ProfilImage, user.BannerImage, user.Birthday, user.IdUser)
 	if err != nil {
