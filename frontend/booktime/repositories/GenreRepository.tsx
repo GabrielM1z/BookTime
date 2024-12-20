@@ -1,7 +1,7 @@
 import { Genre } from "@/models/Genre";
 import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite';
 import { Synchronisable } from './synchronisable';
-import { v4 as uuidv4 } from 'uuid';
+import uuid from 'react-native-uuid';
 
 
 
@@ -46,7 +46,7 @@ export class SQLiteGenreRepository extends Synchronisable implements GenreReposi
         );
 
         await statement.executeAsync({
-            $id_genre: uuidv4(),
+            $id_genre: uuid.v4(),
             $name: genre.name
         });
     }

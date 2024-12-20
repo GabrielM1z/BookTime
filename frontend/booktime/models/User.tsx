@@ -4,20 +4,20 @@ import { PayloadProps } from './keycloak';
 
 export interface UserProps {
     id: string;
-    emailVerified: boolean;
-    username: string;
-    givenName: string;
-    familyName: string
-    email: string;
+    emailVerified?: boolean;
+    username?: string;
+    givenName?: string;
+    familyName?: string
+    email?: string;
 }
 
 export class User extends Serializable<User> implements UserProps {
     id: string;
-    emailVerified: boolean;
-    username: string;
-    givenName: string;
-    familyName: string;
-    email: string;
+    emailVerified?: boolean;
+    username?: string;
+    givenName?: string;
+    familyName?: string;
+    email?: string;
 
     guestId: string = 'guest';
 

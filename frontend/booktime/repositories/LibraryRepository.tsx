@@ -1,7 +1,7 @@
 import { Library, LibraryWithBooks, LibraryWithBooksMin } from '@/models/Library';
 import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite';
 import { Synchronisable } from './synchronisable';
-import { v4 as uuidv4 } from 'uuid';
+import uuid from 'react-native-uuid';
 
 
 
@@ -48,7 +48,7 @@ export class SQLiteLibraryRepository extends Synchronisable implements LibraryRe
         this.sync();
 
         await statement.executeAsync({
-            $id_library: uuidv4(),
+            $id_library: uuid.v4(),
             $name: name
         });
     }
