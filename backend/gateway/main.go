@@ -68,6 +68,7 @@ func main() {
 	// Base URL du service Books
 	const booksServiceBaseURL = "http://books:8080"
 	const newsServiceBaseURL = "http://news:8080"
+	const userServiceBaseURL = "http://user:8080"
 
 	// Route service Books uniquement endpoint search sans protection
 	app.All("/books/search*", func(c *fiber.Ctx) error {
@@ -87,6 +88,11 @@ func main() {
 	// Route service News
 	app.All("/news/*", func(c *fiber.Ctx) error {
 		return proxyRequest(c, newsServiceBaseURL)
+	})
+
+	// Route service Users
+	app.All("/users/*", middleware.KeycloakMiddleware, func(c *fiber.Ctx) error {
+		return proxyRequest(c, userServiceBaseURL)
 	})
 
 	log.Fatal(app.Listen(":8080"))

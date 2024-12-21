@@ -7,5 +7,5 @@ import (
 )
 
 type SynchroServiceInterface interface {
-	Synchro(uuid.UUID, []model.Action) ([]model.Action, error)
+	Synchro(uuid.UUID, []model.Action, string) ([]model.Action, error)
 }

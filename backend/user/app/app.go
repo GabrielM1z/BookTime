@@ -37,13 +37,13 @@ func (a *App) CreateRoutes() {
 
 	prefix := "/users"
 
-	// Book routes
+	// Users routes
 	userController := controller.NewUserController(a.DB)
-	routes.GET(prefix+"/:id", userController.GetUser)
-	routes.GET(prefix+"/", userController.GetUsers)
-	routes.POST(prefix, userController.InsertUser)
-	routes.PUT(prefix+"/:id", userController.UpdateUser)
-	routes.DELETE(prefix+"/:id", userController.DeleteUser)
+	routes.GET(prefix+"/users", userController.GetUsers)
+	routes.POST(prefix+"/user", userController.InsertUser)
+	routes.GET(prefix+"/user/:id", userController.GetUser)
+	routes.PUT(prefix+"/user/:id", userController.UpdateUser)
+	routes.DELETE(prefix+"/user/:id", userController.DeleteUser)
 
 	a.Routes = routes
 }
