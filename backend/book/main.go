@@ -10,7 +10,7 @@ import (
 
 func main() {
 
-	f, _ := os.Create("log/gin.log")
+	f, _ := os.Create("gin.log")
 	gin.DefaultWriter = io.MultiWriter(f)
 
 	var a app.App
