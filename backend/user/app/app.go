@@ -42,6 +42,7 @@ func (a *App) CreateRoutes() {
 	routes.GET(prefix+"/users", userController.GetUsers)
 	routes.POST(prefix+"/user", userController.InsertUser)
 	routes.GET(prefix+"/user/:id", userController.GetUser)
+	routes.GET(prefix+"/userfromtoken", userController.GetUserFromToken)
 	routes.PUT(prefix+"/user/:id", userController.UpdateUser)
 	routes.DELETE(prefix+"/user/:id", userController.DeleteUser)
 
