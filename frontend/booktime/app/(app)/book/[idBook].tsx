@@ -1,8 +1,8 @@
-import { StyleSheet, View, Image } from 'react-native';
+import { StyleSheet, View, Image, TouchableOpacity } from 'react-native';
 import React, { useEffect, useState } from "react";
 
 import { ThemedView } from '@/components/ThemedView';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useNavigation } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { Colors } from '@/constants/Colors';
 import { Link } from 'expo-router';
@@ -14,6 +14,12 @@ export default function LivreDetail() {
 	const cover1 = require('@/assets/images/logo_refait.png');
 	const { idBook } = useLocalSearchParams();
 	console.log("idbook : ", idBook)
+
+	const navigation = useNavigation();
+
+    const goBack = () => {
+        navigation.goBack();
+    };
 
 	// TODO get les info du livre
 
@@ -39,9 +45,18 @@ export default function LivreDetail() {
 	return (
 		<ThemedView style={styles.container}>
 
+			<TouchableOpacity onPress={goBack}>
+
+            </TouchableOpacity>
+
 			<View style={styles.containerTitre}>
 				<Image source={cover1} style={styles.coverLivre}></Image>
-				<ThemedText type='titreLivreHorizontal'>{book.title}</ThemedText>
+				
+				<View>
+					<ThemedText type='titreLivreHorizontal'>{book.title}</ThemedText>
+				</View>
+				
+				
 				<Link push href={{
 					pathname: "/author/[idAuthor]",
 					params: {

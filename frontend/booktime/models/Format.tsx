@@ -1,6 +1,6 @@
 
 
 export interface Format{
-    id : string;
+    id_genre : string;
     name : string;
 }

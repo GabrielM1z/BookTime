@@ -7,13 +7,13 @@ export interface Library {
 }
 
 export interface LibraryWithBooks {
-	id: string;
+	id_library: string;
 	name: string;
 	books: BookAllInfos[]
 }
 
 export interface LibraryWithBooksMin {
-	id: string;
+	id_library: string;
 	name: string;
 	books: BookMinInfos[]
 }
