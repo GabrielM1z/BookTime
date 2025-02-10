@@ -65,9 +65,6 @@ export default function HomeScreen() {
 		// formatResponse: (data: TBook) => data.items,
 	});
 
-	// console.log(data);
-
-
 	return (
 		<ThemedView style={styles.body}>
 			<SafeAreaView>

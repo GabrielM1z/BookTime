@@ -2,7 +2,7 @@ import { BookAllInfos, BookMinInfos } from "./Book";
 import { Book2 } from "./Book2";
 
 export interface Library {
-	id: string;
+	id_library: string;
 	name: string;
 }
 

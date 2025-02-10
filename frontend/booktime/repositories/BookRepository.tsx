@@ -34,25 +34,17 @@ export class SQLiteBookRepository extends Synchronisable implements BookReposito
 	async getAllFromLib(id_library: string): Promise<BookAllInfos[]> {
 
 		const statement = await this.db.prepareAsync(
-			'SELECT *' + 
+			'SELECT * ' + 
 			'FROM book ' + 
-			'JOIN library_book ON book.id_book = library_book.id_library ' +
-			'JOIN library ON library_book.id_book = library.id_library' +
+			'JOIN library_book ON book.id_book = library_book.id_book ' +
+			'JOIN library ON library_book.id_library = library.id_library ' +
 			'WHERE library_book.id_library == $id_library '
 		);
 
 		const result = await statement.executeAsync({
 			$id_library: id_library
-		});
-
-		const libraryWithBooks: LibraryWithBooks = {
-			id: '',
-			name: '',
-			books: [],
-		};
-
-		console.log(result)
-
+		})
+		
 		return result ? (result as unknown as BookAllInfos[]) : [];
 	}
 
