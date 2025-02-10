@@ -1,22 +1,46 @@
-import React from "react";
-import { TouchableOpacity, View, Text, StyleSheet } from "react-native";
+import React, { useState } from "react";
+import { TouchableOpacity, View, Text, StyleSheet, LayoutChangeEvent, Dimensions } from "react-native";
 import {BottomTabBarProps} from '@react-navigation/bottom-tabs'
 import { Colors } from "@/constants/Colors";
 import { Feather } from "@expo/vector-icons";
+import TabBarButton from "./TabBarButton";
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
+import { transcode } from "buffer";
+import { transform } from "@babel/core";
 
 
-export function TabBar ({ state, descriptors, navigation} : BottomTabBarProps){
+export function TabBar ({ state, descriptors, navigation} : BottomTabBarProps)
+{
+	const [dimension, setDimensions] = useState({height: 20, width: 100});
 
-	const icon = {
-		index: (props: any) => <Feather name='home' size={24} color={Colors.dark.text} {...props}/>,
-		library: (props: any) => <Feather name='book' size={24} color={Colors.dark.text} {...props}/>,
-		search: (props: any) => <Feather name='search' size={24} color={Colors.dark.text} {...props}/>,
-		news: (props: any) => <Feather name='mail' size={24} color={Colors.dark.text} {...props}/>,
-		profile: (props: any) => <Feather name='user' size={24} color={Colors.dark.text} {...props}/>,
+	const buttonWidth = dimension.width / (state.routes.length-2);
+	const gap = (dimension.width - buttonWidth * (state.routes.length-2));
+
+	console.log("taille : ", dimension.width, buttonWidth, gap, state.routes.length)
+
+	const onTabBarLayout = (e: LayoutChangeEvent) => {
+		setDimensions({
+			height: e.nativeEvent.layout.height,
+			width: e.nativeEvent.layout.width,
+		})
 	}
 
+	const tabPositionX = useSharedValue(0);
+
+	const animatedStyle = useAnimatedStyle(() => {
+		return {transform: [{translateX: tabPositionX.value}]}
+	});
+
 	return (
-		<View style={styles.tabbar}>
+		<View onLayout={onTabBarLayout} style={styles.tabbar}>
+			<Animated.View style={[animatedStyle,{
+				position: 'absolute',
+				backgroundColor: Colors.dark.primary,
+				borderRadius: 30,
+				marginLeft: 10,
+				height: dimension.height - 15,
+				width: buttonWidth -20
+			}]}/>
 			{state.routes
 				.filter(route => route.name !== 'index' && !route.name.includes('style'))
 				.map((route, index) => {
@@ -31,6 +55,7 @@ export function TabBar ({ state, descriptors, navigation} : BottomTabBarProps){
 				const isFocused = state.index === index;
 
 				const onPress = () => {
+					tabPositionX.value = withSpring((buttonWidth) * index, {duration: 1500})
 					const event = navigation.emit({
 						type: 'tabPress',
 						target: route.key,
@@ -50,23 +75,16 @@ export function TabBar ({ state, descriptors, navigation} : BottomTabBarProps){
 				}
 
 				return (
-					<TouchableOpacity
+					<TabBarButton
 						key={route.name}
-						accessibilityRole="button"
-						accessibilityState={isFocused ? { selected: true } : {}}
-						accessibilityLabel={options.tabBarAccessibilityLabel}
-						testID={options.tabBarTestID}
 						onPress={onPress}
 						onLongPress={onLongPress}
-						style={styles.tabbarItem }
-					>
-						{icon[route.name]({
-							color: isFocused ? '#673ab7' : Colors.dark.text
-						})}
-						<Text style={{ color: isFocused ? '#673ab7' : Colors.dark.text }}>
-							{label}
-						</Text>
-					</TouchableOpacity>
+						isFocused={isFocused}
+						routeName={route.name}
+						color={{ color: isFocused ? '#673ab7' : Colors.dark.text }}
+						label={label}
+					>	
+					</TabBarButton>
 				)
 			})}
 		</View>
@@ -76,23 +94,17 @@ export function TabBar ({ state, descriptors, navigation} : BottomTabBarProps){
 const styles = StyleSheet.create({
 	tabbar: {
 		position: 'absolute',
-		bottom: 50,
+		bottom: 0,
+		marginHorizontal: 20,
 		flexDirection: 'row',
 		justifyContent: 'space-between',
 		alignItems: 'center',
 		backgroundColor: Colors.dark.secondary,
-		marginHorizontal: 20,
 		paddingVertical: 15,
 		borderRadius: 35,
 		shadowColor: '#000',
 		shadowOffset: {width: 0, height: 10},
 		shadowRadius: 10,
 		shadowOpacity : 0.1,
-	},
-	tabbarItem: {
-		flex: 1,
-		justifyContent: 'center',
-		alignItems: 'center',
-		gap: 5,
 	}
 })
