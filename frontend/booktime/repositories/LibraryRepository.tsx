@@ -85,7 +85,7 @@ export class SQLiteLibraryRepository extends Synchronisable implements LibraryRe
             // Si la bibliothèque n'existe pas encore dans le Map, on l'ajoute
             if (!libraryMap.has(id_library)) {
                 libraryMap.set(id_library, {
-                    id: id_library,
+                    id_library: id_library,
                     name: name,
                     books: [],
                 });

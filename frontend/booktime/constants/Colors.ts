@@ -13,25 +13,56 @@ export const theme = {
 	logoDeepBlue: '#191a32',
 }
 
+export const libraryColors = [
+	'#ff6961',
+	'#77dd77',
+	'#84b6f4'
+]
+
 export const Colors = {
 	light: {
-		text: '#11181C',
-		background: '#fff',
-		tint: tintColorLight,
-		icon: '#687076',
-		tabIconDefault: '#687076',
-		tabIconSelected: tintColorLight,
-		primary: '#000000',
-		secondary: '#000000',
-	},
-	dark: {
-		text: theme.logoWhite,
-		background: theme.logoDeepBlue,
-		tint: tintColorDark,
-		icon: '#9BA1A6',
-		tabIconDefault: '#9BA1A6',
-		tabIconSelected: tintColorDark,
 		primary: theme.logoDeepBlue,
 		secondary: theme.logoBlue,
+		background: '#fff',
+		surface: '#000000',
+		text: '#11181C',
+		textMuted: '#6B7280',
+		error: '#B00020',
+		warning: '#FFA000',
+		success: '#388E3C',
+		info: '#1976D2',
+		border: '#E0E0E0',
+		disabled: '#9E9E9E',	
+	},
+	dark: {
+		primary: theme.logoDeepBlue,
+		secondary: theme.logoBlue,
+		background: theme.logoDeepBlue,
+		surface: '#000000',
+		text: theme.logoWhite,
+		textMuted: '#6B7280',
+		error: '#B00020',
+		warning: '#FFA000',
+		success: '#388E3C',
+		info: '#1976D2',
+		border: '#E0E0E0',
+		disabled: '#9E9E9E',
 	},
 };
+
+
+/**
+ * - primary	: Couleur principale utilisée pour les actions, boutons, ou éléments proéminents.
+ * - secondary	: Couleur secondaire utilisée pour les accents ou les éléments complémentaires.
+ * - background	: Couleur de fond principale
+ * - surface 	: Couleur des surfaces surélevées (cartes, menus).
+ * - text   	: Couleur pour le texte principal.
+ * - textMuted  : Couleur pour les textes ou icônes moins importants.
+ * - error 		: Couleur pour les erreurs
+ * - warning 	: Couleur pour les erreurs
+ * - success 	: Couleur pour les succes
+ * - info 		: Couleur pour les info
+ * - border 	: Couleur pour les bordures
+ * - disabled	: Couleur pour les éléments disabled
+*/ 
+
