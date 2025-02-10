@@ -1,12 +1,15 @@
 import { StyleSheet, View, Image, Pressable } from 'react-native';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { ThemedText } from './ThemedText';
-import { BookInfosSearch } from '@/models/Book';
+import { BookAllInfos, BookInfos, BookInfosSearch } from '@/models/Book';
 import React, { useEffect, useState } from 'react';
 
 import axios from 'axios';
-import { Buffer } from 'buffer'; 
+import { Buffer } from 'buffer';
 import { Colors } from '@/constants/Colors';
+import { createBook, getBookByIsbn13, insertBook } from '@/db/db-book';
+import { Library } from '@/models/Library';
+import { useRepository } from '@/hooks/useRepository';
 
 
 
@@ -14,7 +17,7 @@ const defaultCover = require('@/assets/images/logo_refait.png');
 
 // async function getImageAsBase64(url: string): Promise<string | null> {
 //   console.log("coucou")
-  
+
 //   try {
 //     const response = await axios.get(url, { responseType: 'arraybuffer' }); // Utilisez 'arraybuffer' pour manipuler des données binaires
 //     const base64 = Buffer.from(response.data, 'binary').toString('base64'); // Convertissez les données en Base64
@@ -28,8 +31,32 @@ const defaultCover = require('@/assets/images/logo_refait.png');
 
 export const LivreRecherche = ({ book }: { book: BookInfosSearch }) => {
 
-  const handleAddBook = () => {
-    console.log(`Book added: ${book}`);
+  const { bookRepository, libraryRepository } = useRepository();
+  
+  const handleAddBook = async () => {
+
+    const bookInfosDatasBase: BookAllInfos = {
+      id_book: book.isbn13,
+      title: book.title,
+      description: "test",
+      publisher: "test",
+      publication_date : "test",
+      page_number: 0,
+      language: "test",
+      cover_image_url: book.thumbnail,
+    }
+
+    const listLibrary = await libraryRepository.getAll()
+    console.log("listLibrary : " , listLibrary)
+
+    for( let library of listLibrary){
+      console.log("library_name = ", library.name ," / library_id = ", library.id);
+    }
+    
+
+    bookRepository.addBookToLibrary("1", bookInfosDatasBase)
+
+    console.log(`Book added: ${book.title}`);
   };
 
   const [imageSource, setImageSource] = useState<string | number>(defaultCover);

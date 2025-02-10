@@ -7,10 +7,11 @@ import { LivreRecherche } from '@/components/LivreRecherche'
 import { ThemedView } from '@/components/ThemedView';
 
 import { useInfiniteScroll } from '@/core/api';
-import { Book } from '@/models/Book';
+// import { Book } from '@/models/Book';
 import { apiLinkServeur } from '@/constants/Api';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import React from 'react';
+import { BookInfosSearch } from '@/models/Book';
 
 //Filtres appliqué à la recherche API
 type TFilters = {
@@ -24,17 +25,17 @@ type TFilters = {
 // }
 
 // ISBN différents smais id Google Book dupliqué 
-const removeDuplicates = (items: Book[]): Book[] => {
-	const seenIds = new Set<string>();
-	return items.filter((item) => {
-		if (seenIds.has(item.id)) {
-			return false;
-		} else {
-			seenIds.add(item.id);
-			return true;
-		}
-	});
-};
+// const removeDuplicates = (items: Book[]): Book[] => {
+// 	const seenIds = new Set<string>();
+// 	return items.filter((item) => {
+// 		if (seenIds.has(item.id)) {
+// 			return false;
+// 		} else {
+// 			seenIds.add(item.id);
+// 			return true;
+// 		}
+// 	});
+// };
 
 
 export default function HomeScreen() {
@@ -55,7 +56,7 @@ export default function HomeScreen() {
 		onRefresh,
 		onEndReached,
 		isFetchingNextPage
-	} = useInfiniteScroll<Book, TFilters>({
+	} = useInfiniteScroll<BookInfosSearch, TFilters>({
 		url: apiLinkServeur,
 		limit: 10,
 		filters: filters,

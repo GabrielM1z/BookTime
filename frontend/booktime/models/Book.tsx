@@ -33,6 +33,7 @@ export interface Book{
     volumeInfo : BookInfos
 }
 
+//book model BDD
 export interface BookAllInfos {
 	id_book : string;
 	title : string;
