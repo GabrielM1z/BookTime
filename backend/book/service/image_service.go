@@ -37,7 +37,8 @@ func (i *ImageService) SaveBookImage(imageURL string, bookID string) (string, er
 	}
 
 	// Détermine le chemin du fichier
-	filename := fmt.Sprintf("book_%d.jpg", bookID)
+	//filename := fmt.Sprintf("book_%d.jpg", bookID)
+	filename := fmt.Sprintf("book_12345.jpg", bookID)
 	filePath := filepath.Join(storagePath, filename)
 
 	// Crée le fichier localement
