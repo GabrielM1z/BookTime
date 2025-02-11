@@ -7,6 +7,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { Colors } from '@/constants/Colors';
 import { Link } from 'expo-router';
 import { useRepository } from '@/hooks/useRepository';
+import LibraryChoice from '@/components/LibraryChoice';
 
 
 export default function LivreDetail() {
@@ -64,13 +65,18 @@ export default function LivreDetail() {
 						}
 					}}>
 					<ThemedText type='auteurLivreHorizontal'>{book.title}</ThemedText>
-		  		</Link>
+				</Link>
 				
 			</View>
 
 			<View style={styles.containerResume}>
 				<ThemedText type='sousTab'>Résumé</ThemedText>
 				<ThemedText>{book.description}</ThemedText>
+			</View>
+
+			<View style={styles.containerResume}>
+				<ThemedText type='sousTab'>Ajouter</ThemedText>
+				<LibraryChoice></LibraryChoice>
 			</View>
 		</ThemedView>
 	);
