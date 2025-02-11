@@ -2,6 +2,7 @@ package controller
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
 	"os"
 
@@ -54,6 +55,22 @@ func (bc *BookController) GetBook(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
+
+		//NEW----------------
+		imageURL := book.CoverImageUrl // URL de l'image récupérée
+		bookID := idParam              // ID du livre correspondant
+
+		ImageService := service.NewImageService("/var/www/booktime/images/") // Crée un service d'images
+
+		publicURL, err := ImageService.SaveBookImage(imageURL, bookID) // Enregistre l'image localement et retourne l'URL publique
+		if err != nil {
+			fmt.Println("Erreur lors de l'enregistrement de l'image:", err)
+		} else {
+			fmt.Println("Image enregistrée et accessible à :", publicURL)
+			book.CoverImageUrl = publicURL
+		}
+		//NEW----------------
+
 		repoBook.InsertBook(*book)
 
 		//Add new book-author when book is added to bdd
