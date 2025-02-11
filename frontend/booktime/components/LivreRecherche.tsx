@@ -10,6 +10,7 @@ import { Colors } from '@/constants/Colors';
 import { createBook, getBookByIsbn13, insertBook } from '@/db/db-book';
 import { Library } from '@/models/Library';
 import { useRepository } from '@/hooks/useRepository';
+import CoverPressable from './CoverPressable';
 
 
 
@@ -80,6 +81,7 @@ export const LivreRecherche = ({ book }: { book: BookInfosSearch }) => {
   return (
     <View style={styles.itemContainer}>
 
+      <CoverPressable id_book={book.isbn13} cover={book.thumbnail} ></CoverPressable>
       <Image source={typeof imageSource === 'string' ? { uri: imageSource } : imageSource} style={styles.itemImage} resizeMode={'cover'}></Image>
       {/* <Image source={{uri:"data:image/png;base64,"+getImageAsBase64(book.thumbnail)}} defaultSource={defaultCover}  style={styles.itemImage} resizeMode={'cover'} ></Image> */}
 
