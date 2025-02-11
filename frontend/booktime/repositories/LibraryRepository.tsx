@@ -54,33 +54,36 @@ export class SQLiteLibraryRepository extends Synchronisable implements LibraryRe
         });
     }
 
-    async getAllInfo():  Promise<LibraryWithBooksMin[]|null> {
+    async getAllInfo():  Promise<LibraryWithBooksMin[]|[]> {
 
-        console.log("oui")
-        let allRows = await this.db.getAllAsync<{
-            id_library: string;
-            name: string;
-            id_book: string;
-            title: string;
-            cover_image_url: string;
-        }>(
-            'SELECT ' + 
-            'library.id_library AS id_library, ' + 
-            'library.name AS name, ' + 
-            'book.id_book AS id_book, ' + 
-            'book.title AS title, ' + 
-            'book.cover_image_url AS cover_image_url ' + 
-            'FROM library ' +
-            'LEFT JOIN library_book ON library.id_library = library_book.id_library ' +
-            'LEFT JOIN book ON book.id_book = library_book.id_book;'
-        );
+        // let allRows = await this.db.getAllAsync<{
+        //     id_library: string;
+        //     name: string;
+        //     id_book: string;
+        //     title: string;
+        //     cover_image_url: string;
+        // }>(
+        //     'SELECT ' + 
+        //     'library.id_library AS id_library, ' + 
+        //     'library.name AS name, ' + 
+        //     'book.id_book AS id_book, ' + 
+        //     'book.title AS title, ' + 
+        //     'book.cover_image_url AS cover_image_url ' + 
+        //     'FROM library ' +
+        //     'LEFT JOIN library_book ON library.id_library = library_book.id_library ' +
+        //     'LEFT JOIN book ON book.id_book = library_book.id_book;'
+        // );
 
-        console.log("rows : ",allRows)
+        const allLibrary : LibraryWithBooks[] = await this.getAll();
+
+
+        // console.log("rows : ",allRows)
 
         const libraryMap = new Map<string, LibraryWithBooksMin>();
 
 
         allRows.forEach(row => {
+            console.log("row : ", row)
             const { id_library, name, id_book, title, cover_image_url } = row;
 
             // Si la bibliothèque n'existe pas encore dans le Map, on l'ajoute
@@ -94,11 +97,13 @@ export class SQLiteLibraryRepository extends Synchronisable implements LibraryRe
 
             // Ajouter le livre à la bibliothèque correspondante
             const library = libraryMap.get(id_library)!;
-            library.books.push({
-                id_book: id_book,
-                title: title,
-                cover_image_url: cover_image_url,
-            });
+            if(library.books.length != 0){
+                library.books.push({
+                    id_book: id_book,
+                    title: title,
+                    cover_image_url: cover_image_url,
+                });
+            }
         });
 
         console.log("oui")
