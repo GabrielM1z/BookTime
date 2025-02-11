@@ -50,13 +50,19 @@ export const LivreRecherche = ({ book }: { book: BookInfosSearch }) => {
     console.log("listLibrary : " , listLibrary)
 
     for( let library of listLibrary){
-      console.log("library_name = ", library.name ," / library_id = ", library.id);
+      console.log("library_name = ", library.name ," / library_id = ", library.id_library);
     }
     
 
-    bookRepository.addBookToLibrary("1", bookInfosDatasBase)
-
-    console.log(`Book added: ${book.title}`);
+    bookRepository.addBookToLibrary(listLibrary[0].id_library, bookInfosDatasBase)
+  
+    const listInfoLibrary = await libraryRepository.getAllInfo()
+    console.log("etageres :", JSON.stringify(listInfoLibrary, null, 2));
+  
+    let listBook = await bookRepository.getAll();
+    console.log("Livres :", JSON.stringify(listBook, null, 2));
+    // console.log("Livres : ", listBook);
+    
   };
 
   const [imageSource, setImageSource] = useState<string | number>(defaultCover);

@@ -12,7 +12,7 @@ export interface LibraryWithBooks {
 	books: BookAllInfos[]
 }
 
-export interface LibraryWithBooksMin {
+export interface LibraryWithBooksMin extends Library {
 	id_library: string;
 	name: string;
 	books: BookMinInfos[]
