@@ -58,6 +58,6 @@ const styles = StyleSheet.create({
         height: 600,
 	},
     paddingBottom: {
-        height: 80,
+        height: 90,
     }
 });
