@@ -113,8 +113,12 @@ func (bc *UserController) GetUserFromToken(c *gin.Context) {
 	}
 
 	if User == nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-		return
+		user := model.User{IdUser: id, Pseudo: "", Description: "", Private: false, ProfilImage: "", BannerImage: "", Birthday: "1900-01-01"}
+		insert := repoUser.InsertUser(user)
+		if !insert {
+			c.JSON(http.StatusInternalServerError, gin.H{"status": "failed", "msg": "User does not exist and insert User failed"})
+		}
+		User = &model.User{IdUser: id}
 	}
 
 	name, email, err := getUserInfoFromToken(c)
