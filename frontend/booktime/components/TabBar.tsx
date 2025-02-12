@@ -13,7 +13,7 @@ export function TabBar ({ state, descriptors, navigation} : BottomTabBarProps)
 	const buttonWidth = dimension.width / (state.routes.length-2);
 	const gap = (dimension.width - buttonWidth * (state.routes.length-2));
 
-	console.log("taille : ", dimension.width, buttonWidth, gap, state.routes.length)
+	// console.log("taille : ", dimension.width, buttonWidth, gap, state.routes.length)
 
 	const onTabBarLayout = (e: LayoutChangeEvent) => {
 		setDimensions({

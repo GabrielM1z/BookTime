@@ -12,7 +12,7 @@ const cover1 = require('@/assets/images/logo_refait.png');
 // Sous ecran de la bibliotheque, affichage par étagere CLASSIQUE (celle de l'utilisateur)
 export default function pageEtageres() {
 
-    const [etageres, setEtageres] = useState<LibraryWithBooksMin[] | null>([]);
+    const [etageres, setEtageres] = useState<LibraryWithBooksMin[] | []>([]);
 
     // Charger les étagères initiales depuis la base de données
     useEffect(() => {
@@ -21,10 +21,12 @@ export default function pageEtageres() {
 
     const { libraryRepository } = useRepository();
 
-    const refreshEtageres = async () => {
+    const refreshEtageres = () => {
         try {
-            const data = await libraryRepository.getAllInfo();
-            setEtageres(data);
+            libraryRepository.getAllInfo().then((data)=>{
+                setEtageres(data);
+                console.log(data)
+            })
             
         } catch (error) {
             console.error('Error fetching etageres:', error);
@@ -32,11 +34,11 @@ export default function pageEtageres() {
     };
 
 	// Fonction appelée depuis le composant enfant pour ajouter une nouvelle étagère
-    const handleAddEtagere = async () => {
-        await refreshEtageres(); // Recharge les étagères depuis la base après l'ajout
+    const handleAddEtagere = () => {
+        refreshEtageres(); // Recharge les étagères depuis la base après l'ajout
     };
 
-    console.log("etageres :", JSON.stringify(etageres, null, 2));
+    // console.log("etageres :", JSON.stringify(etageres, null, 2));
 
     return (
 		<ScrollView style={styles.etagereContainer}>

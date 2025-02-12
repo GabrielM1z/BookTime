@@ -48,20 +48,20 @@ export const LivreRecherche = ({ book }: { book: BookInfosSearch }) => {
     }
 
     const listLibrary = await libraryRepository.getAll()
-    console.log("listLibrary : " , listLibrary)
+    // console.log("listLibrary : " , listLibrary)
 
-    for( let library of listLibrary){
-      console.log("library_name = ", library.name ," / library_id = ", library.id_library);
-    }
+    // for( let library of listLibrary){
+    //   console.log("library_name = ", library.name ," / library_id = ", library.id_library);
+    // }
     
 
     bookRepository.addBookToLibrary(listLibrary[0].id_library, bookInfosDatasBase)
   
     const listInfoLibrary = await libraryRepository.getAllInfo()
-    console.log("etageres :", JSON.stringify(listInfoLibrary, null, 2));
+    // console.log("etageres :", JSON.stringify(listInfoLibrary, null, 2));
   
     let listBook = await bookRepository.getAll();
-    console.log("Livres :", JSON.stringify(listBook, null, 2));
+    // console.log("Livres :", JSON.stringify(listBook, null, 2));
     // console.log("Livres : ", listBook);
     
   };

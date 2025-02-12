@@ -12,7 +12,7 @@ export interface LibraryRepository {
     getAll: () => Promise<Library[]>;
     get: (id: string) => Promise<Library | null>;
     add: (name: string) => Promise<void>;
-    getAllInfo: () => Promise<LibraryWithBooksMin[] | null>
+    getAllInfo: () => Promise<LibraryWithBooksMin[] | []>
     getAllBookFromLib: (id_library: string) => Promise<BookMinInfos[] | null> 
 }
 
@@ -60,44 +60,51 @@ export class SQLiteLibraryRepository extends Synchronisable implements LibraryRe
     async getAllBookFromLib(id_library: string): Promise<BookMinInfos[]> {
 
         const statement = await this.db.prepareAsync(
-            'SELECT * ' +
-            'FROM book ' +
-            'JOIN library_book ON book.id_book = library_book.id_book ' +
-            'JOIN library ON library_book.id_library = library.id_library ' +
-            'WHERE library_book.id_library == $id_library '
+            `SELECT book.*
+            FROM book
+            JOIN library_book ON book.id_book = library_book.id_book
+            JOIN library ON library_book.id_library = library.id_library
+            WHERE library.id_library = $id_library; `
         );
 
         const result = await statement.executeAsync({
             $id_library: id_library
         })
 
-        return result ? (result as unknown as BookAllInfos[]) : [];
+        const rows = await result.getAllAsync();
+
+        console.log("Result getAllBookFromLib : ", rows)
+
+        return rows ? (rows as unknown as BookMinInfos[]) : [];
     }
 
     async getAllInfo(): Promise<LibraryWithBooksMin[] | []> {
 
-        const allLibrary: Library[] = await this.getAll();
-        const allLibraryWithBook: LibraryWithBooksMin[] = []; 
         try {
+            const allLibrary: Library[] = await this.getAll();
 
-            for (let library of allLibrary){
-                let listBookOfLibrary = await this.getAllBookFromLib(library.id_library);
-                console.log("etagere", library.name, ":", listBookOfLibrary)
-                let newLibraryWithBooks : LibraryWithBooksMin = {
+            // Tableau de promesses pour récupérer tous les livres
+            const libraryPromises = allLibrary.map(async (library) => {
+                const listBookOfLibrary = await this.getAllBookFromLib(library.id_library);
+                console.log("library", library.name, ":", listBookOfLibrary)
+                return {
                     id_library: library.id_library,
                     name: library.name,
                     books: listBookOfLibrary
                 };
+            });
     
-                allLibraryWithBook.push(newLibraryWithBooks);
-            }
+            // Attendre que toutes les promesses soient résolues
+            const allLibraryWithBook: LibraryWithBooksMin[] = await Promise.all(libraryPromises);
+    
+            return allLibraryWithBook;
             
         } catch (error) {
-            console.log("Error", error);            
+            console.log("Error", error);   
+            return [];         
         }
 
 
-        return allLibraryWithBook;
     }
 }
 
@@ -115,8 +122,8 @@ export class APILibraryRepository implements LibraryRepository {
         return;
     }
 
-    async getAllInfo(): Promise<LibraryWithBooksMin[] | null> {
-        return null;
+    async getAllInfo(): Promise<LibraryWithBooksMin[] | []> {
+        return [];
     }
 
     async getAllBookFromLib(id_library: string): Promise<BookMinInfos[] | null> {
