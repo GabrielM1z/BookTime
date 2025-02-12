@@ -1,4 +1,5 @@
 import { useAuth } from '@/hooks/useAuth';
+import commonStyles from '@/styles/commonStyles';
 import { AntDesign, Ionicons } from '@expo/vector-icons';
 import { AxiosError } from 'axios';
 import { Href, useRouter } from 'expo-router';
@@ -6,22 +7,19 @@ import React, { useState } from 'react';
 import { ActivityIndicator, Alert, Image, Keyboard, StatusBar, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import styles from "./SignIn.style";
-import commonStyles from '@/styles/commonStyles';
 
 
 export default function SignIn() {
-    const { logIn, logAsGuest } = useAuth();
+    const { logIn, logAsGuest, isLoading } = useAuth();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
     const router = useRouter();
 
     const logoImageSource = require('@/assets/images/logo_refait.png');
 
     const handleLogIn = async () => {
-        setIsLoading(true);
         Keyboard.dismiss();
 
         try {
@@ -31,9 +29,6 @@ export default function SignIn() {
         catch (error) {
             const axiosError = error as AxiosError;
             Alert.alert('Error', axiosError.message);
-        }
-        finally {
-            setIsLoading(false);
         }
     };
 

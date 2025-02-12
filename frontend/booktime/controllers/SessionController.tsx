@@ -1,20 +1,20 @@
-import { Session, AddSessionDto } from "@/models/Session";
-import { CachedSessionRepository } from "@/repositories/SessionRepository";
 import { guestUserId } from "@/constants";
 import { useRepository } from "@/hooks/useRepository";
+import { Session } from "@/models/Session";
 import { AuthResponseProps, PayloadProps } from "@/models/keycloak";
+import { CachedSessionRepository } from "@/repositories/SessionRepository";
 import { jwtDecode } from 'jwt-decode';
 import { v4 as uuidv4 } from 'uuid';
 
 export class SessionController {
-    private sessionRepo: CachedSessionRepository;
+    sessionRepo: CachedSessionRepository;
 
     constructor() {
         const { cachedSessionRepository } = useRepository();
         this.sessionRepo = cachedSessionRepository;
     }
 
-    sessionFromAuthResponse(authResponse: AuthResponseProps): Session {
+    async getSessionFromAuthResponse(authResponse: AuthResponseProps, save: boolean = false): Promise<Session> {
         const payload = jwtDecode<PayloadProps>(authResponse.access_token);
         const newSession: Session = {
             id: uuidv4(),
@@ -25,12 +25,12 @@ export class SessionController {
             refresh_expires_in: authResponse.refresh_expires_in,
             token_type: authResponse.token_type,
         }
-        return newSession;
-    }
 
-    async createSession(session: Session): Promise<void> {
-        await this.sessionRepo.add(session);
-        await this.sessionRepo.setCurrentSessionId(session.id);
+        if (save) {
+            await this.sessionRepo.addOrUpdate(newSession);
+            await this.sessionRepo.setCurrentSessionId(newSession.id);
+        }
+        return newSession;
     }
 
     async removeSession(session_or_id: Session | string): Promise<void> {
@@ -47,22 +47,34 @@ export class SessionController {
         return currentSessionId ? await this.sessionRepo.get(currentSessionId) : null;
     }
 
-    async updateSessionTokens(authResponse: AuthResponseProps): Promise<void> {
-        
+    async updateSessionTokens(authResponse: AuthResponseProps, session: Session): Promise<Session> {
+        const updatedSession: Session = {
+            ...session,
+            access_token: authResponse.access_token,
+            expires_in: authResponse.expires_in,
+            refresh_token: authResponse.refresh_token,
+            refresh_expires_in: authResponse.refresh_expires_in,
+            token_type: authResponse.token_type,
+        }
+        await this.sessionRepo.addOrUpdate(updatedSession);
+        return updatedSession;
     }
 
     async getOrCreateGuestSession(): Promise<Session> {
         const sessions = await this.sessionRepo.getAll();
-        const guestSession = sessions.find(s => s.id_user === guestUserId);
-        if (guestSession) {
-            await this.sessionRepo.setCurrentSessionId(guestSession.id);
-            return guestSession;
+        let guestSession = sessions.find(s => s.id_user === guestUserId);
+        if (guestSession === undefined) {
+            guestSession = {
+                id: uuidv4(),
+                id_user: guestUserId,
+            }
+            await this.sessionRepo.addOrUpdate(guestSession);
         }
-        const newSession: Session = {
-            id: uuidv4(),
-            id_user: guestUserId,
-        }
-        await this.createSession(newSession);
-        return newSession;
+        await this.sessionRepo.setCurrentSessionId(guestSession.id);
+        return guestSession;
+    }
+
+    async getAllSessions(): Promise<Session[]> {
+        return await this.sessionRepo.getAll();
     }
 }

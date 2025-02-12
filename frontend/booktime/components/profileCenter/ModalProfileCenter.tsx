@@ -1,15 +1,16 @@
 import { useAuth } from '@/hooks/useAuth';
 import { useRepository } from '@/hooks/useRepository';
+import { User } from '@/models/User';
 import { Ionicons } from '@expo/vector-icons';
 import { BottomSheetFlatList, BottomSheetModal, BottomSheetView, useBottomSheetModal } from '@gorhom/bottom-sheet';
 import { Href, useRouter } from 'expo-router';
 import React, { forwardRef, useCallback, useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import TouchableScale from '../TouchableScale';
 import { CustomBottomSheet } from './CustomBottomSheet.component';
 import { OpacityBackgroundBottomSheet } from './OpacityBackgroundBottomSheet.component';
-import TouchableScale from '../TouchableScale';
 import { ProfileItem } from './ProfileItem.component';
-import { User } from '@/models/User';
+import { useController } from '@/hooks/useController';
 
 
 export interface ProfileCenterProps {
@@ -27,13 +28,14 @@ export const ModalProfileCenter = forwardRef<BottomSheetModal>((props, ref) => {
     const [transitioning, setTransitioning] = useState(false);
 
     const { userRepository } = useRepository();
-    const { switchSession, logOut, session, getAllSessions } = useAuth();
+    const { sessionController } = useController();
+    const { switchSession, logOut, session } = useAuth();
 
     const [users, setUsers] = useState<User[]>([]);
 
     useEffect(() => {
         const fetchSessions = async () => {
-            const sessions = await getAllSessions();
+            const sessions = await sessionController.getAllSessions();
             const usersData = await Promise.all(sessions.map(session => userRepository.getBySession(session)));
             setUsers(usersData);
         }

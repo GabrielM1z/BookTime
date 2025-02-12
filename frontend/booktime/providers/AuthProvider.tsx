@@ -1,9 +1,8 @@
-import { sessionFromKeycloak, guestSessionFactory } from "@/helpers/keycloak";
+import { useController } from "@/hooks/useController";
 import { Session } from "@/models/Session";
 import { AuthResponseProps } from "@/models/keycloak";
 import { authenticate } from "@/services/api";
 import React, { createContext, useEffect, useState } from "react";
-import { useController } from "@/hooks/useController";
 
 export interface AuthContextProps {
     session: Session | null;
@@ -13,7 +12,6 @@ export interface AuthContextProps {
     logOut: () => Promise<void>;
     updateSessionTokens: (authResponse: AuthResponseProps) => Promise<void>;
     switchSession: (session: Session) => void;
-    getAllSessions: () => Promise<Session[]>;
 }
 
 export const AuthContext = createContext<AuthContextProps | undefined>(undefined);
@@ -21,16 +19,13 @@ export const AuthContext = createContext<AuthContextProps | undefined>(undefined
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [session, setSession] = useState<Session | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
-    const  { sessionController } = useController();
+    const { sessionController } = useController();
 
     const logIn = async (username: string, password: string, remember: boolean) => {
         try {
             setIsLoading(true);
             const authResponse = await authenticate(username, password);
-            const newSession = sessionController.sessionFromAuthResponse(authResponse);
-            if (remember) {
-                await sessionController.createSession(newSession);
-            }
+            const newSession = await sessionController.getSessionFromAuthResponse(authResponse, remember);
             setSession(newSession);
         }
         catch (error) {
@@ -46,7 +41,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const logAsGuest = async () => {
         try {
             setIsLoading(true);
-            let guestSession = await sessionController.getOrCreateGuestSession();
+            const guestSession = await sessionController.getOrCreateGuestSession();
             setSession(guestSession);
         }
         finally {
@@ -55,7 +50,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     const logOut = async () => {
-        console.log('logOut');
         if (session) {
             await sessionController.removeSession(session);
             setSession(null);
@@ -64,37 +58,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const updateSessionTokens = async (authResponse: AuthResponseProps) => {
         if (session) {
-            const updatedSession = new Session({
-                ...session,
-                access_token: authResponse.access_token,
-                expires_in: authResponse.expires_in,
-                refresh_token: authResponse.refresh_token,
-                refresh_expires_in: authResponse.refresh_expires_in,
-                token_type: authResponse.token_type,
-            });
-
+            const updatedSession = await sessionController.updateSessionTokens(authResponse, session);
             setSession(updatedSession);
-            await sessionController.save(updatedSession);
         }
     };
 
     const switchSession = (newSession: Session) => {
         setSession(newSession);
-        sessionController.setCurrentSessionId(newSession.id);
-    };
-
-    const getAllSessions = async () => {
-        return await sessionController.getAll();
+        sessionController.sessionRepo.setCurrentSessionId(newSession.id);
     };
 
     useEffect(() => {
         (async () => {
             setIsLoading(true);
-            const currentSessionId = await sessionController.getCurrentSessionId();
-            if (currentSessionId) {
-                const currentSession = await sessionController.getById(currentSessionId);
-                setSession(currentSession);
-            }
+            const currentSession = await sessionController.getCurrentSession();
+            setSession(currentSession);
             setIsLoading(false);
         })();
     }, []);
@@ -109,7 +87,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 logOut,
                 updateSessionTokens,
                 switchSession,
-                getAllSessions,
             }}
         >
             {children}

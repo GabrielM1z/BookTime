@@ -1,10 +1,10 @@
+import { ModalProfileCenter } from '@/components/profileCenter';
 import { Ionicons } from '@expo/vector-icons';
-import React, { useCallback, useRef, useState } from 'react';
-import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { BottomSheetModal } from '@gorhom/bottom-sheet';
+import React, { useCallback, useRef } from 'react';
+import { Text, TouchableOpacity, View } from 'react-native';
 import Animated, { Extrapolation, interpolate, useAnimatedRef, useAnimatedStyle, useScrollViewOffset } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ModalProfileCenter } from '@/components/profileCenter';
-import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import styles, { headerMaxHeight, headerMinHeight, profileImageMaxSize } from './profile.style';
 
 const profileImage = require('@/assets/images/profil.png');

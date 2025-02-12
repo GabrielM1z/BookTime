@@ -1,15 +1,14 @@
-import { Session, AddSessionDto } from "@/models/Session";
+import { AddSessionDto, Session } from "@/models/Session";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export interface SessionRepository {
     get(id: string): Promise<Session | null>;
     getAll(): Promise<Session[]>;
-    add(sessionData: AddSessionDto): Promise<void>;
-    update(sessionData: Session): Promise<void>;
+    addOrUpdate(session: AddSessionDto): Promise<void>;
     delete(id_or_session: string | Session): Promise<void>;
 }
 
-export class CachedSessionRepository implements SessionRepository{
+export class CachedSessionRepository implements SessionRepository {
     private sessionsKey = "@sessions";
     private currentSessionKey = "@currentSessionId";
 
@@ -23,15 +22,10 @@ export class CachedSessionRepository implements SessionRepository{
         return sessionsJson ? JSON.parse(sessionsJson) : [];
     }
 
-    async add(session: Session): Promise<void> {
+    async addOrUpdate(session: Session): Promise<void> {
         const sessions = await this.getAll();
-        sessions.push(session);
-        await AsyncStorage.setItem(this.sessionsKey, JSON.stringify(sessions));
-    }
-
-    async update(session: Session): Promise<void> {
-        const sessions = await this.getAll();
-        const updatedSessions = sessions.map(s => s.id === session.id ? session : s);
+        const updatedSessions = sessions.filter(s => s.id !== session.id);
+        updatedSessions.push(session);
         await AsyncStorage.setItem(this.sessionsKey, JSON.stringify(updatedSessions));
     }
 
