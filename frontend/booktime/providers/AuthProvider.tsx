@@ -1,10 +1,10 @@
 import { sessionFromKeycloak, guestSessionFactory } from "@/helpers/keycloak";
-import { useRepository } from "@/hooks/useRepository";
 import { Session } from "@/models/Session";
 import { AuthResponseProps } from "@/models/keycloak";
 import { authenticate } from "@/services/api";
 import React, { createContext, useEffect, useState } from "react";
 import { sessionControllerFactory } from "@/controllers/sessionController";
+import { useController } from "@/hooks/useController";
 
 export interface AuthContextProps {
     session: Session | null;
@@ -23,6 +23,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [session, setSession] = useState<Session | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const sessionController = sessionControllerFactory();
+    const { userController } = useController();
 
     const logIn = async (username: string, password: string, remember: boolean) => {
         try {

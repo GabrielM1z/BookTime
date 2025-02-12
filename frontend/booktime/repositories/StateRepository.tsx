@@ -5,7 +5,6 @@ import { Synchronisable } from './synchronisable';
 import uuid from 'react-native-uuid';
 
 
-
 export interface StateRepository {
     getAll: () => Promise<State[]>;
     get: (id: string) => Promise<State | null>;

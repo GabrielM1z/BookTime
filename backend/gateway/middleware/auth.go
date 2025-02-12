@@ -14,14 +14,20 @@ import (
 
 // Configuration de Keycloak
 var (
-    keycloakIssuer = "http://keycloak:8080/realms/booktime"
-    clientID       = "gateway-client"
     verifier       *oidc.IDTokenVerifier
     oauth2Config   oauth2.Config
 )
 
 func InitKeycloak() {
 	godotenv.Load(".env")
+	keycloakIssuer, ok := os.LookupEnv("KEYCLOAK_ISSUER")
+	if !ok {
+		keycloakIssuer = "http://localhost:8080/realms/booktime"
+	}
+	clientID, ok := os.LookupEnv("KEYCLOAK_CLIENT_ID")
+	if !ok {
+		clientID = "gateway-client"
+	}
 	clientSecret := os.Getenv("KEYCLOAK_CLIENT_SECRET")
 	
 	// Initialiser le fournisseur OIDC

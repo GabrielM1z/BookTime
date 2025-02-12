@@ -1,70 +1,61 @@
+x-service: &service
+  restart: always
+  env_file: ".env"
+  networks:
+    - booktime
+
+x-backend: &backend
+  <<: *service
+  depends_on:
+    - postgres
+
 services:
   postgres:
+    <<: *service
     image: postgres:latest
     container_name: postgres_db
     ports:
       - 5432:5432
-    env_file: ".env"
-    restart: always
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    networks:
-      - backend
+      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
 
   keycloak:
-    build: ./keycloak
+    <<: *backend
+    image: quay.io/keycloak/keycloak:latest
     command: start-dev
     environment:
       KC_HOSTNAME: keycloak
+      # KC_HOSTNAME_BACKCHANNEL_DYNAMIC: true
+      KC_HTTP_ENABLED: true
       KC_HOSTNAME_STRICT: false
-      KC_HOSTNAME_STRICT_HTTPS: false
-
       KC_HEALTH_ENABLED: true
-      KC_METRICS_ENABLED: true
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
-
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak_db
       KC_DB_USERNAME: ${DB_USER}
       KC_DB_PASSWORD: ${DB_PASSWORD}
+      KC_HTTP_RELATIVE_PATH: /auth
     ports:
       - 8080:8080
-    volumes:
-      - ./keycloak:/opt/keycloak/data/import
+      - 9000:9000
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "exec 3<>/dev/tcp/127.0.0.1/9000;echo -e 'GET /health/ready HTTP/1.1\r
-
-            host: http://localhost\r
-
-            Connection: close\r
-
-            \r
-
-            ' >&3;if [ $? -eq 0 ]; then echo 'Healthcheck Successful';exit 0;else echo 'Healthcheck Failed';exit 1;fi;"
-        ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    depends_on:
-      - postgres
-    restart: always
-    env_file: ".env"
-    networks:
-      - backend
+      test: ["CMD-SHELL", "echo -n > /dev/tcp/127.0.0.1/9000"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
 
   api_books:
+    <<: *backend
     container_name: api_books
     hostname: books
     build: 
-      context: ./book
+      context: ./backend/book
       target: prod
     ports:
       - 8083:8080
@@ -79,30 +70,21 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
     volumes:
       - api_volume:/usr/src/app/
-    depends_on:
-      - postgres
-    networks:
-      - backend
-    env_file: ".env"
 
   api_news:
     container_name: api_news
     hostname: news
-    build: ./news
+    build: ./backend/news
     ports:
       - 8084:8080
-    restart: always
-    networks:
-      - backend
-    env_file: ".env"
 
   api_user:
+    <<: *backend
     container_name: api_user
     hostname: user
-    build: ./user
+    build: ./backend/user
     ports:
       - 8085:8080
-    restart: always
     environment:
       DB_HOST: postgres
       DB_NAME: book_db
@@ -110,23 +92,16 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
     volumes:
       - api_volume:/usr/src/app/
-    depends_on:
-      - postgres
-    networks:
-      - backend
-    env_file: ".env"
 
   api_gateway:
+    <<: *backend
     container_name: api_gateway
     hostname: gateway
-    build: ./gateway
+    build: ./backend/gateway
     ports:
       - 8082:8080
-    restart: always
     volumes:
       - api_volume:/usr/src/app/
-    networks:
-      - backend
     depends_on:
       keycloak:
         condition: service_healthy
@@ -135,7 +110,7 @@ services:
     image: migrate/migrate:v4.15.2
     profiles: [ "tools" ]
     volumes:
-      - ./migrations:/migrations
+      - ./backend/migrations:/migrations
     entrypoint: [ "migrate", "-path", "/migrations", "-database", "postgres://postgres:postgres123@postgres:5432/booktime_book?sslmode=disable" ]
     command: [ "up" ]
     depends_on:
@@ -143,11 +118,24 @@ services:
         condition: service_healthy
     restart: on-failure
 
+  nginx:
+    <<: *service
+    image: nginx:latest
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+    ports:
+      - 80:80
+    depends_on:
+      # - api_books
+      # - api_news
+      # - api_user
+      - api_gateway
+
 volumes:
   postgres_data:
   api_volume:
 
 
 networks:
-  backend:
-    driver: bridge
+  booktime:
+    # driver: bridge

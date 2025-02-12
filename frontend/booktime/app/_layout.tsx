@@ -10,12 +10,12 @@ import { QueryProvider } from '@/components/QueryProvider';
 import React from 'react';
 import { migrateDbIfNeeded } from '@/db/init';
 import { deleteDatabaseAsync } from 'expo-sqlite';
-import { RepositoryProviderWrapper } from '@/providers/RepositoryProvider';
 import { AuthProvider } from '@/providers/AuthProvider';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ApiWrapper } from '@/services/api';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { ControllerProvider } from '@/providers/ControllerProvider';
 
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -50,7 +50,7 @@ export default function RootLayout() {
                 <BottomSheetModalProvider>
                     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
                         <AuthProvider>
-                            <RepositoryProviderWrapper databaseName='booktime.db' onInit={migrateDbIfNeeded} onError={handleSQLiteError}>
+                            <ControllerProvider databaseName='booktime.db' onInit={migrateDbIfNeeded} onError={handleSQLiteError}>
                                 <ApiWrapper>
                                     <QueryProvider>
                                         <Stack>
@@ -60,7 +60,7 @@ export default function RootLayout() {
                                         </Stack>
                                     </QueryProvider>
                                 </ApiWrapper>
-                            </RepositoryProviderWrapper>
+                            </ControllerProvider>
                         </AuthProvider>
                     </ThemeProvider>
                 </BottomSheetModalProvider>

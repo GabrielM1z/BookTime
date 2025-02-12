@@ -4,21 +4,21 @@ import { BookRepository } from "@/repositories/BookRepository";
 import { FormatRepository } from "@/repositories/FormatRepository";
 import { GenreRepository } from "@/repositories/GenreRepository";
 import { LibraryRepository } from "@/repositories/LibraryRepository";
-import { UserRepository } from "@/repositories/UserRepository";
+import { UserRepositoryProps, SQLiteUserRepository, APIUserRepository } from "@/repositories/UserRepository";
 import { actionRepositoryFactory } from "@/repositories/factories/actionRepositoryFactory";
 import { authorRepositoryFactory } from "@/repositories/factories/authorRepositoryFactory";
 import { bookRepositoryFactory } from "@/repositories/factories/bookRepositoryFactory";
 import { formatRepositoryFactory } from "@/repositories/factories/formatRepositoryFactory";
 import { genreRepositoryFactory } from "@/repositories/factories/genreRepositoryFactory";
 import { libraryRepositoryFactory } from "@/repositories/factories/libraryRepositoryFactory";
-import { userRepositoryFactory } from "@/repositories/factories/userRepositoryFactory";
 import { SQLiteProviderProps } from "expo-sqlite";
 import { SQLiteProvider } from "./SQLiteProvider";
 import React, { createContext } from "react";
 
 
 export interface RepositoryContextProps {
-    userRepository: UserRepository;
+    sqliteUserRepository: UserRepositoryProps;
+    apiUserRepository: UserRepositoryProps;
     libraryRepository: LibraryRepository;
     bookRepository: BookRepository;
     actionRepository: ActionRepository;
@@ -29,8 +29,10 @@ export interface RepositoryContextProps {
 
 export const RepositoryContext = createContext<RepositoryContextProps | undefined>(undefined);
 
-function RepositoryProvider({ children }: { children: React.ReactNode }) {
-    const userRepository = userRepositoryFactory();
+function RepositoryProviderInner({ children }: { children: React.ReactNode }) {
+    const sqliteUserRepository = new SQLiteUserRepository();
+    const apiUserRepository = new APIUserRepository();
+
     const libraryRepository = libraryRepositoryFactory();
     const bookRepository = bookRepositoryFactory();
     const actionRepository = actionRepositoryFactory();
@@ -40,7 +42,8 @@ function RepositoryProvider({ children }: { children: React.ReactNode }) {
 
     return (
         <RepositoryContext.Provider value={{
-            userRepository,
+            sqliteUserRepository,
+            apiUserRepository,
             libraryRepository,
             bookRepository,
             actionRepository,
@@ -53,15 +56,13 @@ function RepositoryProvider({ children }: { children: React.ReactNode }) {
     );
 }
 
-export function RepositoryProviderWrapper({
+export function RepositoryProvider({
     children,
-    onError,
-    useSuspense = false,
     ...props
 }: SQLiteProviderProps) {
     return (
         <SQLiteProvider {...props}>
-            <RepositoryProvider>{children}</RepositoryProvider>
+            <RepositoryProviderInner>{children}</RepositoryProviderInner>
         </SQLiteProvider>
     );
 }

@@ -6,22 +6,21 @@ import { Synchronisable } from './synchronisable';
 import { userFromToken, guestUserFactory } from '@/helpers/keycloak';
 import { useSQLite } from '@/hooks/useSQLite';
 
-export interface UserRepository {
+export interface UserRepositoryProps {
     getBySession(session: Session): Promise<User>;
     getById(id: string): Promise<User | null>;
     getAll(): Promise<User[]>;
+    add(user: User): Promise<void>;
     update(user: User): Promise<void>;
     delete(user: User): Promise<void>;
 }
 
-export class SQLiteUserRepository extends Synchronisable implements UserRepository {
+export class SQLiteUserRepository extends Synchronisable implements UserRepositoryProps {
     private db: SQLiteDatabase;
-    private api: APIUserRepository;
 
     constructor() {
         super();
         this.db = useSQLite().db;
-        this.api = new APIUserRepository();
     }
 
     async getBySession(session: Session): Promise<User> {
@@ -55,14 +54,7 @@ export class SQLiteUserRepository extends Synchronisable implements UserReposito
     async add(user: User): Promise<void> {
         const statement = await this.db.prepareAsync(`
             INSERT INTO user (id_user, username, email, email_verified, given_name, family_name)
-            VALUES (
-                $id_user,
-                $username,
-                $email,
-                $email_verified,
-                $given_name,
-                $family_name
-            );
+            VALUES ($id_user, $username, $email, $email_verified, $given_name, $family_name);
         `);
 
         await statement.executeAsync({
@@ -108,11 +100,8 @@ export class SQLiteUserRepository extends Synchronisable implements UserReposito
 }
 
 
-export class APIUserRepository implements UserRepository {
+export class APIUserRepository implements UserRepositoryProps {
     async getBySession(session: Session): Promise<User> {
-        // if (!session.isGuest) {
-        //     return User.
-        // }
         if (!session.access_token) {
             throw new Error('No access token in session');
         }
@@ -131,6 +120,10 @@ export class APIUserRepository implements UserRepository {
     async getAll(): Promise<User[]> {
         const response = await api.get('/api/user');
         return response.data;
+    }
+
+    async add(user: User): Promise<void> {
+        await api.post('/api/user', user);
     }
 
     async update(user: User): Promise<void> {
