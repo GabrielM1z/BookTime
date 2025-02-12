@@ -1,7 +1,6 @@
 import { StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { Link } from 'expo-router';
 import React from 'react';
-import React from 'react';
 
 // component représentant la COUVERTURE du livre qui est CLIQUABLE
 interface CoverPressableProps {
