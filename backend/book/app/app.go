@@ -144,7 +144,7 @@ func (a *App) CreateRoutes() {
 	routes.POST(prefix+"/book_genres", bookGenreController.InsertBookGenre)
 	routes.DELETE(prefix+"/book_genres/:id_genre/:id_book", bookGenreController.DeleteBookGenre)
 
-	routes.Static("/images", "/app/images")
+	routes.Static(prefix+"/images", "/app/images")
 
 	a.Routes = routes
 }
