@@ -1,10 +1,9 @@
 import { sessionFromKeycloak, guestSessionFactory } from "@/helpers/keycloak";
-import { useRepository } from "@/hooks/useRepository";
 import { Session } from "@/models/Session";
 import { AuthResponseProps } from "@/models/keycloak";
 import { authenticate } from "@/services/api";
 import React, { createContext, useEffect, useState } from "react";
-import { sessionControllerFactory } from "@/controllers/sessionController";
+import { useController } from "@/hooks/useController";
 
 export interface AuthContextProps {
     session: Session | null;
@@ -22,16 +21,15 @@ export const AuthContext = createContext<AuthContextProps | undefined>(undefined
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [session, setSession] = useState<Session | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
-    const sessionController = sessionControllerFactory();
+    const  { sessionController } = useController();
 
     const logIn = async (username: string, password: string, remember: boolean) => {
         try {
             setIsLoading(true);
             const authResponse = await authenticate(username, password);
-            const newSession = sessionFromKeycloak(authResponse);
+            const newSession = sessionController.sessionFromAuthResponse(authResponse);
             if (remember) {
-                await sessionController.save(newSession);
-                await sessionController.setCurrentSessionId(newSession.id);
+                await sessionController.createSession(newSession);
             }
             setSession(newSession);
         }
@@ -48,13 +46,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const logAsGuest = async () => {
         try {
             setIsLoading(true);
-            let guestSession = await sessionController.getGuestSession();
-            if (!guestSession) {
-                guestSession = guestSessionFactory();
-                await sessionController.save(guestSession);
-            }
+            let guestSession = await sessionController.getOrCreateGuestSession();
             setSession(guestSession);
-            await sessionController.setCurrentSessionId(guestSession.id);
         }
         finally {
             setIsLoading(false);
@@ -64,9 +57,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const logOut = async () => {
         console.log('logOut');
         if (session) {
-            await sessionController.delete(session.id);
+            await sessionController.removeSession(session);
             setSession(null);
-            await sessionController.setCurrentSessionId(null);
         }
     };
 

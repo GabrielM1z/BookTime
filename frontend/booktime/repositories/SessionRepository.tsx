@@ -1,11 +1,10 @@
 import { Session, AddSessionDto } from "@/models/Session";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { v4 as uuidv4 } from 'uuid';
 
 export interface SessionRepository {
     get(id: string): Promise<Session | null>;
     getAll(): Promise<Session[]>;
-    add(sessionData: AddSessionDto): Promise<Session>;
+    add(sessionData: AddSessionDto): Promise<void>;
     update(sessionData: Session): Promise<void>;
     delete(id_or_session: string | Session): Promise<void>;
 }
@@ -24,15 +23,10 @@ export class CachedSessionRepository implements SessionRepository{
         return sessionsJson ? JSON.parse(sessionsJson) : [];
     }
 
-    async add(session: AddSessionDto): Promise<Session> {
-        const newSession: Session = {
-            id: uuidv4(),
-            ...session,
-        }
+    async add(session: Session): Promise<void> {
         const sessions = await this.getAll();
-        sessions.push(newSession);
+        sessions.push(session);
         await AsyncStorage.setItem(this.sessionsKey, JSON.stringify(sessions));
-        return newSession;
     }
 
     async update(session: Session): Promise<void> {
