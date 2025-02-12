@@ -11,21 +11,22 @@ import (
 )
 
 type ImageService struct {
-	uploadPath string
+	uploadPath    string
+	publicURLBase string
 }
 
-func NewImageService(uploadPath string) *ImageService {
-	return &ImageService{uploadPath: uploadPath}
+func NewImageService(uploadPath, publicURLBase string) *ImageService {
+	return &ImageService{
+		uploadPath:    uploadPath,
+		publicURLBase: publicURLBase,
+	}
 }
-
-// Chemin où stocker les images
-const storagePath = "/app/images"
 
 // Sauvegarde une image depuis une URL et l'enregistre localement
 func (i *ImageService) SaveBookImage(imageURL string, bookID string) (string, error) {
 	// Récupère l'image depuis l'URL
 	resp, err := http.Get(imageURL)
-
+	//resp, err := http.Get("http://books.google.com/books/content?id=tB4lDwAAQBAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api")
 	if err != nil {
 		return "", fmt.Errorf("erreur lors du téléchargement de l'image: %v", err)
 	}
@@ -38,10 +39,10 @@ func (i *ImageService) SaveBookImage(imageURL string, bookID string) (string, er
 
 	// Détermine le chemin du fichier
 	filename := fmt.Sprintf("book_%s.jpg", bookID)
-	filePath := filepath.Join(storagePath, filename)
+	filePath := filepath.Join(i.uploadPath, filename)
 
 	// Crée le répertoire s'il n'existe pas
-	err = os.MkdirAll(storagePath, os.ModePerm)
+	err = os.MkdirAll(i.uploadPath, os.ModePerm)
 	if err != nil {
 		return "", fmt.Errorf("erreur lors de la création du répertoire: %v", err)
 	}
@@ -60,7 +61,7 @@ func (i *ImageService) SaveBookImage(imageURL string, bookID string) (string, er
 	}
 
 	// Retourne l'URL publique
-	publicURL := fmt.Sprintf("http://yourdomain.com/images/%s", filename)
+	publicURL := fmt.Sprintf("%s/images/%s", i.publicURLBase, filename)
 	return publicURL, nil
 }
 

@@ -60,7 +60,9 @@ func (bc *BookController) GetBook(c *gin.Context) {
 		imageURL := book.CoverImageUrl // URL de l'image récupérée
 		bookID := idParam              // ID du livre correspondant
 
-		ImageService := service.NewImageService("/var/www/booktime/images/") // Crée un service d'images
+		ImageService := service.NewImageService("/app/images", "http://localhost:8083") // Crée un service d'images
+
+		fmt.Println("le imageURL est:", imageURL)
 
 		publicURL, err := ImageService.SaveBookImage(imageURL, bookID) // Enregistre l'image localement et retourne l'URL publique
 		if err != nil {

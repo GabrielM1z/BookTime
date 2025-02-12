@@ -79,6 +79,7 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
     volumes:
       - api_volume:/usr/src/app/
+      - book_images:/app/images  # Ajout du volume pour stocker les images
     depends_on:
       - postgres
     networks:
@@ -146,6 +147,7 @@ services:
 volumes:
   postgres_data:
   api_volume:
+  book_images:
 
 
 networks:
