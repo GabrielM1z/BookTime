@@ -1,6 +1,5 @@
-import { UserRepository } from "@/repositories/UserRepository";
-import {} 
+import { UserRepository, APIUserRepository, SQLiteUserRepository } from "@/repositories/UserRepository";
 
-class UserController {
-    // private 
+export class UserController {
+
 }

@@ -1,6 +1,7 @@
 import { Session, AddSessionDto } from "@/models/Session";
 import { CachedSessionRepository } from "@/repositories/SessionRepository";
 import { guestUserId } from "@/constants";
+import { useRepository } from "@/hooks/useRepository";
 
 export class SessionController {
     private sessionRepo: CachedSessionRepository;
