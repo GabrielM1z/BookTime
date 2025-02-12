@@ -3,6 +3,7 @@ import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { ThemedView } from './ThemedView';
 import { useEffect, useState } from 'react';
 import { debounce } from 'lodash';
+import React from 'react';
 
 
 interface SearchBarProps {

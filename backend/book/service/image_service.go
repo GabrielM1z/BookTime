@@ -19,7 +19,7 @@ func NewImageService(uploadPath string) *ImageService {
 }
 
 // Chemin où stocker les images
-const storagePath = "/var/www/booktime/images/"
+const storagePath = "/app/images"
 
 // Sauvegarde une image depuis une URL et l'enregistre localement
 func (i *ImageService) SaveBookImage(imageURL string, bookID string) (string, error) {
