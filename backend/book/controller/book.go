@@ -60,9 +60,15 @@ func (bc *BookController) GetBook(c *gin.Context) {
 		imageURL := book.CoverImageUrl // URL de l'image récupérée
 		bookID := idParam              // ID du livre correspondant
 
-		ImageService := service.NewImageService("/app/images", "http://localhost:8083") // Crée un service d'images
+		publicURLBase := "http://159.31.247.130:8082/books"
+		if os.Getenv("ENVIROMENT") == "development" {
+			publicURLBase = "http://localhost:8082/books"
+		}
+		// fmt.Println("le publicURLBase est:", publicURLBase)
 
-		fmt.Println("le imageURL est:", imageURL)
+		ImageService := service.NewImageService("/app/images", publicURLBase) // Crée un service d'images
+
+		// fmt.Println("le imageURL est:", imageURL)
 
 		publicURL, err := ImageService.SaveBookImage(imageURL, bookID) // Enregistre l'image localement et retourne l'URL publique
 		if err != nil {
