@@ -4,12 +4,24 @@ import CoverPressable from './CoverPressable';
 import React from 'react';
 
 // component représentant le LIVRE de l'ETAGERE
-export default function LivreEtagere({ id_book, label, cover }) {
+interface LivreEtagereProps {
+    id_book: string;
+    label: string;
+    cover: string;
+}
+
+interface LivreEtagereProps {
+    id_book: string;
+    label: string;
+    cover: string;
+}
+
+export default function LivreEtagere({ id_book, label, cover }: LivreEtagereProps) {
 	
 	return (
 		<View style={styles.livreContainer}>
-            <CoverPressable id_book={id_book} cover={cover} ></CoverPressable>
-            <ThemedText type="titreLivreVertical">{label}</ThemedText>
+            <CoverPressable id_book={id_book} cover={cover} mode='library' ></CoverPressable>
+            <ThemedText type="titreLivreVertical">{label}</ThemedText>            
 		</View>
 	);
 }

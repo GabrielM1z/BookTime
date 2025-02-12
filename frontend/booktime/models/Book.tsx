@@ -50,3 +50,16 @@ export interface BookMinInfos {
 	title : string;
 	cover_image_url : string;
 }
+
+export interface BookInfosServeur {
+	id_book : string;
+	title : string;
+	description : string;
+	publisher : string;
+	publication_date : string;
+	page_number : number;
+	language : string;
+	cover_image_url : string;
+	authors : string[];
+	genres : string[];
+}
