@@ -11,7 +11,6 @@ import { createBook, getBookByIsbn13, insertBook } from '@/db/db-book';
 import { Library } from '@/models/Library';
 import { useRepository } from '@/hooks/useRepository';
 import CoverPressable from './CoverPressable';
-import CoverPressable from './CoverPressable';
 
 
 
