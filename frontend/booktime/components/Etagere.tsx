@@ -4,6 +4,8 @@ import { ThemedText } from './ThemedText';
 import React from 'react';
 import { LibraryWithBooksMin } from '@/models/Library';
 import { BookMinInfos } from '@/models/Book';
+import { Link } from 'expo-router';
+
 
 const cover1 = require('../assets/images/logo_refait.png');
 
@@ -11,11 +13,12 @@ const cover1 = require('../assets/images/logo_refait.png');
 // component représentant une ETAGERE
 interface EtagereProps {
 	label: string;
+	idEtagere: string;
 	livres: BookMinInfos[];
 	index: number;
 }
 
-export default function Etagere({ label, livres, index }: EtagereProps) 
+export default function Etagere({ label, idEtagere, livres, index }: EtagereProps) 
 {	
 	// couleur possible
 	const colors = [
@@ -33,7 +36,15 @@ export default function Etagere({ label, livres, index }: EtagereProps)
 		<View style={[styles.etagereContainer, { backgroundColor: colors[randomindex] }]}>
 
             <View style={styles.titreContainer}>
+				<Link push href={{
+							pathname: "/(app)/etagere/[idEtagere]",
+							params: {
+								idEtagere: idEtagere,
+								label: label,
+							}
+						}} asChild>
                 <ThemedText type="titreEtagere">{label}</ThemedText>
+				</Link>
             </View>
 
             <ScrollView horizontal style={styles.livresContainer}>
