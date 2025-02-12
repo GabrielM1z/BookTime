@@ -146,7 +146,12 @@ func (bs *SearchService) SearchBooks(startIndex, query, title, author, genre str
 	params.Add("key", bs.ApiKey)
 
 	var formattedBookSearchList []model.FormattedBookSearch
-	for len(formattedBookSearchList) < 10 {
+
+	//Sécurité afin d'éviter une boucle "sans fin", tente 5 fois de récupérer 10 livres
+	maxAttempts := 5
+	attempts := 0
+
+	for len(formattedBookSearchList) < 10 && attempts < maxAttempts {
 		apiURL := fmt.Sprintf("%s?%s", baseURL, params.Encode())
 
 		resp, err := http.Get(apiURL)
@@ -214,6 +219,8 @@ func (bs *SearchService) SearchBooks(startIndex, query, title, author, genre str
 		startIndexInt += len(apiResponse.Items)
 		startIndex = strconv.Itoa(startIndexInt)
 		params.Set("startIndex", startIndex)
+
+		attempts++
 	}
 
 	return formattedBookSearchList, nil
