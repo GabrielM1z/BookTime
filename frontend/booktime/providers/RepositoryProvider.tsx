@@ -20,7 +20,7 @@ import React, { createContext } from "react";
 
 
 export interface RepositoryContextProps {
-    cachedSessionRepository: SessionRepository;
+    cachedSessionRepository: CachedSessionRepository;
     
     userRepository: UserRepository;
     libraryRepository: LibraryRepository;

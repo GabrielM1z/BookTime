@@ -7,7 +7,8 @@ export class SessionController {
     private sessionRepo: CachedSessionRepository;
 
     constructor() {
-        this.sessionRepo = new CachedSessionRepository();
+        const { cachedSessionRepository } = useRepository();
+        this.sessionRepo = cachedSessionRepository;
     }
 
     async createSession(newSession: AddSessionDto): Promise<Session> {
