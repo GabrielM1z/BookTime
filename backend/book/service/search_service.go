@@ -166,24 +166,65 @@ func (bs *SearchService) SearchBooks(startIndex, query, title, author, genre str
 
 	var formattedBookSearchList []model.FormattedBookSearch
 	for _, item := range apiResponse.Items {
+		var isbn10, isbn13 string
+		for _, id := range item.VolumeInfo.IndustryIdentifiers {
+			if id.Type == "ISBN_10" {
+				isbn10 = id.Identifier
+			} else if id.Type == "ISBN_13" {
+				isbn13 = id.Identifier
+			}
+		}
+
+		if isbn10 == "" && isbn13 == "" {
+			continue // Skip books without ISBN-10 and ISBN-13
+		}
+
 		formattedBookSearch := model.FormattedBookSearch{
 			Title:     item.VolumeInfo.Title,
 			Authors:   item.VolumeInfo.Authors,
 			Thumbnail: item.VolumeInfo.ImageLinks.Thumbnail,
 		}
 
-		// Ajouter ISBN10
-		for _, id := range item.VolumeInfo.IndustryIdentifiers {
-			if id.Type == "ISBN_13" {
-				formattedBookSearch.ISBN13 = id.Identifier
-				break
+		if isbn13 != "" {
+			formattedBookSearch.ISBN13 = isbn13
+		} else if isbn10 != "" {
+			// Convert ISBN-10 to ISBN-13
+			isbn13Converted, err := convertISBN10toISBN13(isbn10)
+			if err != nil {
+				log.Printf("Error converting ISBN-10 to ISBN-13: %v", err)
+				continue
 			}
+			formattedBookSearch.ISBN13 = isbn13Converted
 		}
 
 		formattedBookSearchList = append(formattedBookSearchList, formattedBookSearch)
 	}
 
 	return formattedBookSearchList, nil
+}
+
+func convertISBN10toISBN13(isbn10 string) (string, error) {
+	if len(isbn10) != 10 {
+		return "", errors.New("invalid ISBN-10 length")
+	}
+
+	prefix := "978"
+	isbnBody := isbn10[:9]
+	isbn13 := prefix + isbnBody
+
+	// Calculate the check digit for ISBN-13
+	sum := 0
+	for i, digit := range isbn13 {
+		num := int(digit - '0')
+		if i%2 == 0 {
+			sum += num
+		} else {
+			sum += num * 3
+		}
+	}
+	checkDigit := (10 - (sum % 10)) % 10
+
+	return isbn13 + strconv.Itoa(checkDigit), nil
 }
 
 var _ interfaces.SearchServiceInterface = &SearchService{}
