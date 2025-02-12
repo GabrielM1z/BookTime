@@ -11,6 +11,13 @@ interface LivreEtagereProps {
 }
 
 export default function LivreEtagere({ id_book, label, cover }: LivreEtagereProps) {
+interface LivreEtagereProps {
+    id_book: string;
+    label: string;
+    cover: string;
+}
+
+export default function LivreEtagere({ id_book, label, cover }: LivreEtagereProps) {
 	
 	return (
 		<View style={styles.livreContainer}>
