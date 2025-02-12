@@ -166,21 +166,31 @@ func (bs *SearchService) SearchBooks(startIndex, query, title, author, genre str
 
 	var formattedBookSearchList []model.FormattedBookSearch
 	for _, item := range apiResponse.Items {
-		formattedBookSearch := model.FormattedBookSearch{
-			Title:     item.VolumeInfo.Title,
-			Authors:   item.VolumeInfo.Authors,
-			Thumbnail: item.VolumeInfo.ImageLinks.Thumbnail,
-		}
-
-		// Ajouter ISBN10
+		hasISBN := false
 		for _, id := range item.VolumeInfo.IndustryIdentifiers {
-			if id.Type == "ISBN_13" {
-				formattedBookSearch.ISBN13 = id.Identifier
+			if id.Type == "ISBN_10" || id.Type == "ISBN_13" {
+				hasISBN = true
 				break
 			}
 		}
 
-		formattedBookSearchList = append(formattedBookSearchList, formattedBookSearch)
+		if hasISBN {
+			formattedBookSearch := model.FormattedBookSearch{
+				Title:     item.VolumeInfo.Title,
+				Authors:   item.VolumeInfo.Authors,
+				Thumbnail: item.VolumeInfo.ImageLinks.Thumbnail,
+			}
+
+			// Ajouter ISBN10
+			for _, id := range item.VolumeInfo.IndustryIdentifiers {
+				if id.Type == "ISBN_13" {
+					formattedBookSearch.ISBN13 = id.Identifier
+					break
+				}
+			}
+
+			formattedBookSearchList = append(formattedBookSearchList, formattedBookSearch)
+		}
 	}
 
 	return formattedBookSearchList, nil
