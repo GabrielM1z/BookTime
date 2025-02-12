@@ -87,8 +87,8 @@ export const LivreRecherche = ({ book }: { book: BookInfosSearch }) => {
   return (
     <View style={styles.itemContainer}>
 
-      <CoverPressable id_book={book.isbn13} cover={book.thumbnail} ></CoverPressable>
-      <Image source={typeof imageSource === 'string' ? { uri: imageSource } : imageSource} style={styles.itemImage} resizeMode={'cover'}></Image>
+      <CoverPressable id_book={book.isbn13} cover={typeof imageSource === 'string' ? { uri: imageSource } : imageSource} mode='search'></CoverPressable>
+      {/* <Image source={typeof imageSource === 'string' ? { uri: imageSource } : imageSource} style={styles.itemImage} resizeMode={'cover'}></Image> */}
       {/* <Image source={{uri:"data:image/png;base64,"+getImageAsBase64(book.thumbnail)}} defaultSource={defaultCover}  style={styles.itemImage} resizeMode={'cover'} ></Image> */}
 
       <View style={styles.itemInfos}>

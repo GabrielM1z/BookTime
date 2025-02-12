@@ -14,7 +14,7 @@ export default function LivreEtagere({ id_book, label, cover }: LivreEtagereProp
 	
 	return (
 		<View style={styles.livreContainer}>
-            <CoverPressable id_book={id_book} cover={cover} ></CoverPressable>
+            <CoverPressable id_book={id_book} cover={cover} mode='library' ></CoverPressable>
             <ThemedText type="titreLivreVertical">{label}</ThemedText>            
 		</View>
 	);
