@@ -26,7 +26,6 @@ func NewImageService(uploadPath, publicURLBase string) *ImageService {
 func (i *ImageService) SaveBookImage(imageURL string, bookID string) (string, error) {
 	// Récupère l'image depuis l'URL
 	resp, err := http.Get(imageURL)
-	//resp, err := http.Get("http://books.google.com/books/content?id=tB4lDwAAQBAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api")
 	if err != nil {
 		return "", fmt.Errorf("erreur lors du téléchargement de l'image: %v", err)
 	}
