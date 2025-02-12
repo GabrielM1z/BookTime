@@ -56,25 +56,25 @@ export class SQLiteLibraryRepository extends Synchronisable implements LibraryRe
 
     async getAllInfo():  Promise<LibraryWithBooksMin[]|[]> {
 
-        // let allRows = await this.db.getAllAsync<{
-        //     id_library: string;
-        //     name: string;
-        //     id_book: string;
-        //     title: string;
-        //     cover_image_url: string;
-        // }>(
-        //     'SELECT ' + 
-        //     'library.id_library AS id_library, ' + 
-        //     'library.name AS name, ' + 
-        //     'book.id_book AS id_book, ' + 
-        //     'book.title AS title, ' + 
-        //     'book.cover_image_url AS cover_image_url ' + 
-        //     'FROM library ' +
-        //     'LEFT JOIN library_book ON library.id_library = library_book.id_library ' +
-        //     'LEFT JOIN book ON book.id_book = library_book.id_book;'
-        // );
+        let allRows = await this.db.getAllAsync<{
+            id_library: string;
+            name: string;
+            id_book: string;
+            title: string;
+            cover_image_url: string;
+        }>(
+            'SELECT ' + 
+            'library.id_library AS id_library, ' + 
+            'library.name AS name, ' + 
+            'book.id_book AS id_book, ' + 
+            'book.title AS title, ' + 
+            'book.cover_image_url AS cover_image_url ' + 
+            'FROM library ' +
+            'LEFT JOIN library_book ON library.id_library = library_book.id_library ' +
+            'LEFT JOIN book ON book.id_book = library_book.id_book;'
+        );
 
-        const allLibrary : LibraryWithBooks[] = await this.getAll();
+//        const allLibrary : LibraryWithBooks[] = await this.getAll();
 
 
         // console.log("rows : ",allRows)

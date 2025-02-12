@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
 	},
 	auteurLivreHorizontal: {
 		fontSize: 17,
-      	color: "gray",
+		color: "gray",
 	},
 	titreLivreVertical: {
 		fontSize: 15,
