@@ -37,7 +37,7 @@ export default function LivreDetail() {
         if (!idBook) return; // Sécurité si `idBook` est undefined
 
         if (mode === "search") {
-            const url = `${baseURL}/books/books/${idBook}`;
+            const url = baseURL+`/books/books/`+idBook;
             axios.get(url)
                 .then(response => {
                     if (response.data && response.data.data) {
