@@ -77,6 +77,9 @@ func main() {
 	app.Get("/books/books*", func(c *fiber.Ctx) error {
 		return proxyRequest(c, booksServiceBaseURL)
 	})
+	app.Get("/books/images*", func(c *fiber.Ctx) error {
+		return proxyRequest(c, booksServiceBaseURL)
+	})
 
 	// Route service Books uniquement endpoint shops sans protection
 	app.All("/books/shops*", func(c *fiber.Ctx) error {

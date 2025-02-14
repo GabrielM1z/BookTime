@@ -76,15 +76,13 @@ export class SQLiteBookRepository extends Synchronisable implements BookReposito
 	}
 
 	async addBookToLibrary(id_library: string, book: BookAllInfos): Promise<void> {
-		const statement = await this.db.prepareAsync(
-			'INSERT INTO book (id_book, title, description, publisher, publication_date, page_number, language, cover_image_url) VALUES ($id_book, $title, $description, $publisher, $publication_date, $page_number, $language, $cover_image_url);' +
-			'INSERT INTO library_book (id_library, id_book) VALUES ($id_library, $id_book);'
-		);
-
 		try {
-			let result = await statement.executeAsync({
-				$id_library: id_library,
+			const insertBookStmt = await this.db.prepareAsync(
+				`INSERT OR IGNORE INTO book (id_book, title, description, publisher, publication_date, page_number, language, cover_image_url) 
+				VALUES ($id_book, $title, $description, $publisher, $publication_date, $page_number, $language, $cover_image_url);`
+			);
 
+			let resultInsertBook = await insertBookStmt.executeAsync({
 				$id_book: book.id_book,
 				$title: book.title,
 				$description: book.description,
@@ -95,14 +93,22 @@ export class SQLiteBookRepository extends Synchronisable implements BookReposito
 				$cover_image_url: book.cover_image_url,
 			});
 
-			console.log('lastInsertRowId:', result.lastInsertRowId);
-			console.log('changes:', result.changes);
+			await insertBookStmt.finalizeAsync();
+
+			const insertLibraryBookStmt = await this.db.prepareAsync(
+				' INSERT OR IGNORE INTO library_book (id_library, id_book) VALUES ($id_library, $id_book);'
+			);
+
+			let resultInsertLibraryBook = await insertLibraryBookStmt.executeAsync({
+				$id_library: id_library,
+				$id_book: book.id_book,
+			});
+
+			await insertLibraryBookStmt.finalizeAsync();
+
 		} catch (error) {
 			console.log(error)
-		} finally {
-			await statement.finalizeAsync();
 		}
-
 
 		console.log("addBookToLibrary: success")
 	}
