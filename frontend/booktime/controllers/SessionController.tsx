@@ -4,20 +4,19 @@ import { Session } from "@/models/Session";
 import { AuthResponseProps, PayloadProps } from "@/models/keycloak";
 import { CachedSessionRepository } from "@/repositories/SessionRepository";
 import { jwtDecode } from 'jwt-decode';
-import { v4 as uuidv4 } from 'uuid';
+import uuid from 'react-native-uuid';
 
 export class SessionController {
     sessionRepo: CachedSessionRepository;
 
     constructor() {
-        const { cachedSessionRepository } = useRepository();
-        this.sessionRepo = cachedSessionRepository;
+        this.sessionRepo = new CachedSessionRepository();
     }
 
     async getSessionFromAuthResponse(authResponse: AuthResponseProps, save: boolean = false): Promise<Session> {
         const payload = jwtDecode<PayloadProps>(authResponse.access_token);
         const newSession: Session = {
-            id: uuidv4(),
+            id: uuid.v4(),
             id_user: payload.sub,
             access_token: authResponse.access_token,
             expires_in: authResponse.expires_in,
@@ -65,7 +64,7 @@ export class SessionController {
         let guestSession = sessions.find(s => s.id_user === guestUserId);
         if (guestSession === undefined) {
             guestSession = {
-                id: uuidv4(),
+                id: uuid.v4(),
                 id_user: guestUserId,
             }
             await this.sessionRepo.addOrUpdate(guestSession);
@@ -76,5 +75,9 @@ export class SessionController {
 
     async getAllSessions(): Promise<Session[]> {
         return await this.sessionRepo.getAll();
+    }
+
+    static isGuest(session: Session): boolean {
+        return session.id_user === guestUserId;
     }
 }

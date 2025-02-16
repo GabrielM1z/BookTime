@@ -1,0 +1,24 @@
+meta {
+  name: Refresh token
+  type: http
+  seq: 3
+}
+
+post {
+  url: http://159.31.247.130:8080/realms/booktime/protocol/openid-connect/token
+  body: formUrlEncoded
+  auth: none
+}
+
+body:form-urlencoded {
+  client_id: gateway-client
+  client_secret: {{client_secret}}
+  grant_type: refresh_token
+  audience: gateway-client
+  refresh_token: eyJhbGciOiJIUzUxMiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICIwODg5NGQ3Mi0wYjQ0LTRjNzItYWZjYi1iOWRkYTVkN2M3YmMifQ.eyJleHAiOjE3Mzk2NDYxMTUsImlhdCI6MTczOTY0NDMxNSwianRpIjoiNTk0MDVmYjItYTk3ZS00ZmJmLTlhMGEtY2VjNTg5MmNlZjBiIiwiaXNzIjoiaHR0cDovL2tleWNsb2FrL3JlYWxtcy9ib29rdGltZSIsImF1ZCI6Imh0dHA6Ly9rZXljbG9hay9yZWFsbXMvYm9va3RpbWUiLCJzdWIiOiIzMDBjZTcxNy05MDAwLTQyMWItODZkNi1iOGEzNzhlYmNmODgiLCJ0eXAiOiJSZWZyZXNoIiwiYXpwIjoiZ2F0ZXdheS1jbGllbnQiLCJzaWQiOiI3YjY0YTM4Ni1kODIwLTRiYWQtOThmNi0xZDU0NTQ4MzYyNTgiLCJzY29wZSI6InByb2ZpbGUgYWNyIHJvbGVzIGVtYWlsIGJhc2ljIHdlYi1vcmlnaW5zIn0.zEQkPvZbs15Q1NfN5Oy1jNyIpiU5n-hR6hrtsxCSnkv0D3M-59vvfWxq9gRR_NJG07VEaM8PRCRH_GBZw5PM5g
+}
+
+script:post-response {
+  let data = res.getBody();
+  bru.setEnvVar("access_token", data.access_token);
+}

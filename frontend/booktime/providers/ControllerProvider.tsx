@@ -5,19 +5,16 @@ import React, { createContext } from "react";
 import { RepositoryProvider } from "./RepositoryProvider";
 
 export interface ControllerContextProps {
-    sessionController: SessionController;
     userController: UserController;
 }
 
 export const ControllerContext = createContext<ControllerContextProps | undefined>(undefined);
 
 export const ControllerProviderInner = ({ children }: { children: React.ReactNode }) => {
-    const sessionController = new SessionController();
     const userController = new UserController();
 
     return (
         <ControllerContext.Provider value={{
-            sessionController,
             userController
         }}>
             {children}

@@ -13,9 +13,10 @@ import { deleteDatabaseAsync } from 'expo-sqlite';
 import { RepositoryProvider } from '@/providers/RepositoryProvider';
 import { AuthProvider } from '@/providers/AuthProvider';
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { ApiWrapper } from '@/services/api';
+import { ApiWrapper } from '@/components/ApiWrapper';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { ControllerProvider } from '@/providers/ControllerProvider';
 
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -28,7 +29,7 @@ export default function RootLayout() {
     const colorScheme = useColorScheme();
 
     // deleteDatabaseAsync('booktime.db');
-    AsyncStorage.clear();
+    // AsyncStorage.clear();
 
     useEffect(() => {
         if (loaded) {
@@ -50,8 +51,8 @@ export default function RootLayout() {
                 <BottomSheetModalProvider>
                     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
                         <AuthProvider>
-                            <RepositoryProvider databaseName='booktime.db' onInit={migrateDbIfNeeded} onError={handleSQLiteError}>
-                                <ApiWrapper>
+                            <ApiWrapper>
+                                <ControllerProvider databaseName='booktime.db' onInit={migrateDbIfNeeded} onError={handleSQLiteError}>
                                     <QueryProvider>
                                         <Stack>
                                             <Stack.Screen name="(app)" options={{ headerShown: false }} />
@@ -59,8 +60,8 @@ export default function RootLayout() {
                                             <Stack.Screen name="+not-found" />
                                         </Stack>
                                     </QueryProvider>
-                                </ApiWrapper>
-                            </RepositoryProvider>
+                                </ControllerProvider>
+                            </ApiWrapper>
                         </AuthProvider>
                     </ThemeProvider>
                 </BottomSheetModalProvider>

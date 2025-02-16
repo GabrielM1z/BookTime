@@ -1,5 +1,5 @@
 import { useAuth } from '@/hooks/useAuth';
-import { useRepository } from '@/hooks/useRepository';
+import { useController } from '@/hooks/useController';
 import { User } from '@/models/User';
 import { Ionicons } from '@expo/vector-icons';
 import { BottomSheetFlatList, BottomSheetModal, BottomSheetView, useBottomSheetModal } from '@gorhom/bottom-sheet';
@@ -10,7 +10,6 @@ import TouchableScale from '../TouchableScale';
 import { CustomBottomSheet } from './CustomBottomSheet.component';
 import { OpacityBackgroundBottomSheet } from './OpacityBackgroundBottomSheet.component';
 import { ProfileItem } from './ProfileItem.component';
-import { useController } from '@/hooks/useController';
 
 
 export interface ProfileCenterProps {
@@ -27,16 +26,17 @@ export const ModalProfileCenter = forwardRef<BottomSheetModal>((props, ref) => {
     const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
     const [transitioning, setTransitioning] = useState(false);
 
-    const { userRepository } = useRepository();
-    const { sessionController } = useController();
-    const { switchSession, logOut, session } = useAuth();
+    const { userController } = useController();
+    const { sessionController, switchSession, logOut, session } = useAuth();
 
     const [users, setUsers] = useState<User[]>([]);
 
     useEffect(() => {
         const fetchSessions = async () => {
             const sessions = await sessionController.getAllSessions();
-            const usersData = await Promise.all(sessions.map(session => userRepository.getBySession(session)));
+            console.log(sessions);
+            const usersData = await Promise.all(sessions.map(session => userController.getBySession(session)));
+            console.log(usersData);
             setUsers(usersData);
         }
         if (isFirstModalOpen) {

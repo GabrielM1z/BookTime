@@ -200,11 +200,14 @@ const initUser = async (db: SQLiteDatabase) => {
         db.execAsync(`
             CREATE TABLE IF NOT EXISTS user (
                 id_user TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
-                username VARCHAR(100),
                 email VARCHAR(255),
-                email_verified BOOLEAN DEFAULT FALSE,
-                given_name VARCHAR(100),
-                family_name VARCHAR(100)
+                name VARCHAR(100),
+                pseudo VARCHAR(100),
+                description TEXT,
+                private BOOLEAN DEFAULT FALSE,
+                profil_image VARCHAR(255),
+                banner_image VARCHAR(255),
+                birthdate DATE,
             );
         `);
         console.log('user initialized successfully');

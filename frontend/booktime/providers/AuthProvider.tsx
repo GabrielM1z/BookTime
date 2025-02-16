@@ -3,6 +3,7 @@ import { Session } from "@/models/Session";
 import { AuthResponseProps } from "@/models/keycloak";
 import { authenticate } from "@/services/api";
 import React, { createContext, useEffect, useState } from "react";
+import { SessionController } from "../controllers/SessionController";
 
 export interface AuthContextProps {
     session: Session | null;
@@ -12,6 +13,7 @@ export interface AuthContextProps {
     logOut: () => Promise<void>;
     updateSessionTokens: (authResponse: AuthResponseProps) => Promise<void>;
     switchSession: (session: Session) => void;
+    sessionController: SessionController;
 }
 
 export const AuthContext = createContext<AuthContextProps | undefined>(undefined);
@@ -19,7 +21,7 @@ export const AuthContext = createContext<AuthContextProps | undefined>(undefined
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [session, setSession] = useState<Session | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
-    const { sessionController } = useController();
+    const sessionController = new SessionController();
 
     const logIn = async (username: string, password: string, remember: boolean) => {
         try {
@@ -87,6 +89,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 logOut,
                 updateSessionTokens,
                 switchSession,
+                sessionController,
             }}
         >
             {children}
