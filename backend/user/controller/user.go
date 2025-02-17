@@ -127,14 +127,13 @@ func (bc *UserController) GetUserFromToken(c *gin.Context) {
 		return
 	}
 
-	User.Name = name
-	User.Email = email
+	kUser := model.KeyUser{User.IdUser, name, email, User.Pseudo, User.Description, User.Private, User.ProfilImage, User.BannerImage, User.Birthday}
 
 	c.JSON(http.StatusOK, gin.H{
 		"status": "success",
 		"data": gin.H{
-			"id":   User.IdUser,
-			"user": User,
+			"id":   kUser.IdUser,
+			"user": kUser,
 		},
 		"msg": "get User successfully",
 	})
