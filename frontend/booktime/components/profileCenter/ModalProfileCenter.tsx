@@ -1,4 +1,4 @@
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthContext } from '@/hooks/useAuth';
 import { useController } from '@/hooks/useController';
 import { User } from '@/models/User';
 import { Ionicons } from '@expo/vector-icons';
@@ -27,19 +27,17 @@ export const ModalProfileCenter = forwardRef<BottomSheetModal>((props, ref) => {
     const [transitioning, setTransitioning] = useState(false);
 
     const { userController } = useController();
-    const { sessionController, switchSession, logOut, session } = useAuth();
+    const { sessionController, switchSession, logOut, session } = useAuthContext();
 
     const [users, setUsers] = useState<User[]>([]);
 
+    const fetchSessions = async () => {
+        const usersData = await userController.getAll();
+        setUsers(usersData);
+    };
+
     useEffect(() => {
-        const fetchSessions = async () => {
-            const sessions = await sessionController.getAllSessions();
-            console.log(sessions);
-            const usersData = await Promise.all(sessions.map(session => userController.getBySession(session)));
-            console.log(usersData);
-            setUsers(usersData);
-        }
-        if (isFirstModalOpen) {
+        if (isFirstModalOpen && !transitioning) {
             fetchSessions();
             setSelectedUserId(session?.id_user || null);
         }
@@ -66,8 +64,8 @@ export const ModalProfileCenter = forwardRef<BottomSheetModal>((props, ref) => {
         <>
             <OpacityBackgroundBottomSheet isOpen={[isFirstModalOpen, isSecondModalOpen, transitioning]} />
             <CustomBottomSheet ref={ref} setIsOpen={setIsFirstModalOpen}>
-                <BottomSheetFlatList
-                    data={users}
+                <BottomSheetFlatList // FIXME: built twice
+                    data={isFirstModalOpen && !transitioning && !isSecondModalOpen ? users : []}
                     keyExtractor={(item) => item.id_user.toString()}
                     renderItem={({ item }) => ProfileItem({
                         item,

@@ -2,7 +2,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import Etagere from '@/components/Etagere';
 import NewEtagere from '@/components/NewEtagere';
 import React, { useEffect, useState } from 'react';
-import { useRepository } from '@/hooks/useRepository';
+import { useRepositoryContext } from '@/hooks/useRepository';
 import TestBtn from '@/components/TestBtn';
 
 // import des images
@@ -18,7 +18,7 @@ export default function pageEtageres() {
         refreshEtageres();
     }, []);
 
-    const { libraryRepository } = useRepository();
+    const { libraryRepository } = useRepositoryContext();
 
     const refreshEtageres = async () => {
         try {

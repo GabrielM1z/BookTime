@@ -1,5 +1,5 @@
 import { guestUserId } from "@/constants";
-import { useRepository } from "@/hooks/useRepository";
+import { useRepositoryContext } from "@/hooks/useRepository";
 import { Session } from "@/models/Session";
 import { AuthResponseProps, PayloadProps } from "@/models/keycloak";
 import { CachedSessionRepository } from "@/repositories/SessionRepository";

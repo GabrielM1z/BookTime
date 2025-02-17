@@ -22,6 +22,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [session, setSession] = useState<Session | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const sessionController = new SessionController();
+    const { userController } = useController();
 
     const logIn = async (username: string, password: string, remember: boolean) => {
         try {
@@ -29,6 +30,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const authResponse = await authenticate(username, password);
             const newSession = await sessionController.getSessionFromAuthResponse(authResponse, remember);
             setSession(newSession);
+            await userController.addFromSession(newSession);
         }
         catch (error) {
             console.error(error);

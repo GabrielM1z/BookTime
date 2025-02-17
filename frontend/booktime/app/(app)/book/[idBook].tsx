@@ -6,7 +6,7 @@ import { useLocalSearchParams, useNavigation } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { Colors } from '@/constants/Colors';
 import { Link } from 'expo-router';
-import { useRepository } from '@/hooks/useRepository';
+import { useRepositoryContext } from '@/hooks/useRepository';
 
 
 export default function LivreDetail() {
@@ -24,7 +24,7 @@ export default function LivreDetail() {
 	// TODO get les info du livre
 
 	const [book, setBook] = useState([]);
-	const { bookRepository } = useRepository();
+	const { bookRepository } = useRepositoryContext();
 
 	useEffect(() => {
 		refreshBook();

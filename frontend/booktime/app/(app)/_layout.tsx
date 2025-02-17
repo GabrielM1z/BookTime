@@ -1,4 +1,4 @@
-import { useAuth } from "@/hooks/useAuth";
+import { useAuthContext } from "@/hooks/useAuth";
 import commonStyles from "@/styles/commonStyles";
 import { Redirect, Stack } from "expo-router";
 import React from 'react';
@@ -6,7 +6,7 @@ import { ActivityIndicator, View } from "react-native";
 import 'react-native-reanimated';
 
 export default function AppLayout() {
-    const { session, isLoading } = useAuth();
+    const { session, isLoading } = useAuthContext();
 
     if (isLoading) {
         return (

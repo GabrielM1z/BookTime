@@ -14,7 +14,7 @@ export interface ProfileItemProps {
 };
 
 export const ProfileItem = (props: ProfileItemProps) => {
-    const user: User = {... props.item, given_name: 'Guest', family_name: 'User', email: '', email_verified: false, username: 'guest'};
+    const user: User = { name: 'Guest', email: '', pseudo: 'guest', ...props.item };
     return (
         <View style={styles.profileItem}>
             <TouchableScale
@@ -25,7 +25,7 @@ export const ProfileItem = (props: ProfileItemProps) => {
             >
                 <Image source={profileImage} style={styles.profileImage} />
                 <View style={styles.profileTextContainer}>
-                    <Text style={styles.profileName}>{user.given_name} {user.family_name}</Text>
+                    <Text style={styles.profileName}>{user.name}</Text>
                 </View>
             </TouchableScale>
             {props.isSelected && (

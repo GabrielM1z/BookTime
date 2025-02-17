@@ -1,26 +1,35 @@
+import { QueryProvider } from '@/components/QueryProvider';
+import { migrateDbIfNeeded } from '@/db/init';
+import { testServeur } from '@/helpers/testServeur';
+import { useAuthInterceptor } from '@/hooks/useAuth';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { AuthProvider } from '@/providers/AuthProvider';
+import { ControllerProvider } from '@/providers/ControllerProvider';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from "expo-router";
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { QueryProvider } from '@/components/QueryProvider';
-import React from 'react';
-import { migrateDbIfNeeded } from '@/db/init';
 import { deleteDatabaseAsync } from 'expo-sqlite';
-import { RepositoryProvider } from '@/providers/RepositoryProvider';
-import { AuthProvider } from '@/providers/AuthProvider';
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { ApiWrapper } from '@/components/ApiWrapper';
-import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import React, { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { ControllerProvider } from '@/providers/ControllerProvider';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
+
+function Routes() {
+    useAuthInterceptor();
+    return (
+        <Stack>
+            <Stack.Screen name="(app)" options={{ headerShown: false }} />
+            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+            <Stack.Screen name="+not-found" />
+        </Stack>
+    );
+}
 
 export default function RootLayout() {
     const [loaded] = useFonts({
@@ -28,8 +37,16 @@ export default function RootLayout() {
     });
     const colorScheme = useColorScheme();
 
-    // deleteDatabaseAsync('booktime.db');
-    // AsyncStorage.clear();
+    deleteDatabaseAsync('booktime.db');
+    AsyncStorage.clear();
+
+    const test = async () => {
+        await testServeur();
+    }
+
+    useEffect(() => {
+        test();
+    }, []);
 
     useEffect(() => {
         if (loaded) {
@@ -50,19 +67,13 @@ export default function RootLayout() {
             <GestureHandlerRootView>
                 <BottomSheetModalProvider>
                     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-                        <AuthProvider>
-                            <ApiWrapper>
-                                <ControllerProvider databaseName='booktime.db' onInit={migrateDbIfNeeded} onError={handleSQLiteError}>
-                                    <QueryProvider>
-                                        <Stack>
-                                            <Stack.Screen name="(app)" options={{ headerShown: false }} />
-                                            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-                                            <Stack.Screen name="+not-found" />
-                                        </Stack>
-                                    </QueryProvider>
-                                </ControllerProvider>
-                            </ApiWrapper>
-                        </AuthProvider>
+                        <ControllerProvider databaseName='booktime.db' onInit={migrateDbIfNeeded} onError={handleSQLiteError}>
+                            <AuthProvider>
+                                <QueryProvider>
+                                    <Routes />
+                                </QueryProvider>
+                            </AuthProvider>
+                        </ControllerProvider>
                     </ThemeProvider>
                 </BottomSheetModalProvider>
             </GestureHandlerRootView>

@@ -1,4 +1,4 @@
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthContext } from '@/hooks/useAuth';
 import commonStyles from '@/styles/commonStyles';
 import { AntDesign, Ionicons } from '@expo/vector-icons';
 import { AxiosError } from 'axios';
@@ -10,7 +10,7 @@ import styles from "./SignIn.style";
 
 
 export default function SignIn() {
-    const { logIn, logAsGuest, isLoading } = useAuth();
+    const { logIn, logAsGuest, isLoading } = useAuthContext();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [rememberMe, setRememberMe] = useState(false);

@@ -5,7 +5,7 @@ meta {
 }
 
 post {
-  url: http://159.31.247.130/auth/realms/booktime/protocol/openid-connect/token
+  url: {{base_url}}:8080/realms/booktime/protocol/openid-connect/token
   body: formUrlEncoded
   auth: none
 }
@@ -22,4 +22,5 @@ body:form-urlencoded {
 script:post-response {
   let data = res.getBody();
   bru.setEnvVar("access_token", data.access_token);
+  bru.setEnvVar("refresh_token", data.refresh_token);
 }

@@ -9,7 +9,7 @@ import { Buffer } from 'buffer';
 import { Colors } from '@/constants/Colors';
 import { createBook, getBookByIsbn13, insertBook } from '@/db/db-book';
 import { Library } from '@/models/Library';
-import { useRepository } from '@/hooks/useRepository';
+import { useRepositoryContext } from '@/hooks/useRepository';
 
 
 
@@ -31,7 +31,7 @@ const defaultCover = require('@/assets/images/logo_refait.png');
 
 export const LivreRecherche = ({ book }: { book: BookInfosSearch }) => {
 
-  const { bookRepository, libraryRepository } = useRepository();
+  const { bookRepository, libraryRepository } = useRepositoryContext();
   
   const handleAddBook = async () => {
 

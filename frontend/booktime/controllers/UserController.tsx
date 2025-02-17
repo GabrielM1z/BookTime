@@ -12,23 +12,31 @@ export class UserController extends DualRepositoryController<SQLiteUserRepositor
     }
     
     async getBySession(session: Session): Promise<User> {
-        console.log("UserController.getBySession");
-        let user: User | null;
         if (UserController.isWeb()) {
-            user = await this.remote.getFromToken();
+            return await this.remote.getFromToken();
         }
-        else {
-            console.log("not web");
-            user = await this.local.get(session.id_user);
+        return (await this.local.get(session.id_user))!;
+    }
+
+    async addFromSession(session: Session): Promise<void> {
+        if (UserController.isWeb()) {
+            return;
+        }
+
+        let user = await this.local.get(session.id_user);
+        if (!user) {
+            user = SessionController.isGuest(session) ? UserController.guestUser() : await this.remote.getFromToken();
             console.log(user);
-            if (!user) {
-                user = SessionController.isGuest(session) ? UserController.guestUser() : await this.remote.get(session.id_user);
-                console.log(user);
-                // let assume that the user cant be null
-                await this.local.add(user!);
-            }
+            // let assume that the user cant be null
+            await this.local.add(user!);
         }
-        return user!;
+    }
+
+    async getAll(): Promise<User[]> {
+        if (UserController.isWeb()) {
+            return [await this.remote.getFromToken()];
+        }
+        return await this.local.getAll();
     }
 
     static guestUser(): User {

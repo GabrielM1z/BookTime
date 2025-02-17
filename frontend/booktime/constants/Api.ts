@@ -11,5 +11,5 @@ export const keycloakClientId = process.env.EXPO_PUBLIC_KEYCLOAK_CLIENT_ID || "g
 export const baseURL = process.env.EXPO_PUBLIC_API_BASE_URL || "http://159.31.247.130";
 // export const baseURL = process.env.EXPO_PUBLIC_BACKEND_URL || "http://booktime.ddns.net:8082";
 
-export const keycloakAuthUrl = baseURL +  "/auth/realms/booktime/protocol/openid-connect/token";
+export const keycloakAuthUrl = baseURL +  ":8080/realms/booktime/protocol/openid-connect/token";
 export const apiLinkServeur = baseURL + "/books/search/?";

@@ -45,7 +45,7 @@ export class SQLiteUserRepository extends Synchronisable implements UserReposito
                 $id_user,
                 $email,
                 $name,
-                $username,
+                $pseudo,
                 $description,
                 $private,
                 $profil_image,
@@ -105,14 +105,14 @@ export class SQLiteUserRepository extends Synchronisable implements UserReposito
 export class APIUserRepository implements UserRepository {
     async getFromToken(): Promise<User> {
         const response = await api.get('/api/users/userfromtoken');
-        const { data } = await response;
-        return data["user"];
+        // FIXME: weird response structure
+        return response["data"]["data"]["user"];
     }
 
     async get(id: string): Promise<User | null> {
         console.log("APIUserRepository.get");
         const response = await api.get(`/api/users/user/${id}`);
-        const { data } = await response;
+        const { data } = response;
         console.log(data);
         return data;
     }
