@@ -6,10 +6,6 @@ import { LibraryWithBooksMin } from '@/models/Library';
 import { BookMinInfos } from '@/models/Book';
 import { Link } from 'expo-router';
 
-
-const cover1 = require('../assets/images/logo_refait.png');
-
-
 // component représentant une ETAGERE
 interface EtagereProps {
 	label: string;
@@ -18,60 +14,61 @@ interface EtagereProps {
 	index: number;
 }
 
-export default function Etagere({ label, idEtagere, livres, index }: EtagereProps) 
-{	
+export default function Etagere({ label, idEtagere, livres, index }: EtagereProps) {
 	// couleur possible
 	const colors = [
 		'#ff6961',
 		'#77dd77',
 		'#84b6f4'
-	]; 
+	];
 
 	// console.log("livres : ", livres)
-	
+
 	// on fait une rotation sur les coouleurs
-	const randomindex = index%3;
+	const randomindex = index % 3;
 
 	return (
 		<View style={[styles.etagereContainer, { backgroundColor: colors[randomindex] }]}>
 
-            <View style={styles.titreContainer}>
+			<View style={styles.titreContainer}>
 				<Link push href={{
-							pathname: "/(app)/etagere/[idEtagere]",
-							params: {
-								idEtagere: idEtagere,
-								label: label,
-							}
-						}} asChild>
-                <ThemedText type="titreEtagere">{label}</ThemedText>
+					pathname: "/(app)/etagere/[idEtagere]",
+					params: {
+						idEtagere: idEtagere,
+						label: label,
+					}
+				}} asChild>
+					<View>
+						<ThemedText type="titreEtagere">{label}</ThemedText>
+					</View>
 				</Link>
-            </View>
+			</View>
 
-            <ScrollView horizontal style={styles.livresContainer}>
-                {livres.map((livre, index) =>  livre.id_book !== null ? (
-                    <LivreEtagere key={index} id_book={livre.id_book} label={livre.title} cover={livre.cover_image_url}></LivreEtagere>
-                ) : null
+			<ScrollView horizontal style={styles.livresContainer}>
+				{livres.map((livre, index) => livre.id_book !== null ? (
+					<LivreEtagere key={index} livre={livre}></LivreEtagere>
+				) : null
 				)}
-            </ScrollView>
-		
+			</ScrollView>
+
 		</View>
 	);
 }
 
 
 const styles = StyleSheet.create({
-    etagereContainer: {
+	etagereContainer: {
 		alignSelf: 'center',
 		width: '90%',
 		marginTop: 10,
 		marginBottom: 10,
-		padding:10,
-		borderRadius:20,
-    },
+		padding: 10,
+		borderRadius: 20,
+	},
 	titreContainer: {
 		marginBottom: 5,
-    },
-    livresContainer: {
+	},
+	livresContainer: {
 		flexDirection: 'row',
 	},
 });

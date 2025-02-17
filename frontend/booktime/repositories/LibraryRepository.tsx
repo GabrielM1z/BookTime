@@ -73,8 +73,6 @@ export class SQLiteLibraryRepository extends Synchronisable implements LibraryRe
 
         const rows = await result.getAllAsync();
 
-        console.log("Result getAllBookFromLib : ", rows)
-
         return rows ? (rows as unknown as BookMinInfos[]) : [];
     }
 
@@ -86,7 +84,6 @@ export class SQLiteLibraryRepository extends Synchronisable implements LibraryRe
             // Tableau de promesses pour récupérer tous les livres
             const libraryPromises = allLibrary.map(async (library) => {
                 const listBookOfLibrary = await this.getAllBookFromLib(library.id_library);
-                console.log("library", library.name, ":", listBookOfLibrary)
                 return {
                     id_library: library.id_library,
                     name: library.name,

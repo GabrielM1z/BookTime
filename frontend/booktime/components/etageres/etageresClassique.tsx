@@ -1,10 +1,11 @@
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import Etagere from '@/components/Etagere';
 import NewEtagere from '@/components/NewEtagere';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useRepository } from '@/hooks/useRepository';
 import TestBtn from '@/components/TestBtn';
 import { LibraryWithBooksMin } from '@/models/Library';
+import { useFocusEffect } from 'expo-router';
 
 // import des images
 const cover1 = require('@/assets/images/logo_refait.png');
@@ -14,26 +15,28 @@ export default function pageEtageres() {
 
     const [etageres, setEtageres] = useState<LibraryWithBooksMin[] | []>([]);
 
-    // Charger les étagères initiales depuis la base de données
-    useEffect(() => {
-        refreshEtageres();
-    }, []);
-
+    //Se lance à chaque fois que l'utisateur est sur cette page. 
+    useFocusEffect(
+        React.useCallback(() => {
+            // 🆕 Réinitialiser la ref à chaque focus (navigation vers la page)
+            refreshEtageres();
+        }, [])
+    );
     const { libraryRepository } = useRepository();
 
     const refreshEtageres = () => {
         try {
-            libraryRepository.getAllInfo().then((data)=>{
+            libraryRepository.getAllInfo().then((data) => {
                 setEtageres(data);
-                console.log(data)
+                console.log("refreshEtageres success")
             })
-            
+
         } catch (error) {
             console.error('Error fetching etageres:', error);
         }
     };
 
-	// Fonction appelée depuis le composant enfant pour ajouter une nouvelle étagère
+    // Fonction appelée depuis le composant enfant pour ajouter une nouvelle étagère
     const handleAddEtagere = () => {
         refreshEtageres(); // Recharge les étagères depuis la base après l'ajout
     };
@@ -41,24 +44,24 @@ export default function pageEtageres() {
     // console.log("etageres :", JSON.stringify(etageres, null, 2));
 
     return (
-		<ScrollView style={styles.etagereContainer}>
-			<NewEtagere onAddEtagere={handleAddEtagere}></NewEtagere>
+        <ScrollView style={styles.etagereContainer}>
+            <NewEtagere onAddEtagere={handleAddEtagere}></NewEtagere>
             <TestBtn></TestBtn>
             {etageres && etageres.map((etagere, index) => (
-				<Etagere key={index} idEtagere={etagere.id_library} index={index} label={etagere.name} livres={etagere.books}></Etagere>
-			))}
+                <Etagere key={index} idEtagere={etagere.id_library} index={index} label={etagere.name} livres={etagere.books}></Etagere>
+            ))}
             <View style={styles.paddingBottom}></View>
-		</ScrollView>
-	);
+        </ScrollView>
+    );
 }
 
 
 // style css
 const styles = StyleSheet.create({
-	etagereContainer: {
-		flexDirection: 'column',
+    etagereContainer: {
+        flexDirection: 'column',
         height: 600,
-	},
+    },
     paddingBottom: {
         height: 90,
     }

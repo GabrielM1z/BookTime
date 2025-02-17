@@ -109,7 +109,7 @@ export default function EtagereDetail() {
             {/* Liste des livres de l'étagère */}
             <ScrollView style={styles.etagereContainer}>
                 {books && books.map((book, index) => (
-                    <LivreEtagere key={book.id_book} id_book={book.id_book} label={book.title} cover={book.cover_image_url}></LivreEtagere>
+                    <LivreEtagere key={book.id_book} livre={book}></LivreEtagere>
                 ))}
             </ScrollView>
         </ThemedView>

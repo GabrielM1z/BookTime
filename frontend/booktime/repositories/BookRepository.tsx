@@ -1,16 +1,17 @@
 import { SQLiteDatabase } from 'expo-sqlite';
 import { useSQLite } from "@/hooks/useSQLite";
 import { Synchronisable } from './synchronisable';
-import uuid from 'react-native-uuid';
-import { Book, BookAllInfos } from '@/models/Book';
-import { LibraryWithBooks } from '@/models/Library';
-import { log } from 'console';
+import { BookAllInfos } from '@/models/Book';
+
+import api from "@/services/api"
+import { baseURL } from '@/constants/Api';
+import { linkToBase64 } from '@/helpers/image';
 
 
 export interface BookRepository {
 	getAll: () => Promise<BookAllInfos[]>;
 	getAllFromLib: (id_lib: string) => Promise<BookAllInfos[]>
-	get: (id: string) => Promise<BookAllInfos | null>;
+	get: (id: string) => Promise<BookAllInfos>;
 	add: (state: BookAllInfos) => Promise<void>;
 	addBookToLibrary: (id_library: string, book: BookAllInfos) => Promise<void>
 }
@@ -49,13 +50,21 @@ export class SQLiteBookRepository extends Synchronisable implements BookReposito
 		return result ? (result as unknown as BookAllInfos[]) : [];
 	}
 
-	async get(id: string): Promise<BookAllInfos | null> {
+	async get(id: string): Promise<BookAllInfos> {
 		const result = await this.db.getFirstAsync<BookAllInfos>(
 			'SELECT * FROM book WHERE id_book == $id',
 			{ $id: id }
 		);
 
-		return result ? result : null;
+		if (result == null) {
+			throw new Error("yeay"); //A custom celon la pagge erreur.
+		}
+
+		let bookCover = await linkToBase64(result.cover_image_url);
+		result.cover_image_url = bookCover;
+
+
+		return result;
 	}
 
 	async add(book: BookAllInfos): Promise<void> {
@@ -76,41 +85,44 @@ export class SQLiteBookRepository extends Synchronisable implements BookReposito
 	}
 
 	async addBookToLibrary(id_library: string, book: BookAllInfos): Promise<void> {
+
 		try {
-			const insertBookStmt = await this.db.prepareAsync(
-				`INSERT OR IGNORE INTO book (id_book, title, description, publisher, publication_date, page_number, language, cover_image_url) 
-				VALUES ($id_book, $title, $description, $publisher, $publication_date, $page_number, $language, $cover_image_url);`
-			);
-
-			let resultInsertBook = await insertBookStmt.executeAsync({
-				$id_book: book.id_book,
-				$title: book.title,
-				$description: book.description,
-				$publisher: book.publisher,
-				$publication_date: book.publication_date,
-				$page_number: book.page_number,
-				$language: book.language,
-				$cover_image_url: book.cover_image_url,
+			await this.db.withTransactionAsync(async () => {
+				
+				const insertBookStmt = await this.db.prepareAsync(
+					`INSERT OR IGNORE INTO book (id_book, title, description, publisher, publication_date, page_number, language, cover_image_url) 
+					VALUES ($id_book, $title, $description, $publisher, $publication_date, $page_number, $language, $cover_image_url);`
+				);
+	
+				let resultInsertBook = await insertBookStmt.executeAsync({
+					$id_book: book.id_book,
+					$title: book.title,
+					$description: book.description,
+					$publisher: book.publisher,
+					$publication_date: book.publication_date,
+					$page_number: book.page_number,
+					$language: book.language,
+					$cover_image_url: book.cover_image_url,
+				});
+	
+	
+				const insertLibraryBookStmt = await this.db.prepareAsync(
+					' INSERT OR IGNORE INTO library_book (id_library, id_book) VALUES ($id_library, $id_book);'
+				);
+	
+				let resultInsertLibraryBook = await insertLibraryBookStmt.executeAsync({
+					$id_library: id_library,
+					$id_book: book.id_book,
+				});
 			});
 
-			await insertBookStmt.finalizeAsync();
-
-			const insertLibraryBookStmt = await this.db.prepareAsync(
-				' INSERT OR IGNORE INTO library_book (id_library, id_book) VALUES ($id_library, $id_book);'
-			);
-
-			let resultInsertLibraryBook = await insertLibraryBookStmt.executeAsync({
-				$id_library: id_library,
-				$id_book: book.id_book,
-			});
-
-			await insertLibraryBookStmt.finalizeAsync();
+			console.log("addBookToLibrary: success")
 
 		} catch (error) {
-			console.log(error)
+			console.log("Failed addBookToLibrary :", error)
+
 		}
 
-		console.log("addBookToLibrary: success")
 	}
 }
 
@@ -124,8 +136,25 @@ export class APIBookRepository implements BookRepository {
 		return [];
 	}
 
-	async get(id: string): Promise<BookAllInfos | null> {
-		return null;
+	async get(id: string): Promise<BookAllInfos> {
+		let bookData = await api.get(baseURL + `/books/books/` + id)
+
+		if (bookData == null) {
+			throw new Error("yeay"); //A custom celon la pagge erreur.
+		}
+		let imageBase64 = await linkToBase64(bookData.data.data.cover_image_url)
+		const book: BookAllInfos = {
+			id_book: bookData.data.data.id_book,
+			title: bookData.data.data.title,
+			description: bookData.data.data.description,
+			publisher: bookData.data.data.publisher,
+			publication_date: bookData.data.data.publication_date,
+			page_number: bookData.data.data.page_number,
+			language: bookData.data.data.language,
+			cover_image_url: imageBase64,
+		};
+
+		return book;
 	}
 
 	async add(book: BookAllInfos): Promise<void> {

@@ -58,7 +58,7 @@ export const useInfiniteScroll = <T = unknown, F = object>({
                 },
             }
         )
-        console.log("la requete renvoie : ", data)
+        // console.log("la requete renvoie : ", data)
 
         return {
             data: formatResponse ? formatResponse(data) : data,
