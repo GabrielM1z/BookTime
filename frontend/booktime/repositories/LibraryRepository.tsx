@@ -3,6 +3,8 @@ import { SQLiteDatabase } from 'expo-sqlite';
 import { useSQLite } from "@/hooks/useSQLite";
 import { Synchronisable } from './synchronisable';
 import uuid from 'react-native-uuid';
+import { bookRepositoryFactory } from './factories/bookRepositoryFactory';
+import { BookAllInfos, BookMinInfos } from '@/models/Book';
 
 
 
@@ -10,7 +12,8 @@ export interface LibraryRepository {
     getAll: () => Promise<Library[]>;
     get: (id: string) => Promise<Library | null>;
     add: (name: string) => Promise<void>;
-    getAllInfo: () => Promise<LibraryWithBooksMin[]|null>
+    getAllInfo: () => Promise<LibraryWithBooksMin[] | []>
+    getAllBookFromLib: (id_library: string) => Promise<BookMinInfos[] | null> 
 }
 
 export class SQLiteLibraryRepository extends Synchronisable implements LibraryRepository {
@@ -54,65 +57,54 @@ export class SQLiteLibraryRepository extends Synchronisable implements LibraryRe
         });
     }
 
-    async getAllInfo():  Promise<LibraryWithBooksMin[]|[]> {
+    async getAllBookFromLib(id_library: string): Promise<BookMinInfos[]> {
 
-        let allRows = await this.db.getAllAsync<{
-            id_library: string;
-            name: string;
-            id_book: string;
-            title: string;
-            cover_image_url: string;
-        }>(
-            'SELECT ' + 
-            'library.id_library AS id_library, ' + 
-            'library.name AS name, ' + 
-            'book.id_book AS id_book, ' + 
-            'book.title AS title, ' + 
-            'book.cover_image_url AS cover_image_url ' + 
-            'FROM library ' +
-            'LEFT JOIN library_book ON library.id_library = library_book.id_library ' +
-            'LEFT JOIN book ON book.id_book = library_book.id_book;'
+        const statement = await this.db.prepareAsync(
+            `SELECT book.*
+            FROM book
+            JOIN library_book ON book.id_book = library_book.id_book
+            JOIN library ON library_book.id_library = library.id_library
+            WHERE library.id_library = $id_library; `
         );
 
-//        const allLibrary : LibraryWithBooks[] = await this.getAll();
+        const result = await statement.executeAsync({
+            $id_library: id_library
+        })
+
+        const rows = await result.getAllAsync();
+
+        console.log("Result getAllBookFromLib : ", rows)
+
+        return rows ? (rows as unknown as BookMinInfos[]) : [];
+    }
+
+    async getAllInfo(): Promise<LibraryWithBooksMin[] | []> {
+
+        try {
+            const allLibrary: Library[] = await this.getAll();
+
+            // Tableau de promesses pour récupérer tous les livres
+            const libraryPromises = allLibrary.map(async (library) => {
+                const listBookOfLibrary = await this.getAllBookFromLib(library.id_library);
+                console.log("library", library.name, ":", listBookOfLibrary)
+                return {
+                    id_library: library.id_library,
+                    name: library.name,
+                    books: listBookOfLibrary
+                };
+            });
+    
+            // Attendre que toutes les promesses soient résolues
+            const allLibraryWithBook: LibraryWithBooksMin[] = await Promise.all(libraryPromises);
+    
+            return allLibraryWithBook;
+            
+        } catch (error) {
+            console.log("Error", error);   
+            return [];         
+        }
 
 
-        // console.log("rows : ",allRows)
-
-        const libraryMap = new Map<string, LibraryWithBooksMin>();
-
-
-        allRows.forEach(row => {
-            console.log("row : ", row)
-            const { id_library, name, id_book, title, cover_image_url } = row;
-
-            // Si la bibliothèque n'existe pas encore dans le Map, on l'ajoute
-            if (!libraryMap.has(id_library)) {
-                libraryMap.set(id_library, {
-                    id_library: id_library,
-                    name: name,
-                    books: [],
-                });
-            }
-
-            // Ajouter le livre à la bibliothèque correspondante
-            const library = libraryMap.get(id_library)!;
-            if(library.books.length != 0){
-                library.books.push({
-                    id_book: id_book,
-                    title: title,
-                    cover_image_url: cover_image_url,
-                });
-            }
-        });
-
-        console.log("oui")
-
-
-        // Convertir le Map en tableau ou retourner une bibliothèque spécifique
-        const librariesWithBooks = Array.from(libraryMap.values());
-
-        return librariesWithBooks;
     }
 }
 
@@ -130,7 +122,12 @@ export class APILibraryRepository implements LibraryRepository {
         return;
     }
 
-    async getAllInfo():  Promise<LibraryWithBooksMin[]|null> {
+    async getAllInfo(): Promise<LibraryWithBooksMin[] | []> {
+        return [];
+    }
+
+    async getAllBookFromLib(id_library: string): Promise<BookMinInfos[] | null> {
         return null;
     }
+
 }
