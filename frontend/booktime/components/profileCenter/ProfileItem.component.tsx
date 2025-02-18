@@ -3,6 +3,7 @@ import { Entypo } from "@expo/vector-icons";
 import React from "react";
 import { Image, StyleSheet, Text, View } from "react-native";
 import TouchableScale from "../TouchableScale";
+import AntDesign from '@expo/vector-icons/AntDesign';
 
 const profileImage = require('@/assets/images/profil.png');
 
@@ -15,6 +16,12 @@ export interface ProfileItemProps {
 
 export const ProfileItem = (props: ProfileItemProps) => {
     const user: User = { name: 'Guest', email: '', pseudo: 'guest', ...props.item };
+    const renderProfileImage = () => {
+        if (user.profil_image) {
+            return <Image source={profileImage} style={styles.profileImage} />;
+        }
+        return <AntDesign name="user" color="black" style={styles.profileImage} size={50} />
+    }
     return (
         <View style={styles.profileItem}>
             <TouchableScale
@@ -23,7 +30,7 @@ export const ProfileItem = (props: ProfileItemProps) => {
                 scaleTo={0.98}
                 duration={100}
             >
-                <Image source={profileImage} style={styles.profileImage} />
+                {renderProfileImage()}
                 <View style={styles.profileTextContainer}>
                     <Text style={styles.profileName}>{user.name}</Text>
                 </View>
@@ -48,6 +55,12 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderRadius: 25,
         flex: 1,
+        marginRight: 12,
+    },
+    profileImageContainer: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
         marginRight: 12,
     },
     profileImage: {

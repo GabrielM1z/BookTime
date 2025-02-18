@@ -2,7 +2,7 @@ import { useAuthContext } from '@/hooks/useAuth';
 import { useController } from '@/hooks/useController';
 import { User } from '@/models/User';
 import { Ionicons } from '@expo/vector-icons';
-import { BottomSheetFlatList, BottomSheetModal, BottomSheetView, useBottomSheetModal } from '@gorhom/bottom-sheet';
+import { BottomSheetFlatList, BottomSheetModal, BottomSheetView, useBottomSheetModal, BottomSheetBackdropProps } from '@gorhom/bottom-sheet';
 import { Href, useRouter } from 'expo-router';
 import React, { forwardRef, useCallback, useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -10,13 +10,14 @@ import TouchableScale from '../TouchableScale';
 import { CustomBottomSheet } from './CustomBottomSheet.component';
 import { OpacityBackgroundBottomSheet } from './OpacityBackgroundBottomSheet.component';
 import { ProfileItem } from './ProfileItem.component';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 
 export interface ProfileCenterProps {
     onChange?: (index: number) => void;
 };
 
-export const ModalProfileCenter = forwardRef<BottomSheetModal>((props, ref) => {
+export const ModalProfileCenter = forwardRef<BottomSheetModal>((props: ProfileCenterProps, ref) => {
     const router = useRouter();
     const { dismiss } = useBottomSheetModal();
     const subModalRef = useRef<BottomSheetModal>(null);
@@ -63,7 +64,18 @@ export const ModalProfileCenter = forwardRef<BottomSheetModal>((props, ref) => {
     return (
         <>
             <OpacityBackgroundBottomSheet isOpen={[isFirstModalOpen, isSecondModalOpen, transitioning]} />
-            <CustomBottomSheet ref={ref} setIsOpen={setIsFirstModalOpen}>
+            <CustomBottomSheet
+                ref={ref}
+                setIsOpen={setIsFirstModalOpen}
+                // bottomInset={bottom} // FIXME: not working (bottom is 0)
+                footerComponent={() => (
+                    // <View>
+                        <TouchableOpacity style={styles.settingsButton} onPress={handleAccountsCenter}>
+                            <Text style={styles.settingsText}>Settings</Text>
+                        </TouchableOpacity>
+                    // </View>
+                )}
+            >
                 <BottomSheetFlatList // FIXME: built twice
                     data={isFirstModalOpen && !transitioning && !isSecondModalOpen ? users : []}
                     keyExtractor={(item) => item.id_user.toString()}
@@ -84,11 +96,7 @@ export const ModalProfileCenter = forwardRef<BottomSheetModal>((props, ref) => {
                         </TouchableScale>
                     )}
                 />
-                <View>
-                    <TouchableOpacity style={styles.settingsButton} onPress={handleAccountsCenter}>
-                        <Text style={styles.settingsText}>Settings</Text>
-                    </TouchableOpacity>
-                </View>
+
             </CustomBottomSheet>
             <CustomBottomSheet ref={subModalRef} setIsOpen={setIsSecondModalOpen}>
                 <BottomSheetView>
@@ -103,12 +111,20 @@ export const ModalProfileCenter = forwardRef<BottomSheetModal>((props, ref) => {
 
 
 const styles = StyleSheet.create({
+    contentContainer: {
+        flex: 1,
+        padding: 36,
+        alignItems: 'center',
+    },
+
     profileContainer: {
         backgroundColor: '#F5F5F5',
         borderRadius: 12,
         padding: 8,
         margin: 8,
         minHeight: 200, // FIXME: marche pas
+        // minHeight: 100,
+        // maxHeight: 500,
     },
     profileItem: {
         flexDirection: 'row',

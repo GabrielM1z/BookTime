@@ -14,7 +14,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { deleteDatabaseAsync } from 'expo-sqlite';
 import React, { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
 
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -37,8 +37,8 @@ export default function RootLayout() {
     });
     const colorScheme = useColorScheme();
 
-    deleteDatabaseAsync('booktime.db');
-    AsyncStorage.clear();
+    // deleteDatabaseAsync('booktime.db');
+    // AsyncStorage.clear();
 
     const test = async () => {
         await testServeur();
@@ -63,7 +63,7 @@ export default function RootLayout() {
     }
 
     return (
-        <SafeAreaProvider>
+        <SafeAreaProvider initialMetrics={initialWindowMetrics}>
             <GestureHandlerRootView>
                 <BottomSheetModalProvider>
                     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>

@@ -4,7 +4,7 @@ import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import React, { useCallback, useRef } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import Animated, { Extrapolation, interpolate, useAnimatedRef, useAnimatedStyle, useScrollViewOffset } from 'react-native-reanimated';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSafeAreaInsets, SafeAreaView } from 'react-native-safe-area-context';
 import styles, { headerMaxHeight, headerMinHeight, profileImageMaxSize } from './profile.style';
 
 const profileImage = require('@/assets/images/profil.png');
@@ -123,7 +123,7 @@ export default function Profile() {
     };
 
     return (
-        <SafeAreaView style={{ flex: 1, alignItems: 'center' }}>
+        <SafeAreaView>
             <ModalProfileCenter ref={bottomSheetRef} />
             <Animated.View style={[styles.header, headerAnimatedStyles]}>
                 <Animated.Image source={bannerImage} style={[styles.bannerImage, bannerImageAnimatedStyles]} />
