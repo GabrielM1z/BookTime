@@ -14,6 +14,7 @@ export interface BookRepository {
 	get: (id: string) => Promise<BookAllInfos>;
 	add: (state: BookAllInfos) => Promise<void>;
 	addBookToLibrary: (id_library: string, book: BookAllInfos) => Promise<void>
+	delBookFromLibrary: (id_library: string, id_book: string) => Promise<void>
 }
 
 export class SQLiteBookRepository extends Synchronisable implements BookRepository {
@@ -120,9 +121,20 @@ export class SQLiteBookRepository extends Synchronisable implements BookReposito
 
 		} catch (error) {
 			console.log("Failed addBookToLibrary :", error)
-
 		}
+	}
 
+	async delBookFromLibrary(id_library: string, id_book: string): Promise<void> {
+		await this.db.withTransactionAsync(async () => {
+			const deleteLibraryBookStmt = await this.db.prepareAsync(
+				'DELETE FROM library_book WHERE id_library == $id_library AND id_book == $id_book;'
+			);
+
+			await deleteLibraryBookStmt.executeAsync({
+				$id_library: id_library,
+				$id_book: id_book,
+			});
+		});
 	}
 }
 
@@ -162,6 +174,10 @@ export class APIBookRepository implements BookRepository {
 	}
 
 	async addBookToLibrary(id_library: string, book: BookAllInfos): Promise<void> {
+		return;
+	}
+
+	async delBookFromLibrary(id_library: string, id_book: string): Promise<void> {
 		return;
 	}
 }

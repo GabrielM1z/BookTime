@@ -140,8 +140,8 @@ export default function LivreDetail() {
             </View>
 
             <View style={styles.containerResume}>
-                <ThemedText type='sousTab'>Ajouter</ThemedText>
-                <LibraryChoice></LibraryChoice>
+                <ThemedText type='sousTab'>Bibliothèques</ThemedText>
+                <LibraryChoice book={book}/>
             </View>
         </ThemedView>
     );

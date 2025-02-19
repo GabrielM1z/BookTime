@@ -14,6 +14,8 @@ export interface LibraryRepository {
     add: (name: string) => Promise<void>;
     getAllInfo: () => Promise<LibraryWithBooksMin[] | []>
     getAllBookFromLib: (id_library: string) => Promise<BookMinInfos[] | null> 
+    getAllLibraryFromBook: (id_book: string) => Promise<Library[]>;
+    getAllNotLibraryFromBook: (id_book: string) => Promise<Library[]>;
 }
 
 export class SQLiteLibraryRepository extends Synchronisable implements LibraryRepository {
@@ -100,9 +102,49 @@ export class SQLiteLibraryRepository extends Synchronisable implements LibraryRe
             console.log("Error", error);   
             return [];         
         }
-
-
     }
+
+    async getAllLibraryFromBook(id_book: string): Promise<Library[]> {
+
+        const statement = await this.db.prepareAsync(
+            `SELECT library.*
+            FROM library
+            JOIN library_book ON library.id_library = library_book.id_library
+            JOIN book ON library_book.id_book = book.id_book
+            WHERE book.id_book = $id_book;`
+        );
+
+        const result = await statement.executeAsync({
+            $id_book: id_book
+        })
+
+        const rows = await result.getAllAsync();
+
+        return rows ? (rows as unknown as Library[]) : [];
+    }
+
+    async getAllNotLibraryFromBook(id_book: string): Promise<Library[]> {
+        const statement = await this.db.prepareAsync(
+            `SELECT library.*
+            FROM library
+            WHERE library.id_library NOT IN (
+                SELECT library.id_library
+                FROM library
+                JOIN library_book ON library.id_library = library_book.id_library
+                JOIN book ON library_book.id_book = book.id_book
+                WHERE book.id_book = $id_book
+            );`
+        );
+
+        const result = await statement.executeAsync({
+            $id_book: id_book
+        })
+
+        const rows = await result.getAllAsync();
+
+        return rows ? (rows as unknown as Library[]) : [];
+    }
+
 }
 
 
@@ -127,4 +169,11 @@ export class APILibraryRepository implements LibraryRepository {
         return null;
     }
 
+    async getAllLibraryFromBook(id_book: string): Promise<Library[]> {
+        return [];
+    }
+
+    async getAllNotLibraryFromBook(id_book: string): Promise<Library[]> {
+        return [];
+    }
 }
