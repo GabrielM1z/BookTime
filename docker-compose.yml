@@ -103,18 +103,18 @@ services:
 
   # TODO: Add nginx service
   #       - change keycloak to use /auth
-  # nginx:
-  #   <<: *service
-  #   image: nginx:latest
-  #   volumes:
-  #     - ./nginx:/etc/nginx/conf.d
-  #   ports:
-  #     - 80:80
-  #   depends_on:
-  #     # - api_books
-  #     # - api_news
-  #     # - api_user
-  #     - api_gateway
+  nginx:
+    <<: *service
+    image: nginx:latest
+    # volumes:
+    #   - ./nginx:/etc/nginx/conf.d
+    ports:
+      - 80:80
+    depends_on:
+      # - api_books
+      # - api_news
+      # - api_user
+      - api_gateway
 
 volumes:
   postgres_data:
