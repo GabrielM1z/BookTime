@@ -13,7 +13,6 @@ services:
   postgres:
     <<: *service
     image: postgres:latest
-    container_name: postgres_db
     ports:
       - 5432:5432
     environment:
@@ -51,7 +50,6 @@ services:
 
   api_books:
     <<: *backend
-    container_name: api_books
     hostname: books
     build: 
       context: ./backend/book
@@ -71,7 +69,7 @@ services:
       - api_volume:/usr/src/app/
 
   api_news:
-    container_name: api_news
+    <<: *backend
     hostname: news
     build: ./backend/news
     ports:
@@ -79,7 +77,6 @@ services:
 
   api_user:
     <<: *backend
-    container_name: api_user
     hostname: user
     build: ./backend/user
     ports:
@@ -94,7 +91,6 @@ services:
 
   api_gateway:
     <<: *backend
-    container_name: api_gateway
     hostname: gateway
     build: ./backend/gateway
     ports:
@@ -106,6 +102,7 @@ services:
         condition: service_healthy
 
   migrate:
+    <<: *service
     image: migrate/migrate:v4.15.2
     profiles: [ "tools" ]
     volumes:
