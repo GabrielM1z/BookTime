@@ -5,7 +5,7 @@ import { BookInfosSearch, BookInfosServeur } from '@/models/Book';
 import React, { useState } from 'react';
 
 import { Colors } from '@/constants/Colors';
-import { useRepository } from '@/hooks/useRepository';
+import { useRepositoryContext } from '@/hooks/useRepository';
 import CoverPressable from '../CoverPressable';
 import api from '@/services/api';
 import { Snackbar, PaperProvider, Portal } from "react-native-paper";
@@ -17,8 +17,8 @@ interface LivreRechercheProps {
 
 export const LivreRecherche = ({ book }: LivreRechercheProps) => {
 
-  const { bookRepository, libraryRepository } = useRepository();
-  const [visible, setVisible] = useState(false);
+  const { bookRepository, libraryRepository } = useRepositoryContext();
+    const [visible, setVisible] = useState(false);
 
   const showSnackbar = () => setVisible(true);
   const hideSnackbar = () => setVisible(false);

@@ -6,7 +6,7 @@ import { useLocalSearchParams, useNavigation } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { Colors } from '@/constants/Colors';
 import { Link } from 'expo-router';
-import { useRepository } from '@/hooks/useRepository';
+import { useRepositoryContext } from '@/hooks/useRepository';
 import LibraryChoice from '@/components/LibraryChoice';
 import axios from 'axios';
 import { baseURL } from '@/constants/Api';
@@ -18,7 +18,7 @@ import BackButton from '@/components/BackButton';
 
 export default function LivreDetail() {
 
-    const { bookRepository } = useRepository();
+    const { bookRepository } = useRepositoryContext();
     const navigation = useNavigation();
     const { idBook, cover, mode } = useLocalSearchParams();
 

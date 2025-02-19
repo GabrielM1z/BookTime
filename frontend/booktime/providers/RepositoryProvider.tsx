@@ -12,12 +12,16 @@ import { formatRepositoryFactory } from "@/repositories/factories/formatReposito
 import { genreRepositoryFactory } from "@/repositories/factories/genreRepositoryFactory";
 import { libraryRepositoryFactory } from "@/repositories/factories/libraryRepositoryFactory";
 import { userRepositoryFactory } from "@/repositories/factories/userRepositoryFactory";
+
+import { CachedSessionRepository, SessionRepository } from "@/repositories/SessionRepository";
 import { SQLiteProviderProps } from "expo-sqlite";
 import { SQLiteProvider } from "./SQLiteProvider";
 import React, { createContext } from "react";
 
 
 export interface RepositoryContextProps {
+    cachedSessionRepository: CachedSessionRepository;
+    
     userRepository: UserRepository;
     libraryRepository: LibraryRepository;
     bookRepository: BookRepository;
@@ -29,7 +33,9 @@ export interface RepositoryContextProps {
 
 export const RepositoryContext = createContext<RepositoryContextProps | undefined>(undefined);
 
-function RepositoryProvider({ children }: { children: React.ReactNode }) {
+function RepositoryProviderInner({ children }: { children: React.ReactNode }) {
+    const cachedSessionRepository = new CachedSessionRepository();
+
     const userRepository = userRepositoryFactory();
     const libraryRepository = libraryRepositoryFactory();
     const bookRepository = bookRepositoryFactory();
@@ -40,6 +46,8 @@ function RepositoryProvider({ children }: { children: React.ReactNode }) {
 
     return (
         <RepositoryContext.Provider value={{
+            cachedSessionRepository,
+
             userRepository,
             libraryRepository,
             bookRepository,
@@ -53,7 +61,7 @@ function RepositoryProvider({ children }: { children: React.ReactNode }) {
     );
 }
 
-export function RepositoryProviderWrapper({
+export function RepositoryProvider({
     children,
     onError,
     useSuspense = false,
@@ -61,7 +69,7 @@ export function RepositoryProviderWrapper({
 }: SQLiteProviderProps) {
     return (
         <SQLiteProvider {...props}>
-            <RepositoryProvider>{children}</RepositoryProvider>
+            <RepositoryProviderInner>{children}</RepositoryProviderInner>
         </SQLiteProvider>
     );
 }

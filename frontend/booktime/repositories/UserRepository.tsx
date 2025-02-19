@@ -1,14 +1,11 @@
 import api from '@/services/api';
-import { User } from '@/models/User';
-import { Session } from '@/models/Session';
-import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite';
+import { User, UpdateUserDto } from '@/models/User';
+import { SQLiteDatabase } from 'expo-sqlite';
 import { Synchronisable } from './synchronisable';
-import { userFromToken, guestUserFactory } from '@/helpers/keycloak';
 import { useSQLite } from '@/hooks/useSQLite';
 
 export interface UserRepository {
-    getBySession(session: Session): Promise<User>;
-    getById(id: string): Promise<User | null>;
+    get(id: string): Promise<User | null>;
     getAll(): Promise<User[]>;
     update(user: User): Promise<void>;
     delete(user: User): Promise<void>;
@@ -16,24 +13,13 @@ export interface UserRepository {
 
 export class SQLiteUserRepository extends Synchronisable implements UserRepository {
     private db: SQLiteDatabase;
-    private api: APIUserRepository;
 
     constructor() {
         super();
         this.db = useSQLite().db;
-        this.api = new APIUserRepository();
     }
 
-    async getBySession(session: Session): Promise<User> {
-        let user = await this.getById(session.id_user);
-        if (!user) {
-            user = session.isGuest() ? guestUserFactory() : await this.api.getBySession(session);
-            await this.add(user);
-        }
-        return user;
-    }
-
-    async getById(id: string): Promise<User | null> {
+    async get(id: string): Promise<User | null> {
         const statement = await this.db.prepareAsync(`
             SELECT * FROM user WHERE id_user = $id_user;
         `);
@@ -54,78 +40,83 @@ export class SQLiteUserRepository extends Synchronisable implements UserReposito
 
     async add(user: User): Promise<void> {
         const statement = await this.db.prepareAsync(`
-            INSERT INTO user (id_user, username, email, email_verified, given_name, family_name)
+            INSERT INTO user (id_user, email, name, pseudo, description, private, profil_image, banner_image, birthdate)
             VALUES (
                 $id_user,
-                $username,
                 $email,
-                $email_verified,
-                $given_name,
-                $family_name
+                $name,
+                $pseudo,
+                $description,
+                $private,
+                $profil_image,
+                $banner_image,
+                $birthdate
             );
         `);
 
         await statement.executeAsync({
             $id_user: user.id_user,
-            $username: user.username,
             $email: user.email,
-            $email_verified: user.email_verified,
-            $given_name: user.given_name,
-            $family_name: user.family_name
+            $name: user.name,
+            $pseudo: user.pseudo,
+            $description: user.description,
+            $private: user.private,
+            $profil_image: user.profil_image,
+            $banner_image: user.banner_image,
+            $birthdate: user.birthdate
         });
     }
 
-    async update(user: User): Promise<void> {
+    async update(user: UpdateUserDto): Promise<void> {
         const statement = await this.db.prepareAsync(`
             UPDATE user
-            SET username = $username,
-                email = $email,
-                email_verified = $email_verified,
-                given_name = $given_name,
-                family_name = $family_name
+            SET pseudo = $pseudo,
+                description = $description,
+                private = $private,
+                profil_image = $profil_image,
+                banner_image = $banner_image,
+                birthdate = $birthdate
             WHERE id_user = $id_user;
         `);
 
         await statement.executeAsync({
             $id_user: user.id_user,
-            $username: user.username,
-            $email: user.email,
-            $email_verified: user.email_verified,
-            $given_name: user.given_name,
-            $family_name: user.family_name
+            $pseudo: user.pseudo,
+            $description: user.description,
+            $private: user.private,
+            $profil_image: user.profil_image,
+            $banner_image: user.banner_image,
+            $birthdate: user.birthdate
         });
     }
 
-    async delete(user: User): Promise<void> {
+    async delete(id_or_user: string | User): Promise<void> {
+        const id = typeof id_or_user === 'string' ? id_or_user : id_or_user.id_user;
+
         const statement = await this.db.prepareAsync(`
             DELETE FROM user WHERE id_user = $id_user;
         `);
 
         await statement.executeAsync({
-            $id_user: user.id_user
+            $id_user: id,
         });
     }
 }
 
 
 export class APIUserRepository implements UserRepository {
-    async getBySession(session: Session): Promise<User> {
-        // if (!session.isGuest) {
-        //     return User.
-        // }
-        if (!session.access_token) {
-            throw new Error('No access token in session');
-        }
-
-        const tokenUser = userFromToken(session.access_token);
-        const apiUser = await this.getById(tokenUser.id_user);
-        const user = { ...tokenUser, ...apiUser };
-        return user;
+    async getFromToken(): Promise<User> {
+        const response = await api.get('/api/users/userfromtoken');
+        // FIXME: weird response structure
+        return response["data"]["data"]["user"];
     }
 
-    async getById(id: string): Promise<User | null> {
-        const response = await api.get(`/api/user/${id}`);
-        return response.data;
+    async get(id: string): Promise<User | null> {
+        console.log("APIUserRepository.get");
+        const response = await api.get(`/api/users/user/${id}`);
+        const { data } = response;
+        console.log(data);
+        return data;
     }
 
     async getAll(): Promise<User[]> {

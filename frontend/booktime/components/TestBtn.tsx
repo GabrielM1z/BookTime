@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import TitreTab from "./TitreTab";
 import { TouchableOpacity, View, StyleSheet } from "react-native";
 import { Colors } from '@/constants/Colors';
-import { useRepository } from '@/hooks/useRepository';
+import { useRepositoryContext } from '@/hooks/useRepository';
 import { BookAllInfos } from '@/models/Book';
 
 
 export default function TestBtn({})
 {
-	const { bookRepository, libraryRepository } = useRepository();
+	const { bookRepository, libraryRepository } = useRepositoryContext();
 	
 	const book1: BookAllInfos = {
 		id_book: '1',
