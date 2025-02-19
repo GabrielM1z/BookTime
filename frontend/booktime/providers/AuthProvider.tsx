@@ -7,6 +7,7 @@ import { SessionController } from "../controllers/SessionController";
 
 export interface AuthContextProps {
     session: Session | null;
+    sessions: Session[];
     isLoading: boolean;
     logIn: (username: string, password: string, remember: boolean) => Promise<void>;
     logAsGuest: () => Promise<void>;
@@ -20,6 +21,7 @@ export const AuthContext = createContext<AuthContextProps | undefined>(undefined
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [session, setSession] = useState<Session | null>(null);
+    const [sessions, setSessions] = useState<Session[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const sessionController = new SessionController();
     const { userController } = useController();
@@ -47,6 +49,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setIsLoading(true);
             const guestSession = await sessionController.getOrCreateGuestSession();
             setSession(guestSession);
+            await userController.addFromSession(guestSession);
         }
         finally {
             setIsLoading(false);
@@ -56,6 +59,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const logOut = async () => {
         if (session) {
             await sessionController.removeSession(session);
+            await userController.local.delete(session.id_user);
+            console.log(session);
             setSession(null);
         }
     };
@@ -81,10 +86,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         })();
     }, []);
 
+    useEffect(() => {
+        (async () => {
+            const sessions = await sessionController.getAllSessions();
+            setSessions(sessions);
+        })();
+    }, [session]);
+
     return (
         <AuthContext.Provider
             value={{
                 session,
+                sessions,
                 isLoading,
                 logIn,
                 logAsGuest,

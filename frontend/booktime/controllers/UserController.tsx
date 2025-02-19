@@ -10,7 +10,7 @@ export class UserController extends DualRepositoryController<SQLiteUserRepositor
     constructor() {
         super(new APIUserRepository(), new SQLiteUserRepository());
     }
-    
+
     async getBySession(session: Session): Promise<User> {
         if (UserController.isWeb()) {
             return await this.remote.getFromToken();
@@ -37,6 +37,15 @@ export class UserController extends DualRepositoryController<SQLiteUserRepositor
             return [await this.remote.getFromToken()];
         }
         return await this.local.getAll();
+    }
+
+    async getAllBySession(sessions: Session[]): Promise<User[]> {
+        if (UserController.isWeb()) {
+            return [] // TODO: implement
+        }
+
+        const users = await Promise.all(sessions.map(async (session) => await this.local.get(session.id_user)));
+        return users.filter((user): user is User => user !== undefined);
     }
 
     static guestUser(): User {

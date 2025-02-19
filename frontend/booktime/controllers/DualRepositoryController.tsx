@@ -2,8 +2,8 @@ import { Platform } from 'react-native';
 
 
 export abstract class DualRepositoryController<L, R> {
-    protected remote: R;
-    protected local: L;
+    remote: R;
+    local: L;
 
     constructor(api: R, sqlite: L) {
         this.remote = api;

@@ -90,13 +90,15 @@ export class SQLiteUserRepository extends Synchronisable implements UserReposito
         });
     }
 
-    async delete(user: User): Promise<void> {
+    async delete(id_or_user: string | User): Promise<void> {
+        const id = typeof id_or_user === 'string' ? id_or_user : id_or_user.id_user;
+
         const statement = await this.db.prepareAsync(`
             DELETE FROM user WHERE id_user = $id_user;
         `);
 
         await statement.executeAsync({
-            $id_user: user.id_user
+            $id_user: id,
         });
     }
 }

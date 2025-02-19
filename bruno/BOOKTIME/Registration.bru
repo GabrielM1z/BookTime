@@ -1,0 +1,34 @@
+meta {
+  name: Registration
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{base_url}}:8080/realms/booktime/protocol/openid-connect/registrations
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "username": "test2",
+    "email": "test2@booktime.com",
+    "enabled": true,
+    "firstName": "test2",
+    "lastName": "test2",
+    "credentials": [{
+      "type": "password",
+      "value": "password"
+    }]
+  }
+}
+
+body:form-urlencoded {
+  username: test2
+  email: test2@booktime.fr
+  enabled: true
+  firstName: test2
+  lastName: test2
+  credentials: [{"type": "password","value": "password"}]
+}

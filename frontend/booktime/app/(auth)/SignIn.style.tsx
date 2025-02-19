@@ -74,7 +74,7 @@ export default StyleSheet.create({
         fontSize: 16,
         fontWeight: "bold",
     },
-    signupButtonStyle: {
+    signupStyle: {
         marginVertical: 8,
         alignSelf: "center",
     },
@@ -89,6 +89,15 @@ export default StyleSheet.create({
     },
     forgotPasswordTextStyle: {
         color: "#999",
+        fontSize: 14,
+    },
+    logAsStyle: {
+        marginTop: 8,
+        alignSelf: "center",
+    },
+    logAsTextStyle: {
+        color: "#25a9e2",
+        fontWeight: "bold",
         fontSize: 14,
     },
     socialLoginContainer: {

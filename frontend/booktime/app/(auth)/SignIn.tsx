@@ -3,23 +3,28 @@ import commonStyles from '@/styles/commonStyles';
 import { AntDesign, Ionicons } from '@expo/vector-icons';
 import { AxiosError } from 'axios';
 import { Href, useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Keyboard, StatusBar, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import styles from "./SignIn.style";
+import { AccountCenter } from '@/components/bottomSheets/AccountCenter';
+import { BottomSheetModal } from '@gorhom/bottom-sheet';
 
 
 export default function SignIn() {
-    const { logIn, logAsGuest, isLoading } = useAuthContext();
+    const accountCenterRef = useRef<BottomSheetModal>(null);
+
+    const { logIn, logAsGuest, isLoading, sessions } = useAuthContext();
+    const router = useRouter();
+
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-    const router = useRouter();
 
     const logoImageSource = require('@/assets/images/logo_refait.png');
 
-    const handleLogIn = async () => {
+    const handleLogIn = useCallback( async () => {
         Keyboard.dismiss();
 
         try {
@@ -30,13 +35,17 @@ export default function SignIn() {
             const axiosError = error as AxiosError;
             Alert.alert('Error', axiosError.message);
         }
-    };
+    }, [logIn, router, username, password, rememberMe]);
 
-    const handleLogAsGuest = async () => {
+    const handleLogAsGuest = useCallback(async () => {
         Keyboard.dismiss();
         await logAsGuest();
         router.replace('/(app)' as Href<'(app)'>);
-    }
+    }, [logAsGuest, router]);
+
+    const handleLogAs = useCallback(() => {
+        accountCenterRef.current?.present();
+    }, [accountCenterRef]);
 
     return (
         <SafeAreaView style={styles.container}>
@@ -101,7 +110,7 @@ export default function SignIn() {
                     <Text style={styles.loginTextStyle}>Log as guest</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                    style={styles.signupButtonStyle}
+                    style={styles.signupStyle}
                     onPress={() => router.push('/SignUp' as Href<'SignUp'>)}
                 >
                     <Text style={styles.signupTextStyle}>Créer un compte</Text>
@@ -112,6 +121,12 @@ export default function SignIn() {
                 >
                     <Text style={styles.forgotPasswordTextStyle}>Mot de passe oublié ?</Text>
                 </TouchableOpacity>
+                {sessions.length > 0 && <TouchableOpacity
+                    style={styles.logAsStyle}
+                    onPress={handleLogAs}
+                >
+                    <Text style={styles.logAsTextStyle}>Log As</Text>
+                </TouchableOpacity>}
             </View>
             <View style={styles.socialLoginContainer}>
                 <TouchableOpacity style={styles.socialBubble}>
@@ -124,6 +139,7 @@ export default function SignIn() {
                     <AntDesign name="twitter" size={24} color="white" />
                 </TouchableOpacity>
             </View>
+            <AccountCenter ref={accountCenterRef} />
         </SafeAreaView>
     );
 }
