@@ -5,15 +5,15 @@ import axios, { AxiosInstance } from 'axios';
 export type Api = AxiosInstance;
 
 const api = axios.create({
-    baseURL: keycloakBaseUrl,
+    baseURL: apiBaseUrl,
     timeout: 5000,
     headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
     },
 })
 
-const keycloak = axios.create({
-    baseURL: apiBaseUrl,
+export const keycloak = axios.create({
+    baseURL: keycloakBaseUrl,
     timeout: 5000,
     headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
