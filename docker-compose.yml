@@ -29,7 +29,6 @@ services:
     command: start-dev
     environment:
       KC_HOSTNAME: keycloak
-      # KC_HOSTNAME_BACKCHANNEL_DYNAMIC: true
       KC_HTTP_ENABLED: true
       KC_HOSTNAME_STRICT: false
       KC_HEALTH_ENABLED: true
