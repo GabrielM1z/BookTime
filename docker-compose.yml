@@ -65,8 +65,6 @@ services:
       DB_NAME: book_db
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
-    volumes:
-      - api_volume:/usr/src/app/
 
   api_news:
     <<: *backend
@@ -86,8 +84,6 @@ services:
       DB_NAME: book_db
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
-    volumes:
-      - api_volume:/usr/src/app/
 
   api_gateway:
     <<: *backend
