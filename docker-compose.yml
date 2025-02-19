@@ -28,16 +28,18 @@ services:
     command: start-dev
     environment:
       KC_HOSTNAME: keycloak
-      KC_HTTP_ENABLED: true
       KC_HOSTNAME_STRICT: false
+      KC_HOSTNAME_STRICT_HTTPS: false
+      # KC_HTTP_RELATIVE_PATH: /auth
+
       KC_HEALTH_ENABLED: true
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak_db
       KC_DB_USERNAME: ${DB_USER}
       KC_DB_PASSWORD: ${DB_PASSWORD}
-      # KC_HTTP_RELATIVE_PATH: /auth
     ports:
       - 8080:8080
       - 9000:9000
@@ -50,7 +52,6 @@ services:
 
   api_books:
     <<: *backend
-    hostname: books
     build: 
       context: ./backend/book
       target: prod
@@ -68,14 +69,12 @@ services:
 
   api_news:
     <<: *backend
-    hostname: news
     build: ./backend/news
     ports:
       - 8084:8080
 
   api_user:
     <<: *backend
-    hostname: user
     build: ./backend/user
     ports:
       - 8085:8080
@@ -87,7 +86,6 @@ services:
 
   api_gateway:
     <<: *backend
-    hostname: gateway
     build: ./backend/gateway
     ports:
       - 8082:8080
