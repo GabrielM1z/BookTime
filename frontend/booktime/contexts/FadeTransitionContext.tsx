@@ -1,6 +1,8 @@
 import React, { createContext, useContext } from "react";
 import Animated, { useSharedValue, withTiming, useAnimatedStyle, runOnJS } from "react-native-reanimated";
 
+// TODO: change this with navigation transition
+
 interface FadeTransitionContextType {
     withFadeTransition: (callback: () => void, duration?: number) => void;
 }
@@ -15,7 +17,7 @@ export const FadeTransitionProvider: React.FC<{ children: React.ReactNode }> = (
         opacity: opacity.value,
     }));
 
-    const withFadeTransition = (callback: () => void, duration: number = 300) => {
+    const withFadeTransition = (callback: () => void, duration: number = 200) => {
         opacity.value = withTiming(0, { duration }, () => {
             runOnJS(callback)();
             opacity.value = withTiming(1, { duration });

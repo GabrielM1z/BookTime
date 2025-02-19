@@ -1,6 +1,17 @@
-import { keycloakAuthUrl, keycloakClientId, keycloakClientSecret, keycloakBaseUrl, apiBaseUrl } from '@/constants/Api';
+import {
+    apiBaseUrl,
+    baseURL,
+    keycloakAdminClientId,
+    keycloakAdminClientSecret,
+    keycloakAdminUrl,
+    keycloakBaseUrl,
+    keycloakClientId,
+    keycloakClientSecret,
+    keycloakRealmUrl,
+} from '@/constants/Api';
 import { AuthResponseProps } from '@/models/keycloak';
 import axios, { AxiosInstance } from 'axios';
+import { Alert } from 'react-native';
 
 export type Api = AxiosInstance;
 
@@ -23,13 +34,21 @@ export const keycloak = axios.create({
 
 export default api;
 
+
+export const checkServerAliveOrWarning = async () => {
+    await axios.head(baseURL).catch(() => {
+        Alert.alert(
+            "Serveur non disponible",
+            "Le serveur n'est pas disponible. Veuillez vérifier votre connexion internet.",
+            [{ "text": "OK" }]
+        )
+    })
+}
+
+
 export const authenticate = async (username: string, password: string): Promise<AuthResponseProps> => {
-    if (!keycloakClientId || !keycloakClientSecret) {
-        throw new Error('Keycloak not configured');
-    }
-    
     const response = await keycloak.post(
-        keycloakAuthUrl,
+        keycloakRealmUrl + "/protocol/openid-connect/token",
         new URLSearchParams({
             grant_type: 'password',
             client_id: keycloakClientId,
@@ -48,13 +67,10 @@ export const authenticate = async (username: string, password: string): Promise<
     return response.data;
 }
 
-export const refresh = async (refreshToken: string): Promise<AuthResponseProps> => {
-    if (!keycloakClientId || !keycloakClientSecret) {
-        throw new Error('Keycloak not configured');
-    }
 
+export const refresh = async (refreshToken: string): Promise<AuthResponseProps> => {
     const response = await keycloak.post(
-        keycloakAuthUrl,
+        keycloakRealmUrl + "/protocol/openid-connect/token",
         new URLSearchParams({
             grant_type: 'refresh_token',
             client_id: keycloakClientId,
@@ -70,4 +86,51 @@ export const refresh = async (refreshToken: string): Promise<AuthResponseProps> 
     }
 
     return response.data;
+}
+
+
+export const logout = async (refreshToken: string): Promise<void> => {
+    await keycloak.post(
+        keycloakRealmUrl + "/protocol/openid-connect/logout",
+        new URLSearchParams({
+            client_id: keycloakClientId,
+            client_secret: keycloakClientSecret,
+            refresh_token: refreshToken,
+        }).toString(),
+    );
+}
+
+
+export const register = async (email: string, password: string, firstName: string, lastName: string): Promise<void> => {
+    const response = await keycloak.post(
+        keycloakRealmUrl + "/protocol/openid-connect/token",
+        new URLSearchParams({
+            grant_type: 'client_credentials',
+            client_id: keycloakAdminClientId,
+            client_secret: keycloakAdminClientSecret,
+        }).toString(),
+    );
+
+    if (response.status !== 200) {
+        throw new Error('Invalid credentials');
+    }
+
+    const adminToken = response.data.access_token;
+    const tokenType = response.data.token_type;
+
+    await keycloak.post(
+        keycloakAdminUrl + "/users",
+        {
+            email: email,
+            firstName: firstName,
+            lastName: lastName,
+            enabled: true,
+            credentials: [{ type: 'password', value: password, temporary: false }],
+        },
+        {
+            headers: {
+                'Authorization': `${tokenType} ${adminToken}`,
+            }
+        }
+    );
 }

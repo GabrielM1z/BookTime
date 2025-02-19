@@ -1,14 +1,26 @@
 import { useController } from "@/hooks/useController";
 import { Session } from "@/models/Session";
 import { AuthResponseProps } from "@/models/keycloak";
-import { authenticate } from "@/services/axios";
+import { authenticate, logout as logoutAxios, register as registerAxios } from "@/services/axios";
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { SessionController } from "../controllers/SessionController";
+import { SessionController } from "@/controllers/SessionController";
+import { useFadeTransition } from "./FadeTransitionContext";
+
+
+export interface AuthRegisterProps {
+    email: string;
+    password: string;
+    username: string;
+    firstName: string;
+    lastName: string;
+}
+
 
 export interface AuthContextProps {
     session: Session | null;
     sessions: Session[];
     isLoading: boolean;
+    register: (props: AuthRegisterProps) => Promise<void>;
     logIn: (username: string, password: string, remember: boolean) => Promise<void>;
     logAsGuest: () => Promise<void>;
     logOut: () => Promise<void>;
@@ -25,14 +37,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const sessionController = new SessionController();
     const { userController } = useController();
+    const { withFadeTransition } = useFadeTransition();
+
+    const register = async (props: AuthRegisterProps) => {
+        // await registerAxios(props);
+    };
 
     const logIn = async (username: string, password: string, remember: boolean) => {
         try {
             setIsLoading(true);
             const authResponse = await authenticate(username, password);
             const newSession = await sessionController.getSessionFromAuthResponse(authResponse, remember);
-            setSession(newSession);
             await userController.addFromSession(newSession);
+            withFadeTransition(() => setSession(newSession));
         }
         catch (error) {
             console.error(error);
@@ -48,8 +65,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
             setIsLoading(true);
             const guestSession = await sessionController.getOrCreateGuestSession();
-            setSession(guestSession);
             await userController.addFromSession(guestSession);
+            withFadeTransition(() => setSession(guestSession));
         }
         finally {
             setIsLoading(false);
@@ -58,9 +75,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const logOut = async () => {
         if (session) {
+            if (!SessionController.isGuest(session)) {
+                await logoutAxios(session.refresh_token!);
+            }
             await sessionController.removeSession(session);
             await userController.local.delete(session.id_user);
-            setSession(null);
+            withFadeTransition(() => setSession(null));
         }
     };
 
@@ -72,8 +92,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     const switchSession = (newSession: Session) => {
-        setSession(newSession);
         sessionController.sessionRepo.setCurrentSessionId(newSession.id);
+        withFadeTransition(() => setSession(newSession));
     };
 
     useEffect(() => {
@@ -98,6 +118,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 session,
                 sessions,
                 isLoading,
+                register,
                 logIn,
                 logAsGuest,
                 logOut,

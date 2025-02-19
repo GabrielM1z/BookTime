@@ -12,7 +12,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import styles from "./SignIn.style";
 
 
-
 export default function SignIn() {
     const { showSessions = false } = useLocalSearchParams();
     const { logIn, logAsGuest, isLoading, sessions } = useAuthContext();

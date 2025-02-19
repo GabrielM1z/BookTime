@@ -26,7 +26,6 @@ export class UserController extends DualRepositoryController<SQLiteUserRepositor
         let user = await this.local.get(session.id_user);
         if (!user) {
             user = SessionController.isGuest(session) ? UserController.guestUser() : await this.remote.getFromToken();
-            console.log(user);
             // let assume that the user cant be null
             await this.local.add(user!);
         }

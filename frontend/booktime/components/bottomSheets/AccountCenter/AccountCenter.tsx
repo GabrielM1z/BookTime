@@ -7,7 +7,6 @@ import { CustomBottomSheet } from "../CustomBottomSheet";
 import { CustomBottomSheetProps } from "../CustomBottomSheet/CustomBottomSheet";
 import { ProfileItem } from "./ProfileItem";
 import { styles } from "./styles";
-import { useFadeTransition } from "@/contexts/FadeTransitionContext";
 
 
 export interface AccountCenterProps extends Omit<CustomBottomSheetProps, "children"> {
@@ -26,7 +25,6 @@ export const AccountCenter = forwardRef<BottomSheetModal, AccountCenterProps>(
         const { dismissAll } = useBottomSheetModal();
         const { userController } = useController();
         const { switchSession, session, sessions } = useAuthContext();
-        const { withFadeTransition } = useFadeTransition();
 
         const fetchSessions = async () => {
             const usersData = await userController.getAllBySession(sessions);
@@ -45,7 +43,7 @@ export const AccountCenter = forwardRef<BottomSheetModal, AccountCenterProps>(
             dismissAll();
             const session = sessions.find((session) => session.id_user == id);
             if (session) {
-                withFadeTransition(() => switchSession(session), 200);
+                switchSession(session);
             }
         }, [sessions, switchSession]);
 
