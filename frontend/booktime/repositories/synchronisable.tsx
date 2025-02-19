@@ -22,7 +22,7 @@ export class Synchronisable {
             console.log("Actions encodées en Base64 :", actionsWithBase64);
     
             // TODO appel API : send action
-            const url = "/api/synchro"
+            const url = "/synchro"
             const param = actionsWithBase64
             const actionsBack = api.post(url, param)
     

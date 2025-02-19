@@ -28,7 +28,7 @@ export const LivreRecherche = ({ book }: LivreRechercheProps) => {
 
     try {
       //Données a récupérer depuis le back !
-      let url: string = "/api/books/books/" + book.isbn13;
+      let url: string = "/books/books/" + book.isbn13;
       let data: BookInfosServeur = await api.get(url);
       const listLibrary = await libraryRepository.getAll()
       await bookRepository.addBookToLibrary(listLibrary[0].id_library, data)
