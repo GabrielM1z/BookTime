@@ -2,21 +2,8 @@ import { FlatList, Modal, StyleSheet, TouchableOpacity, View, Text } from 'react
 import React, { useEffect, useState } from 'react';
 import { Library } from '@/models/Library';
 import { useRepository } from '@/hooks/useRepository';
+import LibraryChip from './LibraryChip';
 
-// Composant pour les chips de bibliothèque
-interface LibraryChipProps {
-    title: string;
-    onDelete: () => void;
-}
-
-const LibraryChip: React.FC<LibraryChipProps> = ({ title, onDelete }) => (
-    <View style={styles.chip}>
-        <Text style={styles.chipText}>{title}</Text>
-        <TouchableOpacity onPress={onDelete} style={styles.deleteButton}>
-            <Text style={styles.deleteText}>✖</Text>
-        </TouchableOpacity>
-    </View>
-);
 
 export default function LibraryChoice({ book }) {
     const [modalVisible, setModalVisible] = useState(false);
@@ -122,24 +109,6 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap',
         gap: 10,
         marginTop: 10,
-    },
-    chip: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#e0e0e0',
-        borderRadius: 15,
-        padding: 10,
-        margin: 5,
-    },
-    chipText: {
-        marginRight: 10,
-    },
-    deleteButton: {
-        padding: 5,
-    },
-    deleteText: {
-        color: 'red',
-        fontSize: 16,
     },
     plusButton: {
         width: 40,

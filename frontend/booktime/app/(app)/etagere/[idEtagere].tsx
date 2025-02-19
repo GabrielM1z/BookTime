@@ -7,6 +7,7 @@ import { useRepository } from '@/hooks/useRepository';
 import { BookAllInfos } from '@/models/Book';
 import { Ionicons } from '@expo/vector-icons';
 import LivreEtagere from '@/components/LivreEtagere';
+import BackButton from '@/components/BackButton';
 
 
 export default function EtagereDetail() {
@@ -74,9 +75,8 @@ export default function EtagereDetail() {
 
              {/* Barre de navigation avec retour + paramètre */}
             <View style={styles.header}>
-                <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-                    <Ionicons name="arrow-back" size={24} color="white" />
-                </TouchableOpacity>
+                
+                <BackButton/>
 
                 {/* Icône de paramètres */}
                 <View>
@@ -127,11 +127,6 @@ const styles = StyleSheet.create({
         alignItems: "center",
         marginBottom: 10,
         marginTop: 20,
-    },
-    backButton: {
-        backgroundColor: "#333",
-        padding: 10,
-        borderRadius: 50,
     },
     settingsButton: {
         backgroundColor: "#333",
