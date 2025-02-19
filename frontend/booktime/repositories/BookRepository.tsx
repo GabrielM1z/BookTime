@@ -3,7 +3,7 @@ import { useSQLite } from "@/hooks/useSQLite";
 import { Synchronisable } from './synchronisable';
 import { BookAllInfos, BookInfosServeur, BookMinInfos } from '@/models/Book';
 
-import api from "@/services/api"
+import api from "@/services/axios"
 import { baseURL } from '@/constants/Api';
 import { linkToBase64 } from '@/helpers/image';
 

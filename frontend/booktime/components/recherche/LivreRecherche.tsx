@@ -7,7 +7,7 @@ import React, { useState } from 'react';
 import { Colors } from '@/constants/Colors';
 import { useRepositoryContext } from '@/hooks/useRepository';
 import CoverPressable from '../CoverPressable';
-import api from '@/services/api';
+import api from '@/services/axios';
 import { Snackbar, PaperProvider, Portal } from "react-native-paper";
 
 interface LivreRechercheProps {

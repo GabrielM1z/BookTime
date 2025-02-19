@@ -1,7 +1,7 @@
 import { useController } from "@/hooks/useController";
 import { Session } from "@/models/Session";
 import { AuthResponseProps } from "@/models/keycloak";
-import { authenticate } from "@/services/api";
+import { authenticate } from "@/services/axios";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { SessionController } from "../controllers/SessionController";
 

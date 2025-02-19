@@ -10,7 +10,7 @@ import { apiLinkServeur } from '@/constants/Api';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import React from 'react';
 import { BookInfosSearch, BookInfosServeur } from '@/models/Book';
-import api from '@/services/api';
+import api from '@/services/axios';
 import { useRepository } from '@/hooks/useRepository';
 
 //Filtres appliqué à la recherche API
@@ -52,7 +52,7 @@ export default function HomeScreen() {
 		onEndReached,
 		isFetchingNextPage
 	} = useInfiniteScroll<BookInfosSearch, TFilters>({
-		url: apiLinkServeur,
+		url: "/books/search/",
 		limit: 10,
 		filters: filters,
 		key: 'books',

@@ -1,5 +1,5 @@
 import { useAuthContext } from "@/contexts/AuthContext";
-import api, { refresh } from "@/services/api";
+import api, { refresh } from "@/services/axios";
 import axios from "axios";
 import { Href, useRouter } from "expo-router";
 import { useEffect } from "react";

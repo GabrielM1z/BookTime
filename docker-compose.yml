@@ -52,6 +52,7 @@ services:
 
   api_books:
     <<: *backend
+    hostname: books
     build: 
       context: ./backend/book
       target: prod
@@ -69,12 +70,14 @@ services:
 
   api_news:
     <<: *backend
+    hostname: news
     build: ./backend/news
     ports:
       - 8084:8080
 
   api_user:
     <<: *backend
+    hostname: user
     build: ./backend/user
     ports:
       - 8085:8080
@@ -95,6 +98,7 @@ services:
 
   migrate:
     <<: *service
+    hostname: gateway
     image: migrate/migrate:v4.15.2
     profiles: [ "tools" ]
     volumes:

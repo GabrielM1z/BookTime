@@ -1,4 +1,4 @@
-import api from '@/services/api';
+import api from '@/services/axios';
 import { ActionRepository } from './ActionRepository';
 import { useRepositoryContext } from '@/hooks/useRepository';
 

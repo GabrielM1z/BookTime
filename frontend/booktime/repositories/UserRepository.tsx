@@ -1,4 +1,4 @@
-import api from '@/services/api';
+import api from '@/services/axios';
 import { User, UpdateUserDto } from '@/models/User';
 import { SQLiteDatabase } from 'expo-sqlite';
 import { Synchronisable } from './synchronisable';
