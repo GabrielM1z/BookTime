@@ -37,7 +37,7 @@ services:
       KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak_db
       KC_DB_USERNAME: ${DB_USER}
       KC_DB_PASSWORD: ${DB_PASSWORD}
-      KC_HTTP_RELATIVE_PATH: /auth
+      # KC_HTTP_RELATIVE_PATH: /auth
     ports:
       - 8080:8080
       - 9000:9000
@@ -108,18 +108,20 @@ services:
         condition: service_healthy
     restart: on-failure
 
-  nginx:
-    <<: *service
-    image: nginx:latest
-    volumes:
-      - ./nginx:/etc/nginx/conf.d
-    ports:
-      - 80:80
-    depends_on:
-      # - api_books
-      # - api_news
-      # - api_user
-      - api_gateway
+  # TODO: Add nginx service
+  #       - change keycloak to use /auth
+  # nginx:
+  #   <<: *service
+  #   image: nginx:latest
+  #   volumes:
+  #     - ./nginx:/etc/nginx/conf.d
+  #   ports:
+  #     - 80:80
+  #   depends_on:
+  #     # - api_books
+  #     # - api_news
+  #     # - api_user
+  #     - api_gateway
 
 volumes:
   postgres_data:
