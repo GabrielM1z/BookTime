@@ -13,7 +13,7 @@ export interface BookRepository {
 	getAllFromLib: (id_lib: string) => Promise<BookAllInfos[]>
 	get: (id: string) => Promise<BookAllInfos>;
 	add: (state: BookAllInfos) => Promise<void>;
-	addBookToLibrary: (id_library: string, book: BookAllInfos) => Promise<void>
+	addBookToLibrary: (id_library: string, book: BookInfosServeur) => Promise<void>
 	delBookFromLibrary: (id_library: string, id_book: string) => Promise<void>
 }
 
@@ -173,7 +173,7 @@ export class APIBookRepository implements BookRepository {
 		return;
 	}
 
-	async addBookToLibrary(id_library: string, book: BookAllInfos): Promise<void> {
+	async addBookToLibrary(id_library: string, book: BookInfosServeur): Promise<void> {
 		return;
 	}
 

@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
   itemInfos: {
     padding: 10,
     flex: 6,
-  },
+  },  
   titreItem: {
     fontSize: 18,
     color: "white"
