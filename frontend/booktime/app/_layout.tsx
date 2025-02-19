@@ -16,6 +16,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ApiWrapper } from '@/services/api';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { AppRegistry } from 'react-native';
+import { PaperProvider } from 'react-native-paper';
 
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -53,11 +55,13 @@ export default function RootLayout() {
                             <RepositoryProviderWrapper databaseName='booktime.db' onInit={migrateDbIfNeeded} onError={handleSQLiteError}>
                                 <ApiWrapper>
                                     <QueryProvider>
-                                        <Stack>
-                                            <Stack.Screen name="(app)" options={{ headerShown: false }} />
-                                            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-                                            <Stack.Screen name="+not-found" />
-                                        </Stack>
+                                        <PaperProvider>
+                                            <Stack>
+                                                <Stack.Screen name="(app)" options={{ headerShown: false }} />
+                                                <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                                                <Stack.Screen name="+not-found" />
+                                            </Stack>
+                                        </PaperProvider>
                                     </QueryProvider>
                                 </ApiWrapper>
                             </RepositoryProviderWrapper>

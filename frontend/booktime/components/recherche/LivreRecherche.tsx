@@ -1,41 +1,61 @@
-import { StyleSheet, View, Pressable } from 'react-native';
+import { StyleSheet, View, Pressable, Text } from 'react-native';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
-import { ThemedText } from './ThemedText';
-import { BookAllInfos, BookInfos, BookInfosSearch } from '@/models/Book';
-import React, { useEffect, useState } from 'react';
+import { ThemedText } from '../ThemedText';
+import { BookInfosSearch, BookInfosServeur } from '@/models/Book';
+import React, { useState } from 'react';
 
 import { Colors } from '@/constants/Colors';
 import { useRepository } from '@/hooks/useRepository';
-import CoverPressable from './CoverPressable';
+import CoverPressable from '../CoverPressable';
+import api from '@/services/api';
+import { Snackbar, PaperProvider, Portal } from "react-native-paper";
 
-const defaultCover = require('@/assets/images/logo_refait.png');
+interface LivreRechercheProps {
+  book: BookInfosSearch;
+}
 
-export const LivreRecherche = ({ book }: { book: BookInfosSearch }) => {
+
+export const LivreRecherche = ({ book }: LivreRechercheProps) => {
 
   const { bookRepository, libraryRepository } = useRepository();
-  
+  const [visible, setVisible] = useState(false);
+
+  const showSnackbar = () => setVisible(true);
+  const hideSnackbar = () => setVisible(false);
+
+
   const handleAddBook = async () => {
 
-    //Données a récupérer depuis le back !
+    try {
+      //Données a récupérer depuis le back !
+      let url: string = "/api/books/books/" + book.isbn13;
+      let data: BookInfosServeur = await api.get(url);
+      const listLibrary = await libraryRepository.getAll()
+      await bookRepository.addBookToLibrary(listLibrary[0].id_library, data)
 
-    const bookInfosDatasBase: BookAllInfos = {
-      id_book: book.isbn13,
-      title: book.title,
-      description: "test",
-      publisher: "test",
-      publication_date : "test",
-      page_number: 0,
-      language: "test",
-      cover_image_url: book.thumbnail,
+
+    } catch (error) {
+      console.log("error handleAddBook :", error);
+      showSnackbar();
     }
-
-    const listLibrary = await libraryRepository.getAll()
-    bookRepository.addBookToLibrary(listLibrary[0].id_library, bookInfosDatasBase)
   };
 
   return (
     <View style={styles.itemContainer}>
+      <Portal>
+        <Snackbar
+          visible={visible}
+          onDismiss={hideSnackbar}
+          duration={3000} // Snackbar disappears after 3 seconds
+          action={{
+            label: "Change",
+            onPress: () => hideSnackbar(),
 
+          }}
+        >
+          Custom styled Snackbar!
+        </Snackbar>
+      </Portal>
       <CoverPressable id_book={book.isbn13} cover={book.thumbnail} mode='search'></CoverPressable>
       {/* <Image source={typeof imageSource === 'string' ? { uri: imageSource } : imageSource} style={styles.itemImage} resizeMode={'cover'}></Image> */}
       {/* <Image source={{uri:"data:image/png;base64,"+getImageAsBase64(book.thumbnail)}} defaultSource={defaultCover}  style={styles.itemImage} resizeMode={'cover'} ></Image> */}

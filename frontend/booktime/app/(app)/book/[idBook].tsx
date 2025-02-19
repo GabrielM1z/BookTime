@@ -117,7 +117,7 @@ export default function LivreDetail() {
                         idAuthor: "ouiouioui",
                     }
                 }}>
-                    <ThemedText type='auteurLivreHorizontal'>{book?.title || "Auteur inconnu"}</ThemedText>
+                    <ThemedText type='auteurLivreHorizontal'>{book?.publisher || "Auteur inconnu"}</ThemedText>
                 </Link>
 
             </View>

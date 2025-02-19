@@ -1,7 +1,7 @@
 import { SQLiteDatabase } from 'expo-sqlite';
 import { useSQLite } from "@/hooks/useSQLite";
 import { Synchronisable } from './synchronisable';
-import { BookAllInfos } from '@/models/Book';
+import { BookAllInfos, BookInfosServeur } from '@/models/Book';
 
 import api from "@/services/api"
 import { baseURL } from '@/constants/Api';
@@ -13,7 +13,7 @@ export interface BookRepository {
 	getAllFromLib: (id_lib: string) => Promise<BookAllInfos[]>
 	get: (id: string) => Promise<BookAllInfos>;
 	add: (state: BookAllInfos) => Promise<void>;
-	addBookToLibrary: (id_library: string, book: BookAllInfos) => Promise<void>
+	addBookToLibrary: (id_library: string, book: BookInfosServeur) => Promise<void>
 }
 
 export class SQLiteBookRepository extends Synchronisable implements BookRepository {
@@ -84,7 +84,7 @@ export class SQLiteBookRepository extends Synchronisable implements BookReposito
 		});
 	}
 
-	async addBookToLibrary(id_library: string, book: BookAllInfos): Promise<void> {
+	async addBookToLibrary(id_library: string, book: BookInfosServeur): Promise<void> {
 
 		try {
 			await this.db.withTransactionAsync(async () => {
@@ -161,7 +161,7 @@ export class APIBookRepository implements BookRepository {
 		return;
 	}
 
-	async addBookToLibrary(id_library: string, book: BookAllInfos): Promise<void> {
+	async addBookToLibrary(id_library: string, book: BookInfosServeur): Promise<void> {
 		return;
 	}
 }
