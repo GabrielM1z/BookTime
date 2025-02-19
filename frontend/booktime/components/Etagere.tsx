@@ -37,7 +37,7 @@ export default function Etagere({ label, idEtagere, livres, index }: EtagereProp
 						idEtagere: idEtagere,
 						label: label,
 					}
-				}} asChild>
+				}}>
 					<View>
 						<ThemedText type="titreEtagere">{label}</ThemedText>
 					</View>

@@ -12,6 +12,8 @@ import axios from 'axios';
 import { baseURL } from '@/constants/Api';
 import { BookAllInfos } from '@/models/Book';
 import { linkToBase64 } from '@/helpers/image';
+import { Ionicons } from '@expo/vector-icons';
+import BackButton from '@/components/BackButton';
 
 
 export default function LivreDetail() {
@@ -93,9 +95,9 @@ export default function LivreDetail() {
     return (
         <ThemedView style={styles.container}>
 
-            <TouchableOpacity onPress={goBack}>
-
-            </TouchableOpacity>
+            <View style={styles.header}>
+                <BackButton/>
+            </View>
 
             <View style={styles.containerTitre}>
 
@@ -110,14 +112,15 @@ export default function LivreDetail() {
                     <ThemedText type='titreLivreHorizontal'>{book?.title || "Titre inconnu"}</ThemedText>
                 </View>
 
-
+                {/* TODO: mettre le bon id de l'auteur */}
                 <Link push href={{
                     pathname: "/author/[idAuthor]",
                     params: {
-                        idAuthor: "ouiouioui",
+                        idAuthor: "test",
                     }
                 }}>
-                    <ThemedText type='auteurLivreHorizontal'>{book?.publisher || "Auteur inconnu"}</ThemedText>
+                    {/* TODO: mettre le bon nom de l'auteur */}
+                    <ThemedText type='auteurLivreHorizontal'>{book?.title || "Auteur inconnu"}</ThemedText>
                 </Link>
 
             </View>
@@ -140,8 +143,8 @@ export default function LivreDetail() {
             </View>
 
             <View style={styles.containerResume}>
-                <ThemedText type='sousTab'>Ajouter</ThemedText>
-                <LibraryChoice></LibraryChoice>
+                <ThemedText type='sousTab'>Bibliothèques</ThemedText>
+                <LibraryChoice book={book}/>
             </View>
         </ThemedView>
     );
@@ -151,10 +154,11 @@ export default function LivreDetail() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        padding: 20,
     },
     containerTitre: {
         alignItems: 'center',
-        marginTop: 100,
+        marginTop: 30,
     },
     containerResume: {
         marginTop: 50,
@@ -172,5 +176,10 @@ const styles = StyleSheet.create({
         color: Colors.dark.secondary,
         marginTop: 5,
         fontWeight: 'bold',
+    },
+    header: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginTop: 20,
     },
 });
