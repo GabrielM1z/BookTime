@@ -2,7 +2,7 @@ import { useController } from "@/hooks/useController";
 import { Session } from "@/models/Session";
 import { AuthResponseProps } from "@/models/keycloak";
 import { authenticate } from "@/services/api";
-import React, { createContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { SessionController } from "../controllers/SessionController";
 
 export interface AuthContextProps {
@@ -60,7 +60,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (session) {
             await sessionController.removeSession(session);
             await userController.local.delete(session.id_user);
-            console.log(session);
             setSession(null);
         }
     };
@@ -111,3 +110,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         </AuthContext.Provider>
     );
 }
+
+
+export const useAuthContext = (): AuthContextProps => {
+    const context = useContext(AuthContext);
+    if (!context) {
+        throw new Error('useAuthContext must be used within an AuthProvider');
+    }
+    return context;
+};

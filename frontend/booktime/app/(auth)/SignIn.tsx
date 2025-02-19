@@ -1,21 +1,24 @@
-import { useAuthContext } from '@/hooks/useAuth';
+import { AccountCenter } from '@/components/bottomSheets/AccountCenter';
+import { guestUserId } from '@/constants';
+import { useAuthContext } from '@/contexts/AuthContext';
 import commonStyles from '@/styles/commonStyles';
 import { AntDesign, Ionicons } from '@expo/vector-icons';
+import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { AxiosError } from 'axios';
-import { Href, useRouter } from 'expo-router';
-import React, { useCallback, useRef, useState } from 'react';
+import { Href, useRouter, useLocalSearchParams } from 'expo-router';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Keyboard, StatusBar, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import styles from "./SignIn.style";
-import { AccountCenter } from '@/components/bottomSheets/AccountCenter';
-import { BottomSheetModal } from '@gorhom/bottom-sheet';
+
 
 
 export default function SignIn() {
-    const accountCenterRef = useRef<BottomSheetModal>(null);
-
+    const { showSessions = false } = useLocalSearchParams();
     const { logIn, logAsGuest, isLoading, sessions } = useAuthContext();
     const router = useRouter();
+    
+    const accountCenterRef = useRef<BottomSheetModal>(null);
 
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -24,7 +27,7 @@ export default function SignIn() {
 
     const logoImageSource = require('@/assets/images/logo_refait.png');
 
-    const handleLogIn = useCallback( async () => {
+    const handleLogIn = useCallback(async () => {
         Keyboard.dismiss();
 
         try {
@@ -43,9 +46,11 @@ export default function SignIn() {
         router.replace('/(app)' as Href<'(app)'>);
     }, [logAsGuest, router]);
 
-    const handleLogAs = useCallback(() => {
-        accountCenterRef.current?.present();
-    }, [accountCenterRef]);
+    useEffect(() => {
+        if (showSessions) {
+            accountCenterRef.current?.present();
+        }
+    }, [showSessions])
 
     return (
         <SafeAreaView style={styles.container}>
@@ -121,9 +126,9 @@ export default function SignIn() {
                 >
                     <Text style={styles.forgotPasswordTextStyle}>Mot de passe oublié ?</Text>
                 </TouchableOpacity>
-                {sessions.length > 0 && <TouchableOpacity
+                {sessions.length > 0 && <TouchableOpacity // FIXME: filter guest or refactor AccountCenter
                     style={styles.logAsStyle}
-                    onPress={handleLogAs}
+                    onPress={() => accountCenterRef.current?.present()}
                 >
                     <Text style={styles.logAsTextStyle}>Log As</Text>
                 </TouchableOpacity>}
@@ -139,7 +144,11 @@ export default function SignIn() {
                     <AntDesign name="twitter" size={24} color="white" />
                 </TouchableOpacity>
             </View>
-            <AccountCenter ref={accountCenterRef} />
+            <AccountCenter
+                ref={accountCenterRef}
+                filter={(user) => user.id_user !== guestUserId}
+                // header={<Text>Continuer en tant que</Text>}
+            />
         </SafeAreaView>
     );
 }

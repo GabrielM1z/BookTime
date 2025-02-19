@@ -23,8 +23,6 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         paddingVertical: 12,
         alignItems: 'center',
-        // marginHorizontal: 8,
-        // marginBottom: 8,
     },
     text: {
         fontSize: 16,

@@ -1,9 +1,10 @@
 import { QueryProvider } from '@/components/QueryProvider';
 import { migrateDbIfNeeded } from '@/db/init';
 import { testServeur } from '@/helpers/testServeur';
-import { useAuthInterceptor } from '@/hooks/useAuth';
+import { useAuthInterceptor } from '@/hooks/useAuthInterceptor';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { AuthProvider } from '@/providers/AuthProvider';
+import { AuthProvider, useAuthContext } from '@/contexts/AuthContext';
+import { FadeTransitionProvider } from '@/contexts/FadeTransitionContext';
 import { ControllerProvider } from '@/providers/ControllerProvider';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -22,6 +23,7 @@ SplashScreen.preventAutoHideAsync();
 
 function Routes() {
     useAuthInterceptor();
+
     return (
         <Stack>
             <Stack.Screen name="(app)" options={{ headerShown: false }} />
@@ -70,7 +72,9 @@ export default function RootLayout() {
                         <ControllerProvider databaseName='booktime.db' onInit={migrateDbIfNeeded} onError={handleSQLiteError}>
                             <AuthProvider>
                                 <QueryProvider>
-                                    <Routes />
+                                    <FadeTransitionProvider>
+                                        <Routes />
+                                    </FadeTransitionProvider>
                                 </QueryProvider>
                             </AuthProvider>
                         </ControllerProvider>

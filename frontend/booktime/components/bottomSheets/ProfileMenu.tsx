@@ -1,5 +1,5 @@
 import { Button } from "@/components/Button.component"
-import { useAuthContext } from "@/hooks/useAuth"
+import { useAuthContext } from "@/contexts/AuthContext"
 import { BottomSheetModal, BottomSheetView, useBottomSheetModal } from "@gorhom/bottom-sheet"
 import { Href, useRouter } from "expo-router"
 import React, { forwardRef, useCallback, useRef } from "react"

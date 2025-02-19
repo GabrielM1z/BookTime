@@ -1,4 +1,4 @@
-import { useAuthContext } from "@/hooks/useAuth";
+import { useAuthContext } from "@/contexts/AuthContext";
 import commonStyles from "@/styles/commonStyles";
 import { Redirect, Stack } from "expo-router";
 import React from 'react';
@@ -17,7 +17,7 @@ export default function AppLayout() {
     }
 
     if (!session) {
-        return <Redirect href="/SignIn" />;
+        return <Redirect href="/SignIn?showSessions=true" />;
     }
 
     return (

@@ -1,5 +1,5 @@
 import { useController } from "./useController";
-import { useAuthContext } from "./useAuth";
+import { useAuthContext } from "@/contexts/AuthContext";
 import { User } from "@/models/User";
 import { useState, useEffect } from "react";
 

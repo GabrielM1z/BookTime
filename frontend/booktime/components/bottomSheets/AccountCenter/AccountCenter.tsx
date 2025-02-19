@@ -1,4 +1,4 @@
-import { useAuthContext } from "@/hooks/useAuth";
+import { useAuthContext } from "@/contexts/AuthContext";
 import { useController } from "@/hooks/useController";
 import { User } from "@/models/User";
 import { BottomSheetFlatList, BottomSheetModal, useBottomSheetModal } from "@gorhom/bottom-sheet";
@@ -6,32 +6,31 @@ import React, { forwardRef, useCallback, useEffect, useState } from "react";
 import { CustomBottomSheet } from "../CustomBottomSheet";
 import { CustomBottomSheetProps } from "../CustomBottomSheet/CustomBottomSheet";
 import { ProfileItem } from "./ProfileItem";
+import { styles } from "./styles";
+import { useFadeTransition } from "@/contexts/FadeTransitionContext";
 
 
 export interface AccountCenterProps extends Omit<CustomBottomSheetProps, "children"> {
-    footer?:
-    | React.ComponentType<any>
-    | React.ReactElement
-    | null
-    | undefined;
-
+    header?: React.ReactNode;
+    footer?: React.ComponentType<any> | React.ReactElement;
     selectCurrentUser?: boolean;
+    filter?: (user: User) => boolean;
 }
 
 
 export const AccountCenter = forwardRef<BottomSheetModal, AccountCenterProps>(
-    ({ footer, selectCurrentUser = false, ...bottomSheetProps }, ref) => {
+    ({ header, footer, selectCurrentUser = false, filter, ...bottomSheetProps }, ref) => {
         const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
         const [users, setUsers] = useState<User[]>([]);
-
+        
         const { dismissAll } = useBottomSheetModal();
         const { userController } = useController();
         const { switchSession, session, sessions } = useAuthContext();
+        const { withFadeTransition } = useFadeTransition();
 
         const fetchSessions = async () => {
             const usersData = await userController.getAllBySession(sessions);
-            console.log(usersData);
-            setUsers(usersData);
+            setUsers(filter ? usersData.filter(filter) : usersData);
         };
 
         useEffect(() => {
@@ -46,12 +45,13 @@ export const AccountCenter = forwardRef<BottomSheetModal, AccountCenterProps>(
             dismissAll();
             const session = sessions.find((session) => session.id_user == id);
             if (session) {
-                switchSession(session);
+                withFadeTransition(() => switchSession(session), 200);
             }
         }, [sessions, switchSession]);
 
         return (
             <CustomBottomSheet ref={ref} {...bottomSheetProps}>
+                {header}
                 <BottomSheetFlatList
                     data={users}
                     keyExtractor={(item) => item.id_user.toString()}
@@ -64,6 +64,7 @@ export const AccountCenter = forwardRef<BottomSheetModal, AccountCenterProps>(
                     })}
                     showsVerticalScrollIndicator={false}
                     ListFooterComponent={footer}
+                    contentContainerStyle={styles.profileContainer} // FIXME: dont know why this is needed, already defined in BottomSheetView
                 />
             </CustomBottomSheet>
         );

@@ -1,18 +1,9 @@
-import { AuthContext, AuthContextProps } from "@/providers/AuthProvider";
+import { useAuthContext } from "@/contexts/AuthContext";
 import api, { refresh } from "@/services/api";
 import axios from "axios";
 import { Href, useRouter } from "expo-router";
-import { useContext, useEffect } from "react";
+import { useEffect } from "react";
 import { Alert } from "react-native";
-
-
-export const useAuthContext = (): AuthContextProps => {
-    const context = useContext(AuthContext);
-    if (!context) {
-        throw new Error('useAuthContext must be used within an AuthProvider');
-    }
-    return context;
-};
 
 
 export const useAuthInterceptor = () => {
@@ -50,7 +41,7 @@ export const useAuthInterceptor = () => {
                             originalRequest.headers.Authorization = `${session?.token_type || 'Bearer'} ${session?.access_token}`;
                             return axios(originalRequest)
                         } catch (error) {
-                            router.push('/signIn' as Href<'signIn'>);
+                            router.push('/SignIn' as Href<'signIn'>);
                             return;
                         }
                     }
