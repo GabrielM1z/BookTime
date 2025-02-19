@@ -1,13 +1,13 @@
 import { ScrollView, StyleSheet, View } from 'react-native';
 import React, { useEffect, useState } from 'react';
-import { useRepository } from '@/hooks/useRepository';
+import { useRepository, useRepositoryContext } from '@/hooks/useRepository';
 import LivreEtagere from '../LivreEtagere';
 import { BookMinInfos } from '@/models/Book';
 
 // Sous écran de la bibliothèque, affichage de TOUT les LIVRES
 export default function pageToutLivre() {
     const [books, setBooks] = useState<BookMinInfos[]>([]);
-    const { bookRepository } = useRepository();
+    const { bookRepository } = useRepositoryContext();
 
     useEffect(() => {
         fetchAllBooks();

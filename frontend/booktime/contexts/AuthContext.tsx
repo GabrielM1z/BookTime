@@ -1,39 +1,38 @@
-import { sessionFromKeycloak, guestSessionFactory } from "@/helpers/keycloak";
-import { useRepository } from "@/hooks/useRepository";
+import { useController } from "@/hooks/useController";
 import { Session } from "@/models/Session";
 import { AuthResponseProps } from "@/models/keycloak";
 import { authenticate } from "@/services/api";
-import React, { createContext, useEffect, useState } from "react";
-import { sessionControllerFactory } from "@/controllers/sessionController";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { SessionController } from "../controllers/SessionController";
 
 export interface AuthContextProps {
     session: Session | null;
+    sessions: Session[];
     isLoading: boolean;
     logIn: (username: string, password: string, remember: boolean) => Promise<void>;
     logAsGuest: () => Promise<void>;
     logOut: () => Promise<void>;
     updateSessionTokens: (authResponse: AuthResponseProps) => Promise<void>;
     switchSession: (session: Session) => void;
-    getAllSessions: () => Promise<Session[]>;
+    sessionController: SessionController;
 }
 
 export const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [session, setSession] = useState<Session | null>(null);
+    const [sessions, setSessions] = useState<Session[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
-    const sessionController = sessionControllerFactory();
+    const sessionController = new SessionController();
+    const { userController } = useController();
 
     const logIn = async (username: string, password: string, remember: boolean) => {
         try {
             setIsLoading(true);
             const authResponse = await authenticate(username, password);
-            const newSession = sessionFromKeycloak(authResponse);
-            if (remember) {
-                await sessionController.save(newSession);
-                await sessionController.setCurrentSessionId(newSession.id);
-            }
+            const newSession = await sessionController.getSessionFromAuthResponse(authResponse, remember);
             setSession(newSession);
+            await userController.addFromSession(newSession);
         }
         catch (error) {
             console.error(error);
@@ -48,13 +47,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const logAsGuest = async () => {
         try {
             setIsLoading(true);
-            let guestSession = await sessionController.getGuestSession();
-            if (!guestSession) {
-                guestSession = guestSessionFactory();
-                await sessionController.save(guestSession);
-            }
+            const guestSession = await sessionController.getOrCreateGuestSession();
             setSession(guestSession);
-            await sessionController.setCurrentSessionId(guestSession.id);
+            await userController.addFromSession(guestSession);
         }
         finally {
             setIsLoading(false);
@@ -62,65 +57,65 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     const logOut = async () => {
-        console.log('logOut');
         if (session) {
-            await sessionController.delete(session.id);
+            await sessionController.removeSession(session);
+            await userController.local.delete(session.id_user);
             setSession(null);
-            await sessionController.setCurrentSessionId(null);
         }
     };
 
     const updateSessionTokens = async (authResponse: AuthResponseProps) => {
         if (session) {
-            const updatedSession = new Session({
-                ...session,
-                access_token: authResponse.access_token,
-                expires_in: authResponse.expires_in,
-                refresh_token: authResponse.refresh_token,
-                refresh_expires_in: authResponse.refresh_expires_in,
-                token_type: authResponse.token_type,
-            });
-
+            const updatedSession = await sessionController.updateSessionTokens(authResponse, session);
             setSession(updatedSession);
-            await sessionController.save(updatedSession);
         }
     };
 
     const switchSession = (newSession: Session) => {
         setSession(newSession);
-        sessionController.setCurrentSessionId(newSession.id);
-    };
-
-    const getAllSessions = async () => {
-        return await sessionController.getAll();
+        sessionController.sessionRepo.setCurrentSessionId(newSession.id);
     };
 
     useEffect(() => {
         (async () => {
             setIsLoading(true);
-            const currentSessionId = await sessionController.getCurrentSessionId();
-            if (currentSessionId) {
-                const currentSession = await sessionController.getById(currentSessionId);
-                setSession(currentSession);
-            }
+            const currentSession = await sessionController.getCurrentSession();
+            setSession(currentSession);
             setIsLoading(false);
         })();
     }, []);
+
+    useEffect(() => {
+        (async () => {
+            const sessions = await sessionController.getAllSessions();
+            setSessions(sessions);
+        })();
+    }, [session]);
 
     return (
         <AuthContext.Provider
             value={{
                 session,
+                sessions,
                 isLoading,
                 logIn,
                 logAsGuest,
                 logOut,
                 updateSessionTokens,
                 switchSession,
-                getAllSessions,
+                sessionController,
             }}
         >
             {children}
         </AuthContext.Provider>
     );
 }
+
+
+export const useAuthContext = (): AuthContextProps => {
+    const context = useContext(AuthContext);
+    if (!context) {
+        throw new Error('useAuthContext must be used within an AuthProvider');
+    }
+    return context;
+};

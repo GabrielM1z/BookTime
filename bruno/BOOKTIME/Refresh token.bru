@@ -1,0 +1,25 @@
+meta {
+  name: Refresh token
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{base_url}}:8080/realms/booktime/protocol/openid-connect/token
+  body: formUrlEncoded
+  auth: none
+}
+
+body:form-urlencoded {
+  client_id: gateway-client
+  client_secret: {{client_secret}}
+  grant_type: refresh_token
+  audience: gateway-client
+  refresh_token: {{refresh_token}}
+}
+
+script:post-response {
+  let data = res.getBody();
+  bru.setEnvVar("access_token", data.access_token);
+  bru.setEnvVar("refresh_token", data.refresh_token);
+}

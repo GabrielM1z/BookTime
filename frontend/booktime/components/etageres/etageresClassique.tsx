@@ -2,7 +2,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import Etagere from '@/components/Etagere';
 import NewEtagere from '@/components/NewEtagere';
 import React, { useEffect, useRef, useState } from 'react';
-import { useRepository } from '@/hooks/useRepository';
+import { useRepositoryContext } from '@/hooks/useRepository';
 import TestBtn from '@/components/TestBtn';
 import { LibraryWithBooksMin } from '@/models/Library';
 import { useFocusEffect } from 'expo-router';
@@ -22,7 +22,7 @@ export default function pageEtageres() {
             refreshEtageres();
         }, [])
     );
-    const { libraryRepository } = useRepository();
+    const { libraryRepository } = useRepositoryContext();
 
     const refreshEtageres = () => {
         try {

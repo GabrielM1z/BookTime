@@ -1,7 +1,7 @@
 import { SQLiteDatabase } from 'expo-sqlite';
 import { useSQLite } from "@/hooks/useSQLite";
 import { Synchronisable } from './synchronisable';
-import { BookAllInfos, BookMinInfos } from '@/models/Book';
+import { BookAllInfos, BookInfosServeur, BookMinInfos } from '@/models/Book';
 
 import api from "@/services/api"
 import { baseURL } from '@/constants/Api';

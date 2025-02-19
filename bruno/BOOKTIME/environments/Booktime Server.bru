@@ -1,9 +1,11 @@
 vars {
-  base_book_url: http://159.31.247.130:8082/books
+  base_book_url: {{base_url}}:8082/books
   client_secret: {{process.env.KEYCLOAK_CLIENT_SECRET_SERVER}}
   username: test
-  base_keycloak_url: http://159.31.247.130:8080/realms/booktime
-  base_user_url: http://localhost:8082/users
+  base_keycloak_url: {{base_url}}:8080/realms/booktime
+  base_user_url: {{base_url}}:8082/users
+  base_url: http://159.31.247.130
+  refresh_token: eyJhbGciOiJIUzUxMiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICIwODg5NGQ3Mi0wYjQ0LTRjNzItYWZjYi1iOWRkYTVkN2M3YmMifQ.eyJleHAiOjE3Mzk4MTQ1MzksImlhdCI6MTczOTgxMjczOSwianRpIjoiZTZkNmMxNWYtMzQ3OS00OWRhLTgwNDUtM2EwM2Q2NDU1MGZhIiwiaXNzIjoiaHR0cDovL2tleWNsb2FrOjgwODAvcmVhbG1zL2Jvb2t0aW1lIiwiYXVkIjoiaHR0cDovL2tleWNsb2FrOjgwODAvcmVhbG1zL2Jvb2t0aW1lIiwic3ViIjoiMzAwY2U3MTctOTAwMC00MjFiLTg2ZDYtYjhhMzc4ZWJjZjg4IiwidHlwIjoiUmVmcmVzaCIsImF6cCI6ImdhdGV3YXktY2xpZW50Iiwic2lkIjoiNjZlODNlMGEtNTJjOC00NTYzLWJkYzMtNzUxN2RhOGEwYWFjIiwic2NvcGUiOiJwcm9maWxlIGFjciByb2xlcyBlbWFpbCBiYXNpYyB3ZWItb3JpZ2lucyJ9.mZmhb6jVdHqVMcGRns8FSFVL1V7PH9QIxzAAQ2GnzhoEmQhGH-YjvbrVa179ajctCoLtx6svYBGYnFBJo2XScQ
 }
 vars:secret [
   access_token,
