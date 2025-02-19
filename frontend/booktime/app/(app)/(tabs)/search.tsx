@@ -25,17 +25,18 @@ type TFilters = {
 // }
 
 // ISBN différents smais id Google Book dupliqué 
-// const removeDuplicates = (items: Book[]): Book[] => {
-// 	const seenIds = new Set<string>();
-// 	return items.filter((item) => {
-// 		if (seenIds.has(item.id)) {
-// 			return false;
-// 		} else {
-// 			seenIds.add(item.id);
-// 			return true;
-// 		}
-// 	});
-// };
+// !!!!! SOLUTION TEMPORAIRE !!!!!
+const removeDuplicates = (items: BookInfosSearch[]): BookInfosSearch[] => {
+	const seenIds = new Set<string>();
+	return items.filter((item) => {
+		if (seenIds.has(item.isbn13)) {
+			return false;
+		} else {
+			seenIds.add(item.isbn13);
+			return true;
+		}
+	});
+};
 
 
 export default function HomeScreen() {
@@ -65,17 +66,17 @@ export default function HomeScreen() {
 		// formatResponse: (data: TBook) => data.items,
 	});
 
-	return (
+	return (	
 		<ThemedView style={styles.body}>
 			<SafeAreaView>
 				<SearchBar qrcode={true} onSearch={searchBarChanged} />
 				<FlatList
 					contentContainerStyle={styles.contentContainerStyle}
 					// keyExtractor={item => `${item.id}+${item.etag}`}
-					keyExtractor={item => item.id}
+					keyExtractor={item => item.isbn13}
 					initialNumToRender={10}
-					// data={removeDuplicates(data)}
-					data={data}
+					data={removeDuplicates(data)}
+					// data={data}
 					onEndReached={onEndReached}
 					removeClippedSubviews={true}
 					// refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />}

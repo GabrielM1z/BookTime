@@ -1,39 +1,22 @@
-import { StyleSheet, View, Image, Pressable } from 'react-native';
+import { StyleSheet, View, Pressable } from 'react-native';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { ThemedText } from './ThemedText';
 import { BookAllInfos, BookInfos, BookInfosSearch } from '@/models/Book';
 import React, { useEffect, useState } from 'react';
 
-import axios from 'axios';
-import { Buffer } from 'buffer';
 import { Colors } from '@/constants/Colors';
-import { createBook, getBookByIsbn13, insertBook } from '@/db/db-book';
-import { Library } from '@/models/Library';
 import { useRepositoryContext } from '@/hooks/useRepository';
-
-
+import CoverPressable from './CoverPressable';
 
 const defaultCover = require('@/assets/images/logo_refait.png');
-
-// async function getImageAsBase64(url: string): Promise<string | null> {
-//   console.log("coucou")
-
-//   try {
-//     const response = await axios.get(url, { responseType: 'arraybuffer' }); // Utilisez 'arraybuffer' pour manipuler des données binaires
-//     const base64 = Buffer.from(response.data, 'binary').toString('base64'); // Convertissez les données en Base64
-//     console.log('Image fetched successfully as Base64.');
-//     return `data:image/jpeg;base64,${base64}`; // Retournez une chaîne Base64 utilisable dans React Native
-//   } catch (error) {
-//     console.error('Error fetching the image as Base64:', error);
-//     return null;
-//   }
-// }
 
 export const LivreRecherche = ({ book }: { book: BookInfosSearch }) => {
 
   const { bookRepository, libraryRepository } = useRepositoryContext();
   
   const handleAddBook = async () => {
+
+    //Données a récupérer depuis le back !
 
     const bookInfosDatasBase: BookAllInfos = {
       id_book: book.isbn13,
@@ -47,46 +30,14 @@ export const LivreRecherche = ({ book }: { book: BookInfosSearch }) => {
     }
 
     const listLibrary = await libraryRepository.getAll()
-    console.log("listLibrary : " , listLibrary)
-
-    for( let library of listLibrary){
-      console.log("library_name = ", library.name ," / library_id = ", library.id_library);
-    }
-    
-
     bookRepository.addBookToLibrary(listLibrary[0].id_library, bookInfosDatasBase)
-  
-    const listInfoLibrary = await libraryRepository.getAllInfo()
-    console.log("etageres :", JSON.stringify(listInfoLibrary, null, 2));
-  
-    let listBook = await bookRepository.getAll();
-    console.log("Livres :", JSON.stringify(listBook, null, 2));
-    // console.log("Livres : ", listBook);
-    
   };
-
-  const [imageSource, setImageSource] = useState<string | number>(defaultCover);
-
-  useEffect(() => {
-    const fetchAndConvertImage = async () => {
-      try {
-        // Téléchargez l'image et convertissez-la en Base64
-        const response = await axios.get(book.thumbnail, { responseType: 'arraybuffer' });
-        const base64Image = `data:image/jpeg;base64,${Buffer.from(response.data, 'binary').toString('base64')}`;
-        setImageSource(base64Image); // Mettez à jour l'état avec l'image en Base64
-      } catch (error) {
-        console.error('Error fetching and converting image:', error);
-        // En cas d'échec, vous pouvez garder l'image temporaire ou définir une image d'erreur
-      }
-    };
-
-    fetchAndConvertImage();
-  }, [book.thumbnail]);
 
   return (
     <View style={styles.itemContainer}>
 
-      <Image source={typeof imageSource === 'string' ? { uri: imageSource } : imageSource} style={styles.itemImage} resizeMode={'cover'}></Image>
+      <CoverPressable id_book={book.isbn13} cover={book.thumbnail} mode='search'></CoverPressable>
+      {/* <Image source={typeof imageSource === 'string' ? { uri: imageSource } : imageSource} style={styles.itemImage} resizeMode={'cover'}></Image> */}
       {/* <Image source={{uri:"data:image/png;base64,"+getImageAsBase64(book.thumbnail)}} defaultSource={defaultCover}  style={styles.itemImage} resizeMode={'cover'} ></Image> */}
 
       <View style={styles.itemInfos}>

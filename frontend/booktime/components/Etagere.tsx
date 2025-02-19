@@ -2,39 +2,54 @@ import { StyleSheet, View, Text, ScrollView } from 'react-native';
 import LivreEtagere from '@/components/LivreEtagere';
 import { ThemedText } from './ThemedText';
 import React from 'react';
-
-const cover1 = require('../assets/images/logo_refait.png');
-
+import { LibraryWithBooksMin } from '@/models/Library';
+import { BookMinInfos } from '@/models/Book';
+import { Link } from 'expo-router';
 
 // component représentant une ETAGERE
-export default function Etagere({ label, livres, index }) 
-{	
+interface EtagereProps {
+	label: string;
+	idEtagere: string;
+	livres: BookMinInfos[];
+	index: number;
+}
+
+export default function Etagere({ label, idEtagere, livres, index }: EtagereProps) {
 	// couleur possible
 	const colors = [
 		'#ff6961',
 		'#77dd77',
 		'#84b6f4'
-    ]; 
+	];
 
-	console.log("livres : ", livres)
-	
+	// console.log("livres : ", livres)
+
 	// on fait une rotation sur les coouleurs
-	const randomindex = index%3;
+	const randomindex = index % 3;
 
 	return (
 		<View style={[styles.etagereContainer, { backgroundColor: colors[randomindex] }]}>
 
-            <View style={styles.titreContainer}>
-                <ThemedText type="titreEtagere">{label}</ThemedText>
-            </View>
+			<View style={styles.titreContainer}>
+				<Link push href={{
+					pathname: "/(app)/etagere/[idEtagere]",
+					params: {
+						idEtagere: idEtagere,
+						label: label,
+					}
+				}}>
+					<View>
+						<ThemedText type="titreEtagere">{label}</ThemedText>
+					</View>
+				</Link>
+			</View>
 
-            <ScrollView horizontal style={styles.livresContainer}>
-                {livres.map((livre, index) =>  livre.id_book !== null ? (
-                    <LivreEtagere key={index} label={livre.title} cover={livre.url}></LivreEtagere>
-                ) : null
+			<ScrollView horizontal style={styles.livresContainer}>
+				{livres.map((livre, index) => livre.id_book !== null ? (
+					<LivreEtagere key={index} livre={livre}></LivreEtagere>
+				) : null
 				)}
-            </ScrollView>
-			
+			</ScrollView>
 
 		</View>
 	);
@@ -42,18 +57,18 @@ export default function Etagere({ label, livres, index })
 
 
 const styles = StyleSheet.create({
-    etagereContainer: {
+	etagereContainer: {
 		alignSelf: 'center',
 		width: '90%',
 		marginTop: 10,
 		marginBottom: 10,
-		padding:10,
-		borderRadius:20,
-    },
+		padding: 10,
+		borderRadius: 20,
+	},
 	titreContainer: {
 		marginBottom: 5,
-    },
-    livresContainer: {
+	},
+	livresContainer: {
 		flexDirection: 'row',
-  	},
+	},
 });

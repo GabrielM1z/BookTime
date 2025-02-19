@@ -1,12 +1,9 @@
 import React, { useState } from "react";
-import { TouchableOpacity, View, Text, StyleSheet, LayoutChangeEvent, Dimensions } from "react-native";
+import { View, StyleSheet, LayoutChangeEvent } from "react-native";
 import {BottomTabBarProps} from '@react-navigation/bottom-tabs'
 import { Colors } from "@/constants/Colors";
-import { Feather } from "@expo/vector-icons";
 import TabBarButton from "./TabBarButton";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
-import { transcode } from "buffer";
-import { transform } from "@babel/core";
 
 
 export function TabBar ({ state, descriptors, navigation} : BottomTabBarProps)
@@ -16,7 +13,7 @@ export function TabBar ({ state, descriptors, navigation} : BottomTabBarProps)
 	const buttonWidth = dimension.width / (state.routes.length-2);
 	const gap = (dimension.width - buttonWidth * (state.routes.length-2));
 
-	console.log("taille : ", dimension.width, buttonWidth, gap, state.routes.length)
+	// console.log("taille : ", dimension.width, buttonWidth, gap, state.routes.length)
 
 	const onTabBarLayout = (e: LayoutChangeEvent) => {
 		setDimensions({
@@ -46,9 +43,9 @@ export function TabBar ({ state, descriptors, navigation} : BottomTabBarProps)
 				.map((route, index) => {
 				const {options} = descriptors[route.key];
 				const label =
-					options.tabBarLabel !== undefined
+					typeof options.tabBarLabel === 'string'
 						? options.tabBarLabel
-						: options.title !== undefined
+						: typeof options.title === 'string'
 						? options.title
 						: route.name;
 				
@@ -81,7 +78,7 @@ export function TabBar ({ state, descriptors, navigation} : BottomTabBarProps)
 						onLongPress={onLongPress}
 						isFocused={isFocused}
 						routeName={route.name}
-						color={{ color: isFocused ? '#673ab7' : Colors.dark.text }}
+						color={isFocused ? '#673ab7' : Colors.dark.text}
 						label={label}
 					>	
 					</TabBarButton>
