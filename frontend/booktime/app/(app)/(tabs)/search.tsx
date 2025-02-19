@@ -6,11 +6,9 @@ import { ThemedView } from '@/components/ThemedView';
 
 import { useInfiniteScroll } from '@/core/api';
 // import { Book } from '@/models/Book';
-import { apiLinkServeur } from '@/constants/Api';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import React from 'react';
 import { BookInfosSearch, BookInfosServeur } from '@/models/Book';
-import api from '@/services/axios';
 import { useRepository } from '@/hooks/useRepository';
 
 //Filtres appliqué à la recherche API
