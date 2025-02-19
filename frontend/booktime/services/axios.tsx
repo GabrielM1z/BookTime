@@ -1,11 +1,11 @@
-import { keycloakAuthUrl, keycloakClientId, keycloakClientSecret, baseURL } from '@/constants/Api';
+import { keycloakAuthUrl, keycloakClientId, keycloakClientSecret, keycloakBaseUrl, apiBaseUrl } from '@/constants/Api';
 import { AuthResponseProps } from '@/models/keycloak';
 import axios, { AxiosInstance } from 'axios';
 
 export type Api = AxiosInstance;
 
 const api = axios.create({
-    baseURL: baseURL + ':8082',
+    baseURL: keycloakBaseUrl,
     timeout: 5000,
     headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -13,7 +13,7 @@ const api = axios.create({
 })
 
 const keycloak = axios.create({
-    baseURL: baseURL + ':8080',
+    baseURL: apiBaseUrl,
     timeout: 5000,
     headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
