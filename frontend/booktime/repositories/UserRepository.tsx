@@ -12,7 +12,7 @@ export interface UserRepository {
     delete(user: User): Promise<void>;
 }
 
-export class SQLiteUserRepository extends Synchronisable implements UserRepositoryProps {
+export class SQLiteUserRepository extends Synchronisable implements UserRepository {
     private db: SQLiteDatabase;
 
     constructor() {
