@@ -12,4 +12,4 @@ export const baseURL = process.env.EXPO_PUBLIC_API_BASE_URL || "http://159.31.24
 // export const baseURL = process.env.EXPO_PUBLIC_BACKEND_URL || "http://booktime.ddns.net:8082";
 
 export const keycloakAuthUrl = baseURL +  ":8080/realms/booktime/protocol/openid-connect/token";
-export const apiLinkServeur = baseURL + "/books/search/?";
+export const apiLinkServeur = baseURL + "/api/books/search/?";
