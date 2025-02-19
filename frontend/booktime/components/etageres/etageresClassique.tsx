@@ -22,7 +22,7 @@ export default function pageEtageres() {
             refreshEtageres();
         }, [])
     );
-    const { libraryRepository } = useRepository();
+    const { libraryRepository } = useRepositoryContext();
 
     const refreshEtageres = () => {
         try {

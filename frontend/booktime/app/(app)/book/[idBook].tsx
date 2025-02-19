@@ -18,7 +18,7 @@ import BackButton from '@/components/BackButton';
 
 export default function LivreDetail() {
 
-    const { bookRepository } = useRepository();
+    const { bookRepository } = useRepositoryContext();
     const navigation = useNavigation();
     const { idBook, cover, mode } = useLocalSearchParams();
 
