@@ -58,7 +58,7 @@ export default function LibrairyScreen({}) {
     return (
         <ThemedView style={libraryStyles.container}>
 			<SafeAreaProvider>
-				<SafeAreaView>
+				<SafeAreaView style={{ flex: 1 }}>
 					
 					<SearchBar qrcode={true} onSearch={getLibraryFromBack}></SearchBar>
 				

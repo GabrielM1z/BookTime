@@ -10,23 +10,12 @@ export default function TestBtn({})
 {
 	const { bookRepository, libraryRepository } = useRepository();
 	
-	const book1: BookAllInfos = {
-		id_book: '1',
-		title: 'TEST',
-		description: 'loremipsum description',
-		publisher: 'publisher',
-		publication_date: '01-01-2001',
-		page_number: 50,
-		language: 'FR',
-		cover_image_url: 'test.png',
-	}
 
 	const handleSubmit = async () => {
 		try {
-	
-			await bookRepository.add(book1)
-			const result = await bookRepository.getAll()
-			console.log(result);
+			bookRepository.delete('1').then((result) => {
+				console.log('result:', result);
+			});
 			
         } catch (error) {
             console.error('Error : ', error);

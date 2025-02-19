@@ -1,7 +1,7 @@
 import { SQLiteDatabase } from 'expo-sqlite';
 import { useSQLite } from "@/hooks/useSQLite";
 import { Synchronisable } from './synchronisable';
-import { BookAllInfos } from '@/models/Book';
+import { BookAllInfos, BookMinInfos } from '@/models/Book';
 
 import api from "@/services/api"
 import { baseURL } from '@/constants/Api';
@@ -10,9 +10,11 @@ import { linkToBase64 } from '@/helpers/image';
 
 export interface BookRepository {
 	getAll: () => Promise<BookAllInfos[]>;
+	getAllMin: () => Promise<BookMinInfos[]>;
 	getAllFromLib: (id_lib: string) => Promise<BookAllInfos[]>
 	get: (id: string) => Promise<BookAllInfos>;
 	add: (state: BookAllInfos) => Promise<void>;
+	delete: (id: string) => Promise<void>;
 	addBookToLibrary: (id_library: string, book: BookAllInfos) => Promise<void>
 	delBookFromLibrary: (id_library: string, id_book: string) => Promise<void>
 }
@@ -30,6 +32,13 @@ export class SQLiteBookRepository extends Synchronisable implements BookReposito
 	async getAll(): Promise<BookAllInfos[]> {
 		let allRows = await this.db.getAllAsync<BookAllInfos>(
 			'SELECT * FROM book'
+		);
+		return allRows;
+	}
+
+	async getAllMin(): Promise<BookMinInfos[]> {
+		let allRows = await this.db.getAllAsync<BookMinInfos>(
+			'SELECT id_book, title, cover_image_url FROM book'
 		);
 		return allRows;
 	}
@@ -82,6 +91,18 @@ export class SQLiteBookRepository extends Synchronisable implements BookReposito
 			$page_number: book.page_number,
 			$language: book.language,
 			$cover_image_url: book.cover_image_url,
+		});
+	}
+
+	async delete(id: string): Promise<void> {
+		await this.db.withTransactionAsync(async () => {
+			const deleteBookStmt = await this.db.prepareAsync(
+				'DELETE FROM book WHERE id_book == $id;'
+			);
+
+			await deleteBookStmt.executeAsync({
+				$id: id
+			});
 		});
 	}
 
@@ -173,11 +194,19 @@ export class APIBookRepository implements BookRepository {
 		return;
 	}
 
+	async delete(id: string): Promise<void> {
+		return;
+	}
+
 	async addBookToLibrary(id_library: string, book: BookAllInfos): Promise<void> {
 		return;
 	}
 
 	async delBookFromLibrary(id_library: string, id_book: string): Promise<void> {
 		return;
+	}
+
+	async getAllMin(): Promise<BookMinInfos[]> {
+		return [];
 	}
 }
