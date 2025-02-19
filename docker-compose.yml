@@ -133,6 +133,7 @@ services:
 volumes:
   postgres_data:
   api_volume:
+  book_images:
 
 
 networks:

@@ -1,21 +1,27 @@
+import { ProfileMenu } from '@/components/bottomSheets/ProfileMenu';
 import { Ionicons } from '@expo/vector-icons';
-import React, { useCallback, useRef, useState } from 'react';
-import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import Animated, { Extrapolation, interpolate, useAnimatedRef, useAnimatedStyle, useScrollViewOffset } from 'react-native-reanimated';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ModalProfileCenter } from '@/components/profileCenter';
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
+import React, { useCallback, useRef } from 'react';
+import { Text, TouchableOpacity, View } from 'react-native';
+import Animated, { Extrapolation, interpolate, useAnimatedRef, useAnimatedStyle, useScrollViewOffset } from 'react-native-reanimated';
+import { useSafeAreaInsets, SafeAreaView } from 'react-native-safe-area-context';
 import styles, { headerMaxHeight, headerMinHeight, profileImageMaxSize } from './profile.style';
+import { useUser } from '@/hooks/useUser';
+import AntDesign from '@expo/vector-icons/AntDesign';
+
 
 const profileImage = require('@/assets/images/profil.png');
 const bannerImage = require('@/assets/images/banner.jpg');
 
 export const headerPageText = "Embark on a journey of transformation with our innovative app designed to enhance every aspect of your life. Whether you're seeking to boost productivity, ignite creativity, or simply streamline daily tasks, our platform empowers you to reach new heights.";
 
+
 export default function Profile() {
     const scrollRef = useAnimatedRef<Animated.ScrollView>();
     const scrollOffset = useScrollViewOffset(scrollRef);
     const bottomSheetRef = useRef<BottomSheetModal>(null);
+
+    const user = useUser();
 
     const handlePresentModalPress = useCallback(() => {
         bottomSheetRef.current?.present();
@@ -123,8 +129,8 @@ export default function Profile() {
     };
 
     return (
-        <SafeAreaView style={{ flex: 1, alignItems: 'center' }}>
-            <ModalProfileCenter ref={bottomSheetRef} />
+        <SafeAreaView>
+            <ProfileMenu ref={bottomSheetRef} />
             <Animated.View style={[styles.header, headerAnimatedStyles]}>
                 <Animated.Image source={bannerImage} style={[styles.bannerImage, bannerImageAnimatedStyles]} />
                 <Animated.View style={[
@@ -132,9 +138,15 @@ export default function Profile() {
                     innerHeaderAnimatedStyles,
                     { paddingTop: insets.top } // Add padding top to avoid the status bar overlap. Needed because of the absolute position of the header
                 ]}>
-                    <Animated.Image source={profileImage} style={[styles.profileImage, profileImageAnimatedStyles]} />
+                    {user && user.profil_image ? (
+                        <Animated.Image source={{uri: user.profil_image}} style={[styles.profileImage, profileImageAnimatedStyles]} />
+                    ) : (
+                        <Animated.View style={[styles.profileImage, profileImageAnimatedStyles]}>
+                            <AntDesign name="user" color="black" size={50} />
+                        </Animated.View>
+                    )}
                     <Animated.Text style={[styles.profileName, profileNameAnimatedStyles]}>
-                        Nom d'utilisateur
+                        {user ? user.name || "Guest" : "User Name"}
                     </Animated.Text>
                 </Animated.View>
                 <View style={[

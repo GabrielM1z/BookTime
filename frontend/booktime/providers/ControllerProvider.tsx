@@ -1,3 +1,4 @@
+import { SessionController } from "@/controllers/SessionController";
 import { UserController } from "@/controllers/UserController";
 import { SQLiteProviderProps } from "expo-sqlite";
 import React, { createContext } from "react";

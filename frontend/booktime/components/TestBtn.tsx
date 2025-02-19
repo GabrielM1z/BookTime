@@ -2,31 +2,20 @@ import React, { useState } from 'react';
 import TitreTab from "./TitreTab";
 import { TouchableOpacity, View, StyleSheet } from "react-native";
 import { Colors } from '@/constants/Colors';
-import { useRepository } from '@/hooks/useRepository';
+import { useRepositoryContext } from '@/hooks/useRepository';
 import { BookAllInfos } from '@/models/Book';
 
 
 export default function TestBtn({})
 {
-	const { bookRepository, libraryRepository } = useRepository();
+	const { bookRepository, libraryRepository } = useRepositoryContext();
 	
-	const book1: BookAllInfos = {
-		id_book: '1',
-		title: 'TEST',
-		description: 'loremipsum description',
-		publisher: 'publisher',
-		publication_date: '01-01-2001',
-		page_number: 50,
-		language: 'FR',
-		cover_image_url: 'test.png',
-	}
 
 	const handleSubmit = async () => {
 		try {
-	
-			await bookRepository.add(book1)
-			const result = await bookRepository.getAll()
-			console.log(result);
+			bookRepository.delete('1').then((result) => {
+				console.log('result:', result);
+			});
 			
         } catch (error) {
             console.error('Error : ', error);

@@ -21,9 +21,19 @@ const listMigrations = () => {
     .sort((a, b) => a.version - b.version);
 };
 
-export const migrateDbIfNeeded = async (db: SQLiteDatabase) => {
-  const migrations = listMigrations();
+const deleteDatabase = async (db: SQLiteDatabase) => {
+  await db.execAsync('PRAGMA writable_schema = 1');
+  await db.execAsync('DELETE FROM sqlite_master WHERE type IN (\'table\', \'index\', \'trigger\')');
+  await db.execAsync('PRAGMA writable_schema = 0');
+  await db.execAsync('VACUUM');
+  // set the user_version to 0
+  await db.execAsync('PRAGMA user_version = 0');
+}
 
+export const migrateDbIfNeeded = async (db: SQLiteDatabase) => {
+  // await deleteDatabase(db);
+  
+  const migrations = listMigrations();
   // Obtenir la version actuelle de la base
   const result = await db.getFirstAsync<{ user_version: number }>('PRAGMA user_version');
   const currentVersion = result ? result.user_version : 0;

@@ -119,6 +119,6 @@ CREATE TABLE IF NOT EXISTS user_booktime (
     private BOOLEAN DEFAULT FALSE,
     profil_image VARCHAR(150),
     banner_image VARCHAR(150),
-    birthdate DATE NOT NULL,
+    birthdate DATE,
     PRIMARY KEY (id_user)
 );

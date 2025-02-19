@@ -11,14 +11,18 @@ import { bookRepositoryFactory } from "@/repositories/factories/bookRepositoryFa
 import { formatRepositoryFactory } from "@/repositories/factories/formatRepositoryFactory";
 import { genreRepositoryFactory } from "@/repositories/factories/genreRepositoryFactory";
 import { libraryRepositoryFactory } from "@/repositories/factories/libraryRepositoryFactory";
+import { userRepositoryFactory } from "@/repositories/factories/userRepositoryFactory";
+
+import { CachedSessionRepository, SessionRepository } from "@/repositories/SessionRepository";
 import { SQLiteProviderProps } from "expo-sqlite";
 import { SQLiteProvider } from "./SQLiteProvider";
 import React, { createContext } from "react";
 
 
 export interface RepositoryContextProps {
-    sqliteUserRepository: UserRepositoryProps;
-    apiUserRepository: UserRepositoryProps;
+    cachedSessionRepository: CachedSessionRepository;
+    
+    userRepository: UserRepository;
     libraryRepository: LibraryRepository;
     bookRepository: BookRepository;
     actionRepository: ActionRepository;
@@ -30,9 +34,9 @@ export interface RepositoryContextProps {
 export const RepositoryContext = createContext<RepositoryContextProps | undefined>(undefined);
 
 function RepositoryProviderInner({ children }: { children: React.ReactNode }) {
-    const sqliteUserRepository = new SQLiteUserRepository();
-    const apiUserRepository = new APIUserRepository();
+    const cachedSessionRepository = new CachedSessionRepository();
 
+    const userRepository = userRepositoryFactory();
     const libraryRepository = libraryRepositoryFactory();
     const bookRepository = bookRepositoryFactory();
     const actionRepository = actionRepositoryFactory();
@@ -42,8 +46,9 @@ function RepositoryProviderInner({ children }: { children: React.ReactNode }) {
 
     return (
         <RepositoryContext.Provider value={{
-            sqliteUserRepository,
-            apiUserRepository,
+            cachedSessionRepository,
+
+            userRepository,
             libraryRepository,
             bookRepository,
             actionRepository,

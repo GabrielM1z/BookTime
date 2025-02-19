@@ -18,10 +18,6 @@ import EtagereByGenre from '@/components/etageres/etageresByGenre';
 import EtageresByTypes from '@/components/etageres/etageresByTypes';
 import EtageresByAuthor from '@/components/etageres/etageresByAuthor';
 
-// import des styles
-import libraryStyles from '@/styles/libraryStyles';
-
-
 // Ecran de la BIBLIOTHEQUE
 export default function LibrairyScreen({}) {
 
@@ -34,7 +30,7 @@ export default function LibrairyScreen({}) {
 		// toutes les pages disponiblaes
 		switch (activeTab) 
 		{
-		  	case 'etagereClassique':
+			case 'etagereClassique':
 				return <EtagereClassique />;
 
 			case 'allBooks':
@@ -62,13 +58,13 @@ export default function LibrairyScreen({}) {
     return (
         <ThemedView style={libraryStyles.container}>
 			<SafeAreaProvider>
-				<SafeAreaView>
+				<SafeAreaView style={{ flex: 1 }}>
 					
 					<SearchBar qrcode={true} onSearch={getLibraryFromBack}></SearchBar>
 				
 					<View style={libraryStyles.containerBtn}>
 
-					<TouchableOpacity 
+						<TouchableOpacity 
 							style={activeTab === 'etagereClassique' ? libraryStyles.activeBtn : libraryStyles.btn} 
 							onPress={() => setActiveTab('etagereClassique')}
 						>
@@ -123,3 +119,37 @@ export default function LibrairyScreen({}) {
 		</ThemedView>	
 	);
 }
+
+const libraryStyles = StyleSheet.create({
+    container: {
+		flex: 1,
+	},
+	etagereContainer: {
+		flexDirection: 'column',
+	},
+	btn: {
+		backgroundColor: Colors.dark.primary,
+		borderColor: Colors.dark.secondary,
+		borderWidth: 2,
+		borderRadius: 100,
+		paddingVertical: 5,
+		paddingHorizontal: 10,
+		marginRight: 5,
+		marginTop: 5,
+	},
+	activeBtn: {
+		backgroundColor: Colors.dark.secondary,
+		borderColor: Colors.dark.secondary,
+		borderWidth: 2,
+		borderRadius: 100,
+		paddingVertical: 5,
+		paddingHorizontal: 10,
+		marginRight: 5,
+		marginTop: 5,
+	},
+	containerBtn: {
+		flexDirection: 'row',
+        flexWrap: 'wrap',
+		paddingBottom: 10
+    },
+});

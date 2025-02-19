@@ -1,9 +1,7 @@
-import { StyleSheet, Text, View, Image, ScrollView, FlatList, ActivityIndicator, VirtualizedList, RefreshControl } from 'react-native';
-import { useState, useEffect, useRef } from 'react';
-import { TabBarIcon } from '@/components/navigation/TabBarIcon';
+import { StyleSheet, Text, View, FlatList, ActivityIndicator } from 'react-native';
+import { useState } from 'react';
 import { SearchBar } from '@/components/SearchBar';
-import TitreTab from '@/components/TitreTab';
-import { LivreRecherche } from '@/components/LivreRecherche'
+import { LivreRecherche } from '@/components/recherche/LivreRecherche'
 import { ThemedView } from '@/components/ThemedView';
 
 import { useInfiniteScroll } from '@/core/api';
@@ -11,31 +9,28 @@ import { useInfiniteScroll } from '@/core/api';
 import { apiLinkServeur } from '@/constants/Api';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import React from 'react';
-import { BookInfosSearch } from '@/models/Book';
+import { BookInfosSearch, BookInfosServeur } from '@/models/Book';
+import api from '@/services/api';
+import { useRepository } from '@/hooks/useRepository';
 
 //Filtres appliqué à la recherche API
 type TFilters = {
 	query: string;
 };
 
-// type TBook = {
-// 	items: Book[];
-// 	kind: string;
-// 	totalItems: number;
-// }
-
 // ISBN différents smais id Google Book dupliqué 
-// const removeDuplicates = (items: Book[]): Book[] => {
-// 	const seenIds = new Set<string>();
-// 	return items.filter((item) => {
-// 		if (seenIds.has(item.id)) {
-// 			return false;
-// 		} else {
-// 			seenIds.add(item.id);
-// 			return true;
-// 		}
-// 	});
-// };
+// !!!!! SOLUTION TEMPORAIRE !!!!!
+const removeDuplicates = (items: BookInfosSearch[]): BookInfosSearch[] => {
+	const seenIds = new Set<string>();
+	return items.filter((item) => {
+		if (seenIds.has(item.isbn13)) {
+			return false;
+		} else {
+			seenIds.add(item.isbn13);
+			return true;
+		}
+	});
+};
 
 
 export default function HomeScreen() {
@@ -65,9 +60,6 @@ export default function HomeScreen() {
 		// formatResponse: (data: TBook) => data.items,
 	});
 
-	// console.log(data);
-
-
 	return (
 		<ThemedView style={styles.body}>
 			<SafeAreaView>
@@ -75,10 +67,10 @@ export default function HomeScreen() {
 				<FlatList
 					contentContainerStyle={styles.contentContainerStyle}
 					// keyExtractor={item => `${item.id}+${item.etag}`}
-					keyExtractor={item => item.id}
+					keyExtractor={item => item.isbn13}
 					initialNumToRender={10}
-					// data={removeDuplicates(data)}
-					data={data}
+					data={removeDuplicates(data)}
+					// data={data}
 					onEndReached={onEndReached}
 					removeClippedSubviews={true}
 					// refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />}

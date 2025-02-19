@@ -1,17 +1,23 @@
 import { StyleSheet, View, Text, Image } from 'react-native';
 import { ThemedText } from './ThemedText';
 import CoverPressable from './CoverPressable';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { BookMinInfos } from '@/models/Book';
+import { linkToBase64 } from '@/helpers/image';
 
 // component représentant le LIVRE de l'ETAGERE
-export default function LivreEtagere({ id_book, label, cover }) {
-	
-	return (
-		<View style={styles.livreContainer}>
-            <CoverPressable id_book={id_book} cover={cover} ></CoverPressable>
-            <ThemedText type="titreLivreVertical">{label}</ThemedText>
-		</View>
-	);
+interface LivreEtagereProps {
+    livre: BookMinInfos;
+}
+
+export default function LivreEtagere({ livre }: LivreEtagereProps) {
+
+    return (
+        <View style={styles.livreContainer}>
+            <CoverPressable id_book={livre.id_book} cover={livre.cover_image_url} mode='library' ></CoverPressable>
+            {/* <ThemedText type="titreLivreVertical">{livre.title}</ThemedText> */}
+        </View>
+    );
 }
 
 

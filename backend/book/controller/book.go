@@ -2,6 +2,7 @@ package controller
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
 	"os"
 
@@ -54,6 +55,30 @@ func (bc *BookController) GetBook(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
+
+		//NEW----------------
+		imageURL := book.CoverImageUrl // URL de l'image récupérée
+		bookID := idParam              // ID du livre correspondant
+
+		publicURLBase := "http://159.31.247.130:8082/books"
+		if os.Getenv("ENVIROMENT") == "development" {
+			publicURLBase = "http://localhost:8082/books"
+		}
+		// fmt.Println("le publicURLBase est:", publicURLBase)
+
+		ImageService := service.NewImageService("/app/images", publicURLBase) // Crée un service d'images
+
+		// fmt.Println("le imageURL est:", imageURL)
+
+		publicURL, err := ImageService.SaveBookImage(imageURL, bookID) // Enregistre l'image localement et retourne l'URL publique
+		if err != nil {
+			fmt.Println("Erreur lors de l'enregistrement de l'image:", err)
+		} else {
+			fmt.Println("Image enregistrée et accessible à :", publicURL)
+			book.CoverImageUrl = publicURL
+		}
+		//NEW----------------
+
 		repoBook.InsertBook(*book)
 
 		//Add new book-author when book is added to bdd

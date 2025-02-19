@@ -1,10 +1,10 @@
 import api from '@/services/api';
 import { ActionRepository } from './ActionRepository';
-import { useRepository } from '@/hooks/useRepository';
+import { useRepositoryContext } from '@/hooks/useRepository';
 
 export class Synchronisable {
     async sync() {
-        const { actionRepository } = useRepository();
+        const { actionRepository } = useRepositoryContext();
         try {
             console.log("pre action")
     
