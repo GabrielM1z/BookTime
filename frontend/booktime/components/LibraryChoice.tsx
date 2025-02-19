@@ -1,7 +1,7 @@
 import { FlatList, Modal, StyleSheet, TouchableOpacity, View, Text } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { Library } from '@/models/Library';
-import { useRepository } from '@/hooks/useRepository';
+import { useRepositoryContext } from '@/hooks/useRepository';
 import LibraryChip from './LibraryChip';
 
 
@@ -9,7 +9,7 @@ export default function LibraryChoice({ book }) {
     const [modalVisible, setModalVisible] = useState(false);
     const [librariesNotOwn, setLibrariesNotOwn] = useState<Library[]>([]);
     const [librariesOwn, setLibrariesOwn] = useState<Library[]>([]);
-    const { libraryRepository, bookRepository } = useRepository();
+    const { libraryRepository, bookRepository } = useRepositoryContext();
 
     useEffect(() => {
         if (book) {

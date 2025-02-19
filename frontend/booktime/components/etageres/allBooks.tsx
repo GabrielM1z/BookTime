@@ -2,7 +2,7 @@ import { ScrollView, StyleSheet } from 'react-native';
 
 // import des component
 import React, { useEffect, useState } from 'react';
-import { useRepository } from '@/hooks/useRepository';
+import { useRepositoryContext } from '@/hooks/useRepository';
 import Livre from '../Livre';
 import LivreEtagere from '../LivreEtagere';
 
@@ -14,7 +14,7 @@ const cover1 = require('@/assets/images/logo_refait.png');
 export default function pageToutLivre() 
 {
 	const [books, setBooks] = useState([]);
-	const { bookRepository } = useRepository();
+	const { bookRepository } = useRepositoryContext();
 
 	useEffect(() => {
 		refreshBooks();

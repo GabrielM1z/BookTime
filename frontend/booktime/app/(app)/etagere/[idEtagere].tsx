@@ -3,7 +3,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import React, { useEffect, useState } from "react";
 import { useLocalSearchParams, useNavigation } from 'expo-router';
-import { useRepository } from '@/hooks/useRepository';
+import { useRepositoryContext } from '@/hooks/useRepository';
 import { BookAllInfos } from '@/models/Book';
 import { Ionicons } from '@expo/vector-icons';
 import LivreEtagere from '@/components/LivreEtagere';
@@ -14,7 +14,7 @@ export default function EtagereDetail() {
 
     const navigation = useNavigation();
     const { idEtagere, label } = useLocalSearchParams();
-    const { bookRepository } = useRepository();
+    const { bookRepository } = useRepositoryContext();
 
     const [books, setBooks] = useState<BookAllInfos[] | null>(null);
 

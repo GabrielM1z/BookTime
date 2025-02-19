@@ -1,7 +1,7 @@
 meta {
-  name: Get user's token
+  name: Refresh token
   type: http
-  seq: 2
+  seq: 3
 }
 
 post {
@@ -13,10 +13,9 @@ post {
 body:form-urlencoded {
   client_id: gateway-client
   client_secret: {{client_secret}}
-  grant_type: password
-  username: {{username}}
-  password: {{password}}
+  grant_type: refresh_token
   audience: gateway-client
+  refresh_token: {{refresh_token}}
 }
 
 script:post-response {

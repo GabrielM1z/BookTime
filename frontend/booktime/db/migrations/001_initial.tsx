@@ -6,24 +6,24 @@ import { SQLiteDatabase } from 'expo-sqlite';
 export const initDB = async (db: SQLiteDatabase) => {
 
     // init de toute les table 1 par 1
-    initLibrary(db)
-    initFormat(db)
-    initAuthor(db)
-    initGenre(db)
-    initBook(db)
-    initBookAuthor(db)
-    initBookGenre(db)
-    initState(db)
-    initLibraryBook(db)
-    initSharedLibrary(db)
-    initUser(db)
-    initAction(db)
+    await initLibrary(db)
+    await initFormat(db)
+    await initAuthor(db)
+    await initGenre(db)
+    await initBook(db)
+    await initBookAuthor(db)
+    await initBookGenre(db)
+    await initState(db)
+    await initLibraryBook(db)
+    await initSharedLibrary(db)
+    await initUser(db)
+    await initAction(db)
 
     // init des trigger
-    initTrigger(db)
+    await initTrigger(db)
 
     // init library de base
-    initBaseData(db)
+    await initBaseData(db)
 };
 
 export default initDB;
@@ -32,7 +32,7 @@ export default initDB;
 
 const initLibrary = async (db: SQLiteDatabase) => {
     try {
-        db.execAsync(`
+        await db.execAsync(`
             CREATE TABLE IF NOT EXISTS library (
                 id_library TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
                 name VARCHAR(255) NOT NULL
@@ -46,7 +46,7 @@ const initLibrary = async (db: SQLiteDatabase) => {
 
 const initFormat = async (db: SQLiteDatabase) => {
     try {
-        db.execAsync(`
+        await db.execAsync(`
             CREATE TABLE IF NOT EXISTS formats (
                 id_format TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
                 name VARCHAR(100) NOT NULL
@@ -60,7 +60,7 @@ const initFormat = async (db: SQLiteDatabase) => {
 
 const initAuthor = async (db: SQLiteDatabase) => {
     try {
-        db.execAsync(`
+        await db.execAsync(`
             CREATE TABLE IF NOT EXISTS author (
                 id_author TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
                 first_name VARCHAR(100) NOT NULL,
@@ -76,7 +76,7 @@ const initAuthor = async (db: SQLiteDatabase) => {
 
 const initGenre = async (db: SQLiteDatabase) => {
     try {
-        db.execAsync(`
+        await db.execAsync(`
             CREATE TABLE IF NOT EXISTS genre (
                 id_genre TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
                 name VARCHAR(100) NOT NULL
@@ -90,7 +90,7 @@ const initGenre = async (db: SQLiteDatabase) => {
 
 const initBook = async (db: SQLiteDatabase) => {
     try {
-        db.execAsync(`
+        await db.execAsync(`
             CREATE TABLE IF NOT EXISTS book (
                 id_book VARCHAR(13) PRIMARY KEY,
                 title VARCHAR(255) NOT NULL,
@@ -110,7 +110,7 @@ const initBook = async (db: SQLiteDatabase) => {
 
 const initBookAuthor = async (db: SQLiteDatabase) => {
     try {
-        db.execAsync(`
+        await db.execAsync(`
             CREATE TABLE IF NOT EXISTS book_author (
                 id_author TEXT,
                 id_book VARCHAR(13),
@@ -127,7 +127,7 @@ const initBookAuthor = async (db: SQLiteDatabase) => {
 
 const initBookGenre = async (db: SQLiteDatabase) => {
     try {
-        db.execAsync(`
+        await db.execAsync(`
             CREATE TABLE IF NOT EXISTS book_genre (
                 id_genre TEXT,
                 id_book VARCHAR(13),
@@ -144,15 +144,16 @@ const initBookGenre = async (db: SQLiteDatabase) => {
 
 const initState = async (db: SQLiteDatabase) => {
     try {
-        db.execAsync(`
+        await db.execAsync(`
             CREATE TABLE IF NOT EXISTS state (
                 state VARCHAR(50),
                 progression INT,
                 read_count INT DEFAULT 0,
                 last_read_date TIMESTAMP,
-                id_user TEXT PRIMARY KEY,
-                id_book VARCHAR(13) PRIMARY KEY,
+                id_user TEXT NOT NULL,
+                id_book VARCHAR(13) NOT NULL,
                 is_available BOOLEAN DEFAULT FALSE,
+                PRIMARY KEY (id_user, id_book)
                 FOREIGN KEY (id_book) REFERENCES book(id_book) ON DELETE CASCADE
             );
         `);
@@ -164,7 +165,7 @@ const initState = async (db: SQLiteDatabase) => {
 
 const initLibraryBook = async (db: SQLiteDatabase) => {
     try {
-        db.execAsync(`
+        await db.execAsync(`
             CREATE TABLE IF NOT EXISTS library_book (
                 id_library TEXT,
                 id_book VARCHAR(13),
@@ -181,7 +182,7 @@ const initLibraryBook = async (db: SQLiteDatabase) => {
 
 const initSharedLibrary = async (db: SQLiteDatabase) => {
     try {
-        db.execAsync(`
+        await db.execAsync(`
             CREATE TABLE IF NOT EXISTS shared_library (
                 id_user TEXT,
                 id_library TEXT,
@@ -197,14 +198,17 @@ const initSharedLibrary = async (db: SQLiteDatabase) => {
 
 const initUser = async (db: SQLiteDatabase) => {
     try {
-        db.execAsync(`
+        await db.execAsync(`
             CREATE TABLE IF NOT EXISTS user (
                 id_user TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
-                username VARCHAR(100),
                 email VARCHAR(255),
-                email_verified BOOLEAN DEFAULT FALSE,
-                given_name VARCHAR(100),
-                family_name VARCHAR(100)
+                name VARCHAR(100),
+                pseudo VARCHAR(100),
+                description TEXT,
+                private BOOLEAN DEFAULT FALSE,
+                profil_image VARCHAR(255),
+                banner_image VARCHAR(255),
+                birthdate DATE
             );
         `);
         console.log('user initialized successfully');
@@ -216,7 +220,7 @@ const initUser = async (db: SQLiteDatabase) => {
 
 const initAction = async (db: SQLiteDatabase) => {
     try {
-        db.execAsync(`
+        await db.execAsync(`
             CREATE TABLE IF NOT EXISTS action (
                 id_action TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
                 id_user TEXT,
@@ -244,22 +248,22 @@ const initAction = async (db: SQLiteDatabase) => {
 const initTrigger = async (db: SQLiteDatabase) => {
 
     // State
-    initTriggerInsertState(db);
-    initTriggerUpdateState(db);
-    initTriggerDeleteState(db);
+    await initTriggerInsertState(db);
+    await initTriggerUpdateState(db);
+    await initTriggerDeleteState(db);
 
     // Library
-    initTriggerInsertLibrary(db);
-    initTriggerUpdateLibrary(db);
-    initTriggerDeleteLibrary(db);
+    await initTriggerInsertLibrary(db);
+    await initTriggerUpdateLibrary(db);
+    await initTriggerDeleteLibrary(db);
 
     // Library Book
-    initTriggerInsertLibraryBook(db);
-    initTriggerDeleteLibraryBook(db);
-
+    await initTriggerInsertLibraryBook(db);
+    await initTriggerDeleteLibraryBook(db);
+ 
     // Shared Library
-    initTriggerInsertSharedLibrary(db);
-    initTriggerDeleteSharedLibrary(db);
+    await initTriggerInsertSharedLibrary(db);
+    await initTriggerDeleteSharedLibrary(db);
 }
 
 
@@ -273,7 +277,7 @@ const initTrigger = async (db: SQLiteDatabase) => {
  */
 const initTriggerInsertState = async (db: SQLiteDatabase) => {
     try {
-        db.execAsync(`
+        await db.execAsync(`
             CREATE TRIGGER IF NOT EXISTS trg_state_insert
             AFTER INSERT
             ON state
@@ -318,7 +322,7 @@ const initTriggerInsertState = async (db: SQLiteDatabase) => {
  */
 const initTriggerUpdateState = async (db: SQLiteDatabase) => {
     try {
-        db.execAsync(`
+        await db.execAsync(`
             CREATE TRIGGER IF NOT EXISTS trg_state_update
             AFTER UPDATE
             ON state
@@ -377,7 +381,7 @@ const initTriggerUpdateState = async (db: SQLiteDatabase) => {
  */
 const initTriggerDeleteState = async (db: SQLiteDatabase) => {
     try {
-        db.execAsync(`
+        await db.execAsync(`
             CREATE TRIGGER IF NOT EXISTS trg_state_delete
             AFTER DELETE
             ON state
@@ -418,7 +422,7 @@ const initTriggerDeleteState = async (db: SQLiteDatabase) => {
  */
 const initTriggerInsertLibrary = async (db: SQLiteDatabase) => {
     try {
-        db.execAsync(`
+        await db.execAsync(`
             CREATE TRIGGER IF NOT EXISTS trg_library_insert
             AFTER INSERT
             ON library
@@ -456,7 +460,7 @@ const initTriggerInsertLibrary = async (db: SQLiteDatabase) => {
  */
 const initTriggerUpdateLibrary = async (db: SQLiteDatabase) => {
     try {
-        db.execAsync(`
+        await db.execAsync(`
             CREATE TRIGGER IF NOT EXISTS trg_library_update
             AFTER UPDATE
             ON library
@@ -496,7 +500,7 @@ const initTriggerUpdateLibrary = async (db: SQLiteDatabase) => {
  */
 const initTriggerDeleteLibrary = async (db: SQLiteDatabase) => {
     try {
-        db.execAsync(`
+        await db.execAsync(`
             CREATE TRIGGER IF NOT EXISTS trg_library_delete
             AFTER DELETE
             ON library
@@ -537,7 +541,7 @@ const initTriggerDeleteLibrary = async (db: SQLiteDatabase) => {
  */
 const initTriggerInsertSharedLibrary = async (db: SQLiteDatabase) => {
     try {
-        db.execAsync(`
+        await db.execAsync(`
             CREATE TRIGGER IF NOT EXISTS trg_shared_library_insert
             AFTER INSERT
             ON shared_library
@@ -576,7 +580,7 @@ const initTriggerInsertSharedLibrary = async (db: SQLiteDatabase) => {
  */
 const initTriggerDeleteSharedLibrary = async (db: SQLiteDatabase) => {
     try {
-        db.execAsync(`
+        await db.execAsync(`
             CREATE TRIGGER IF NOT EXISTS trg_shared_library_delete
             AFTER DELETE
             ON shared_library
@@ -618,7 +622,7 @@ const initTriggerDeleteSharedLibrary = async (db: SQLiteDatabase) => {
  */
 const initTriggerInsertLibraryBook = async (db: SQLiteDatabase) => {
     try {
-        db.execAsync(`
+        await db.execAsync(`
             CREATE TRIGGER IF NOT EXISTS trg_library_book_insert
             AFTER INSERT
             ON library_book
@@ -658,7 +662,7 @@ const initTriggerInsertLibraryBook = async (db: SQLiteDatabase) => {
  */
 const initTriggerDeleteLibraryBook = async (db: SQLiteDatabase) => {
     try {
-        db.execAsync(`
+        await db.execAsync(`
             CREATE TRIGGER IF NOT EXISTS trg_library_book_delete
             AFTER DELETE
             ON library_book
@@ -703,7 +707,7 @@ const initTriggerDeleteLibraryBook = async (db: SQLiteDatabase) => {
  */
 const initBaseData = async (db: SQLiteDatabase) => {
 
-    initBaseLibraryData(db);
+    await initBaseLibraryData(db);
     
 }
 
@@ -722,11 +726,11 @@ const initBaseLibraryData = async (db: SQLiteDatabase) => {
     // création des library de base
     libs.forEach(async element => {
         try {
-            const statement = db.prepareAsync(
+            const statement = await db.prepareAsync(
                 'INSERT INTO library (name) VALUES ($name);'
             );
     
-            (await statement).executeAsync({
+            await statement.executeAsync({
                 $name: element
             });
 
