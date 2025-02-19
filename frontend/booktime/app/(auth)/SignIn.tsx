@@ -47,7 +47,7 @@ export default function SignIn() {
     }, [logAsGuest, router]);
 
     useEffect(() => {
-        if (showSessions) {
+        if (showSessions && sessions.length > 0) {
             accountCenterRef.current?.present();
         }
     }, [showSessions])
