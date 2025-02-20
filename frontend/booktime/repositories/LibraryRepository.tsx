@@ -12,6 +12,7 @@ export interface LibraryRepository {
     getAll: () => Promise<Library[]>;
     get: (id: string) => Promise<Library | null>;
     add: (name: string) => Promise<void>;
+    delete: (id: string) => Promise<void>;
     getAllInfo: () => Promise<LibraryWithBooksMin[] | []>
     getAllBookFromLib: (id_library: string) => Promise<BookMinInfos[] | null> 
     getAllLibraryFromBook: (id_book: string) => Promise<Library[]>;
@@ -58,6 +59,60 @@ export class SQLiteLibraryRepository extends Synchronisable implements LibraryRe
             $name: name
         });
     }
+
+    async delete(id: string): Promise<void> {
+        await this.db.withTransactionAsync(async () => {
+            try {
+                // Suppression des associations entre la bibliothèque et les livres
+                const deleteLibraryBooks = await this.db.prepareAsync(
+                    'DELETE FROM library_book WHERE id_library = $id'
+                );
+                await deleteLibraryBooks.executeAsync({ $id: id });
+                await deleteLibraryBooks.finalizeAsync(); // Fermer la déclaration
+    
+                // Suppression des associations entre la bibliothèque et les utilisateurs partagés
+                const deleteSharedLibrary = await this.db.prepareAsync(
+                    'DELETE FROM shared_library WHERE id_library = $id'
+                );
+                await deleteSharedLibrary.executeAsync({ $id: id });
+                await deleteSharedLibrary.finalizeAsync(); // Fermer la déclaration
+    
+                // Suppression de la bibliothèque elle-même
+                const deleteLibrary = await this.db.prepareAsync(
+                    'DELETE FROM library WHERE id_library = $id'
+                );
+                await deleteLibrary.executeAsync({ $id: id });
+                await deleteLibrary.finalizeAsync(); // Fermer la déclaration
+    
+                console.log("deleted");
+            } catch (error) {
+                console.error('Error deleting library:', error);
+                throw error; // Re-throw the error to handle it at a higher level if needed
+            }
+        });
+    }
+    
+
+    async delete2(id: string): Promise<void> {
+
+        await this.db.withTransactionAsync(async () => {
+            const deleteLibraryBooks = await this.db.prepareAsync(
+                'DELETE FROM library_book WHERE id_library = $id'
+            );
+            await deleteLibraryBooks.executeAsync({ $id: id });
+    
+            const deleteSharedLibrary = await this.db.prepareAsync(
+                'DELETE FROM shared_library WHERE id_library = $id'
+            );
+            await deleteSharedLibrary.executeAsync({ $id: id });
+    
+            const deleteLibrary = await this.db.prepareAsync(
+                'DELETE FROM library WHERE id_library = $id'
+            );
+            await deleteLibrary.executeAsync({ $id: id });
+        });
+    }
+    
 
     async getAllBookFromLib(id_library: string): Promise<BookMinInfos[]> {
 
@@ -158,6 +213,10 @@ export class APILibraryRepository implements LibraryRepository {
     }
 
     async add(name: string): Promise<void> {
+        return;
+    }
+
+    async delete(id: string): Promise<void> {
         return;
     }
 
