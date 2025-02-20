@@ -32,15 +32,11 @@ export const LivreRecherche = ({ book, handleModalAddToLibrary }: LivreRecherche
     try {
       //Données a récupérer depuis le back !
       let url: string = "/books/books/" + book.isbn13;
-      let data: BookInfosServeur = (await api.get(url)).data.data;
-      console.log(data);
-      
+      let data: BookInfosServeur = (await api.get(url)).data.data;      
       const listLibrary = await libraryRepository.getAll()
-
       await bookRepository.addBookToLibrary(listLibrary[0].id_library, data)
       showSnackbar();
-
-
+      
     } catch (error) {
       console.log("error handleAddBook :", error);
       showSnackbar();

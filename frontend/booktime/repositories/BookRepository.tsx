@@ -108,7 +108,7 @@ export class SQLiteBookRepository extends Synchronisable implements BookReposito
 	async addBookToLibrary(id_library: string, book: BookAllInfos): Promise<void> {
 
 		try {
-			await this.db.withTransactionAsync(async () => {
+			await this.db.withExclusiveTransactionAsync(async () => {
 				
 				const insertBookStmt = await this.db.prepareAsync(
 					`INSERT OR IGNORE INTO book (id_book, title, description, publisher, publication_date, page_number, language, cover_image_url) 
