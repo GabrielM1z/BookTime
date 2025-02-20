@@ -1,10 +1,28 @@
-import React, { useCallback, useRef, useMemo, forwardRef } from "react";
+import React, { useCallback, useRef, useMemo, forwardRef, useEffect, useState } from "react";
 import { StyleSheet, View, Text, Button } from "react-native";
-import BottomSheet, { BottomSheetModal, BottomSheetModalProvider, BottomSheetSectionList, BottomSheetView } from "@gorhom/bottom-sheet";
+import BottomSheet, { BottomSheetFlatList, BottomSheetModal, BottomSheetModalProvider, BottomSheetSectionList, BottomSheetView } from "@gorhom/bottom-sheet";
+import { CustomBottomSheet } from "../bottomSheets/CustomBottomSheet";
+import { useRepositoryContext } from "@/hooks/useRepository";
+import { Library } from "@/models";
 
 export const ModalAddToLibrary = forwardRef<BottomSheetModal>((_props, ref) => {
     // hooks
     // const ref = useRef<BottomSheetModal>(null);
+    const [libraryList, setLibraryList] = useState<Library[]>([])
+    const { libraryRepository } = useRepositoryContext();
+
+    // libraryRepository.getAll().then((data) => {
+    //     console.log(data)
+    //     setLibraryList(data)
+    // })
+
+    useEffect(() => {
+        libraryRepository.getAll().then((data) => {
+            console.log(data)
+            setLibraryList(data)
+        })
+    }, []); 
+
 
     // variables
     const sections = useMemo(
@@ -21,7 +39,7 @@ export const ModalAddToLibrary = forwardRef<BottomSheetModal>((_props, ref) => {
     );
 
     // callbacks
-    const handleSheetChange = useCallback((index: number) => {
+    const handleSheetChanges = useCallback((index: number) => {
         console.log("handleSheetChange", index);
     }, []);
 
@@ -35,9 +53,9 @@ export const ModalAddToLibrary = forwardRef<BottomSheetModal>((_props, ref) => {
         []
     );
     const renderItem = useCallback(
-        ({ item }: { item: string }) => (
+        ({ item }: { item: Library }) => (
             <View style={styles.itemContainer}>
-                <Text>{item}</Text>
+                <Text>{item.name}</Text>
             </View>
         ),
         []
@@ -49,29 +67,46 @@ export const ModalAddToLibrary = forwardRef<BottomSheetModal>((_props, ref) => {
                 <Button title="Snap To 50%" onPress={() => handleSnapPress(1)} />
                 <Button title="Snap To 25%" onPress={() => handleSnapPress(0)} />
                 <Button title="Close" onPress={() => handleClosePress()} /> */}
-            <BottomSheetModal
+            <CustomBottomSheet
                 ref={ref}
-                index={-1}
-                snapPoints={["25%", "50%", "90%"]}
-                enableDynamicSizing={false}
-                onChange={handleSheetChange}
-            
+                onChange={handleSheetChanges}
+            // index={0}
+            // snapPoints={["25%", "50%", "90%"]} // <-- Définition des points d'ancrage
             >
-                <BottomSheetView style={styles.contentContainer}>
+                <BottomSheetFlatList style={styles.contentContainer} data={libraryList} renderItem={renderItem}>
+                    {/* <Text>Awesome 🎉</Text>
                     <Text>Awesome 🎉</Text>
-                </BottomSheetView>
-                <BottomSheetSectionList
-                    sections={sections}
-                    keyExtractor={(i) => i}
-                    renderSectionHeader={renderSectionHeader}
-                    renderItem={renderItem}
-                    contentContainerStyle={styles.contentContainer}
-                />
-            </BottomSheetModal>
+                    <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text> */}
+
+                </BottomSheetFlatList>
+            </CustomBottomSheet>
             {/* </GestureHandlerRootView> */}
         </>
     );
 });
+
 
 const styles = StyleSheet.create({
     container: {
@@ -79,6 +114,7 @@ const styles = StyleSheet.create({
         paddingTop: 200,
     },
     contentContainer: {
+        flex: 1,
         backgroundColor: "white",
     },
     sectionHeaderContainer: {

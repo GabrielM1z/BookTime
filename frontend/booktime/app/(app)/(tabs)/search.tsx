@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, FlatList, ActivityIndicator } from 'react-native';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { SearchBar } from '@/components/SearchBar';
 import { LivreRecherche } from '@/components/recherche/LivreRecherche'
 import { ThemedView } from '@/components/ThemedView';
@@ -9,10 +9,12 @@ import { useInfiniteScroll } from '@/core/api';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import React from 'react';
 import { BookInfosSearch, BookInfosServeur } from '@/models/Book';
-import { useRepository } from '@/hooks/useRepository';
+import { useRepository, useRepositoryContext } from '@/hooks/useRepository';
 import { ModalAddToLibrary } from '@/components/recherche/ModalAddToLibrary';
-import { BottomSheetModal, BottomSheetSectionList, BottomSheetView } from '@gorhom/bottom-sheet';
+import BottomSheet, { BottomSheetModal, BottomSheetSectionList, BottomSheetView } from '@gorhom/bottom-sheet';
 import { Button } from 'react-native-paper';
+import { CustomBottomSheet } from '@/components/bottomSheets/CustomBottomSheet';
+import { Library } from '@/models';
 
 //Filtres appliqué à la recherche API
 type TFilters = {
@@ -46,10 +48,6 @@ export default function HomeScreen() {
 		console.log("bottomSheetRef.current", bottomSheetRef.current); // Vérifier si la ref n'est pas null
 		bottomSheetRef.current?.present();
 	}, []);
-	
-	const handleSheetChanges = useCallback((index: number) => {
-		console.log('handleSheetChanges', index);
-	}, []);
 
 
 	const searchBarChanged = (searchTerms: string) => {
@@ -75,70 +73,56 @@ export default function HomeScreen() {
 	});
 
 	return (
-		<ThemedView style={styles.body}>
-			<SafeAreaView>
+		<SafeAreaView >
 
-				{/* <SearchBar qrcode={true} onSearch={searchBarChanged} /> */}
-				<Button icon="camera" mode="contained" onPress={() => handlePresentModalPress()}>
-					Press me
-				</Button>
+			<SearchBar qrcode={true} onSearch={searchBarChanged} />
+			{/* Button icon="camera" mode="contained" onPress={() => handlePresentModalPress()}>
+				Press me
+			</Button>< */}
 
-				{/* <FlatList
-					contentContainerStyle={styles.contentContainerStyle}
-					// keyExtractor={item => `${item.id}+${item.etag}`}
-					keyExtractor={item => item.isbn13}
-					initialNumToRender={10}
-					data={removeDuplicates(data)}
-					// data={data}
-					onEndReached={onEndReached}
-					removeClippedSubviews={true}
-					// refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />}
-					renderItem={({ item }) => <LivreRecherche book={item} handleModalAddToLibrary={handlePresentModalPress} />}
-					ListEmptyComponent={
-						<View style={styles.listEmptyComponent}>
-							<Text>{'noResult'}</Text>
-						</View>
-					}
-					ListFooterComponent={
-						<View style={styles.listFooterComponent}>
-							{isFetchingNextPage && <ActivityIndicator />}
-						</View>
-					}
-				/> */}
-				<View style={styles.container}>
 
-					<BottomSheetModal
-						ref={bottomSheetRef}
-						onChange={handleSheetChanges}
-					>
-						<BottomSheetView style={styles.contentContainer}>
-							<Text>Awesome 🎉</Text>
-						</BottomSheetView>
-					</BottomSheetModal>
+			<ModalAddToLibrary ref={bottomSheetRef} />
 
-					<ModalAddToLibrary ref={bottomSheetRef} />
-				</View>
-			</SafeAreaView>
-		</ThemedView>
+			<FlatList
+				contentContainerStyle={styles.contentContainerStyle}
+				// keyExtractor={item => `${item.id}+${item.etag}`}
+				keyExtractor={item => item.isbn13}
+				initialNumToRender={10}
+				data={removeDuplicates(data)}
+				// data={data}
+				onEndReached={onEndReached}
+				removeClippedSubviews={true}
+				// refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />}
+				renderItem={({ item }) => <LivreRecherche book={item} handleModalAddToLibrary={handlePresentModalPress} />}
+				ListEmptyComponent={
+					<View style={styles.listEmptyComponent}>
+						<Text>{'noResult'}</Text>
+					</View>
+				}
+				ListFooterComponent={
+					<View style={styles.listFooterComponent}>
+						{isFetchingNextPage && <ActivityIndicator />}
+					</View>
+				}
+			/>
+
+		</SafeAreaView>
 	);
 }
 
 
 const styles = StyleSheet.create({
-	body: {
-		height: "100%",
-	},
+	// container: {
+	// 	flex: 1,
+	// 	padding: 24,
+	// 	justifyContent: 'center',
+	// 	backgroundColor: 'grey',
+	// },
 	dataTableContainer: {
 		marginHorizontal: "5%",
 		marginTop: "5%",
 		flexDirection: "column",
 	},
-	// listFooterComponent: {
-	// 	padding: 10,
-	// 	justifyContent: 'center',
-	// 	alignItems: 'center',
-	// 	flexDirection: 'row',
-	// },
 	listEmptyComponent: {
 		flexDirection: 'row',
 	},
@@ -156,13 +140,5 @@ const styles = StyleSheet.create({
 		marginTop: 10,
 		padding: 10,
 	},
-	contentContainer: {
-		backgroundColor: "white",
-	},
-	container: {
-		flex: 1,
-		padding: 24,
-		justifyContent: 'center',
-		backgroundColor: 'grey',
-	},
+
 });

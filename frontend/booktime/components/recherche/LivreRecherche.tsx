@@ -32,9 +32,14 @@ export const LivreRecherche = ({ book, handleModalAddToLibrary }: LivreRecherche
     try {
       //Données a récupérer depuis le back !
       let url: string = "/books/books/" + book.isbn13;
-      let data: BookInfosServeur = await api.get(url);
+      let data: BookInfosServeur = (await api.get(url)).data.data;
+      console.log(data);
+      
       const listLibrary = await libraryRepository.getAll()
+
       await bookRepository.addBookToLibrary(listLibrary[0].id_library, data)
+      showSnackbar();
+
 
     } catch (error) {
       console.log("error handleAddBook :", error);
@@ -78,15 +83,6 @@ const CustomSnackbar = ({ visible, onDismiss, onPressChange }: { visible: boolea
       Custom styled Snackbar!
     </Snackbar>
   </Portal>
-);
-
-/** Composant Bouton "Ajouter" */
-const AddButton = ({ onPress }: { onPress: () => void }) => (
-  <View style={styles.addItemContainer}>
-    <Pressable onPress={onPress} style={styles.addItem}>
-      <TabBarIcon size={20} color={"#1E9AA4"} name={"add"} />
-    </Pressable>
-  </View>
 );
 
 const styles = StyleSheet.create({
