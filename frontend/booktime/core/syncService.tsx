@@ -1,9 +1,10 @@
-import { getAllAction } from "@/db/db-action"
 import { useRepositoryContext } from "@/hooks/useRepository";
 import api from "@/services/axios";
 
 
-export const syncDB = async(actionRepository: ActionRepository) => {
+export const syncDB = async() => {
+
+	const { actionRepository } = useRepositoryContext();
 
 	try {
 		console.log("pre action")
@@ -34,6 +35,10 @@ export const syncDB = async(actionRepository: ActionRepository) => {
 				console.log("Actions recup :", response.data);
 				
 				// TODO suppr la table action local
+				try {
+					//actionRepository.deleteAll
+				}
+
 
 				// TODO éxecution des actions dans l'ordre
 			})

@@ -1,4 +1,4 @@
-import { StyleSheet, View, Image, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Image, TouchableOpacity, ScrollView } from 'react-native';
 import React, { useEffect, useState } from "react";
 
 import { ThemedView } from '@/components/ThemedView';
@@ -99,53 +99,59 @@ export default function LivreDetail() {
                 <BackButton/>
             </View>
 
-            <View style={styles.containerTitre}>
+            <ScrollView style={styles.containerScrollable}>
 
-                {/* 🔹 Vérification si `parsedCover` ou `book.cover_image_url` est disponible */}
-                {book ? (
-                    <Image source={{ uri: book.cover_image_url }} style={styles.coverLivre} />
-                ) : (
-                    <ThemedText>Aucune image disponible</ThemedText>
-                )}
+                
 
-                <View>
-                    <ThemedText type='titreLivreHorizontal'>{book?.title || "Titre inconnu"}</ThemedText>
+                <View style={styles.containerTitre}>
+
+                    {/* 🔹 Vérification si `parsedCover` ou `book.cover_image_url` est disponible */}
+                    {book ? (
+                        <Image source={{ uri: book.cover_image_url }} style={styles.coverLivre} />
+                    ) : (
+                        <ThemedText>Aucune image disponible</ThemedText>
+                    )}
+
+                    <View>
+                        <ThemedText type='titreLivreHorizontal'>{book?.title || "Titre inconnu"}</ThemedText>
+                    </View>
+
+                    {/* TODO: mettre le bon id de l'auteur */}
+                    <Link push href={{
+                        pathname: "/author/[idAuthor]",
+                        params: {
+                            idAuthor: "test",
+                        }
+                    }}>
+                        {/* TODO: mettre le bon nom de l'auteur */}
+                        <ThemedText type='auteurLivreHorizontal'>{book?.title || "Auteur inconnu"}</ThemedText>
+                    </Link>
+
                 </View>
 
-                {/* TODO: mettre le bon id de l'auteur */}
-                <Link push href={{
-                    pathname: "/author/[idAuthor]",
-                    params: {
-                        idAuthor: "test",
-                    }
-                }}>
-                    {/* TODO: mettre le bon nom de l'auteur */}
-                    <ThemedText type='auteurLivreHorizontal'>{book?.title || "Auteur inconnu"}</ThemedText>
-                </Link>
+                {/* Résumé avec affichage tronqué */}
+                <View style={styles.containerResume}>
+                    <ThemedText type='sousTab'>Résumé</ThemedText>
+                    <ThemedText>
+                        {expandedResume || !book?.description
+                            ? book?.description || "Pas de description disponible."
+                            : `${book?.description.substring(0, 200)}...`} {/* Affiche seulement 200 caractères */}
+                    </ThemedText>
+                    {book?.description && book?.description.length > 200 && (
+                        <TouchableOpacity onPress={() => setExpandedResume(!expandedResume)}>
+                            <ThemedText style={styles.expandedResume}>
+                                {expandedResume ? "Voir moins" : "Voir plus"}
+                            </ThemedText>
+                        </TouchableOpacity>
+                    )}
+                </View>
 
-            </View>
+                <View style={styles.containerResume}>
+                    <ThemedText type='sousTab'>Bibliothèques</ThemedText>
+                    <LibraryChoice book={book}/>
+                </View>
 
-            {/* Résumé avec affichage tronqué */}
-            <View style={styles.containerResume}>
-                <ThemedText type='sousTab'>Résumé</ThemedText>
-                <ThemedText>
-                    {expandedResume || !book?.description
-                        ? book?.description || "Pas de description disponible."
-                        : `${book?.description.substring(0, 200)}...`} {/* Affiche seulement 200 caractères */}
-                </ThemedText>
-                {book?.description && book?.description.length > 200 && (
-                    <TouchableOpacity onPress={() => setExpandedResume(!expandedResume)}>
-                        <ThemedText style={styles.expandedResume}>
-                            {expandedResume ? "Voir moins" : "Voir plus"}
-                        </ThemedText>
-                    </TouchableOpacity>
-                )}
-            </View>
-
-            <View style={styles.containerResume}>
-                <ThemedText type='sousTab'>Bibliothèques</ThemedText>
-                <LibraryChoice book={book}/>
-            </View>
+            </ScrollView>
         </ThemedView>
     );
 }
@@ -155,6 +161,9 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
+    },
+    containerScrollable: {
+        flex: 1,
     },
     containerTitre: {
         alignItems: 'center',
@@ -168,6 +177,7 @@ const styles = StyleSheet.create({
     coverLivre: {
         width: 200,
         height: 200,
+        marginTop: 50,
         borderRadius: 20,
         borderWidth: 5,
         borderColor: Colors.dark.secondary,
@@ -178,8 +188,9 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     header: {
-        flexDirection: "row",
-        alignItems: "center",
-        marginTop: 20,
+        position: 'absolute',
+        top: 40,
+        left: 20,
+        zIndex: 1,
     },
 });
