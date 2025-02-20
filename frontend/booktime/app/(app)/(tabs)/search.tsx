@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, FlatList, ActivityIndicator } from 'react-native';
-import { useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { SearchBar } from '@/components/SearchBar';
 import { LivreRecherche } from '@/components/recherche/LivreRecherche'
 import { ThemedView } from '@/components/ThemedView';
@@ -12,6 +12,9 @@ import React from 'react';
 import { BookInfosSearch, BookInfosServeur } from '@/models/Book';
 import api from '@/services/api';
 import { useRepository } from '@/hooks/useRepository';
+import { ModalAddToLibrary } from '@/components/recherche/ModalAddToLibrary';
+import { BottomSheetModal, BottomSheetSectionList, BottomSheetView } from '@gorhom/bottom-sheet';
+import { Button } from 'react-native-paper';
 
 //Filtres appliqué à la recherche API
 type TFilters = {
@@ -33,10 +36,23 @@ const removeDuplicates = (items: BookInfosSearch[]): BookInfosSearch[] => {
 };
 
 
+
 export default function HomeScreen() {
 	const [filters, setFilters] = useState<TFilters>({
 		query: '',
 	});
+
+	const bottomSheetRef = useRef<BottomSheetModal>(null);
+
+	const handlePresentModalPress = useCallback(() => {
+		console.log("bottomSheetRef.current", bottomSheetRef.current); // Vérifier si la ref n'est pas null
+		bottomSheetRef.current?.present();
+	}, []);
+	
+	const handleSheetChanges = useCallback((index: number) => {
+		console.log('handleSheetChanges', index);
+	}, []);
+
 
 	const searchBarChanged = (searchTerms: string) => {
 		setFilters({
@@ -63,8 +79,13 @@ export default function HomeScreen() {
 	return (
 		<ThemedView style={styles.body}>
 			<SafeAreaView>
-				<SearchBar qrcode={true} onSearch={searchBarChanged} />
-				<FlatList
+
+				{/* <SearchBar qrcode={true} onSearch={searchBarChanged} /> */}
+				<Button icon="camera" mode="contained" onPress={() => handlePresentModalPress()}>
+					Press me
+				</Button>
+
+				{/* <FlatList
 					contentContainerStyle={styles.contentContainerStyle}
 					// keyExtractor={item => `${item.id}+${item.etag}`}
 					keyExtractor={item => item.isbn13}
@@ -74,7 +95,7 @@ export default function HomeScreen() {
 					onEndReached={onEndReached}
 					removeClippedSubviews={true}
 					// refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />}
-					renderItem={({ item }) => <LivreRecherche book={item} />}
+					renderItem={({ item }) => <LivreRecherche book={item} handleModalAddToLibrary={handlePresentModalPress} />}
 					ListEmptyComponent={
 						<View style={styles.listEmptyComponent}>
 							<Text>{'noResult'}</Text>
@@ -85,7 +106,20 @@ export default function HomeScreen() {
 							{isFetchingNextPage && <ActivityIndicator />}
 						</View>
 					}
-				/>
+				/> */}
+				<View style={styles.container}>
+
+					<BottomSheetModal
+						ref={bottomSheetRef}
+						onChange={handleSheetChanges}
+					>
+						<BottomSheetView style={styles.contentContainer}>
+							<Text>Awesome 🎉</Text>
+						</BottomSheetView>
+					</BottomSheetModal>
+
+					<ModalAddToLibrary ref={bottomSheetRef} />
+				</View>
 			</SafeAreaView>
 		</ThemedView>
 	);
@@ -123,5 +157,14 @@ const styles = StyleSheet.create({
 	contentContainerStyle: {
 		marginTop: 10,
 		padding: 10,
+	},
+	contentContainer: {
+		backgroundColor: "white",
+	},
+	container: {
+		flex: 1,
+		padding: 24,
+		justifyContent: 'center',
+		backgroundColor: 'grey',
 	},
 });
