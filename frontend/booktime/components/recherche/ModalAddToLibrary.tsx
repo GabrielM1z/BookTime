@@ -1,138 +1,129 @@
-import { useAuth } from '@/hooks/useAuth';
-import { useRepository } from '@/hooks/useRepository';
-import { Ionicons } from '@expo/vector-icons';
-import { BottomSheetFlatList, BottomSheetModal, BottomSheetView, useBottomSheetModal } from '@gorhom/bottom-sheet';
-import { Href, useRouter } from 'expo-router';
-import React, { forwardRef, useCallback, useEffect, useRef, useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { CustomBottomSheet } from './CustomBottomSheet.component';
-import { OpacityBackgroundBottomSheet } from './OpacityBackgroundBottomSheet.component';
-import TouchableScale from '../TouchableScale';
-import { ProfileItem } from './ProfileItem.component';
-import { User } from '@/models/User';
+import React, { useCallback, useRef, useMemo, forwardRef, useEffect, useState } from "react";
+import { StyleSheet, View, Text, Button } from "react-native";
+import BottomSheet, { BottomSheetFlatList, BottomSheetModal, BottomSheetModalProvider, BottomSheetSectionList, BottomSheetView } from "@gorhom/bottom-sheet";
+import { CustomBottomSheet } from "../bottomSheets/CustomBottomSheet";
+import { useRepositoryContext } from "@/hooks/useRepository";
+import { Library } from "@/models";
 
+export const ModalAddToLibrary = forwardRef<BottomSheetModal>((_props, ref) => {
+    // hooks
+    // const ref = useRef<BottomSheetModal>(null);
+    const [libraryList, setLibraryList] = useState<Library[]>([])
+    const { libraryRepository } = useRepositoryContext();
 
-export interface ProfileCenterProps {
-    onChange?: (index: number) => void;
-};
-
-export const ModalProfileCenter = forwardRef<BottomSheetModal>((props, ref) => {
-    const router = useRouter();
-    const { dismiss } = useBottomSheetModal();
-    const subModalRef = useRef<BottomSheetModal>(null);
-    const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-
-    const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
-    const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
-    const [transitioning, setTransitioning] = useState(false);
-
-    const { userRepository } = useRepository();
-    const { switchSession, logOut, session, getAllSessions } = useAuth();
-
-    const [users, setUsers] = useState<User[]>([]);
+    // libraryRepository.getAll().then((data) => {
+    //     console.log(data)
+    //     setLibraryList(data)
+    // })
 
     useEffect(() => {
-        const fetchSessions = async () => {
-            const sessions = await getAllSessions();
-            const usersData = await Promise.all(sessions.map(session => userRepository.getBySession(session)));
-            setUsers(usersData);
-        }
-        if (isFirstModalOpen) {
-            fetchSessions();
-            setSelectedUserId(session?.id_user || null);
-        }
-    }, [isFirstModalOpen]);
+        libraryRepository.getAll().then((data) => {
+            console.log(data)
+            setLibraryList(data)
+        })
+    }, []); 
 
-    useEffect(() => {
-        if (!isSecondModalOpen && transitioning) {
-            setTransitioning(false);
-        }
-    }, [isSecondModalOpen]);
 
-    const handleMenuClicked = useCallback(() => {
-        setTransitioning(true);
-        subModalRef.current?.present();
-    }, [subModalRef]);
+    // variables
+    const sections = useMemo(
+        () =>
+            Array(10)
+                .fill(0)
+                .map((_, index) => ({
+                    title: `Section ${index}`,
+                    data: Array(10)
+                        .fill(0)
+                        .map((_, index) => `Item ${index}`),
+                })),
+        []
+    );
 
-    const handleAddAccount = () => console.log('Add account');
-    const handleAccountsCenter = () => {
-        dismiss();
-        router.push('/settings' as Href<"settings">);
-    };
+    // callbacks
+    const handleSheetChanges = useCallback((index: number) => {
+        console.log("handleSheetChange", index);
+    }, []);
 
+    // render
+    const renderSectionHeader = useCallback(
+        ({ section }: { section: { title: string } }) => (
+            <View style={styles.sectionHeaderContainer}>
+                <Text>{section.title}</Text>
+            </View>
+        ),
+        []
+    );
+    const renderItem = useCallback(
+        ({ item }: { item: Library }) => (
+            <View style={styles.itemContainer}>
+                <Text>{item.name}</Text>
+            </View>
+        ),
+        []
+    );
     return (
         <>
-            <OpacityBackgroundBottomSheet isOpen={[isFirstModalOpen, isSecondModalOpen, transitioning]} />
-            <CustomBottomSheet ref={ref} setIsOpen={setIsFirstModalOpen}>
-                <BottomSheetFlatList
-                    data={users}
-                    keyExtractor={(item) => item.id_user.toString()}
-                    renderItem={({ item }) => ProfileItem({
-                        item,
-                        isSelected: item.id_user == selectedUserId,
-                        onItemClicked: setSelectedUserId,
-                        onMenuClicked: handleMenuClicked,
-                    })}
-                    style={styles.profileContainer}
-                    showsVerticalScrollIndicator={false}
-                    ListFooterComponent={() => (
-                        <TouchableScale style={[styles.profileItem, { paddingBottom: 8 }]} onPress={handleAddAccount}>
-                            <View style={styles.addProfileCircle}>
-                                <Ionicons name="add" size={28} color="#000" />
-                            </View>
-                            <Text style={styles.addAccountText}>Add account</Text>
-                        </TouchableScale>
-                    )}
-                />
-                <View>
-                    <TouchableOpacity style={styles.settingsButton} onPress={handleAccountsCenter}>
-                        <Text style={styles.settingsText}>Settings</Text>
-                    </TouchableOpacity>
-                </View>
+            {/* <GestureHandlerRootView style={styles.container}>
+                <Button title="Snap To 90%" onPress={() => handleSnapPress(2)} />
+                <Button title="Snap To 50%" onPress={() => handleSnapPress(1)} />
+                <Button title="Snap To 25%" onPress={() => handleSnapPress(0)} />
+                <Button title="Close" onPress={() => handleClosePress()} /> */}
+            <CustomBottomSheet
+                ref={ref}
+                onChange={handleSheetChanges}
+            // index={0}
+            // snapPoints={["25%", "50%", "90%"]} // <-- Définition des points d'ancrage
+            >
+                <BottomSheetFlatList style={styles.contentContainer} data={libraryList} renderItem={renderItem}>
+                    {/* <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text>
+                    <Text>Awesome 🎉</Text> */}
+
+                </BottomSheetFlatList>
             </CustomBottomSheet>
+            {/* </GestureHandlerRootView> */}
         </>
     );
 });
 
 
 const styles = StyleSheet.create({
-    profileContainer: {
-        backgroundColor: '#F5F5F5',
-        borderRadius: 12,
-        padding: 8,
-        margin: 8,
-        minHeight: 200, // FIXME: marche pas
+    container: {
+        flex: 1,
+        paddingTop: 200,
     },
-    profileItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 8,
+    contentContainer: {
+        flex: 1,
+        backgroundColor: "white",
     },
-    settingsButton: {
-        backgroundColor: '#007AFF',
-        borderRadius: 8,
-        paddingVertical: 12,
-        alignItems: 'center',
-        marginHorizontal: 8,
-        marginBottom: 8,
+    sectionHeaderContainer: {
+        backgroundColor: "white",
+        padding: 6,
     },
-    settingsText: {
-        fontSize: 16,
-        color: '#fff',
-        fontWeight: 'bold',
-    },
-    addProfileCircle: {
-        width: 50,
-        height: 50,
-        borderRadius: 25,
-        backgroundColor: '#E0E0E0',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: 12,
-    },
-    addAccountText: {
-        fontSize: 16,
-        color: '#000',
-        fontWeight: 'bold',
+    itemContainer: {
+        padding: 6,
+        margin: 6,
+        backgroundColor: "#eee",
     },
 });

@@ -14,8 +14,7 @@ export interface BookRepository {
 	getAllFromLib: (id_lib: string) => Promise<BookAllInfos[]>
 	get: (id: string) => Promise<BookAllInfos>;
 	add: (state: BookAllInfos) => Promise<void>;
-	delete: (id: string) => Promise<void>;
-	addBookToLibrary: (id_library: string, book: BookInfosServeur) => Promise<void>
+	addBookToLibrary: (id_library: string, book: BookAllInfos) => Promise<void>
 	delBookFromLibrary: (id_library: string, id_book: string) => Promise<void>
 }
 

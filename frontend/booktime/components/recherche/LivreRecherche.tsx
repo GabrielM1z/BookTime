@@ -2,20 +2,25 @@ import { StyleSheet, View, Pressable, Text } from 'react-native';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { ThemedText } from '../ThemedText';
 import { BookInfosSearch, BookInfosServeur } from '@/models/Book';
-import React, { useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 
 import { Colors } from '@/constants/Colors';
 import { useRepositoryContext } from '@/hooks/useRepository';
 import CoverPressable from '../CoverPressable';
 import api from '@/services/axios';
 import { Snackbar, PaperProvider, Portal } from "react-native-paper";
+import { BottomSheetModal } from '@gorhom/bottom-sheet';
+import { ModalAddToLibrary } from './ModalAddToLibrary';
 
 interface LivreRechercheProps {
   book: BookInfosSearch;
+  handleModalAddToLibrary: () => void;
+
+
 }
 
 
-export const LivreRecherche = ({ book }: LivreRechercheProps) => {
+export const LivreRecherche = ({ book, handleModalAddToLibrary }: LivreRechercheProps) => {
 
   const { bookRepository, libraryRepository } = useRepositoryContext();
     const [visible, setVisible] = useState(false);
@@ -23,15 +28,17 @@ export const LivreRecherche = ({ book }: LivreRechercheProps) => {
   const showSnackbar = () => setVisible(true);
   const hideSnackbar = () => setVisible(false);
 
-
   const handleAddBook = async () => {
-
     try {
       //Données a récupérer depuis le back !
       let url: string = "/books/books/" + book.isbn13;
-      let data: BookInfosServeur = await api.get(url);
+      let data: BookInfosServeur = (await api.get(url)).data.data;
+      console.log(data);
+      
       const listLibrary = await libraryRepository.getAll()
+
       await bookRepository.addBookToLibrary(listLibrary[0].id_library, data)
+      showSnackbar();
 
 
     } catch (error) {
@@ -42,20 +49,7 @@ export const LivreRecherche = ({ book }: LivreRechercheProps) => {
 
   return (
     <View style={styles.itemContainer}>
-      <Portal>
-        <Snackbar
-          visible={visible}
-          onDismiss={hideSnackbar}
-          duration={3000} // Snackbar disappears after 3 seconds
-          action={{
-            label: "Change",
-            onPress: () => hideSnackbar(),
-
-          }}
-        >
-          Custom styled Snackbar!
-        </Snackbar>
-      </Portal>
+      <CustomSnackbar visible={visible} onDismiss={hideSnackbar} onPressChange={handleModalAddToLibrary} />
       <CoverPressable id_book={book.isbn13} cover={book.thumbnail} mode='search'></CoverPressable>
       {/* <Image source={typeof imageSource === 'string' ? { uri: imageSource } : imageSource} style={styles.itemImage} resizeMode={'cover'}></Image> */}
       {/* <Image source={{uri:"data:image/png;base64,"+getImageAsBase64(book.thumbnail)}} defaultSource={defaultCover}  style={styles.itemImage} resizeMode={'cover'} ></Image> */}
@@ -73,6 +67,23 @@ export const LivreRecherche = ({ book }: LivreRechercheProps) => {
   );
 }
 
+
+/** Composant Snackbar pour simplifier `LivreRecherche` */
+const CustomSnackbar = ({ visible, onDismiss, onPressChange }: { visible: boolean, onDismiss: () => void, onPressChange: () => void }) => (
+  <Portal>
+    <Snackbar
+      visible={visible}
+      onDismiss={onDismiss}
+      duration={3000}
+      action={{
+        label: "Change",
+        onPress: onPressChange,
+      }}
+    >
+      Custom styled Snackbar!
+    </Snackbar>
+  </Portal>
+);
 
 const styles = StyleSheet.create({
   itemContainer: {
