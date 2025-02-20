@@ -1,0 +1,126 @@
+x-service: &service
+  restart: always
+  env_file: ".env"
+  networks:
+    - booktime
+
+x-backend: &backend
+  <<: *service
+  depends_on:
+    - postgres
+
+services:
+  postgres:
+    <<: *service
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  keycloak:
+    <<: *backend
+    image: quay.io/keycloak/keycloak:latest
+    command: start-dev
+    environment:
+      KC_HOSTNAME: keycloak
+      KC_HOSTNAME_STRICT: false
+      KC_HOSTNAME_STRICT_HTTPS: false
+      # KC_HTTP_RELATIVE_PATH: /auth
+
+      KC_HEALTH_ENABLED: true
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak_db
+      KC_DB_USERNAME: ${DB_USER}
+      KC_DB_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - 8080:8080
+      - 9000:9000
+    healthcheck:
+      test: ["CMD-SHELL", "echo -n > /dev/tcp/127.0.0.1/9000"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  api_books:
+    <<: *backend
+    hostname: books
+    build: 
+      context: ./backend/book
+      target: prod
+    security_opt:
+      - "seccomp:unconfined"
+    restart: always
+    environment:
+      DB_HOST: postgres
+      DB_NAME: book_db
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+
+  api_news:
+    <<: *backend
+    hostname: news
+    build: ./backend/news
+
+  api_user:
+    <<: *backend
+    hostname: user
+    build: ./backend/user
+    environment:
+      DB_HOST: postgres
+      DB_NAME: book_db
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+
+  api_gateway:
+    <<: *backend
+    build: ./backend/gateway
+    ports: 
+      - 8082:8080
+    depends_on:
+      keycloak:
+        condition: service_healthy
+
+  migrate:
+    <<: *service
+    hostname: gateway
+    image: migrate/migrate:v4.15.2
+    profiles: [ "tools" ]
+    volumes:
+      - ./backend/migrations:/migrations
+    entrypoint: [ "migrate", "-path", "/migrations", "-database", "postgres://postgres:postgres123@postgres:5432/booktime_book?sslmode=disable" ]
+    command: [ "up" ]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: on-failure
+
+  # TODO: Add nginx service
+  #       - change keycloak to use /auth
+  nginx:
+    <<: *service
+    image: nginx:latest
+    # volumes:
+    #   - ./nginx:/etc/nginx/conf.d
+    ports:
+      - 80:80
+    depends_on:
+      # - api_books
+      # - api_news
+      # - api_user
+      - api_gateway
+
+volumes:
+  postgres_data:
+  book_images:
+
+
+networks:
+  booktime:
+    # driver: bridge

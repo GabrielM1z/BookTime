@@ -1,27 +1,32 @@
-import { useAuth } from '@/hooks/useAuth';
+import { AccountCenter } from '@/components/bottomSheets/AccountCenter';
+import { guestUserId } from '@/constants';
+import { useAuthContext } from '@/contexts/AuthContext';
+import commonStyles from '@/styles/commonStyles';
 import { AntDesign, Ionicons } from '@expo/vector-icons';
+import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { AxiosError } from 'axios';
-import { Href, useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import { Href, useRouter, useLocalSearchParams } from 'expo-router';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Keyboard, StatusBar, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import styles from "./SignIn.style";
-import commonStyles from '@/styles/commonStyles';
 
 
 export default function SignIn() {
-    const { logIn, logAsGuest } = useAuth();
+    const { showSessions = false } = useLocalSearchParams();
+    const { logIn, logAsGuest, isLoading, sessions } = useAuthContext();
+    const router = useRouter();
+    
+    const accountCenterRef = useRef<BottomSheetModal>(null);
+
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-    const router = useRouter();
 
     const logoImageSource = require('@/assets/images/logo_refait.png');
 
-    const handleLogIn = async () => {
-        setIsLoading(true);
+    const handleLogIn = useCallback(async () => {
         Keyboard.dismiss();
 
         try {
@@ -32,16 +37,19 @@ export default function SignIn() {
             const axiosError = error as AxiosError;
             Alert.alert('Error', axiosError.message);
         }
-        finally {
-            setIsLoading(false);
-        }
-    };
+    }, [logIn, router, username, password, rememberMe]);
 
-    const handleLogAsGuest = async () => {
+    const handleLogAsGuest = useCallback(async () => {
         Keyboard.dismiss();
         await logAsGuest();
         router.replace('/(app)' as Href<'(app)'>);
-    }
+    }, [logAsGuest, router]);
+
+    useEffect(() => {
+        if (showSessions && sessions.length > 0) {
+            accountCenterRef.current?.present();
+        }
+    }, [showSessions])
 
     return (
         <SafeAreaView style={styles.container}>
@@ -106,7 +114,7 @@ export default function SignIn() {
                     <Text style={styles.loginTextStyle}>Log as guest</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                    style={styles.signupButtonStyle}
+                    style={styles.signupStyle}
                     onPress={() => router.push('/SignUp' as Href<'SignUp'>)}
                 >
                     <Text style={styles.signupTextStyle}>Créer un compte</Text>
@@ -117,6 +125,12 @@ export default function SignIn() {
                 >
                     <Text style={styles.forgotPasswordTextStyle}>Mot de passe oublié ?</Text>
                 </TouchableOpacity>
+                {sessions.length > 0 && <TouchableOpacity // FIXME: filter guest or refactor AccountCenter
+                    style={styles.logAsStyle}
+                    onPress={() => accountCenterRef.current?.present()}
+                >
+                    <Text style={styles.logAsTextStyle}>Log As</Text>
+                </TouchableOpacity>}
             </View>
             <View style={styles.socialLoginContainer}>
                 <TouchableOpacity style={styles.socialBubble}>
@@ -129,6 +143,11 @@ export default function SignIn() {
                     <AntDesign name="twitter" size={24} color="white" />
                 </TouchableOpacity>
             </View>
+            <AccountCenter
+                ref={accountCenterRef}
+                filter={(user) => user.id_user !== guestUserId}
+                // header={<Text>Continuer en tant que</Text>}
+            />
         </SafeAreaView>
     );
 }

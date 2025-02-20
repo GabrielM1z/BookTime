@@ -3,7 +3,7 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useCallback, useMemo, useState } from 'react';
 import _ from 'lodash';
-import axios from 'axios';
+import api from '@/services/axios';
 
 //debug axios request
 // axios.interceptors.request.use(request => {
@@ -48,7 +48,7 @@ export const useInfiniteScroll = <T = unknown, F = object>({
     const queryFn = async ({ pageParam = initialPage }) => {  
                 
         console.log("la requete : ", url)
-        const { data } = await axios.get<T[]>(
+        const { data } = await api.get<T[]>(
             url,
             {
                 params: {

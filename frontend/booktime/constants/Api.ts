@@ -1,15 +1,14 @@
-const key = "key=AIzaSyA_vH7yqR2lJkLlgUmXt2Ydpw53X8tMYys"
-export const apiLink = "https://www.googleapis.com/books/v1/volumes?" + key;
-
-// export const backendIp = "159.31.247.130";
-// export const keycloakAuthUrl = "http://" + backendIp + ":8080/realms/booktime/protocol/openid-connect/token";
-// export const apiLinkServeur = "http://159.31.247.130:8082/books/search/?";
-
-export const keycloakClientSecret = process.env.EXPO_PUBLIC_KEYCLOAK_CLIENT_SECRET;
+export const keycloakClientSecret = process.env.EXPO_PUBLIC_KEYCLOAK_CLIENT_SECRET!;
 export const keycloakClientId = process.env.EXPO_PUBLIC_KEYCLOAK_CLIENT_ID || "gateway-client";
+export const keycloakAdminClientId = process.env.EXPO_PUBLIC_KEYCLOAK_ADMIN_CLIENT_ID || "admin-cli";
+export const keycloakAdminClientSecret = process.env.EXPO_PUBLIC_KEYCLOAK_ADMIN_CLIENT_SECRET!;
 
-export const baseURL = process.env.EXPO_PUBLIC_BACKEND_URL || "http://159.31.247.130:8082";
-// export const baseURL = process.env.EXPO_PUBLIC_BACKEND_URL || "http://booktime.ddns.net:8082";
+export const baseURL = process.env.EXPO_PUBLIC_API_BASE_URL || "http://159.31.247.130";
+export const keycloakBaseUrl = baseURL + ":8080";
+export const apiBaseUrl = baseURL + ":8082";
+export const keycloakRealmUrl = keycloakBaseUrl + "/realms/booktime";
+export const keycloakAdminUrl = keycloakBaseUrl + "/admin/realms/booktime";
 
-export const keycloakAuthUrl = baseURL +  "/auth/realms/booktime/protocol/openid-connect/token";
-export const apiLinkServeur = baseURL + "/books/search/?";
+if (!keycloakClientId || !keycloakClientSecret || !keycloakAdminClientId || !keycloakAdminClientSecret) {
+    throw new Error('Keycloak not configured');
+}

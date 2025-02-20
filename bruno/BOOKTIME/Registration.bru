@@ -1,0 +1,37 @@
+meta {
+  name: Registration
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{base_url}}:8080/admin/realms/booktime/users
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{admin_token}}
+}
+
+body:json {
+  {
+    "username": "app_user_test",
+    "firstName": "app_user_firstname",
+    "lastName": "app_user_lastname",
+    "email": "app_user@test.fr",
+    "emailVerified": true,
+    "enabled": true,
+    "credentials": [
+      {
+        "temporary": false,
+        "type": "password",
+        "value": "mypassword"
+      }
+    ]
+  }
+}
+
+body:form-urlencoded {
+  username: 
+}

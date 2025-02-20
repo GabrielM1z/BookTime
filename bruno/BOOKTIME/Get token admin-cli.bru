@@ -1,0 +1,23 @@
+meta {
+  name: Get token admin-cli
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{base_url}}:8080/realms/booktime/protocol/openid-connect/token
+  body: formUrlEncoded
+  auth: none
+}
+
+body:form-urlencoded {
+  client_id: admin-cli
+  client_secret: {{admin_client_secret}}
+  grant_type: client_credentials
+}
+
+script:post-response {
+  let data = res.getBody();
+  bru.setEnvVar("admin_token", data.access_token);
+  
+}

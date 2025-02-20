@@ -5,9 +5,9 @@ import { BookInfosSearch, BookInfosServeur } from '@/models/Book';
 import React, { useCallback, useRef, useState } from 'react';
 
 import { Colors } from '@/constants/Colors';
-import { useRepository } from '@/hooks/useRepository';
+import { useRepositoryContext } from '@/hooks/useRepository';
 import CoverPressable from '../CoverPressable';
-import api from '@/services/api';
+import api from '@/services/axios';
 import { Snackbar, PaperProvider, Portal } from "react-native-paper";
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { ModalAddToLibrary } from './ModalAddToLibrary';
@@ -22,8 +22,8 @@ interface LivreRechercheProps {
 
 export const LivreRecherche = ({ book, handleModalAddToLibrary }: LivreRechercheProps) => {
 
-  const { bookRepository, libraryRepository } = useRepository();
-  const [visible, setVisible] = useState(false);
+  const { bookRepository, libraryRepository } = useRepositoryContext();
+    const [visible, setVisible] = useState(false);
 
   const showSnackbar = () => setVisible(true);
   const hideSnackbar = () => setVisible(false);
@@ -31,7 +31,7 @@ export const LivreRecherche = ({ book, handleModalAddToLibrary }: LivreRecherche
   const handleAddBook = async () => {
     try {
       //Données a récupérer depuis le back !
-      let url: string = "/api/books/books/" + book.isbn13;
+      let url: string = "/books/books/" + book.isbn13;
       let data: BookInfosServeur = await api.get(url);
       const listLibrary = await libraryRepository.getAll()
       await bookRepository.addBookToLibrary(listLibrary[0].id_library, data)

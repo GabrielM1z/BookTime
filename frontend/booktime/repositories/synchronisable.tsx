@@ -1,10 +1,10 @@
-import api from '@/services/api';
+import api from '@/services/axios';
 import { ActionRepository } from './ActionRepository';
-import { useRepository } from '@/hooks/useRepository';
+import { useRepositoryContext } from '@/hooks/useRepository';
 
 export class Synchronisable {
     async sync() {
-        const { actionRepository } = useRepository();
+        const { actionRepository } = useRepositoryContext();
         try {
             console.log("pre action")
     
@@ -22,7 +22,7 @@ export class Synchronisable {
             console.log("Actions encodées en Base64 :", actionsWithBase64);
     
             // TODO appel API : send action
-            const url = "/api/synchro"
+            const url = "/synchro"
             const param = actionsWithBase64
             const actionsBack = api.post(url, param)
     
