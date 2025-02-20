@@ -1,6 +1,6 @@
 import { QueryProvider } from '@/components/QueryProvider';
 import { migrateDbIfNeeded } from '@/db/init';
-import { testServeur } from '@/helpers/testServeur';
+import { checkServerAliveOrWarning } from '@/services/axios';
 import { useAuthInterceptor } from '@/hooks/useAuthInterceptor';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { AuthProvider, useAuthContext } from '@/contexts/AuthContext';
@@ -16,7 +16,6 @@ import { deleteDatabaseAsync } from 'expo-sqlite';
 import React, { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
-import { AppRegistry } from 'react-native';
 import { PaperProvider } from 'react-native-paper';
 
 
@@ -44,12 +43,10 @@ export default function RootLayout() {
     // deleteDatabaseAsync('booktime.db');
     // AsyncStorage.clear();
 
-    const test = async () => {
-        await testServeur();
-    }
-
     useEffect(() => {
-        test();
+        if (__DEV__) {
+            checkServerAliveOrWarning();
+        }
     }, []);
 
     useEffect(() => {
@@ -71,17 +68,17 @@ export default function RootLayout() {
             <GestureHandlerRootView>
                 <BottomSheetModalProvider>
                     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-                        <ControllerProvider databaseName='booktime.db' onInit={migrateDbIfNeeded} onError={handleSQLiteError}>
-                            <AuthProvider>
-                                <QueryProvider>
-                                    <PaperProvider>
-                                        <FadeTransitionProvider>
+                        <FadeTransitionProvider>
+                            <ControllerProvider databaseName='booktime.db' onInit={migrateDbIfNeeded} onError={handleSQLiteError}>
+                                <AuthProvider>
+                                    <QueryProvider>
+                                        <PaperProvider>
                                             <Routes />
-                                        </FadeTransitionProvider>
-                                    </PaperProvider>
-                                </QueryProvider>
-                            </AuthProvider>
-                        </ControllerProvider>
+                                        </PaperProvider>
+                                    </QueryProvider>
+                                </AuthProvider>
+                            </ControllerProvider>
+                        </FadeTransitionProvider>
                     </ThemeProvider>
                 </BottomSheetModalProvider>
             </GestureHandlerRootView>

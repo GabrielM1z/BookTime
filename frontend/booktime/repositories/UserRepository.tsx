@@ -1,4 +1,4 @@
-import api from '@/services/api';
+import api from '@/services/axios';
 import { User, UpdateUserDto } from '@/models/User';
 import { SQLiteDatabase } from 'expo-sqlite';
 import { Synchronisable } from './synchronisable';
@@ -7,6 +7,7 @@ import { useSQLite } from '@/hooks/useSQLite';
 export interface UserRepository {
     get(id: string): Promise<User | null>;
     getAll(): Promise<User[]>;
+    add(user: User): Promise<void>;
     update(user: User): Promise<void>;
     delete(user: User): Promise<void>;
 }
@@ -106,29 +107,33 @@ export class SQLiteUserRepository extends Synchronisable implements UserReposito
 
 export class APIUserRepository implements UserRepository {
     async getFromToken(): Promise<User> {
-        const response = await api.get('/api/users/userfromtoken');
+        const response = await api.get('/users/userfromtoken');
         // FIXME: weird response structure
         return response["data"]["data"]["user"];
     }
 
     async get(id: string): Promise<User | null> {
         console.log("APIUserRepository.get");
-        const response = await api.get(`/api/users/user/${id}`);
+        const response = await api.get(`/users/user/${id}`);
         const { data } = response;
         console.log(data);
         return data;
     }
 
     async getAll(): Promise<User[]> {
-        const response = await api.get('/api/user');
+        const response = await api.get('/user');
         return response.data;
     }
 
+    async add(user: User): Promise<void> {
+        await api.post('/user', user);
+    }
+
     async update(user: User): Promise<void> {
-        await api.put(`/api/user/${user.id_user}`, user);
+        await api.put(`/user/${user.id_user}`, user);
     }
 
     async delete(user: User): Promise<void> {
-        await api.delete(`/api/user/${user.id_user}`);
+        await api.delete(`/user/${user.id_user}`);
     }
 }

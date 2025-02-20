@@ -3,7 +3,7 @@ import React, { useCallback } from "react";
 import { useRouter } from "expo-router";
 import { useBottomSheetModal } from "@gorhom/bottom-sheet";
 import { ProfileItem } from "./ProfileItem";
-import { Button } from "@/components/Button.component";
+import { Button } from "react-native-paper";
 
 
 export const AddAccountFooter = () => {
@@ -23,6 +23,6 @@ export const AddAccountFooter = () => {
         //     onItemClicked={handleAddAccount}
         //     isSelected={false}
         // />
-        <Button text="Add Account" onPress={handleAddAccount} color="blue" />
+        <Button mode="outlined" onPress={handleAddAccount}>Add Account</Button>
     );
 }

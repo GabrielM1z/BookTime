@@ -46,7 +46,6 @@ export default function pageEtageres() {
     return (
         <ScrollView style={styles.etagereContainer}>
             <NewEtagere onAddEtagere={handleAddEtagere}></NewEtagere>
-            <TestBtn></TestBtn>
             {etageres && etageres.map((etagere, index) => (
                 <Etagere key={index} idEtagere={etagere.id_library} index={index} label={etagere.name} livres={etagere.books}></Etagere>
             ))}

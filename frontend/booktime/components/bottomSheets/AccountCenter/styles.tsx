@@ -2,7 +2,7 @@ import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
     profileContainer: {
-        paddingBottom: 8,
+        paddingBottom: 12,
     },
     profileItem: {
         flexDirection: 'row',

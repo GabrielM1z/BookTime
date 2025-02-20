@@ -4,7 +4,7 @@ import { useContext, useState, useEffect } from "react";
 export function useRepositoryContext() {
     const context = useContext(RepositoryContext);
     if (!context) {
-        throw new Error("useRepository must be used within a RepositoryProviderWrapper");
+        throw new Error("useRepository must be used within a RepositoryProvider");
     }
     return context;
 }

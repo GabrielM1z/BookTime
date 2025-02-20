@@ -1,6 +1,6 @@
 import { getAllAction } from "@/db/db-action"
 import { useRepositoryContext } from "@/hooks/useRepository";
-import api from "@/services/api";
+import api from "@/services/axios";
 
 
 export const syncDB = async(actionRepository: ActionRepository) => {

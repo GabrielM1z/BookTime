@@ -24,7 +24,7 @@ export class CachedSessionRepository implements SessionRepository {
 
     async addOrUpdate(session: Session): Promise<void> {
         const sessions = await this.getAll();
-        const updatedSessions = sessions.filter(s => s.id !== session.id);
+        const updatedSessions = sessions.filter(s => s.id_user !== session.id_user);
         updatedSessions.push(session);
         await AsyncStorage.setItem(this.sessionsKey, JSON.stringify(updatedSessions));
     }

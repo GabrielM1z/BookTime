@@ -4,7 +4,7 @@ import { BookRepository } from "@/repositories/BookRepository";
 import { FormatRepository } from "@/repositories/FormatRepository";
 import { GenreRepository } from "@/repositories/GenreRepository";
 import { LibraryRepository } from "@/repositories/LibraryRepository";
-import { UserRepository } from "@/repositories/UserRepository";
+import { UserRepository, SQLiteUserRepository, APIUserRepository } from "@/repositories/UserRepository";
 import { actionRepositoryFactory } from "@/repositories/factories/actionRepositoryFactory";
 import { authorRepositoryFactory } from "@/repositories/factories/authorRepositoryFactory";
 import { bookRepositoryFactory } from "@/repositories/factories/bookRepositoryFactory";
@@ -63,8 +63,6 @@ function RepositoryProviderInner({ children }: { children: React.ReactNode }) {
 
 export function RepositoryProvider({
     children,
-    onError,
-    useSuspense = false,
     ...props
 }: SQLiteProviderProps) {
     return (
