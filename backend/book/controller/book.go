@@ -63,6 +63,8 @@ func (bc *BookController) GetBook(c *gin.Context) {
 		publicURLBase := "http://159.31.247.130:8082/books"
 		if os.Getenv("ENVIROMENT") == "development" {
 			publicURLBase = "http://localhost:8082/books"
+		} else if os.Getenv("ENVIROMENT") == "oracle" {
+			publicURLBase = "http://84.235.239.52:8082/books"
 		}
 		// fmt.Println("le publicURLBase est:", publicURLBase)
 
