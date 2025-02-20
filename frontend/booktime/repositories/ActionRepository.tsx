@@ -5,6 +5,7 @@ import { Trigger } from '@/models/Trigger';
 
 export interface ActionRepository {
     getAll: () => Promise<Action[]>;
+    deleteAll: () => Promise<void>;
     getTrigger: () => Promise<Trigger[]>;
 }
 
@@ -32,6 +33,10 @@ export class SQLiteActionRepository implements ActionRepository {
         });
 
         return result ? (result as unknown as Action) : null;
+    }
+
+    async deleteAll(): Promise<void> {
+        await this.db.execAsync('DELETE FROM action');
     }
 
     async getTrigger(): Promise<Trigger[]> {
