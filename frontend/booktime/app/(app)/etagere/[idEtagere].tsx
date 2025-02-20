@@ -12,33 +12,30 @@ import BackButton from '@/components/BackButton';
 
 export default function EtagereDetail() {
 
-    const navigation = useNavigation();
     const { idEtagere, label } = useLocalSearchParams();
-    const { bookRepository } = useRepositoryContext();
+    const { bookRepository, libraryRepository } = useRepositoryContext();
+    const navigation = useNavigation();
 
-    const [books, setBooks] = useState<BookAllInfos[] | null>(null);
+    const [books, setBooks] = useState<BookAllInfos[]>([]);
 
     const [menuVisible, setMenuVisible] = useState(false);
     const [menuAnimation] = useState(new Animated.Value(0));
 
     useEffect(() => {
-        if (!idEtagere) return; // Sécurité si `idEtagere` est undefined
-
-        // Charger les livres de l'étagère depuis la base de données
-        if (typeof idEtagere === 'string') {
-            bookRepository.getAllFromLib(idEtagere)
-                .then(books => {
-                    console.log("Books fetched:", books);
-                }).catch(error => {
-                    console.error("Error fetching books:", error);
-                });
-        } else {
-            console.error("Invalid idEtagere:", idEtagere);
+        if (idEtagere) {
+            fetchAllBooksFromLib();
         }
     }, [idEtagere]);
 
-    const goBack = () => {
-        navigation.goBack();
+    // Récupère tous les livres de l'étagère
+    const fetchAllBooksFromLib = () => {
+        try {
+            bookRepository.getAllFromLib(idEtagere as string).then((data) => {
+                setBooks(data);
+            });
+        } catch (error) {
+            console.error('Error fetching etageres:', error);
+        }
     };
 
     const toggleMenu = () => {
@@ -65,7 +62,14 @@ export default function EtagereDetail() {
 
     const deleteEtagere = () => {
         console.log("Supprimer l'étagère");
-        toggleMenu();
+        try {
+            libraryRepository.delete(idEtagere as string).then(() => {
+                console.log("Etagère supprimée");
+                navigation.goBack();
+            });
+        } catch (error) {
+            console.error('Error deleting etagere:', error);
+        }
     };
 
 
@@ -88,10 +92,10 @@ export default function EtagereDetail() {
                     {menuVisible && (
                         <Animated.View style={[styles.menu, { opacity: menuAnimation }]}>
                             <TouchableOpacity style={styles.menuItem} onPress={editEtagere}>
-                                <Ionicons name="create-outline" size={24} color="blue" />
+                                <Ionicons name="create-outline" size={24} color="white" />
                             </TouchableOpacity>
                             <TouchableOpacity style={styles.menuItem} onPress={deleteEtagere}>
-                                <Ionicons name="trash-outline" size={24} color="red" />
+                                <Ionicons name="trash-outline" size={24} color="white" />
                             </TouchableOpacity>
                             <TouchableOpacity style={styles.menuItem} onPress={toggleMenu}>
                                 <Ionicons name="close-outline" size={24} color="white" />
@@ -107,9 +111,9 @@ export default function EtagereDetail() {
             </ThemedText>
 
             {/* Liste des livres de l'étagère */}
-            <ScrollView style={styles.etagereContainer}>
-                {books && books.map((book, index) => (
-                    <LivreEtagere key={book.id_book} livre={book}></LivreEtagere>
+            <ScrollView contentContainerStyle={styles.etagereContainer}>
+                {books.map((book) => (
+                    <LivreEtagere key={book.id_book} livre={book} />
                 ))}
             </ScrollView>
         </ThemedView>
@@ -156,6 +160,8 @@ const styles = StyleSheet.create({
         margin: "auto",
     },
     etagereContainer: {
-        flexDirection: "column",
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'flex-start',
     },
 });
