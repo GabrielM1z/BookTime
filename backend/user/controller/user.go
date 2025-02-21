@@ -113,7 +113,7 @@ func (bc *UserController) GetUserFromToken(c *gin.Context) {
 	}
 
 	if User == nil {
-		pseudo_user := "user" + id.String()
+		pseudo_user := "user" + id.String()[:15]
 		user := model.User{IdUser: id, Pseudo: pseudo_user, Description: "", Private: false, ProfilImage: "", BannerImage: "", Birthday: "1900-01-01"}
 		insert := repoUser.InsertUser(user)
 		if !insert {
