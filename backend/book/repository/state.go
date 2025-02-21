@@ -22,7 +22,7 @@ func NewStateRepository(db *sql.DB) *StateRepository {
 }
 
 func (sr *StateRepository) InsertState(state model.State) bool {
-	stmt, err := sr.DB.Prepare("INSERT INTO state (state, progression, read_count, last_read_date, is_available, id_user, id_book, rate, comment) VALUES ($1, $2, $3, $4, $5, $6, $7, $8; $9)")
+	stmt, err := sr.DB.Prepare("INSERT INTO state (state, progression, read_count, last_read_date, is_available, id_user, id_book, rate, comment) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)")
 	if err != nil {
 		log.Println(err)
 		return false

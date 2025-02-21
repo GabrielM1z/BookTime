@@ -74,6 +74,8 @@ CREATE TABLE IF NOT EXISTS state (
     id_user UUID,
     id_book VARCHAR(13),
     is_available BOOLEAN DEFAULT FALSE,
+    rate INT,
+    comment VARCHAR(500),
     PRIMARY KEY (id_user, id_book),
     FOREIGN KEY (id_book) REFERENCES book(id_book) ON DELETE CASCADE
 );
@@ -120,7 +122,5 @@ CREATE TABLE IF NOT EXISTS user_booktime (
     profil_image VARCHAR(150),
     banner_image VARCHAR(150),
     birthdate DATE,
-    rate INT,
-    comment VARCHAR(500),
     PRIMARY KEY (id_user)
 );
