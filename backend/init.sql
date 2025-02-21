@@ -120,5 +120,7 @@ CREATE TABLE IF NOT EXISTS user_booktime (
     profil_image VARCHAR(150),
     banner_image VARCHAR(150),
     birthdate DATE,
+    rate INT,
+    comment VARCHAR(500),
     PRIMARY KEY (id_user)
 );
