@@ -1,11 +1,12 @@
 vars {
   base_book_url: http://localhost:8082/books
   client_secret: {{process.env.KEYCLOAK_CLIENT_SECRET}}
-  username: test
+  username: test@gmail.com
   base_keycloak_url: http://localhost:8080/realms/booktime
   base_user_url: http://localhost:8082/users
   base_api_url: http://localhost/api
   base_url: http://localhost
+  refresh_token: undefined
 }
 vars:secret [
   access_token,

@@ -114,13 +114,12 @@ func (bc *UserController) GetUserFromToken(c *gin.Context) {
 
 	if User == nil {
 		pseudo_user := "user" + id.String()[:15]
-		user := model.User{IdUser: id, Pseudo: pseudo_user, Description: "", Private: false, ProfilImage: "", BannerImage: "", Birthday: "1900-01-01"}
-		insert := repoUser.InsertUser(user)
+		User = &model.User{IdUser: id, Pseudo: pseudo_user, Description: "", Private: false, ProfilImage: "", BannerImage: "", Birthday: "1900-01-01"}
+		insert := repoUser.InsertUser(*User)
 		if !insert {
 			c.JSON(http.StatusInternalServerError, gin.H{"status": "failed", "msg": "User does not exist and insert User failed"})
 			return
 		}
-		User = &model.User{IdUser: id, Pseudo: pseudo_user}
 	}
 
 	name, email, err := getUserInfoFromToken(c)
@@ -129,14 +128,11 @@ func (bc *UserController) GetUserFromToken(c *gin.Context) {
 		return
 	}
 
-	kUser := model.KeyUser{User.IdUser, name, email, User.Pseudo, User.Description, User.Private, User.ProfilImage, User.BannerImage, User.Birthday}
+	UserKeycloak := model.UserKeycloak{User: *User, Name: name, Email: email}
 
 	c.JSON(http.StatusOK, gin.H{
 		"status": "success",
-		"data": gin.H{
-			"id":   kUser.IdUser,
-			"user": kUser,
-		},
+		"data": UserKeycloak,
 		"msg": "get User successfully",
 	})
 	return
