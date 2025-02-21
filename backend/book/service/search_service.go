@@ -79,27 +79,15 @@ func (bs *SearchService) SearchBookByISBN(isbn string) (*model.Book, error) {
 		authors = append(authors, *author)
 	}
 
-	log.Println("for _, genreName := range respBook.Categories")
-	log.Println("respBook.Categories : ")
-	log.Println(respBook.Categories)
 	for _, genreName := range respBook.Categories {
-		log.Println("genreName : ")
-		log.Println(genreName)
 
 		var genre model.Genre
 		genre, err = repository.NewGenreRepository(bs.DB).SelectGenreByName(genreName)
 
-		log.Println("		genre, err = repository.NewGenreRepository(bs.DB).SelectGenreByName(genreName)")
-		log.Println("genre")
-		log.Println(genre)
 
 		if genre.Name == "" {
 			repository.NewGenreRepository(bs.DB).InsertGenre(model.PostGenre{Name: genreName})
 			genre, err = repository.NewGenreRepository(bs.DB).SelectGenreByName(genreName)
-			log.Println("INSERT")
-			log.Println("		genre, err = repository.NewGenreRepository(bs.DB).SelectGenreByName(genreName)")
-			log.Println("genre")
-			log.Println(genre)
 		}
 		genres = append(genres, genre)
 	}

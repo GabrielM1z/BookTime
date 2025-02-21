@@ -69,7 +69,7 @@ func (ar *StateRepository) SelectStates() []model.State {
 	return states
 }
 
-func (sr StateRepository) SelectStateByUserAndBook(idUser uuid.UUID, idBook string) model.State {
+func (sr StateRepository) SelectStateByUserAndBook(idUser uuid.UUID, idBook string) (model.State, error) {
 	rows, err := sr.DB.Query("SELECT * FROM state WHERE id_user = $1 AND id_book = $2", idUser, idBook)
 	if err != nil {
 		log.Fatal(err)
@@ -84,11 +84,18 @@ func (sr StateRepository) SelectStateByUserAndBook(idUser uuid.UUID, idBook stri
 		}
 		states = append(states, state)
 	}
-	return states[0]
+	if len(states) == 0 {
+		return model.State{}, fmt.Errorf("No state found for user %s and book %s", idUser, idBook)
+	} else {
+		return states[0], nil
+	}
 }
 
 func (sr *StateRepository) UpdateState(idUser uuid.UUID, idBook string, state model.State) bool {
-	baseState := sr.SelectStateByUserAndBook(idUser, idBook)
+	baseState, err := sr.SelectStateByUserAndBook(idUser, idBook)
+	if err != nil {
+		return false
+	}
 
 	query := "UPDATE state SET "
 	params := []interface{}{}
