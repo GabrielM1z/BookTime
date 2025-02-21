@@ -120,7 +120,7 @@ func (bc *UserController) GetUserFromToken(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"status": "failed", "msg": "User does not exist and insert User failed"})
 			return
 		}
-		User = &model.User{IdUser: id}
+		User = &model.User{IdUser: id, Pseudo: pseudo_user}
 	}
 
 	name, email, err := getUserInfoFromToken(c)
