@@ -1,10 +1,10 @@
-import React, { forwardRef, useCallback, useEffect } from "react";
 import { BottomSheetModal, BottomSheetModalProps, BottomSheetView, useBottomSheetModal } from "@gorhom/bottom-sheet";
+import React, { forwardRef, useCallback, useEffect } from "react";
+import { BackHandler } from "react-native";
+import { useTheme } from "react-native-paper";
+import { OpacityBackdropBottomSheet } from "./OpacityBackdropBottomSheet";
 import { MAX_HEIGHT } from "./constant";
 import { styles } from "./styles";
-import { OpacityBackdropBottomSheet } from "./OpacityBackdropBottomSheet";
-import { BackHandler } from "react-native";
-import { Surface, Modal } from "react-native-paper";
 
 export interface CustomBottomSheetProps extends Omit<BottomSheetModalProps, "children"> {
     useOpacityBackdrop?: boolean;
@@ -13,6 +13,7 @@ export interface CustomBottomSheetProps extends Omit<BottomSheetModalProps, "chi
 
 export const CustomBottomSheet = forwardRef<BottomSheetModal, CustomBottomSheetProps>(
     ({ useOpacityBackdrop = true, children, ...bottomSheetProps }, ref) => {
+        const { colors } = useTheme();
         const { dismiss } = useBottomSheetModal();
 
         const handleBackPress = useCallback(() => {
@@ -24,12 +25,14 @@ export const CustomBottomSheet = forwardRef<BottomSheetModal, CustomBottomSheetP
             return () => backHandler.remove();
         }, [handleBackPress]);
 
+
         return (
             <BottomSheetModal
                 ref={ref}
                 bottomInset={8}
                 detached={true}
                 style={styles.bottomSheet}
+                backgroundStyle={{ backgroundColor: colors.surface }}
                 maxDynamicContentSize={MAX_HEIGHT}
                 backdropComponent={useOpacityBackdrop ? OpacityBackdropBottomSheet : undefined}
                 // containerComponent={Surface}

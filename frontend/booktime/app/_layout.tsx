@@ -24,8 +24,6 @@ import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-c
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
-
-
 const { LightTheme, DarkTheme } = adaptNavigationTheme({
     reactNavigationLight: NavigationDefaultTheme,
     reactNavigationDark: NavigationDarkTheme,
@@ -51,12 +49,6 @@ export default function RootLayout() {
 
     deleteDatabaseAsync('booktime.db');
     AsyncStorage.clear();
-
-    // useEffect(() => {
-    //     if (__DEV__) {
-    //         checkServerAliveOrWarning();
-    //     }
-    // }, []);
 
     useEffect(() => {
         if (loaded) {

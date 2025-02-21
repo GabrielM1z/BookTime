@@ -3,7 +3,7 @@ import { Image, Text, View } from "react-native";
 import TouchableScale from "@/components/TouchableScale";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { styles } from "./styles";
-import { Avatar, AvatarImageProps } from "react-native-paper";
+import { Avatar, Icon } from "react-native-paper";
 
 
 export interface ProfileItemProps {
@@ -34,6 +34,7 @@ export const ProfileItem = (props: ProfileItemProps) => {
                 </View>
             </TouchableScale>
             {props.isSelected && (
+                // <Icon source="check-circle" size={24}/> // FIXME: Icon not rendering
                 <AntDesign name="checkcircle" size={24} color="blue" />
             )}
         </View>

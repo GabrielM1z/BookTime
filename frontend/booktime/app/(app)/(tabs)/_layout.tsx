@@ -1,15 +1,10 @@
-import { NavBar } from '@/components/navigation/NavBar';
+import { NavBar } from '@/components/navigation/BubbleNavBar';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Feather } from "@expo/vector-icons";
 import { Tabs } from 'expo-router';
 import React from 'react';
 
-
-
-
 export default function TabLayout() {
-    const colorScheme = useColorScheme();
-
     return (
         <Tabs
             tabBar={(props) => (
@@ -32,11 +27,9 @@ export default function TabLayout() {
             )}
             screenOptions={{
                 headerShown: false,
-                // tabBarActiveTintColor: Colors.dark.text,
-                // tabBarInactiveTintColor: Colors.dark.textMuted,
             }}>
-            <Tabs.Screen name="library" options={{ title: 'Bibliothèque' }} />
-            <Tabs.Screen name="search" options={{ title: 'Rechercher' }} />
+            <Tabs.Screen name="library" options={{ title: 'Library' }} />
+            <Tabs.Screen name="search" options={{ title: 'Search' }} />
             <Tabs.Screen name="profile" options={{ title: 'Profile' }} />
         </Tabs>
     );

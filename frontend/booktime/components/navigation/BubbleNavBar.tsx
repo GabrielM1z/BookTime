@@ -1,22 +1,18 @@
-import React, { useMemo, useRef } from "react";
-import { View, TouchableOpacity, StyleSheet } from "react-native";
-import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { Feather } from "@expo/vector-icons";
+import { useTheme } from "react-native-paper";
+import Color from "color";
+import { BottomTabBarProps } from "expo-router/node_modules/@react-navigation/bottom-tabs";
+import React, { useMemo } from "react";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 import Animated, { FadeIn, FadeOut, LinearTransition, useAnimatedStyle, useSharedValue, withSpring, withTiming } from "react-native-reanimated";
+import { Text } from "@/common";
 
 const AnimatedTouchableOpacity =
     Animated.createAnimatedComponent(TouchableOpacity);
 
-const PRIMARY_COLOR = "#130057";
-const SECONDARY_COLOR = "#fff";
-
 export interface NavBarProps extends BottomTabBarProps {
     renderIcon?: (routeName: string, color: string) => React.ReactNode;
     excludeRoutes?: string[];
-
-    state: any;
-    descriptors: any;
-    navigation: any;
 }
 
 const defaultRenderIcon = (iconName: keyof typeof Feather.glyphMap, color: string) => (
@@ -30,6 +26,7 @@ export const NavBar: React.FC<NavBarProps> = ({
     descriptors,
     navigation,
 }) => {
+    const { colors, fonts } = useTheme();
     const tabPositionX = useSharedValue(0);
     const tabWidth = useSharedValue(0);
 
@@ -40,10 +37,13 @@ export const NavBar: React.FC<NavBarProps> = ({
         }
     });
 
-    const bubbleStyle = useMemo(() => [styles.bubble, bubbleAnimation], [bubbleAnimation]);
+    const bubbleStyle = useMemo(() => [styles.bubble, { backgroundColor: colors.surfaceVariant }, bubbleAnimation], [bubbleAnimation, colors]);
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, {
+            backgroundColor: colors.elevation.level2,
+            borderTopColor: colors.outline,
+        }]}>
             <Animated.View style={bubbleStyle} />
             {state.routes.map((route: any, index: number) => {
                 if (excludeRoutes.includes(route.name)) return null;
@@ -77,6 +77,8 @@ export const NavBar: React.FC<NavBarProps> = ({
                     }
                 }
 
+                const color = focused ? colors.primary : Color(colors.onSurface).mix(Color(colors.elevation.level2), 0.5).hex();
+
                 return (
                     <AnimatedTouchableOpacity
                         layout={LinearTransition.springify().mass(0.5)}
@@ -85,18 +87,15 @@ export const NavBar: React.FC<NavBarProps> = ({
                         onPress={onPress}
                         style={styles.tabItem}
                     >
-                        {(renderIcon || defaultRenderIcon)(
-                            route.name,
-                            focused ? PRIMARY_COLOR : SECONDARY_COLOR
-                        )}
+                        {(renderIcon || defaultRenderIcon)(route.name, color)}
                         {focused && (
-                            <Animated.Text
+                            <Text.Animated
                                 entering={FadeIn.duration(200)}
                                 exiting={FadeOut.duration(200)}
-                                style={styles.text}
+                                style={[styles.text, { color }]}
                             >
                                 {label as string}
-                            </Animated.Text>
+                            </Text.Animated>
                         )}
                     </AnimatedTouchableOpacity>
                 );
@@ -111,13 +110,12 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: PRIMARY_COLOR,
         width: "80%",
         alignSelf: "center",
         bottom: 16,
         borderRadius: 18,
         paddingVertical: 8,
-        gap: 8,
+        gap: 24,
     },
     tabItem: {
         flexDirection: "row",
@@ -130,11 +128,8 @@ const styles = StyleSheet.create({
         position: "absolute",
         height: 36,
         borderRadius: 10,
-        backgroundColor: SECONDARY_COLOR,
     },
     text: {
-        color: PRIMARY_COLOR,
         marginLeft: 8,
-        fontWeight: "500",
     },
 });
