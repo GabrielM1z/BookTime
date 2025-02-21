@@ -4,7 +4,7 @@ import { MAX_HEIGHT } from "./constant";
 import { styles } from "./styles";
 import { OpacityBackdropBottomSheet } from "./OpacityBackdropBottomSheet";
 import { BackHandler } from "react-native";
-
+import { Surface, Modal } from "react-native-paper";
 
 export interface CustomBottomSheetProps extends Omit<BottomSheetModalProps, "children"> {
     useOpacityBackdrop?: boolean;
@@ -32,6 +32,7 @@ export const CustomBottomSheet = forwardRef<BottomSheetModal, CustomBottomSheetP
                 style={styles.bottomSheet}
                 maxDynamicContentSize={MAX_HEIGHT}
                 backdropComponent={useOpacityBackdrop ? OpacityBackdropBottomSheet : undefined}
+                // containerComponent={Surface}
                 {...bottomSheetProps}
             >
                 <BottomSheetView style={styles.containerSheet}>

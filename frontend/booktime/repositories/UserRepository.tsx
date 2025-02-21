@@ -109,7 +109,7 @@ export class APIUserRepository implements UserRepository {
     async getFromToken(): Promise<User> {
         const response = await api.get('/users/userfromtoken');
         // FIXME: weird response structure
-        return response["data"]["data"]["user"];
+        return response["data"]["data"];
     }
 
     async get(id: string): Promise<User | null> {

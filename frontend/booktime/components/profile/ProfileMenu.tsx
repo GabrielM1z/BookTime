@@ -1,15 +1,12 @@
+import { CustomBottomSheet, CustomBottomSheetProps } from "@/common"
+import { AccountCenter, AddAccountFooter } from "@/components/AccountCenter"
 import { useAuthContext } from "@/contexts/AuthContext"
 import { BottomSheetModal, useBottomSheetModal } from "@gorhom/bottom-sheet"
 import { Href, useRouter } from "expo-router"
 import React, { forwardRef, useCallback, useRef } from "react"
 import { Button } from "react-native-paper"
-import { AccountCenter, AddAccountFooter } from "./AccountCenter"
-import { CustomBottomSheet } from "./CustomBottomSheet"
-import { CustomBottomSheetProps } from "./CustomBottomSheet/CustomBottomSheet"
-
 
 export interface ProfileMenuProps extends Omit<CustomBottomSheetProps, "children"> { }
-
 
 export const ProfileMenu = forwardRef<BottomSheetModal, ProfileMenuProps>((props, ref) => {
     const router = useRouter();

@@ -53,9 +53,14 @@ export default StyleSheet.create({
         position: 'absolute',
         top: 0,
     },
-    profileImage: {
+    profileImageContainer: {
         borderWidth: 2,
         borderColor: 'white',
+        borderRadius: 50,
+    },
+    profileImage: {
+        height: "100%",
+        width: "100%",
         borderRadius: 50,
     },
     profileName: {

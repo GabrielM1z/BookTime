@@ -1,69 +1,43 @@
+import { NavBar } from '@/components/navigation/NavBar';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { Feather } from "@expo/vector-icons";
 import { Tabs } from 'expo-router';
 import React from 'react';
 
-import { TabBarIcon } from '@/components/navigation/TabBarIcon';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { TabBar } from '@/components/TabBar';
+
+
 
 export default function TabLayout() {
     const colorScheme = useColorScheme();
 
     return (
         <Tabs
-            tabBar={props => <TabBar {...props} />}
+            tabBar={(props) => (
+                <NavBar
+                    {...props}
+                    renderIcon={(routeName, color) => {
+                        switch (routeName) {
+                            case 'library':
+                                return <Feather name='book' color={color} size={24} />;
+                            case 'search':
+                                return <Feather name='search' color={color} size={24} />;
+                            case 'news':
+                                return <Feather name='mail' color={color} size={24} />;
+                            case 'profile':
+                                return <Feather name='user' color={color} size={24} />;
+                        }
+                    }}
+                    excludeRoutes={['index']}
+                />
+            )}
             screenOptions={{
-                tabBarActiveTintColor: Colors.dark.background,
                 headerShown: false,
-                tabBarShowLabel: false,
-                tabBarStyle: {
-                    position: "absolute",
-                    bottom: 27,
-                    marginLeft: 16,
-                    marginRight: 16,
-                    elevation: 0,
-                    borderRadius: 30,
-                    alignItems: "center",
-                    justifyContent: "center",
-                }
+                // tabBarActiveTintColor: Colors.dark.text,
+                // tabBarInactiveTintColor: Colors.dark.textMuted,
             }}>
-            <Tabs.Screen
-                name="library"
-                options={{
-                    title: 'Bibliothèque',
-                    tabBarIcon: ({ color, focused }) => (
-                        <TabBarIcon name={focused ? 'library' : 'library-outline'} color={color} />
-                    ),
-                }}
-            />
-            <Tabs.Screen
-                name="search"
-                options={{
-                    title: 'Rechercher',
-                    tabBarIcon: ({ color, focused }) => (
-                        <TabBarIcon name={focused ? 'search' : 'search-outline'} color={color} />
-                    ),
-                }}
-            />
-            <Tabs.Screen
-                name="news"
-                options={{
-                    title: 'Nouveauté',
-                    tabBarIcon: ({ color, focused }) => (
-                        <TabBarIcon name={focused ? 'mail' : 'mail-outline'} color={color} />
-                    ),
-                }}
-            />
-            <Tabs.Screen
-                name="profile"
-                options={{
-                    title: 'Profile',
-                    tabBarIcon: ({ color, focused }) => (
-                        <TabBarIcon name={focused ? 'star' : 'star-outline'} color={color} />
-                    ),
-                }}
-            />
+            <Tabs.Screen name="library" options={{ title: 'Bibliothèque' }} />
+            <Tabs.Screen name="search" options={{ title: 'Rechercher' }} />
+            <Tabs.Screen name="profile" options={{ title: 'Profile' }} />
         </Tabs>
-
     );
 }

@@ -4,7 +4,6 @@ import { TouchableOpacity } from "react-native";
 import Animated, { Extrapolation, interpolate, useAnimatedStyle } from "react-native-reanimated";
 import { styles } from "./styles";
 
-
 export const OpacityBackdropBottomSheet = ({ animatedIndex, animatedPosition, style }: BottomSheetBackdropProps) => {
     const { dismiss } = useBottomSheetModal();
 

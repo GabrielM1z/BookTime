@@ -22,3 +22,9 @@ export interface AuthResponseProps {
     refresh_expires_in: number;
 }
 
+export interface AuthRegisterProps {
+    email: string;
+    password: string;
+    firstName: string;
+    lastName: string;
+}

@@ -3,10 +3,10 @@ import { useController } from "@/hooks/useController";
 import { User } from "@/models/User";
 import { BottomSheetFlatList, BottomSheetModal, useBottomSheetModal } from "@gorhom/bottom-sheet";
 import React, { forwardRef, useCallback, useEffect, useState } from "react";
-import { CustomBottomSheet } from "../CustomBottomSheet";
-import { CustomBottomSheetProps } from "../CustomBottomSheet/CustomBottomSheet";
+import { CustomBottomSheet, CustomBottomSheetProps } from "@/common";
 import { ProfileItem } from "./ProfileItem";
 import { styles } from "./styles";
+import { Href, useRouter } from "expo-router";
 
 
 export interface AccountCenterProps extends Omit<CustomBottomSheetProps, "children"> {
@@ -21,7 +21,8 @@ export const AccountCenter = forwardRef<BottomSheetModal, AccountCenterProps>(
     ({ header, footer, selectCurrentUser = false, filter, ...bottomSheetProps }, ref) => {
         const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
         const [users, setUsers] = useState<User[]>([]);
-        
+
+        const router = useRouter();
         const { dismissAll } = useBottomSheetModal();
         const { userController } = useController();
         const { switchSession, session, sessions } = useAuthContext();
@@ -40,12 +41,13 @@ export const AccountCenter = forwardRef<BottomSheetModal, AccountCenterProps>(
         }, [session]);
 
         const handleItemClicked = useCallback((id: string) => {
-            dismissAll();
             const session = sessions.find((session) => session.id_user == id);
             if (session) {
                 switchSession(session);
+                router.replace('/(app)' as Href<'(app)'>);
+                dismissAll();
             }
-        }, [sessions, switchSession]);
+        }, []);
 
         return (
             <CustomBottomSheet ref={ref} {...bottomSheetProps}>

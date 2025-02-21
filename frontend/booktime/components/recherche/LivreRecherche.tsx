@@ -1,5 +1,5 @@
 import { StyleSheet, View, Pressable, Text } from 'react-native';
-import { TabBarIcon } from '@/components/navigation/TabBarIcon';
+import { Ionicons } from '@expo/vector-icons';
 import { ThemedText } from '../ThemedText';
 import { BookInfosSearch, BookInfosServeur } from '@/models/Book';
 import React, { useCallback, useRef, useState } from 'react';
@@ -60,7 +60,7 @@ export const LivreRecherche = ({ book, handleModalAddToLibrary }: LivreRecherche
       </View>
       <View style={styles.addItemContainer}>
         <Pressable onPress={handleAddBook} style={styles.addItem}>
-          <TabBarIcon size={20} color={"#1E9AA4"} name={'add'} />
+          <Ionicons size={20} color={"#1E9AA4"} name={'add'} />
         </Pressable>
       </View>
     </View>

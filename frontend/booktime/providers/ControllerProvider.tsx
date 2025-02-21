@@ -27,7 +27,7 @@ export const ControllerProvider = ({ children, ...props }: SQLiteProviderProps) 
         <RepositoryProvider {...props}>
             <ControllerProviderInner>
                 {children}
-            </ControllerProviderInner>²
+            </ControllerProviderInner>
         </RepositoryProvider>
     );
 }

@@ -1,7 +1,7 @@
 import React, { useCallback, useRef, useMemo, forwardRef, useEffect, useState } from "react";
 import { StyleSheet, View, Text, Button } from "react-native";
 import BottomSheet, { BottomSheetFlatList, BottomSheetModal, BottomSheetModalProvider, BottomSheetSectionList, BottomSheetView } from "@gorhom/bottom-sheet";
-import { CustomBottomSheet } from "../bottomSheets/CustomBottomSheet";
+import { CustomBottomSheet } from "@/common";
 import { useRepositoryContext } from "@/hooks/useRepository";
 import { Library } from "@/models";
 
