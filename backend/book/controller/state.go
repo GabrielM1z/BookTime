@@ -109,8 +109,8 @@ func getUserID(c *gin.Context) uuid.UUID {
 func (sc *StateController) InsertState(c *gin.Context) {
 	db := sc.DB
 	var state model.State
-	state.IdUser = getUserID(c)
 	if err := c.ShouldBindJSON(&state); err == nil {
+		state.IdUser = getUserID(c)
 		repoState := repository.NewStateRepository(db)
 		insert := repoState.InsertState(state)
 		if insert {
