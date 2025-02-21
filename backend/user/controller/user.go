@@ -11,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
+	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/google/uuid"
 )
 
@@ -113,7 +114,8 @@ func (bc *UserController) GetUserFromToken(c *gin.Context) {
 	}
 
 	if User == nil {
-		user := model.User{IdUser: id, Pseudo: "", Description: "", Private: false, ProfilImage: "", BannerImage: "", Birthday: "1900-01-01"}
+		pseudo_user := "user" + timestamp.TimestampNow().GetSeconds().String()
+		user := model.User{IdUser: id, Pseudo: pseudo_user, Description: "", Private: false, ProfilImage: "", BannerImage: "", Birthday: "1900-01-01"}
 		insert := repoUser.InsertUser(user)
 		if !insert {
 			c.JSON(http.StatusInternalServerError, gin.H{"status": "failed", "msg": "User does not exist and insert User failed"})
