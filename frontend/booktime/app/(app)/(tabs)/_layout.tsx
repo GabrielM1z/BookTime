@@ -1,4 +1,4 @@
-import { NavBar } from '@/components/navigation/BubbleNavBar';
+import { BubbleNavBar } from '@/components/navigation/BubbleNavBar';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Feather } from "@expo/vector-icons";
 import { Tabs } from 'expo-router';
@@ -8,7 +8,7 @@ export default function TabLayout() {
     return (
         <Tabs
             tabBar={(props) => (
-                <NavBar
+                <BubbleNavBar
                     {...props}
                     renderIcon={(routeName, color) => {
                         switch (routeName) {
@@ -27,6 +27,7 @@ export default function TabLayout() {
             )}
             screenOptions={{
                 headerShown: false,
+                tabBarHideOnKeyboard: true,
             }}>
             <Tabs.Screen name="library" options={{ title: 'Library' }} />
             <Tabs.Screen name="search" options={{ title: 'Search' }} />

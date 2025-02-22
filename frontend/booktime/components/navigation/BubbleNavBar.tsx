@@ -4,8 +4,10 @@ import Color from "color";
 import { BottomTabBarProps } from "expo-router/node_modules/@react-navigation/bottom-tabs";
 import React, { useMemo } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
-import Animated, { FadeIn, FadeOut, LinearTransition, useAnimatedStyle, useSharedValue, withSpring, withTiming } from "react-native-reanimated";
+import Animated, { FadeIn, FadeOut, LinearTransition, interpolate, useAnimatedStyle, useSharedValue, withSpring, withTiming, useAnimatedKeyboard, KeyboardState } from "react-native-reanimated";
 import { Text } from "@/common";
+
+// FIXME: tabBarHideOnKeyboard 
 
 const AnimatedTouchableOpacity =
     Animated.createAnimatedComponent(TouchableOpacity);
@@ -19,7 +21,7 @@ const defaultRenderIcon = (iconName: keyof typeof Feather.glyphMap, color: strin
     <Feather name={iconName} size={18} color={color} />
 )
 
-export const NavBar: React.FC<NavBarProps> = ({
+export const BubbleNavBar: React.FC<NavBarProps> = ({
     renderIcon,
     excludeRoutes = [],
     state,
@@ -30,20 +32,55 @@ export const NavBar: React.FC<NavBarProps> = ({
     const tabPositionX = useSharedValue(0);
     const tabWidth = useSharedValue(0);
 
+    const focusedRoute = state.routes[state.index];
+    const focusedDescriptor = descriptors[focusedRoute.key];
+    const focusedOptions = focusedDescriptor.options;
+
+    const {
+        tabBarHideOnKeyboard = false,
+    } = focusedOptions;
+
+    const { state: keyboardState } = useAnimatedKeyboard();
+
+    const visible = useSharedValue(1);
+
+    React.useEffect(() => {
+        if (!(tabBarHideOnKeyboard && keyboardState.value !== KeyboardState.CLOSED)) {
+            visible.value = withSpring(1, { duration: 250, });
+        } else {
+            visible.value = withSpring(0, { duration: 200, });
+        }
+    }, [keyboardState, visible]);
+
+    const tabBarAnimation = useAnimatedStyle(() => ({
+        transform: [{
+            translateY: interpolate(visible.value, [0, 1], [styles.container.bottom, 0])
+        }]
+    }));
+
     const bubbleAnimation = useAnimatedStyle(() => {
         return {
             width: tabWidth.value,
-            left: tabPositionX.value
+            left: tabPositionX.value,
         }
     });
 
-    const bubbleStyle = useMemo(() => [styles.bubble, { backgroundColor: colors.surfaceVariant }, bubbleAnimation], [bubbleAnimation, colors]);
+    const bubbleStyle = useMemo(() => [
+        styles.bubble,
+        { backgroundColor: colors.surfaceVariant },
+        bubbleAnimation
+    ], [bubbleAnimation, colors]);
+
+    const tabBarStyle = useMemo(() => [
+        styles.container,
+        {
+            backgroundColor: colors.elevation.level2,
+            borderTopColor: colors.outline
+        },
+        tabBarAnimation], [tabBarAnimation, colors]);
 
     return (
-        <View style={[styles.container, {
-            backgroundColor: colors.elevation.level2,
-            borderTopColor: colors.outline,
-        }]}>
+        <View style={tabBarStyle}>
             <Animated.View style={bubbleStyle} />
             {state.routes.map((route: any, index: number) => {
                 if (excludeRoutes.includes(route.name)) return null;

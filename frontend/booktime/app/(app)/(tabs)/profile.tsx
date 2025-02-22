@@ -14,7 +14,7 @@ const bannerImage = require('@/assets/images/banner.jpg');
 
 export const headerPageText = "Embark on a journey of transformation with our innovative app designed to enhance every aspect of your life. Whether you're seeking to boost productivity, ignite creativity, or simply streamline daily tasks, our platform empowers you to reach new heights.";
 
-export default function Profile() {
+export default function ProfileTab() {
     const scrollRef = useAnimatedRef<Animated.ScrollView>();
     const scrollOffset = useScrollViewOffset(scrollRef);
     const bottomSheetRef = useRef<BottomSheetModal>(null);
