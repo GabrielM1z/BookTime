@@ -6,8 +6,9 @@ import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { debounce } from "lodash";
 import React, { useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
-import { Searchbar, Text } from "react-native-paper";
+import { Searchbar, Text, Button } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { InactiveSearchbar } from "@/components/explore/Searchbar";
 
 type TFilters = {
     query: string;
@@ -71,12 +72,22 @@ const SearchTab = () => {
 
     return (
         <SafeAreaView style={{ flex: 1, padding: 10 }}>
-            <Searchbar
+            {/* <Searchbar
                 autoFocus
                 placeholder="Search"
                 value={searchTerm}
                 onChangeText={handleSearch}
-            />
+            /> */}
+
+            <View style={styles.headerContainer}>
+                <InactiveSearchbar
+                    style={{
+                        // position: 'absolute',
+                        flex: 1,
+                    }}
+                />
+                <Button>Cancel</Button>
+            </View>
             <FlatList
                 keyExtractor={item => item.isbn13}
                 initialNumToRender={NUMBER_OF_ITEMS}
@@ -106,6 +117,9 @@ const styles = StyleSheet.create({
         height: 100,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    headerContainer: {
+        flexDirection: 'row',
     },
 })
 

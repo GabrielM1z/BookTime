@@ -14,13 +14,13 @@ const BottomTabsLayout = () => {
                         switch (routeName) {
                             case 'library':
                                 return <Feather name='book' color={color} size={24} />;
-                            case 'discover':
+                            case '(explore)':
                                 return <Feather name='search' color={color} size={24} />;
                             case 'profile':
                                 return <Feather name='user' color={color} size={24} />;
                         }
                     }}
-                    excludeRoutes={['index']}
+                    excludeRoutes={['index', 'explore']} // FIXME: Don't know why I should exclude 'explore'
                 />
             )}
             screenOptions={{
