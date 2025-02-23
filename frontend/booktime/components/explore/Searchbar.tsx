@@ -1,7 +1,9 @@
-import React from "react"
-import { TouchableOpacity, View, StyleSheet, LayoutChangeEvent, StyleProp, ViewStyle } from "react-native"
+import { debounce } from "lodash";
+import React, { useState } from "react"
+import { TouchableOpacity, View, StyleSheet, LayoutChangeEvent, StyleProp, ViewStyle, TextInput } from "react-native"
 import { Icon, Text, useTheme } from "react-native-paper"
-import Animated, { AnimatedStyle, SharedTransition, SharedTransitionType, withSpring } from "react-native-reanimated"
+
+// TODO: add animation like https://www.reddit.com/r/reactnative/comments/14uazr6/custom_screen_transition/
 
 export interface SearchbarLayoutProps {
     width: number;
@@ -12,36 +14,29 @@ export interface SearchbarLayoutProps {
 
 export interface SearchbarProps {
     onPress?: (layout: SearchbarLayoutProps) => void;
-    // sharedTransitionStyle?: SharedTransition;
-    style?: StyleProp<AnimatedStyle<StyleProp<ViewStyle>>>;
+    style?: StyleProp<ViewStyle>;
+    active?: boolean;
+    value?: string;
+    onDebouncedSearch?: (value: string) => void;
 }
 
-const transition = SharedTransition.custom((values) => {
-    'worklet';
-    return {
-      height: withSpring(values.targetHeight, { duration: 1000 }),
-      width: withSpring(values.targetWidth, { duration: 1000 }),
-    };
-  })
-    .progressAnimation((values, progress) => {
-      'worklet';
-      const getValue = (
-        progress: number,
-        target: number,
-        current: number
-      ): number => {
-        return progress * (target - current) + current;
-      };
-      return {
-        width: getValue(progress, values.targetWidth, values.currentWidth),
-        height: getValue(progress, values.targetHeight, values.currentHeight),
-      };
-    })
-    .defaultTransitionType(SharedTransitionType.ANIMATION);
+export const Searchbar = ({
+    onPress,
+    style,
+    active = false,
+    value = "",
+    onDebouncedSearch = () => { },
+}: SearchbarProps) => {
+    const { colors, fonts, roundness } = useTheme();
+    const [layout, setLayout] = useState({ width: 0, height: 0, x: 0, y: 0 });
+    const [searchTerm, setSearchTerm] = useState(value);
 
-export const InactiveSearchbar = ({ onPress, style }: SearchbarProps) => {
-    const { colors, roundness } = useTheme();
-    const [layout, setLayout] = React.useState({ width: 0, height: 0, x: 0, y: 0 });
+    const debounceSearch = debounce(onDebouncedSearch, 500);
+
+    const handleTextChange = (value: string) => {
+        setSearchTerm(value);
+        debounceSearch(value);
+    };
 
     const handleLayout = (event: LayoutChangeEvent) => {
         const { width, height, x, y } = event.nativeEvent.layout;
@@ -49,37 +44,59 @@ export const InactiveSearchbar = ({ onPress, style }: SearchbarProps) => {
     }
 
     return (
-        <Animated.View
-            sharedTransitionTag="inactifSearchbar"
-            sharedTransitionStyle={transition}
+        <View
             style={[
                 styles.container,
                 {
                     backgroundColor: colors.surfaceVariant,
-                    borderRadius: roundness
+                    borderRadius: roundness,
+                    padding: 10,
                 },
                 style
             ]}
         >
-            <TouchableOpacity
-                onPress={() => onPress && onPress(layout)}
-                onLayout={handleLayout}
-                style={styles.innerContainer}
-            >
-                <Icon size={24} source="magnify" color={colors.onSurfaceVariant} />
-                <Text style={{ color: colors.onSurfaceVariant }}>Search</Text>
-            </TouchableOpacity>
-        </Animated.View>
+            {active ? (
+                <TextInput
+                    autoFocus
+                    placeholder="Search"
+                    value={searchTerm}
+                    onChangeText={handleTextChange}
+                    style={[
+                        styles.textInput,
+                        {
+                            color: colors.onSurfaceVariant,
+                            ...fonts.bodyLarge
+                        }
+                    ]}
+                />
+            ) : (
+                <TouchableOpacity
+                    onPress={() => onPress && onPress(layout)}
+                    onLayout={handleLayout}
+                    style={styles.innerContainer}
+                >
+                    <Icon size={24} source="magnify" color={colors.onSurfaceVariant} />
+                    <Text style={{ color: colors.onSurfaceVariant }}>Search</Text>
+                </TouchableOpacity>
+
+            )}
+
+        </View>
     )
 }
 
 const styles = StyleSheet.create({
     container: {
-        padding: 10,
+        height: 40,
     },
     innerContainer: {
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
+    },
+    textInput: {
+        padding: 0, 
+        margin: 0, 
+        flex: 1,
     }
 })

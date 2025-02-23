@@ -3,12 +3,12 @@ import { ModalAddToLibrary } from "@/components/search/ModalAddToLibrary";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 import { BookSearchResult } from "@/models/Book";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
-import { debounce } from "lodash";
 import React, { useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
-import { Searchbar, Text, Button } from "react-native-paper";
+import { Text, Searchbar } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { InactiveSearchbar } from "@/components/explore/Searchbar";
+import { useRouter } from "expo-router";
+import { debounce } from "lodash";
 
 type TFilters = {
     query: string;
@@ -32,12 +32,16 @@ const removeDuplicates = (items: BookSearchResult[]): BookSearchResult[] => {
 
 const SearchTab = () => {
     const bottomSheetRef = useRef<BottomSheetModal>(null);
-
-    const [searchTerm, setSearchTerm] = useState('');
+    const router = useRouter();
     const [filters, setFilters] = useState<TFilters | null>(null);
+    const [query, setQuery] = useState<string>("");
 
     const handlePresentModalPress = () => {
         bottomSheetRef.current?.present();
+    };
+
+    const handleCancel = () => {
+        router.back();
     };
 
     const fetchData = (query: string) => {
@@ -53,8 +57,8 @@ const SearchTab = () => {
 
     const debounceSearch = debounce(fetchData, 500);
 
-    const handleSearch = (value: string) => {
-        setSearchTerm(value);
+    const handleTextChange = (value: string) => {
+        setQuery(value);
         debounceSearch(value);
     };
 
@@ -71,22 +75,20 @@ const SearchTab = () => {
     });
 
     return (
-        <SafeAreaView style={{ flex: 1, padding: 10 }}>
-            {/* <Searchbar
-                autoFocus
-                placeholder="Search"
-                value={searchTerm}
-                onChangeText={handleSearch}
-            /> */}
-
+        <SafeAreaView style={styles.container}>
             <View style={styles.headerContainer}>
-                <InactiveSearchbar
-                    style={{
-                        // position: 'absolute',
-                        flex: 1,
-                    }}
+                <Searchbar // FIXME: Height not working
+                    mode="view"
+                    value={query}
+                    onChangeText={handleTextChange}
+                    style={styles.searchbar}
+                    inputStyle={styles.textInput}
+                    placeholder="Search"
+                    icon="arrow-left"
+                    onIconPress={handleCancel}
+                    autoFocus
+                    showDivider={false}
                 />
-                <Button>Cancel</Button>
             </View>
             <FlatList
                 keyExtractor={item => item.isbn13}
@@ -112,6 +114,9 @@ const SearchTab = () => {
 }
 
 const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+    },
     listFooterComponent: {
         flexDirection: 'row',
         height: 100,
@@ -120,6 +125,15 @@ const styles = StyleSheet.create({
     },
     headerContainer: {
         flexDirection: 'row',
+    },
+    searchbar: {
+        flex: 1,
+        height: 50,
+    },
+    textInput: {
+        height: 40,
+        padding: 0,
+        margin: 0,
     },
 })
 

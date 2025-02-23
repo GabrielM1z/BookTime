@@ -2,7 +2,7 @@ import { MaterialTopTabBarProps } from '@react-navigation/material-top-tabs';
 import React from 'react';
 import { ScrollView, StyleSheet, View, Text } from 'react-native';
 import { Button, useTheme } from 'react-native-paper';
-import { InactiveSearchbar, SearchbarLayoutProps } from './Searchbar';
+import { Searchbar, SearchbarLayoutProps } from './Searchbar';
 
 export interface ButtonsTabbarProps extends MaterialTopTabBarProps {
     onSearchPress?: (layout: SearchbarLayoutProps) => void;
@@ -18,7 +18,7 @@ export const ButtonsTabbar: React.FC<ButtonsTabbarProps> = ({
 
     return (
         <View style={[styles.container]}>
-            <InactiveSearchbar onPress={onSearchPress} />
+            <Searchbar onPress={onSearchPress} />
             <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
