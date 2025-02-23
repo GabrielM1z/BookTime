@@ -1,10 +1,9 @@
 import React from "react";
-import { Image, Text, View } from "react-native";
+import { Image, View } from "react-native";
 import TouchableScale from "@/components/TouchableScale";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { styles } from "./styles";
-import { Avatar, Icon } from "react-native-paper";
-
+import { Avatar, Text, IconButton } from "react-native-paper";
 
 export interface ProfileItemProps {
     id: string;
@@ -13,7 +12,6 @@ export interface ProfileItemProps {
     isSelected: boolean;
     onItemClicked?: (id: string) => void;
 };
-
 
 export const ProfileItem = (props: ProfileItemProps) => {
     return (
@@ -29,14 +27,11 @@ export const ProfileItem = (props: ProfileItemProps) => {
                         <Avatar.Image size={50} source={{ uri: props.image }} /> :
                         <Avatar.Icon size={50} icon="account" />}
                 </View>
-                <View style={styles.profileTextContainer}>
-                    <Text style={styles.profileText}>{props.text}</Text>
-                </View>
+                <Text variant="titleMedium" style={styles.profileText}>{props.text}</Text>
+                {props.isSelected && (
+                    <IconButton icon="check-circle" />
+                )}
             </TouchableScale>
-            {props.isSelected && (
-                // <Icon source="check-circle" size={24}/> // FIXME: Icon not rendering
-                <AntDesign name="checkcircle" size={24} color="blue" />
-            )}
         </View>
     );
 };

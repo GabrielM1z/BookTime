@@ -11,36 +11,37 @@ export interface CustomBottomSheetProps extends Omit<BottomSheetModalProps, "chi
     children?: React.ReactNode[] | React.ReactNode;
 }
 
-export const CustomBottomSheet = forwardRef<BottomSheetModal, CustomBottomSheetProps>(
-    ({ useOpacityBackdrop = true, children, ...bottomSheetProps }, ref) => {
-        const { colors } = useTheme();
-        const { dismiss } = useBottomSheetModal();
+export const CustomBottomSheet = forwardRef<BottomSheetModal, CustomBottomSheetProps>(({
+    useOpacityBackdrop = true,
+    children,
+    ...bottomSheetProps
+}, ref) => {
+    const { colors } = useTheme();
+    const { dismiss } = useBottomSheetModal();
 
-        const handleBackPress = useCallback(() => {
-            return dismiss();
-        }, [dismiss]);
+    const handleBackPress = useCallback(() => {
+        return dismiss();
+    }, [dismiss]);
 
-        useEffect(() => {
-            const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackPress);
-            return () => backHandler.remove();
-        }, [handleBackPress]);
+    useEffect(() => {
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackPress);
+        return () => backHandler.remove();
+    }, [handleBackPress]);
 
-
-        return (
-            <BottomSheetModal
-                ref={ref}
-                bottomInset={8}
-                detached={true}
-                style={styles.bottomSheet}
-                backgroundStyle={{ backgroundColor: colors.surface }}
-                maxDynamicContentSize={MAX_HEIGHT}
-                backdropComponent={useOpacityBackdrop ? OpacityBackdropBottomSheet : undefined}
-                // containerComponent={Surface}
-                {...bottomSheetProps}
-            >
-                <BottomSheetView style={styles.containerSheet}>
-                    {children}
-                </BottomSheetView>
-            </BottomSheetModal>
-        );
-    });
+    return (
+        <BottomSheetModal
+            ref={ref}
+            bottomInset={16 + 8}
+            detached={true}
+            style={styles.bottomSheet}
+            backgroundStyle={{ backgroundColor: colors.surface }}
+            maxDynamicContentSize={MAX_HEIGHT}
+            backdropComponent={useOpacityBackdrop ? OpacityBackdropBottomSheet : undefined}
+            {...bottomSheetProps}
+        >
+            <BottomSheetView style={styles.containerSheet}>
+                {children}
+            </BottomSheetView>
+        </BottomSheetModal>
+    );
+});

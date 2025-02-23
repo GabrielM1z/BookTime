@@ -1,11 +1,14 @@
 import { BottomSheetBackdropProps, useBottomSheetModal } from "@gorhom/bottom-sheet";
 import React, { useMemo } from "react";
 import { TouchableOpacity } from "react-native";
+import { useTheme } from "react-native-paper";
 import Animated, { Extrapolation, interpolate, useAnimatedStyle } from "react-native-reanimated";
 import { styles } from "./styles";
-import { useTheme } from "react-native-paper";
 
-export const OpacityBackdropBottomSheet = ({ animatedIndex, animatedPosition, style }: BottomSheetBackdropProps) => {
+export const OpacityBackdropBottomSheet = ({
+    animatedIndex,
+    style
+}: BottomSheetBackdropProps) => {
     const { dismiss } = useBottomSheetModal();
     const { colors } = useTheme();
 

@@ -64,7 +64,7 @@ export const AccountCenter = forwardRef<BottomSheetModal, AccountCenterProps>(
                     })}
                     showsVerticalScrollIndicator={false}
                     ListFooterComponent={footer}
-                    contentContainerStyle={styles.profileContainer} // FIXME: dont know why this is needed, already defined in BottomSheetView
+                    contentContainerStyle={styles.profileContainer}
                 />
             </CustomBottomSheet>
         );
