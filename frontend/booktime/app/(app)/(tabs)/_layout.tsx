@@ -14,10 +14,8 @@ export default function TabLayout() {
                         switch (routeName) {
                             case 'library':
                                 return <Feather name='book' color={color} size={24} />;
-                            case 'search':
+                            case 'discover':
                                 return <Feather name='search' color={color} size={24} />;
-                            case 'news':
-                                return <Feather name='mail' color={color} size={24} />;
                             case 'profile':
                                 return <Feather name='user' color={color} size={24} />;
                         }
@@ -30,7 +28,7 @@ export default function TabLayout() {
                 tabBarHideOnKeyboard: true,
             }}>
             <Tabs.Screen name="library" options={{ title: 'Library' }} />
-            <Tabs.Screen name="search" options={{ title: 'Search' }} />
+            <Tabs.Screen name="discover" options={{ title: 'Search' }} />
             <Tabs.Screen name="profile" options={{ title: 'Profile' }} />
         </Tabs>
     );

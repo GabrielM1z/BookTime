@@ -21,31 +21,18 @@ export default function AppLayout() {
     }
 
     return (
-        <Stack>
-
-            <Stack.Screen
-                name='(tabs)'
-                options={{ headerShown: false }}
-            />
-
-            <Stack.Screen
-                name='author/[idAuthor]'
-                options={{ headerShown: false }}
-            />
-
-            <Stack.Screen
-                name='book/[idBook]'
-                options={{ headerShown: false }}
-            />
-
-            <Stack.Screen
-                name='etagere/[idEtagere]'
-                options={{ headerShown: false }}
-            />
-
+        <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name='(tabs)' />
+            <Stack.Screen name='author/[idAuthor]' />
+            <Stack.Screen name='book/[idBook]' />
+            <Stack.Screen name='etagere/[idEtagere]' />
             <Stack.Screen
                 name='settings'
                 options={{ headerShown: true }}
+            />
+            <Stack.Screen
+                name='search'
+                options={{ animation: 'fade' }}
             />
         </Stack>
     );
