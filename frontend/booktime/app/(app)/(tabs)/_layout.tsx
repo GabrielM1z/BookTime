@@ -4,7 +4,7 @@ import { Feather } from "@expo/vector-icons";
 import { Tabs } from 'expo-router';
 import React from 'react';
 
-export default function TabLayout() {
+const BottomTabsLayout = () => {
     return (
         <Tabs
             tabBar={(props) => (
@@ -28,8 +28,10 @@ export default function TabLayout() {
                 tabBarHideOnKeyboard: true,
             }}>
             <Tabs.Screen name="library" options={{ title: 'Library' }} />
-            <Tabs.Screen name="discover" options={{ title: 'Search' }} />
+            <Tabs.Screen name="(explore)" options={{ title: 'Search' }} />
             <Tabs.Screen name="profile" options={{ title: 'Profile' }} />
         </Tabs>
     );
 }
+
+export default BottomTabsLayout;
