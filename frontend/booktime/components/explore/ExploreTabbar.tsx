@@ -3,6 +3,7 @@ import React from 'react';
 import { ScrollView, StyleSheet, View, Text } from 'react-native';
 import { Button, useTheme } from 'react-native-paper';
 import { Searchbar, SearchbarLayoutProps } from './Searchbar';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export interface ButtonsTabbarProps extends MaterialTopTabBarProps {
     onSearchPress?: (layout: SearchbarLayoutProps) => void;
@@ -17,7 +18,7 @@ export const ButtonsTabbar: React.FC<ButtonsTabbarProps> = ({
     const { colors } = useTheme();
 
     return (
-        <View style={[styles.container]}>
+        <SafeAreaView style={[styles.container]}>
             <Searchbar onPress={onSearchPress} />
             <ScrollView
                 horizontal
@@ -61,7 +62,7 @@ export const ButtonsTabbar: React.FC<ButtonsTabbarProps> = ({
                     );
                 })}
             </ScrollView>
-        </View>
+        </SafeAreaView>
     );
 };
 

@@ -27,7 +27,10 @@ const ExploreTopTabsLayout = () => {
     }
 
     return (
-        <MaterialTopTabs tabBar={(props) => <ButtonsTabbar onSearchPress={handleSearch} {...props} />}>
+        <MaterialTopTabs
+            tabBar={(props) => <ButtonsTabbar onSearchPress={handleSearch} {...props} />}
+            backBehavior="none"
+        >
             <MaterialTopTabs.Screen name="feed" options={{ title: 'Feed' }} />
             <MaterialTopTabs.Screen name="genres" options={{ title: 'Genres' }} />
         </MaterialTopTabs>
