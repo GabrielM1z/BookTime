@@ -26,7 +26,8 @@ const BottomTabsLayout = () => {
             screenOptions={{
                 headerShown: false,
                 tabBarHideOnKeyboard: true,
-            }}>
+            }}
+        >
             <Tabs.Screen name="library" options={{ title: 'Library' }} />
             <Tabs.Screen name="(explore)" options={{ title: 'Search' }} />
             <Tabs.Screen name="profile" options={{ title: 'Profile' }} />
