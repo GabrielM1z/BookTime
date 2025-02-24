@@ -19,6 +19,7 @@ import React, { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { PaperProvider, adaptNavigationTheme } from 'react-native-paper';
 import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -65,24 +66,25 @@ export default function RootLayout() {
     }
 
     return (
-        // <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-        <GestureHandlerRootView>
-            <BottomSheetModalProvider>
-                <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : LightTheme}>
-                    <FadeTransitionProvider>
-                        <ControllerProvider databaseName='booktime.db' onInit={migrateDbIfNeeded} onError={handleSQLiteError}>
-                            <AuthProvider>
-                                <QueryProvider>
-                                    <PaperProvider>
-                                        <Routes />
-                                    </PaperProvider>
-                                </QueryProvider>
-                            </AuthProvider>
-                        </ControllerProvider>
-                    </FadeTransitionProvider>
-                </ThemeProvider>
-            </BottomSheetModalProvider>
-        </GestureHandlerRootView>
-        // </SafeAreaProvider>
+        <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+            <GestureHandlerRootView>
+                <BottomSheetModalProvider>
+                    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : LightTheme}>
+                        <FadeTransitionProvider>
+                            <ControllerProvider databaseName='booktime.db' onInit={migrateDbIfNeeded} onError={handleSQLiteError}>
+                                <AuthProvider>
+                                    <QueryProvider>
+                                        <PaperProvider>
+                                            <Routes />
+                                        </PaperProvider>
+                                    </QueryProvider>
+                                </AuthProvider>
+                            </ControllerProvider>
+                        </FadeTransitionProvider>
+                        <StatusBar style="auto" />
+                    </ThemeProvider>
+                </BottomSheetModalProvider>
+            </GestureHandlerRootView>
+        </SafeAreaProvider>
     );
 }
