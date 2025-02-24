@@ -2,17 +2,17 @@ import { BottomSheetModal, BottomSheetModalProps, BottomSheetView, useBottomShee
 import React, { forwardRef, useCallback, useEffect } from "react";
 import { BackHandler } from "react-native";
 import { useTheme } from "react-native-paper";
-import { OpacityBackdropBottomSheet } from "./OpacityBackdropBottomSheet";
+import { InternalOpacityBackdrop } from "./InternalOpacityBackdrop";
 import { MAX_HEIGHT } from "./constant";
 import { styles } from "./styles";
 
+// FIXME: InternalOpacityBackdrop
+
 export interface CustomBottomSheetProps extends Omit<BottomSheetModalProps, "children"> {
-    useOpacityBackdrop?: boolean;
     children?: React.ReactNode[] | React.ReactNode;
 }
 
 export const CustomBottomSheet = forwardRef<BottomSheetModal, CustomBottomSheetProps>(({
-    useOpacityBackdrop = true,
     children,
     ...bottomSheetProps
 }, ref) => {
@@ -36,7 +36,8 @@ export const CustomBottomSheet = forwardRef<BottomSheetModal, CustomBottomSheetP
             style={styles.bottomSheet}
             backgroundStyle={{ backgroundColor: colors.surface }}
             maxDynamicContentSize={MAX_HEIGHT}
-            backdropComponent={useOpacityBackdrop ? OpacityBackdropBottomSheet : undefined}
+            // stackBehavior="push"
+            backdropComponent={InternalOpacityBackdrop}
             {...bottomSheetProps}
         >
             <BottomSheetView style={styles.containerSheet}>

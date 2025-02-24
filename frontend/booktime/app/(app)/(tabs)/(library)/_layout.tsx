@@ -8,7 +8,7 @@ import {
 import { Href, useRouter, withLayoutContext } from "expo-router";
 import { ParamListBase, TabNavigationState } from "@react-navigation/native";
 import React from "react";
-import { SearchTabbar } from "@/components/explore/SearchTabbar";
+import { ButtonsTopTabbar } from "@/common";
 
 const { Navigator } = createMaterialTopTabNavigator();
 
@@ -19,22 +19,19 @@ export const MaterialTopTabs = withLayoutContext<
     MaterialTopTabNavigationEventMap
 >(Navigator);
 
-const ExploreTopTabsLayout = () => {
-    const router = useRouter();
-
-    const handleSearch = () => {
-        router.push('search' as Href);
-    }
-
+const LibraryTopTabsLayout = () => {
     return (
         <MaterialTopTabs
-            tabBar={(props) => <SearchTabbar onSearchPress={handleSearch} {...props} />}
+            tabBar={(props) => <ButtonsTopTabbar addTopEdge style={{ padding: 10 }} {...props} />}
             backBehavior="none"
         >
-            <MaterialTopTabs.Screen name="feed" options={{ title: 'Feed' }} />
-            <MaterialTopTabs.Screen name="genres" options={{ title: 'Genres' }} />
+            <MaterialTopTabs.Screen name="myShelf" options={{ title: 'My Shelf' }} />
+            <MaterialTopTabs.Screen name="allBooks" options={{ title: 'All Books' }} />
+            <MaterialTopTabs.Screen name="genre" options={{ title: 'Genre' }} />
+            <MaterialTopTabs.Screen name="type" options={{ title: 'Type' }} />
+            <MaterialTopTabs.Screen name="author" options={{ title: 'Author' }} />
         </MaterialTopTabs>
     );
 }
 
-export default ExploreTopTabsLayout;
+export default LibraryTopTabsLayout;

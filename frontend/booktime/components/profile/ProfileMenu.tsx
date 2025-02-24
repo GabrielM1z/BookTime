@@ -38,7 +38,6 @@ export const ProfileMenu = forwardRef<BottomSheetModal, ProfileMenuProps>((props
                 ref={accountCenterRef}
                 footer={AddAccountFooter}
                 selectCurrentUser={true}
-                useOpacityBackdrop={false}
             />
         </>
     );

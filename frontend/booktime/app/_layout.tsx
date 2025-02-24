@@ -5,7 +5,7 @@ import { migrateDbIfNeeded } from '@/db/init';
 import { useAuthInterceptor } from '@/hooks/useAuthInterceptor';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { ControllerProvider } from '@/providers/ControllerProvider';
-import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import { CustomBottomSheetProvider } from "@/common";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
     DarkTheme as NavigationDarkTheme,
@@ -48,8 +48,8 @@ export default function RootLayout() {
     });
     const colorScheme = useColorScheme();
 
-    // deleteDatabaseAsync('booktime.db');
-    // AsyncStorage.clear();
+    deleteDatabaseAsync('booktime.db');
+    AsyncStorage.clear();
 
     useEffect(() => {
         if (loaded) {
@@ -68,7 +68,7 @@ export default function RootLayout() {
     return (
         <SafeAreaProvider initialMetrics={initialWindowMetrics}>
             <GestureHandlerRootView>
-                <BottomSheetModalProvider>
+                <CustomBottomSheetProvider>
                     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : LightTheme}>
                         <FadeTransitionProvider>
                             <ControllerProvider databaseName='booktime.db' onInit={migrateDbIfNeeded} onError={handleSQLiteError}>
@@ -83,7 +83,7 @@ export default function RootLayout() {
                         </FadeTransitionProvider>
                         <StatusBar style="auto" />
                     </ThemeProvider>
-                </BottomSheetModalProvider>
+                </CustomBottomSheetProvider>
             </GestureHandlerRootView>
         </SafeAreaProvider>
     );

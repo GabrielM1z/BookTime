@@ -12,7 +12,7 @@ const BottomTabsLayout = () => {
                     {...props}
                     renderIcon={(routeName, color) => {
                         switch (routeName) {
-                            case 'library':
+                            case '(library)':
                                 return <Feather name='book' color={color} size={24} />;
                             case '(explore)':
                                 return <Feather name='search' color={color} size={24} />;
@@ -28,7 +28,7 @@ const BottomTabsLayout = () => {
                 tabBarHideOnKeyboard: true,
             }}
         >
-            <Tabs.Screen name="library" options={{ title: 'Library' }} />
+            <Tabs.Screen name="(library)" options={{ title: 'Library' }} />
             <Tabs.Screen name="(explore)" options={{ title: 'Search' }} />
             <Tabs.Screen name="profile" options={{ title: 'Profile' }} />
         </Tabs>
