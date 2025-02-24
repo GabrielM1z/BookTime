@@ -14,7 +14,7 @@ import { ModalAddToLibrary } from './ModalAddToLibrary';
 
 interface LivreRechercheProps {
   book: BookInfosSearch;
-  handleModalAddToLibrary: () => void;
+  handleModalAddToLibrary: (idBook: string) => void;
 
 
 }
@@ -36,16 +36,20 @@ export const LivreRecherche = ({ book, handleModalAddToLibrary }: LivreRecherche
       const listLibrary = await libraryRepository.getAll()
       await bookRepository.addBookToLibrary(listLibrary[0].id_library, data)
       showSnackbar();
-      
+
     } catch (error) {
       console.log("error handleAddBook :", error);
       showSnackbar();
     }
   };
 
+  const handleModal = async () => {
+    handleModalAddToLibrary(book.isbn13)
+  }
+
   return (
     <View style={styles.itemContainer}>
-      <CustomSnackbar visible={visible} onDismiss={hideSnackbar} onPressChange={handleModalAddToLibrary} />
+      <CustomSnackbar visible={visible} onDismiss={hideSnackbar} onPressChange={handleModal} />
       <CoverPressable id_book={book.isbn13} cover={book.thumbnail} mode='search'></CoverPressable>
       {/* <Image source={typeof imageSource === 'string' ? { uri: imageSource } : imageSource} style={styles.itemImage} resizeMode={'cover'}></Image> */}
       {/* <Image source={{uri:"data:image/png;base64,"+getImageAsBase64(book.thumbnail)}} defaultSource={defaultCover}  style={styles.itemImage} resizeMode={'cover'} ></Image> */}

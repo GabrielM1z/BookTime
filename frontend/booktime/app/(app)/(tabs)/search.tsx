@@ -42,9 +42,12 @@ export default function HomeScreen() {
 		query: '',
 	});
 
+	const [idBookAdded, setIdBookAdded] = useState("")
+
 	const bottomSheetRef = useRef<BottomSheetModal>(null);
 
-	const handlePresentModalPress = useCallback(() => {
+	const handlePresentModalPress = useCallback((bookId: string) => {
+		setIdBookAdded(bookId);
 		console.log("bottomSheetRef.current", bottomSheetRef.current); // Vérifier si la ref n'est pas null
 		bottomSheetRef.current?.present();
 	}, []);
@@ -81,7 +84,7 @@ export default function HomeScreen() {
 			</Button>< */}
 
 
-			<ModalAddToLibrary ref={bottomSheetRef} />
+			<ModalAddToLibrary ref={bottomSheetRef} idBookAdded={idBookAdded}/>
 
 			<FlatList
 				contentContainerStyle={styles.contentContainerStyle}
