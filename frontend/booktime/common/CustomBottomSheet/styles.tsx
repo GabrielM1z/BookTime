@@ -4,12 +4,10 @@ import { StyleSheet } from 'react-native';
 export const styles = StyleSheet.create({
     bottomSheet: {
         marginHorizontal: 4,
-        backgroundColor: '#fff',
         borderRadius: 12,
+        padding: 8,
     },
     containerSheet: {
-        paddingHorizontal: 8,
-        paddingBottom: 8,
         gap: 8,
     },
     backdropSheet: {

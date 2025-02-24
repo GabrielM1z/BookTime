@@ -31,12 +31,19 @@ func (sc *StateController) GetStateByUserAndBook(c *gin.Context) {
 	uuidUser := getUserID(c)
 	idBook := c.Param("bookId")
 
-	var getState model.State
 	if uuidUser != uuid.Nil {
-		getState = repoState.SelectStateByUserAndBook(uuidUser, idBook)
+		getState, err := repoState.SelectStateByUserAndBook(uuidUser, idBook)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "msg": "failed to get state"})
+			return
+		} else {
+			c.JSON(http.StatusOK, gin.H{"status": "success", "data": getState, "msg": "get state successfully"})
+			return
+		}
+	} else {
+		c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "msg": "ID user null"})
+		return
 	}
-
-	c.JSON(http.StatusOK, gin.H{"status": "success", "data": getState, "msg": "get state successfully"})
 }
 
 // GetState implements StateControllerInterface
@@ -102,8 +109,8 @@ func getUserID(c *gin.Context) uuid.UUID {
 func (sc *StateController) InsertState(c *gin.Context) {
 	db := sc.DB
 	var state model.State
-	state.IdUser = getUserID(c)
 	if err := c.ShouldBindJSON(&state); err == nil {
+		state.IdUser = getUserID(c)
 		repoState := repository.NewStateRepository(db)
 		insert := repoState.InsertState(state)
 		if insert {
@@ -124,8 +131,14 @@ func (sc *StateController) GetState(c *gin.Context) {
 	uuidUser := getUserID(c)
 	idBook := c.Param("bookId")
 
-	state := repoState.SelectStateByUserAndBook(uuidUser, idBook)
-	c.JSON(http.StatusOK, gin.H{"status": "success", "data": state, "msg": "state retrieved successfully"})
+	getState, err := repoState.SelectStateByUserAndBook(uuidUser, idBook)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "msg": "failed to get state"})
+		return
+	} else {
+		c.JSON(http.StatusOK, gin.H{"status": "success", "data": getState, "msg": "get state successfully"})
+		return
+	}
 }
 
 func (sc *StateController) UpdateState(c *gin.Context) {

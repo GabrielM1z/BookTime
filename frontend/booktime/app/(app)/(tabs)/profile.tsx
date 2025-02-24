@@ -1,22 +1,20 @@
-import { ProfileMenu } from '@/components/bottomSheets/ProfileMenu';
+import { ProfileMenu } from '@/components/profile/ProfileMenu';
+import { useUser } from '@/hooks/useUser';
+import styles, { headerMaxHeight, headerMinHeight, profileImageMaxSize } from '@/styles/profile';
 import { Ionicons } from '@expo/vector-icons';
+import AntDesign from '@expo/vector-icons/AntDesign';
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
-import React, { useCallback, useRef } from 'react';
+import React, { forwardRef, useCallback, useRef } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import Animated, { Extrapolation, interpolate, useAnimatedRef, useAnimatedStyle, useScrollViewOffset } from 'react-native-reanimated';
-import { useSafeAreaInsets, SafeAreaView } from 'react-native-safe-area-context';
-import styles, { headerMaxHeight, headerMinHeight, profileImageMaxSize } from './profile.style';
-import { useUser } from '@/hooks/useUser';
-import AntDesign from '@expo/vector-icons/AntDesign';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Avatar } from 'react-native-paper';
 
-
-const profileImage = require('@/assets/images/profil.png');
 const bannerImage = require('@/assets/images/banner.jpg');
 
 export const headerPageText = "Embark on a journey of transformation with our innovative app designed to enhance every aspect of your life. Whether you're seeking to boost productivity, ignite creativity, or simply streamline daily tasks, our platform empowers you to reach new heights.";
 
-
-export default function Profile() {
+export default function ProfileTab() {
     const scrollRef = useAnimatedRef<Animated.ScrollView>();
     const scrollOffset = useScrollViewOffset(scrollRef);
     const bottomSheetRef = useRef<BottomSheetModal>(null);
@@ -138,13 +136,13 @@ export default function Profile() {
                     innerHeaderAnimatedStyles,
                     { paddingTop: insets.top } // Add padding top to avoid the status bar overlap. Needed because of the absolute position of the header
                 ]}>
-                    {user && user.profil_image ? (
-                        <Animated.Image source={{uri: user.profil_image}} style={[styles.profileImage, profileImageAnimatedStyles]} />
-                    ) : (
-                        <Animated.View style={[styles.profileImage, profileImageAnimatedStyles]}>
-                            <AntDesign name="user" color="black" size={50} />
-                        </Animated.View>
-                    )}
+                    <Animated.View style={[styles.profileImageContainer, profileImageAnimatedStyles]}>
+                        {user && user.profil_image ? (
+                            <Avatar.Image source={{ uri: user.profil_image }} style={styles.profileImage} />
+                        ) : (
+                            <Avatar.Icon icon="account" style={styles.profileImage} size={18} />
+                        )}
+                    </Animated.View>
                     <Animated.Text style={[styles.profileName, profileNameAnimatedStyles]}>
                         {user ? user.name || "Guest" : "User Name"}
                     </Animated.Text>
@@ -171,4 +169,3 @@ export default function Profile() {
         </SafeAreaView>
     );
 }
-

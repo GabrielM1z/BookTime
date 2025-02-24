@@ -96,9 +96,7 @@ func (a *App) CreateRoutes() {
 	// State routes
 	stateController := controller.NewStateController(a.DB)
 	routes.GET(prefix+"/states", stateController.GetStates)
-	//routes.GET(prefix+"/states/:stateId", stateController.GetState)
-	//routes.GET(prefix+"/user/:userId/book/:bookId/states", stateController.GetStateByUserAndBook)
-	routes.GET(prefix+"/states/book", stateController.GetStateByUserAndBook)
+	routes.GET(prefix+"/states/book/:bookId", stateController.GetStateByUserAndBook)
 	routes.POST(prefix+"/states", stateController.InsertState)
 	routes.PUT(prefix+"/states/:bookId", stateController.UpdateState)
 	routes.DELETE(prefix+"/states/:bookId", stateController.DeleteState)

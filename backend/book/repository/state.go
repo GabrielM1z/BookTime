@@ -22,14 +22,14 @@ func NewStateRepository(db *sql.DB) *StateRepository {
 }
 
 func (sr *StateRepository) InsertState(state model.State) bool {
-	stmt, err := sr.DB.Prepare("INSERT INTO state (state, progression, read_count, last_read_date, is_available, id_user, id_book) VALUES ($1, $2, $3, $4, $5, $6, $7)")
+	stmt, err := sr.DB.Prepare("INSERT INTO state (state, progression, read_count, last_read_date, is_available, id_user, id_book, rate, comment) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)")
 	if err != nil {
 		log.Println(err)
 		return false
 	}
 	defer stmt.Close()
 
-	_, err2 := stmt.Exec(state.State, state.Progression, state.ReadCount, state.LastReadDate, state.IsAvailable, state.IdUser, state.IdBook)
+	_, err2 := stmt.Exec(state.State, state.Progression, state.ReadCount, state.LastReadDate, state.IsAvailable, state.IdUser, state.IdBook, state.Rate, state.Comment)
 	if err2 != nil {
 		log.Println(err2)
 		return false
@@ -43,6 +43,8 @@ func (sr *StateRepository) InsertState(state model.State) bool {
 		"is_available":   state.IsAvailable,
 		"id_user":        state.IdUser,
 		"id_book":        state.IdBook,
+		"rate":           state.Rate,
+		"comment":        state.Comment,
 	}
 
 	return sr.LogAction(state.IdUser, "STATE", "INSERT", actionMap)
@@ -59,7 +61,7 @@ func (ar *StateRepository) SelectStates() []model.State {
 	states := []model.State{}
 	for rows.Next() {
 		var state model.State
-		if err := rows.Scan(&state.State, &state.Progression, &state.ReadCount, &state.LastReadDate, &state.IdUser, &state.IdBook, &state.IsAvailable); err != nil {
+		if err := rows.Scan(&state.State, &state.Progression, &state.ReadCount, &state.LastReadDate, &state.IdUser, &state.IdBook, &state.IsAvailable, &state.Rate, &state.Comment); err != nil {
 			log.Fatal(err)
 		}
 		states = append(states, state)
@@ -67,12 +69,7 @@ func (ar *StateRepository) SelectStates() []model.State {
 	return states
 }
 
-func (sr StateRepository) SelectStateByUserAndBook(idUser uuid.UUID, idBook string) model.State {
-	log.Println("SelectStateByUserAndBook with : ")
-	log.Println("idUser")
-	log.Println(idUser)
-	log.Println("idBook")
-	log.Println(idBook)
+func (sr StateRepository) SelectStateByUserAndBook(idUser uuid.UUID, idBook string) (model.State, error) {
 	rows, err := sr.DB.Query("SELECT * FROM state WHERE id_user = $1 AND id_book = $2", idUser, idBook)
 	if err != nil {
 		log.Fatal(err)
@@ -82,27 +79,30 @@ func (sr StateRepository) SelectStateByUserAndBook(idUser uuid.UUID, idBook stri
 	states := []model.State{}
 	for rows.Next() {
 		var state model.State
-		if err := rows.Scan(&state.State, &state.Progression, &state.ReadCount, &state.LastReadDate, &state.IdUser, &state.IdBook, &state.IsAvailable); err != nil {
+		if err := rows.Scan(&state.State, &state.Progression, &state.ReadCount, &state.LastReadDate, &state.IdUser, &state.IdBook, &state.IsAvailable, &state.Rate, &state.Comment); err != nil {
 			log.Fatal(err)
 		}
 		states = append(states, state)
 	}
-	return states[0]
+	if len(states) == 0 {
+		return model.State{}, fmt.Errorf("No state found for user %s and book %s", idUser, idBook)
+	} else {
+		return states[0], nil
+	}
 }
 
 func (sr *StateRepository) UpdateState(idUser uuid.UUID, idBook string, state model.State) bool {
-	log.Println("REPOSITORY : UpdateState")
-
-	baseState := sr.SelectStateByUserAndBook(idUser, idBook)
-
-	log.Println("REPOSITORY : after basestate")
+	baseState, err := sr.SelectStateByUserAndBook(idUser, idBook)
+	if err != nil {
+		return false
+	}
 
 	query := "UPDATE state SET "
 	params := []interface{}{}
 	counter := 1 // Compteur pour les paramètres SQL ($1, $2, etc.)
 
 	// Ajout des champs dynamiquement en fonction des valeurs non nulles
-	if state.State != "" || state.Progression != 0 || state.ReadCount != 0 || state.LastReadDate != "" || state.IsAvailable != baseState.IsAvailable {
+	if state.State != "" || state.Progression != 0 || state.ReadCount != 0 || state.LastReadDate != "" || state.IsAvailable != baseState.IsAvailable || state.Rate != baseState.Rate || state.Comment != baseState.Comment {
 		if state.State != "" {
 			query += "state = $" + fmt.Sprint(counter) + ", "
 			params = append(params, state.State)
@@ -123,9 +123,19 @@ func (sr *StateRepository) UpdateState(idUser uuid.UUID, idBook string, state mo
 			params = append(params, state.LastReadDate)
 			counter++
 		}
-		if state.IsAvailable != baseState.IsAvailable { // Comparaison avec l'état de base
+		if state.IsAvailable != baseState.IsAvailable {
 			query += "is_available = $" + fmt.Sprint(counter) + ", "
 			params = append(params, state.IsAvailable)
+			counter++
+		}
+		if state.Rate != baseState.Rate {
+			query += "rate = $" + fmt.Sprint(counter) + ", "
+			params = append(params, state.Rate)
+			counter++
+		}
+		if state.Comment != baseState.Comment {
+			query += "comment = $" + fmt.Sprint(counter) + ", "
+			params = append(params, state.Comment)
 			counter++
 		}
 
@@ -162,6 +172,12 @@ func (sr *StateRepository) UpdateState(idUser uuid.UUID, idBook string, state mo
 
 		if baseState.IsAvailable != state.IsAvailable {
 			actionMap["is_available"] = state.IsAvailable
+		}
+		if baseState.Rate != state.Rate {
+			actionMap["rate"] = state.Rate
+		}
+		if baseState.Comment != state.Comment {
+			actionMap["comment"] = state.Comment
 		}
 
 		if len(actionMap) == 0 {

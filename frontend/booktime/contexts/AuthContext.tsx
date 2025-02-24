@@ -1,20 +1,9 @@
+import { SessionController } from "@/controllers/SessionController";
 import { useController } from "@/hooks/useController";
 import { Session } from "@/models/Session";
-import { AuthResponseProps } from "@/models/keycloak";
+import { AuthRegisterProps, AuthResponseProps } from "@/models/keycloak";
 import { authenticate, logout as logoutAxios, register as registerAxios } from "@/services/axios";
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { SessionController } from "@/controllers/SessionController";
-import { useFadeTransition } from "./FadeTransitionContext";
-
-
-export interface AuthRegisterProps {
-    email: string;
-    password: string;
-    username: string;
-    firstName: string;
-    lastName: string;
-}
-
 
 export interface AuthContextProps {
     session: Session | null;
@@ -37,25 +26,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const sessionController = new SessionController();
     const { userController } = useController();
-    const { withFadeTransition } = useFadeTransition();
 
-    const register = async (props: AuthRegisterProps) => {
-        // await registerAxios(props);
+    const register = async (email: string, password: string, username: string) => {
+        // try {
+        //     setIsLoading(true);
+        //     await registerAxios(email, password, "", "");
+        //     await 
+        // } finally {
+        //     setIsLoading(false);
+        // }
     };
 
-    const logIn = async (username: string, password: string, remember: boolean) => {
+    const logIn = async (email: string, password: string, remember: boolean) => {
         try {
             setIsLoading(true);
-            const authResponse = await authenticate(username, password);
+            const authResponse = await authenticate(email, password);
             const newSession = await sessionController.getSessionFromAuthResponse(authResponse, remember);
+            setSession(newSession);
             await userController.addFromSession(newSession);
-            withFadeTransition(() => setSession(newSession));
-        }
-        catch (error) {
-            console.error(error);
-            throw error;
-        }
-        finally {
+        } finally {
             setIsLoading(false);
         }
 
@@ -65,22 +54,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
             setIsLoading(true);
             const guestSession = await sessionController.getOrCreateGuestSession();
+            setSession(guestSession);
             await userController.addFromSession(guestSession);
-            withFadeTransition(() => setSession(guestSession));
-        }
-        finally {
+        } finally {
             setIsLoading(false);
         }
     };
 
     const logOut = async () => {
         if (session) {
-            if (!SessionController.isGuest(session)) {
-                await logoutAxios(session.refresh_token!);
+            try {
+                setIsLoading(true);
+                if (!SessionController.isGuest(session)) {
+                    await logoutAxios(session.refresh_token!);
+                }
+                await sessionController.removeSession(session);
+                await userController.local.delete(session.id_user);
+                setSession(null);
+            } finally {
+                setIsLoading(false);
             }
-            await sessionController.removeSession(session);
-            await userController.local.delete(session.id_user);
-            withFadeTransition(() => setSession(null));
         }
     };
 
@@ -93,7 +86,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const switchSession = (newSession: Session) => {
         sessionController.sessionRepo.setCurrentSessionId(newSession.id);
-        withFadeTransition(() => setSession(newSession));
+        setSession(newSession);
     };
 
     useEffect(() => {
@@ -131,7 +124,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         </AuthContext.Provider>
     );
 }
-
 
 export const useAuthContext = (): AuthContextProps => {
     const context = useContext(AuthContext);

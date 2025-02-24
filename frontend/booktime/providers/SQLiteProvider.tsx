@@ -16,7 +16,6 @@ export function SQLiteProviderInner({ children }: { children: React.ReactNode })
     const db = wrapDbWithErrorHandler(useSQLiteContext());
 
     return (
-        
             <SQLiteContext.Provider value={{ db, lastSync, setLastSync }}>
                 {children}
             </SQLiteContext.Provider>
@@ -26,7 +25,7 @@ export function SQLiteProviderInner({ children }: { children: React.ReactNode })
 export function SQLiteProvider({ children, ...props }: SQLiteProviderProps) {
     return (
         <SQLiteProviderOriginal {...props}>
-            <SQLiteProviderInner {...props}>
+            <SQLiteProviderInner>
                 {children}
             </SQLiteProviderInner>
         </SQLiteProviderOriginal>

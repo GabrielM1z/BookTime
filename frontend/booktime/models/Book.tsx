@@ -19,7 +19,7 @@ export interface BookInfos {
 	genres?: string[];   
 }
 
-export interface BookInfosSearch {
+export interface BookSearchResult {
 	id : string;
 	title: string
 	isbn13: string;    

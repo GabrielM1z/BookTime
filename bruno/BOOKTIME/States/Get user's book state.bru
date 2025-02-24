@@ -5,14 +5,9 @@ meta {
 }
 
 get {
-  url: {{base_book_url}}/user/:userId/book/:bookId/states
+  url: {{base_book_url}}/states/book
   body: none
   auth: bearer
-}
-
-params:path {
-  userId: 1
-  bookId: 1
 }
 
 auth:bearer {

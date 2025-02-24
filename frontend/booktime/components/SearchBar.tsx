@@ -1,8 +1,8 @@
 import { StyleSheet, View, TextInput } from 'react-native';
-import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { ThemedView } from './ThemedView';
 import { useEffect, useState } from 'react';
 import { debounce } from 'lodash';
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 
 
@@ -18,7 +18,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({ qrcode, onSearch }) => {
     if (qrcode) {
         searchBarQR =
             <View style={styles.qrSearchContainer}>
-                <View style={styles.qrSearch}><TabBarIcon size={30} color={"white"} name={'qr-code'} /></View>
+                <View style={styles.qrSearch}><Ionicons size={30} color={"white"} name={'qr-code'} /></View>
             </View>;
     }
 
@@ -42,7 +42,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({ qrcode, onSearch }) => {
 
         <ThemedView style={styles.searchBarComponent}>
             <View style={styles.searchContainer}>
-                <TabBarIcon size={40} name={'search'} />
+                <Ionicons size={40} name={'search'} />
                 <TextInput 
                     style={styles.searchBar} 
                     value={searchTerm}

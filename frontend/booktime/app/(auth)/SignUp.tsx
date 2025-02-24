@@ -1,66 +1,68 @@
-import React from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { ActivityIndicator, StatusBar, View, Image } from "react-native";
 import commonStyles from "@/styles/commonStyles";
-import  styles  from "./SignUp.style";
-import { TextInput, Button, Text } from "react-native-paper";
+import React, { useState } from "react";
+import { ActivityIndicator, View } from "react-native";
+import { Avatar, Button } from "react-native-paper";
+import { SafeAreaView } from "react-native-safe-area-context";
+import styles from "./SignUp.style";
+import { Text, TextInput } from "@/common";
+import BackButton from "@/components/BackButton";
 
 
 export default function Register() {
+    const [email, setEmail] = useState<string>('');
+    const [emailError, setEmailError] = useState<string>('');
+    const [password, setPassword] = useState<string>('');
+    const [username, setUsername] = useState<string>('');
+
     const { isLoading, register } = useAuthContext();
 
-    const logoImageSource = require('@/assets/images/logo_refait.png');
-    
+    const handleRegister = async () => {
+        // try {
+        //     await register({})
+        // }
+    }
+
     return (
-        <SafeAreaView>
-            <StatusBar barStyle="dark-content" />
+        <SafeAreaView style={styles.container}>
+            <View style={styles.backButtonContainer}>
+                <BackButton />
+            </View>
             {isLoading && (
                 <View style={commonStyles.loadingOverlay}>
                     <ActivityIndicator size="large" color="#25a9e2" />
                 </View>
             )}
-            <Image
-                resizeMode="contain"
-                source={logoImageSource}
-                // style={styles.logoImageStyle}
-            />
-            <View style={styles.textInputContainer}>
-                <TextInput
-                    label="Username"
-                    mode="outlined"
-                    // style={styles.textInput}
-                />
-                <TextInput
-                    label="Email"
-                    mode="outlined"
-                    // style={styles.textInput}
-                />
-                <TextInput
-                    label="Password"
-                    mode="outlined"
-                    // style={styles.textInput}
-                />
-                <TextInput
-                    label="First Name"
-                    mode="outlined"
-                    // style={styles.textInput}
-                />
-                <TextInput
-                    label="Last Name"
-                    mode="outlined"
-                    // style={styles.textInput}
-                />
+            <View style={styles.innerContainer}>
+                <View style={styles.headerContainer}>
+                    <Avatar.Image size={150} source={require('@/assets/images/logo_refait.png')} />
+                    <Text variant="titleLarge">Sign up</Text>
+                </View>
+                <View style={styles.bodyContainer}>
+                    <TextInput
+                        placeholder="Email"
+                        autoCapitalize="none"
+                        onChangeText={setEmail}
+                        error={emailError ? true : false}
+                        label={emailError}
+
+                    />
+                    <TextInput.Password onChangeText={setPassword} />
+                    <TextInput
+                        placeholder="Username"
+                        onChangeText={setUsername}
+                    />
+                </View>
+            </View>
+            <View style={styles.footerContainer}>
                 <Button
                     mode="contained"
-                    // onPress={() => register()}
-                    // style={styles.button}
+                    onPress={() => { }}
+                    disabled={ isLoading || !email || !password || !username }
                 >
                     Register
                 </Button>
-                
             </View>
-            
         </SafeAreaView>
     )
 }

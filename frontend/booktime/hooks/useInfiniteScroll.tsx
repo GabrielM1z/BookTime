@@ -2,28 +2,14 @@
 
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useCallback, useMemo, useState } from 'react';
-import _ from 'lodash';
+import _, { filter } from 'lodash';
 import api from '@/services/axios';
 
-//debug axios request
-// axios.interceptors.request.use(request => {
-//     console.log('Starting Request', JSON.stringify(request, null, 2))
-//     return request
-// })
-
-// axios.interceptors.response.use(response => {
-//     console.log("response !!!");
-//     console.log('Response:', JSON.stringify(response, null, 2))
-//     return response
-// })
-
-
-
-type Params<F> = {
+type InfiniteScrollProps<F> = {
     key: string;
     url: string;
     limit?: number;
-    filters?: F;
+    filters?: F | null;
     initialPage?: number;
     formatResponse?: (data: any) => any;
 };
@@ -35,8 +21,7 @@ export const useInfiniteScroll = <T = unknown, F = object>({
     filters,
     initialPage = 1,
     formatResponse,
-}: Params<F>) => {
-
+}: InfiniteScrollProps<F>) => {
     //Création de clé unique pour chaques résultats
     const queryKey = [key, ..._.values<string | string[]>(_.omitBy(filters || {}, _.isEmpty))].filter(
         c => Boolean(c) && !_.isEmpty(c),
@@ -45,9 +30,7 @@ export const useInfiniteScroll = <T = unknown, F = object>({
     const [isRefreshing, setIsRefreshing] = useState(false);
 
     //récupère les données 
-    const queryFn = async ({ pageParam = initialPage }) => {  
-                
-        console.log("la requete : ", url)
+    const queryFn = async ({ pageParam = initialPage }) => {
         const { data } = await api.get<T[]>(
             url,
             {
@@ -58,7 +41,6 @@ export const useInfiniteScroll = <T = unknown, F = object>({
                 },
             }
         )
-        // console.log("la requete renvoie : ", data)
 
         return {
             data: formatResponse ? formatResponse(data) : data,
@@ -70,10 +52,10 @@ export const useInfiniteScroll = <T = unknown, F = object>({
         queryKey,
         queryFn,
         initialPageParam: 0,
+        enabled: filters != null || filters != undefined,
         // vérifie si il reste des données
         getNextPageParam: (lastPage, __, lastPageParam) => {
             if (lastPage.data != undefined && lastPage.data.length < limit) {
-                console.log("no more data")
                 return undefined;
             }
             return lastPageParam + 1;
@@ -86,8 +68,6 @@ export const useInfiniteScroll = <T = unknown, F = object>({
             return firstPageParam - 1;
         },
     });
-
-    console.log("data : ", data)
 
     //charge la prochaine page
     const loadNext = useCallback(() => {
