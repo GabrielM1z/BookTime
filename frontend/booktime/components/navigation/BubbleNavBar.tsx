@@ -1,10 +1,10 @@
-import { Text } from "@/common";
+import { withAnimated } from "@/common";
 import { Feather } from "@expo/vector-icons";
 import Color from "color";
 import { BottomTabBarProps } from "expo-router/node_modules/@react-navigation/bottom-tabs";
 import React, { useMemo } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
-import { useTheme } from "react-native-paper";
+import { useTheme, Text } from "react-native-paper";
 import Animated, {
     FadeIn,
     FadeOut,
@@ -17,6 +17,8 @@ import Animated, {
 
 const AnimatedTouchableOpacity =
     Animated.createAnimatedComponent(TouchableOpacity);
+
+const AnimatedText = withAnimated(Text);
 
 export interface NavBarProps extends BottomTabBarProps {
     renderIcon?: (routeName: string, color: string) => React.ReactNode;
@@ -105,13 +107,13 @@ export const BubbleNavBar: React.FC<NavBarProps> = ({
                     >
                         {(renderIcon || defaultRenderIcon)(route.name, color)}
                         {focused && (
-                            <Text.Animated
+                            <AnimatedText
                                 entering={FadeIn.duration(200)}
                                 exiting={FadeOut.duration(200)}
                                 style={[styles.text, { color }]}
                             >
                                 {label as string}
-                            </Text.Animated>
+                            </AnimatedText>
                         )}
                     </AnimatedTouchableOpacity>
                 );

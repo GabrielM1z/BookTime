@@ -35,17 +35,11 @@ export default StyleSheet.create({
     },
     menuContainer: {
         position: 'absolute',
-        right: 20,
-        justifyContent: 'center',
-    },
-    menuButton: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: Colors.gray + '30',
-        zIndex: 10,
+        right: 0,
+        left: 0,
+        flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'flex-end',
     },
     bannerImage: {
         width: '100%',

@@ -65,24 +65,24 @@ export default function RootLayout() {
     }
 
     return (
-        <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-            <GestureHandlerRootView>
-                <BottomSheetModalProvider>
-                    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : LightTheme}>
-                        <FadeTransitionProvider>
-                            <ControllerProvider databaseName='booktime.db' onInit={migrateDbIfNeeded} onError={handleSQLiteError}>
-                                <AuthProvider>
-                                    <QueryProvider>
-                                        <PaperProvider>
-                                            <Routes />
-                                        </PaperProvider>
-                                    </QueryProvider>
-                                </AuthProvider>
-                            </ControllerProvider>
-                        </FadeTransitionProvider>
-                    </ThemeProvider>
-                </BottomSheetModalProvider>
-            </GestureHandlerRootView>
-        </SafeAreaProvider>
+        // <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+        <GestureHandlerRootView>
+            <BottomSheetModalProvider>
+                <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : LightTheme}>
+                    <FadeTransitionProvider>
+                        <ControllerProvider databaseName='booktime.db' onInit={migrateDbIfNeeded} onError={handleSQLiteError}>
+                            <AuthProvider>
+                                <QueryProvider>
+                                    <PaperProvider>
+                                        <Routes />
+                                    </PaperProvider>
+                                </QueryProvider>
+                            </AuthProvider>
+                        </ControllerProvider>
+                    </FadeTransitionProvider>
+                </ThemeProvider>
+            </BottomSheetModalProvider>
+        </GestureHandlerRootView>
+        // </SafeAreaProvider>
     );
 }
