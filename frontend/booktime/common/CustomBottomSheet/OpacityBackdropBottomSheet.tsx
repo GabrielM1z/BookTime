@@ -1,9 +1,8 @@
 import { BottomSheetBackdropProps, useBottomSheetModal } from "@gorhom/bottom-sheet";
 import React, { useMemo } from "react";
-import { TouchableOpacity } from "react-native";
+import { StyleSheet, TouchableOpacity } from "react-native";
 import { useTheme } from "react-native-paper";
-import Animated, { Extrapolation, interpolate, useAnimatedStyle } from "react-native-reanimated";
-import { styles } from "./styles";
+import Animated, { interpolate, useAnimatedStyle } from "react-native-reanimated";
 
 export const OpacityBackdropBottomSheet = ({
     animatedIndex,
@@ -14,18 +13,18 @@ export const OpacityBackdropBottomSheet = ({
 
     // animated variables
     const containerAnimatedStyle = useAnimatedStyle(() => ({
-        opacity: interpolate(animatedIndex.value, [0, 1], [0.6, 0], Extrapolation.CLAMP),
+        opacity: interpolate(animatedIndex.value, [-0.5, -1], [0.6, 0]),
     }));
 
     // styles
     const containerStyle = useMemo(
         () => [
-            style,
-            styles.backdropSheet,
+            StyleSheet.absoluteFillObject,
             { backgroundColor: colors.backdrop },
+            style,
             containerAnimatedStyle,
         ],
-        [style, containerAnimatedStyle]
+        [containerAnimatedStyle, colors]
     );
 
     return (

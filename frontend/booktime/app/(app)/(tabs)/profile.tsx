@@ -1,14 +1,13 @@
 import { ProfileMenu } from '@/components/profile/ProfileMenu';
 import { useUser } from '@/hooks/useUser';
 import styles, { headerMaxHeight, headerMinHeight, profileImageMaxSize } from '@/styles/profile';
-import { Ionicons } from '@expo/vector-icons';
-import AntDesign from '@expo/vector-icons/AntDesign';
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
-import React, { forwardRef, useCallback, useRef } from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
-import Animated, { Extrapolation, interpolate, useAnimatedRef, useAnimatedStyle, useScrollViewOffset, interpolateColor } from 'react-native-reanimated';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
+import React, { useCallback, useRef } from 'react';
+import { Text, View } from 'react-native';
 import { Avatar, IconButton, useTheme } from 'react-native-paper';
+import Animated, { Extrapolation, interpolate, interpolateColor, useAnimatedRef, useAnimatedScrollHandler, useAnimatedStyle, useScrollViewOffset } from 'react-native-reanimated';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const bannerImage = require('@/assets/images/banner.jpg');
 
@@ -130,18 +129,18 @@ const ProfileTab = () => {
                     innerHeaderAnimatedStyles,
                     { paddingTop: insets.top } // Add padding top to avoid the status bar overlap. Needed because of the absolute position of the header
                 ]}>
-                    <Animated.View style={[styles.profileImageContainer, profileImageAnimatedStyles]}>
+                    <Animated.View style={[styles.profileImageContainer, { borderColor: colors.primary }, profileImageAnimatedStyles]}>
                         {user && user.profil_image ? (
                             <Avatar.Image source={{ uri: user.profil_image }} style={styles.profileImage} />
                         ) : (
-                            <Avatar.Icon icon="account" style={styles.profileImage} size={18} />
+                            <Avatar.Icon icon="account" style={styles.profileImage} size={profileImageAnimatedStyles.width} />
                         )}
                     </Animated.View>
                     <Animated.Text style={[styles.profileName, profileNameAnimatedStyles]}>
                         {user ? user.name || "Guest" : "User Name"}
                     </Animated.Text>
                 </Animated.View>
-                <SafeAreaView edges={['left', 'right']} style={[styles.menuContainer, { height: headerReelMinHeight }]}>
+                <SafeAreaView edges={['left', 'right', 'top']} style={[styles.menuContainer, { height: headerReelMinHeight }]}>
                     <IconButton icon="menu" onPress={handlePresentModalPress} mode='contained' />
                 </SafeAreaView>
             </Animated.View>
@@ -150,7 +149,7 @@ const ProfileTab = () => {
                 contentContainerStyle={styles.scrollContent}
                 snapToOffsets={[headerMaxHeight - headerReelMinHeight]}
                 snapToEnd={false}
-                overScrollMode={"always"}
+                scrollEventThrottle={16}
             >
                 <View style={styles.innerContainer}>
                     <Text style={styles.description}>
@@ -159,20 +158,6 @@ const ProfileTab = () => {
                 </View>
             </Animated.ScrollView>
         </SafeAreaView>
-    );
-}
-
-import { StickyParallaxHeader } from '@/components/profile/StickyParallaxHeader';
-import AvatarParallaxHeader from '@/components/profile/AvatarParallaxHeader';
-
-const ProfileTab2 = () => {
-    return (
-        <AvatarParallaxHeader
-        // title='Profile'
-        // image={
-        //     <Avatar.Icon icon="account" size={32} />
-        // }
-        />
     );
 }
 

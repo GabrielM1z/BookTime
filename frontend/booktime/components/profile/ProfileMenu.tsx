@@ -22,7 +22,7 @@ export const ProfileMenu = forwardRef<BottomSheetModal, ProfileMenuProps>((props
 
     const handleSettings = useCallback(() => {
         dismiss();
-        router.push('/settings' as Href<"settings">);
+        router.push('/settings' as Href);
     }, [router]);
 
     return (
