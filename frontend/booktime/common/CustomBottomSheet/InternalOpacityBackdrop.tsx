@@ -15,8 +15,6 @@ export const InternalOpacityBackdrop = ({
 
     const bottomSheetKey = useMemo(() => generateRandomKey(), []);
 
-    console.log(bottomSheetKey);
-
     // useEffect(() => {
     //     addBottomSheet(bottomSheetKey);
     //     return () => {

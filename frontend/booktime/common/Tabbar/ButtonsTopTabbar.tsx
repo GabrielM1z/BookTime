@@ -31,7 +31,6 @@ export const ButtonsTopTabbar: React.FC<ButtonsTopTabbarProps> = ({
         const route = state.routes[index];
         const button = buttonRefs.current[route.key];
 
-        console.log(index);
         if (button && scrollRef.current) {
             button.measure((x, y, width, height, pageX) => {
                 scrollRef.current?.scrollTo({
