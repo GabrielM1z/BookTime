@@ -1,0 +1,1 @@
+export const defaultCover = require('./logo_refait.png');

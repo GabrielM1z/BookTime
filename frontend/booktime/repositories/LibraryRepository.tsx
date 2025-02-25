@@ -11,7 +11,7 @@ export interface LibraryRepository {
     add: (name: string) => Promise<void>;
     delete: (id: string) => Promise<void>;
     getAllInfo: () => Promise<LibraryWithBooksMin[] | []>
-    getAllBookFromLib: (id_library: string) => Promise<BookMinInfos[] | null> 
+    getAllBookFromLib: (id_library: string) => Promise<BookMinInfos[] | null>
     getAllLibraryFromBook: (id_book: string) => Promise<Library[]>;
     getAllNotLibraryFromBook: (id_book: string) => Promise<Library[]>;
 }
@@ -31,27 +31,19 @@ export class SQLiteLibraryRepository implements LibraryRepository {
     }
 
     async get(id: string): Promise<Library | null> {
-        const statement = await this.db.prepareAsync(
-            'SELECT * FROM library WHERE id_library == $id'
+        const result = await this.db.getFirstAsync<Library>(
+            'SELECT * FROM library WHERE id_library == $id',
+            { $id: id }
         );
 
-        const result = await statement.executeAsync({
-            $id: id
-        });
-
-        return result ? (result as unknown as Library) : null;
+        return result!;
     }
 
     async add(name: string): Promise<void> {
-        const statement = await this.db.prepareAsync(
-            'INSERT INTO library (id_library, name) VALUES ($id_library, $name);'
-        );
-        // this.sync();
-
-        await statement.executeAsync({
-            $id_library: uuid.v4(),
-            $name: name
-        });
+        await this.db.runAsync(
+            'INSERT INTO library (id_library, name) VALUES ($id_library, $name);',
+            { $id_library: uuid.v4(), $name: name }
+        )
     }
 
     async delete(id: string): Promise<void> {
@@ -63,21 +55,21 @@ export class SQLiteLibraryRepository implements LibraryRepository {
                 );
                 await deleteLibraryBooks.executeAsync({ $id: id });
                 await deleteLibraryBooks.finalizeAsync(); // Fermer la déclaration
-    
+
                 // Suppression des associations entre la bibliothèque et les utilisateurs partagés
                 const deleteSharedLibrary = await this.db.prepareAsync(
                     'DELETE FROM shared_library WHERE id_library = $id'
                 );
                 await deleteSharedLibrary.executeAsync({ $id: id });
                 await deleteSharedLibrary.finalizeAsync(); // Fermer la déclaration
-    
+
                 // Suppression de la bibliothèque elle-même
                 const deleteLibrary = await this.db.prepareAsync(
                     'DELETE FROM library WHERE id_library = $id'
                 );
                 await deleteLibrary.executeAsync({ $id: id });
                 await deleteLibrary.finalizeAsync(); // Fermer la déclaration
-    
+
                 console.log("deleted");
             } catch (error) {
                 console.error('Error deleting library:', error);
@@ -85,7 +77,7 @@ export class SQLiteLibraryRepository implements LibraryRepository {
             }
         });
     }
-    
+
 
     async delete2(id: string): Promise<void> {
 
@@ -94,37 +86,31 @@ export class SQLiteLibraryRepository implements LibraryRepository {
                 'DELETE FROM library_book WHERE id_library = $id'
             );
             await deleteLibraryBooks.executeAsync({ $id: id });
-    
+
             const deleteSharedLibrary = await this.db.prepareAsync(
                 'DELETE FROM shared_library WHERE id_library = $id'
             );
             await deleteSharedLibrary.executeAsync({ $id: id });
-    
+
             const deleteLibrary = await this.db.prepareAsync(
                 'DELETE FROM library WHERE id_library = $id'
             );
             await deleteLibrary.executeAsync({ $id: id });
         });
     }
-    
+
 
     async getAllBookFromLib(id_library: string): Promise<BookMinInfos[]> {
-
-        const statement = await this.db.prepareAsync(
-            `SELECT book.*
+        const books = this.db.getAllAsync<BookMinInfos>(
+            `SELECT book.id_book, book.title, book.cover_image_url
             FROM book
             JOIN library_book ON book.id_book = library_book.id_book
             JOIN library ON library_book.id_library = library.id_library
-            WHERE library.id_library = $id_library; `
+            WHERE library.id_library = $id_library; `,
+            { $id_library: id_library }
         );
 
-        const result = await statement.executeAsync({
-            $id_library: id_library
-        })
-
-        const rows = await result.getAllAsync();
-
-        return rows ? (rows as unknown as BookMinInfos[]) : [];
+        return books;
     }
 
     async getAllInfo(): Promise<LibraryWithBooksMin[] | []> {
@@ -141,39 +127,33 @@ export class SQLiteLibraryRepository implements LibraryRepository {
                     books: listBookOfLibrary
                 };
             });
-    
+
             // Attendre que toutes les promesses soient résolues
             const allLibraryWithBook: LibraryWithBooksMin[] = await Promise.all(libraryPromises);
-    
+
             return allLibraryWithBook;
-            
+
         } catch (error) {
-            console.log("Error", error);   
-            return [];         
+            console.log("Error", error);
+            return [];
         }
     }
 
     async getAllLibraryFromBook(id_book: string): Promise<Library[]> {
-
-        const statement = await this.db.prepareAsync(
+        const libraries = this.db.getAllAsync<Library>(
             `SELECT library.*
             FROM library
             JOIN library_book ON library.id_library = library_book.id_library
             JOIN book ON library_book.id_book = book.id_book
-            WHERE book.id_book = $id_book;`
+            WHERE book.id_book = $id_book; `,
+            { $id_book: id_book }
         );
 
-        const result = await statement.executeAsync({
-            $id_book: id_book
-        })
-
-        const rows = await result.getAllAsync();
-
-        return rows ? (rows as unknown as Library[]) : [];
+        return libraries;
     }
 
     async getAllNotLibraryFromBook(id_book: string): Promise<Library[]> {
-        const statement = await this.db.prepareAsync(
+        const libraries = this.db.getAllAsync<Library>(
             `SELECT library.*
             FROM library
             WHERE library.id_library NOT IN (
@@ -182,16 +162,11 @@ export class SQLiteLibraryRepository implements LibraryRepository {
                 JOIN library_book ON library.id_library = library_book.id_library
                 JOIN book ON library_book.id_book = book.id_book
                 WHERE book.id_book = $id_book
-            );`
+            ); `,
+            { $id_book: id_book }
         );
 
-        const result = await statement.executeAsync({
-            $id_book: id_book
-        })
-
-        const rows = await result.getAllAsync();
-
-        return rows ? (rows as unknown as Library[]) : [];
+        return libraries;
     }
 
 }

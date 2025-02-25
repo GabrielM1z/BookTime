@@ -1,13 +1,15 @@
+import { BookController } from "@/controllers/BookController";
+import { SynchronisationController } from "@/controllers/SynchronisationController";
 import { UserController } from "@/controllers/UserController";
+import { useSQLite } from "@/hooks/useSQLite";
 import React, { createContext } from "react";
 import { SQLiteProvider, SQLiteProviderProps } from "./SQLiteProvider";
-import { useSQLite } from "@/hooks/useSQLite";
-import { BookController } from "@/controllers/BookController";
 
 
 export interface ControllerContextProps {
     userController: UserController;
     bookController: BookController;
+    synchronisationController: SynchronisationController;
 }
 
 export const ControllerContext = createContext<ControllerContextProps | undefined>(undefined);
@@ -17,11 +19,13 @@ export const ControllerProviderInner = ({ children }: { children: React.ReactNod
 
     const userController = new UserController(db);
     const bookController = new BookController(db);
+    const synchronisationController = new SynchronisationController(db);
 
     return (
         <ControllerContext.Provider value={{
             userController,
-            bookController
+            bookController,
+            synchronisationController,
         }}>
             {children}
         </ControllerContext.Provider>

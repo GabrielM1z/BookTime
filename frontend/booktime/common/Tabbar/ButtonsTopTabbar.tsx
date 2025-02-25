@@ -41,9 +41,9 @@ export const ButtonsTopTabbar: React.FC<ButtonsTopTabbarProps> = ({
         }
     };
 
-    useEffect(() => {
-        scrollToActiveTab(state.index);
-    }, [state.index]);
+    // useEffect(() => {
+    //     scrollToActiveTab(state.index);
+    // }, [state.index]);
 
     return (
         <SafeAreaView edges={edges} style={style}>
