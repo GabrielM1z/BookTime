@@ -1,13 +1,13 @@
-import { useRepositoryContext } from '@/hooks/useRepository';
 import { BookMinInfos } from '@/models/Book';
 import React, { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
 import LivreEtagere from '@/components/LivreEtagere';
+import { useController } from '@/hooks/useController';
 
 const AllBooksTab = () => {
     const [books, setBooks] = useState<BookMinInfos[]>([]);
-    const { bookRepository } = useRepositoryContext();
+    const { bookController } = useController();
 
     useEffect(() => {
         fetchAllBooks();
@@ -15,7 +15,7 @@ const AllBooksTab = () => {
 
     const fetchAllBooks = () => {
         try {
-            bookRepository.getAllMin().then((data) => {
+            bookController.book.getAll(["title", "cover_image_url"]).then((data) => {
                 setBooks(data);
             });
         } catch (error) {

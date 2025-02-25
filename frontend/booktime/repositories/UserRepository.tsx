@@ -1,7 +1,6 @@
-import api from '@/services/axios';
+import { api } from '@/services/axios';
 import { User, UpdateUserDto } from '@/models/User';
 import { SQLiteDatabase } from 'expo-sqlite';
-import { Synchronisable } from './synchronisable';
 import { useSQLite } from '@/hooks/useSQLite';
 
 export interface UserRepository {
@@ -12,12 +11,11 @@ export interface UserRepository {
     delete(user: User): Promise<void>;
 }
 
-export class SQLiteUserRepository extends Synchronisable implements UserRepository {
+export class SQLiteUserRepository implements UserRepository {
     private db: SQLiteDatabase;
 
-    constructor() {
-        super();
-        this.db = useSQLite().db;
+    constructor(db: SQLiteDatabase) {
+        this.db = db;
     }
 
     async get(id: string): Promise<User | null> {

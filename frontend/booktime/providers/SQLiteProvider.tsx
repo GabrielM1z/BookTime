@@ -3,6 +3,8 @@ import { SQLiteDatabase, SQLiteProvider as SQLiteProviderOriginal, SQLiteProvide
 import React, { createContext } from 'react';
 import { wrapDbWithErrorHandler } from '@/db/wrapDBWithErrorHandler'
 
+export type { SQLiteProviderProps } from 'expo-sqlite';
+
 export interface SQLiteContextProps {
     db: SQLiteDatabase;
     lastSync: string | null;
@@ -11,7 +13,7 @@ export interface SQLiteContextProps {
 
 export const SQLiteContext = createContext<SQLiteContextProps | undefined>(undefined);
 
-export function SQLiteProviderInner({ children }: { children: React.ReactNode }) {
+function SQLiteProviderInner({ children }: { children: React.ReactNode }) {
     const [lastSync, setLastSync] = usePersistentState<string | null>('lastSync', null);
     const db = wrapDbWithErrorHandler(useSQLiteContext());
 

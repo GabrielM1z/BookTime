@@ -1,9 +1,18 @@
-import api from '@/services/axios';
-import { ActionRepository } from './ActionRepository';
-import { useRepositoryContext } from '@/hooks/useRepository';
+import { SQLiteActionRepository } from "@/repositories/ActionRepository"
+import { SQLiteDatabase } from "expo-sqlite";
 
-export class Synchronisable {
-    async sync() {
+export class SynchronisationController {
+    local: SQLiteActionRepository;
+
+    constructor(db: SQLiteDatabase) {
+        this.local = new SQLiteActionRepository(db);
+    }
+
+    // sync() {
+    //     // TODO sync decorator
+    // }
+
+	async sync() {
         const { actionRepository } = useRepositoryContext();
         try {
             console.log("pre action")

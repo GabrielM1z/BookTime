@@ -2,18 +2,16 @@ import React, { useState } from 'react';
 import TitreTab from "./TitreTab";
 import { TouchableOpacity, View, StyleSheet } from "react-native";
 import { Colors } from '@/constants/Colors';
-import { useRepositoryContext } from '@/hooks/useRepository';
-import { BookAllInfos } from '@/models/Book';
-
+import { Book } from '@/models/Book';
+import { useController } from '@/hooks/useController';
 
 export default function TestBtn({})
 {
-	const { bookRepository, libraryRepository } = useRepositoryContext();
+	const { bookController } = useController();
 	
-
 	const handleSubmit = async () => {
 		try {
-			bookRepository.delete('1').then((result) => {
+			bookController.book.delete('1').then((result) => {
 				console.log('result:', result);
 			});
 			

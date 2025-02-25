@@ -1,11 +1,11 @@
 import Etagere from '@/components/Etagere';
 import NewEtagere from '@/components/NewEtagere';
-import { useRepositoryContext } from '@/hooks/useRepository';
 import { LibraryWithBooksMin } from '@/models/Library';
 import { useFocusEffect } from 'expo-router';
 import React, { useState } from "react";
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useController } from '@/hooks/useController';
 
 const MyShelfTab = () => {
     const [etageres, setEtageres] = useState<LibraryWithBooksMin[] | []>([]);
@@ -17,11 +17,11 @@ const MyShelfTab = () => {
             refreshEtageres();
         }, [])
     );
-    const { libraryRepository } = useRepositoryContext();
+    const { bookController } = useController();
 
     const refreshEtageres = () => {
         try {
-            libraryRepository.getAllInfo().then((data) => {
+            bookController.library.getAllInfo().then((data) => {
                 setEtageres(data);
                 console.log("refreshEtageres success")
             })

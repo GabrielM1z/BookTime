@@ -3,7 +3,7 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useCallback, useMemo, useState } from 'react';
 import _, { filter } from 'lodash';
-import api from '@/services/axios';
+import { api } from '@/services/axios';
 
 type InfiniteScrollProps<F> = {
     key: string;

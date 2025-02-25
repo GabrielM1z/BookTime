@@ -15,7 +15,7 @@ import { Alert } from 'react-native';
 
 export type Api = AxiosInstance;
 
-const api = axios.create({
+export const api = axios.create({
     baseURL: apiBaseUrl,
     timeout: 5000,
     headers: {
@@ -30,8 +30,6 @@ export const keycloak = axios.create({
         'Content-Type': 'application/x-www-form-urlencoded',
     },
 })
-
-export default api;
 
 export const checkServerAliveOrWarning = async () => {
     await axios.head(baseURL).catch(() => {

@@ -1,5 +1,5 @@
 import { useAuthContext } from "@/contexts/AuthContext";
-import api, { refresh } from "@/services/axios";
+import { api, refresh } from "@/services/axios";
 import axios from "axios";
 import { Href, useRouter } from "expo-router";
 import { useEffect } from "react";
@@ -41,7 +41,7 @@ export const useAuthInterceptor = () => {
                             originalRequest.headers.Authorization = `${session?.token_type || 'Bearer'} ${session?.access_token}`;
                             return axios(originalRequest)
                         } catch (error) {
-                            router.push('/SignIn' as Href<'signIn'>);
+                            router.push('/SignIn' as Href);
                             return;
                         }
                     }

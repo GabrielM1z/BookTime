@@ -1,10 +1,7 @@
 import { Library, LibraryWithBooks, LibraryWithBooksMin } from '@/models/Library';
 import { SQLiteDatabase } from 'expo-sqlite';
-import { useSQLite } from "@/hooks/useSQLite";
-import { Synchronisable } from './synchronisable';
 import uuid from 'react-native-uuid';
-import { bookRepositoryFactory } from './factories/bookRepositoryFactory';
-import { BookAllInfos, BookMinInfos } from '@/models/Book';
+import { Book, BookMinInfos } from '@/models/Book';
 
 
 
@@ -19,14 +16,11 @@ export interface LibraryRepository {
     getAllNotLibraryFromBook: (id_book: string) => Promise<Library[]>;
 }
 
-export class SQLiteLibraryRepository extends Synchronisable implements LibraryRepository {
+export class SQLiteLibraryRepository implements LibraryRepository {
     private db: SQLiteDatabase;
-    private api: APILibraryRepository;
 
-    constructor() {
-        super();
-        this.db = useSQLite().db;
-        this.api = new APILibraryRepository();
+    constructor(db: SQLiteDatabase) {
+        this.db = db;
     }
 
     async getAll(): Promise<Library[]> {
@@ -52,7 +46,7 @@ export class SQLiteLibraryRepository extends Synchronisable implements LibraryRe
         const statement = await this.db.prepareAsync(
             'INSERT INTO library (id_library, name) VALUES ($id_library, $name);'
         );
-        this.sync();
+        // this.sync();
 
         await statement.executeAsync({
             $id_library: uuid.v4(),

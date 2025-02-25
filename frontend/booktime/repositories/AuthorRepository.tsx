@@ -1,7 +1,6 @@
 import { Author } from '@/models/Author';
 import { SQLiteDatabase } from 'expo-sqlite';
 import { useSQLite } from "@/hooks/useSQLite";
-import { Synchronisable } from './synchronisable';
 import { v4 as uuidv4 } from 'uuid';
 
 
@@ -11,12 +10,11 @@ export interface AuthorRepository {
     add: (author: Author) => Promise<void>;
 }
 
-export class SQLiteAuthorRepository extends Synchronisable implements AuthorRepository {
+export class SQLiteAuthorRepository implements AuthorRepository {
     private db: SQLiteDatabase;
 
-    constructor() {
-        super();
-        this.db = useSQLite().db;
+    constructor(db: SQLiteDatabase) {
+        this.db = db;
     }
 
     async getAll(): Promise<Author[]> {

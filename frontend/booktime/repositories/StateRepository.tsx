@@ -1,24 +1,18 @@
 import { State } from "@/models/State";
 import { SQLiteDatabase } from 'expo-sqlite';
-import { useSQLite } from "@/hooks/useSQLite";
-import { Synchronisable } from './synchronisable';
 import uuid from 'react-native-uuid';
 
 
 export interface StateRepository {
     getAll: () => Promise<State[]>;
     get: (id: string) => Promise<State | null>;
-    add: (state: State) => Promise<void>;
 }
 
-export class SQLiteStateRepository extends Synchronisable implements StateRepository {
+export class SQLiteStateRepository implements StateRepository {
     private db: SQLiteDatabase;
-    private api: APIStateRepository;
 
-    constructor() {
-        super();
-        this.db = useSQLite().db;
-        this.api = new APIStateRepository();
+    constructor(db: SQLiteDatabase) {
+        this.db = db;
     }
 
     async getAll(): Promise<State[]> {

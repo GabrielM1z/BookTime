@@ -3,20 +3,19 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import React, { useEffect, useState } from "react";
 import { useLocalSearchParams, useNavigation } from 'expo-router';
-import { useRepositoryContext } from '@/hooks/useRepository';
-import { BookAllInfos } from '@/models/Book';
+import { Book } from '@/models/Book';
 import { Ionicons } from '@expo/vector-icons';
 import LivreEtagere from '@/components/LivreEtagere';
 import BackButton from '@/components/BackButton';
-
+import { useController } from '@/hooks/useController';
 
 export default function EtagereDetail() {
 
     const { idEtagere, label } = useLocalSearchParams();
-    const { bookRepository, libraryRepository } = useRepositoryContext();
+    const { bookController } = useController();
     const navigation = useNavigation();
 
-    const [books, setBooks] = useState<BookAllInfos[]>([]);
+    const [books, setBooks] = useState<Book[]>([]);
 
     const [menuVisible, setMenuVisible] = useState(false);
     const [menuAnimation] = useState(new Animated.Value(0));
@@ -30,7 +29,7 @@ export default function EtagereDetail() {
     // Récupère tous les livres de l'étagère
     const fetchAllBooksFromLib = () => {
         try {
-            bookRepository.getAllFromLib(idEtagere as string).then((data) => {
+            bookController.book.getAllFromLib(idEtagere as string).then((data) => {
                 setBooks(data);
             });
         } catch (error) {
@@ -63,7 +62,7 @@ export default function EtagereDetail() {
     const deleteEtagere = () => {
         console.log("Supprimer l'étagère");
         try {
-            libraryRepository.delete(idEtagere as string).then(() => {
+            bookController.library.delete(idEtagere as string).then(() => {
                 console.log("Etagère supprimée");
                 navigation.goBack();
             });

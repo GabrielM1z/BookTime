@@ -1,7 +1,7 @@
 import { withAnimated } from "@/common";
 import { Feather } from "@expo/vector-icons";
 import Color from "color";
-import { BottomTabBarProps } from "expo-router/node_modules/@react-navigation/bottom-tabs";
+import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import React, { useMemo } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { useTheme, Text } from "react-native-paper";

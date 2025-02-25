@@ -2,14 +2,14 @@ import React, { useCallback, useRef, useMemo, forwardRef, useEffect, useState } 
 import { StyleSheet, View, Text, Button } from "react-native";
 import BottomSheet, { BottomSheetFlatList, BottomSheetModal, BottomSheetModalProvider, BottomSheetSectionList, BottomSheetView } from "@gorhom/bottom-sheet";
 import { CustomBottomSheet } from "@/common";
-import { useRepositoryContext } from "@/hooks/useRepository";
 import { Library } from "@/models";
+import { useController } from "@/hooks/useController";
 
 export const ModalAddToLibrary = forwardRef<BottomSheetModal>((_props, ref) => {
     // hooks
     // const ref = useRef<BottomSheetModal>(null);
     const [libraryList, setLibraryList] = useState<Library[]>([])
-    const { libraryRepository } = useRepositoryContext();
+    const { bookController } = useController();
 
     // libraryRepository.getAll().then((data) => {
     //     console.log(data)
@@ -17,7 +17,7 @@ export const ModalAddToLibrary = forwardRef<BottomSheetModal>((_props, ref) => {
     // })
 
     useEffect(() => {
-        libraryRepository.getAll().then((data) => {
+        bookController.library.getAll().then((data) => {
             console.log(data)
             setLibraryList(data)
         })

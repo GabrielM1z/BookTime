@@ -6,23 +6,22 @@ import { useLocalSearchParams, useNavigation } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { Colors } from '@/constants/Colors';
 import { Link } from 'expo-router';
-import { useRepositoryContext } from '@/hooks/useRepository';
 import LibraryChoice from '@/components/LibraryChoice';
 import axios from 'axios';
 import { baseURL } from '@/constants/Api';
-import { BookAllInfos } from '@/models/Book';
+import { Book } from '@/models/Book';
 import { linkToBase64 } from '@/helpers/image';
 import { Ionicons } from '@expo/vector-icons';
 import BackButton from '@/components/BackButton';
-
+import { useController } from '@/hooks/useController';
 
 export default function LivreDetail() {
 
-    const { bookRepository } = useRepositoryContext();
+    const { bookController } = useController();
     const navigation = useNavigation();
     const { idBook, cover, mode } = useLocalSearchParams();
 
-    const [book, setBook] = useState<BookAllInfos>();
+    const [book, setBook] = useState<Book>();
     const [expandedResume, setExpandedResume] = useState(false);
 
     // 🔹 Vérifier si `cover` est bien une chaîne avant d'essayer de parser
@@ -39,7 +38,7 @@ export default function LivreDetail() {
         try {
             let bookData = (await axios.get(url));
             let imageBase64 = await linkToBase64(bookData.data.data.cover_image_url)
-            const book: BookAllInfos = {
+            const book: Book = {
                 id_book: bookData.data.data.id_book,
                 title: bookData.data.data.title,
                 description: bookData.data.data.description,
@@ -59,7 +58,7 @@ export default function LivreDetail() {
 
     const getBookFromFront = async (idBook: string) => {
         try {
-            let book = await bookRepository.get(idBook)
+            let book = await bookController.book.get(idBook)
             setBook(book);
             console.log("chargement book front :", book.title)
 

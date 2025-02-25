@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import TitreTab from "./TitreTab";
 import { Modal, TouchableOpacity, View, StyleSheet, TextInput, Text } from "react-native";
 import { Colors } from '@/constants/Colors';
-import { useRepositoryContext } from '@/hooks/useRepository';
-
+import { useController } from '@/hooks/useController';
 
 export default function NewEtagere({ onAddEtagere })
 {
@@ -11,7 +10,7 @@ export default function NewEtagere({ onAddEtagere })
 	const [formData, setFormData] = useState({
 		name: ''
 	});
-	const { libraryRepository } = useRepositoryContext();
+	const { bookController } = useController();
 
 	const handleInputChange = (field: any, value: any) => {
 		setFormData({ name: value });
@@ -20,7 +19,7 @@ export default function NewEtagere({ onAddEtagere })
 	const handleSubmit = async () => {
 		try {
             console.log('Form Data Submitted:', formData);
-            await libraryRepository.add(formData.name); // Ajoute l'étagère
+            await bookController.library.add(formData.name); // Ajoute l'étagère
             setModalVisible(false); // Ferme la popup après soumission
             onAddEtagere(); // Notifie le parent pour rafraîchir la liste des étagères
         } catch (error) {
