@@ -29,7 +29,7 @@ export default function SignIn() {
 
         try {
             await logIn(email, password, rememberMe)
-            router.replace('/(app)' as Href<'(app)'>);
+            router.replace('/(app)' as Href);
         }
         catch (error) {
             const axiosError = error as AxiosError;
@@ -41,7 +41,7 @@ export default function SignIn() {
         Keyboard.dismiss();
         try {
             await logAsGuest();
-            router.replace('/(app)' as Href<'(app)'>);
+            router.replace('/(app)' as Href);
         }
         catch (error) {
             const axiosError = error as AxiosError;
@@ -50,7 +50,7 @@ export default function SignIn() {
     }, []);
 
     useEffect(() => {
-        if (showSessions && sessions.length > 0) {
+        if (showSessions) {
             accountCenterRef.current?.present();
         }
     }, [showSessions])
@@ -87,26 +87,24 @@ export default function SignIn() {
                         Log as guest
                     </Button>
                     <PressableText
-                        onPress={() => router.push('/ForgotPassword' as Href<'ForgotPassword'>)}
+                        onPress={() => router.push('/ForgotPassword' as Href)}
                     >
                         Forgot Password
                     </PressableText>
-                    <PressableText onPress={() => router.push('/SignUp' as Href<'SignUp'>)}>Sign Up</PressableText>
+                    <PressableText onPress={() => router.push('/SignUp' as Href)}>Sign Up</PressableText>
                     {
                         showLoggedUsers && (
-                            <>
-                                <PressableText
-                                    onPress={() => accountCenterRef.current?.present()}
-                                >
-                                    Logged users
-                                </PressableText>
-                                <AccountCenter
-                                    ref={accountCenterRef}
-                                    filter={(user) => user.id_user !== guestUserId}
-                                />
-                            </>
+                            <PressableText
+                                onPress={() => accountCenterRef.current?.present()}
+                            >
+                                Logged users
+                            </PressableText>
                         )
                     }
+                    <AccountCenter
+                        ref={accountCenterRef}
+                        filter={(user) => user.id_user !== guestUserId}
+                    />
                 </View>
             </View>
             <View style={styles.footerContainer}>

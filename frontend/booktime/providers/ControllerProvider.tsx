@@ -15,7 +15,7 @@ export const ControllerContext = createContext<ControllerContextProps | undefine
 export const ControllerProviderInner = ({ children }: { children: React.ReactNode }) => {
     const { db } = useSQLite();
 
-    const userController = new UserController();
+    const userController = new UserController(db);
     const bookController = new BookController(db);
 
     return (

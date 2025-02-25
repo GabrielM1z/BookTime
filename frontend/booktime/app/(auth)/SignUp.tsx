@@ -2,10 +2,10 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import commonStyles from "@/styles/commonStyles";
 import React, { useState } from "react";
 import { ActivityIndicator, View } from "react-native";
-import { Avatar, Button } from "react-native-paper";
+import { Avatar, Button, Text, TextInput } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import styles from "./SignUp.style";
-import { Text, TextInput } from "@/common";
+import { PasswordTextInput } from "@/common";
 import BackButton from "@/components/BackButton";
 
 
@@ -47,7 +47,7 @@ export default function Register() {
                         label={emailError}
 
                     />
-                    <TextInput.Password onChangeText={setPassword} />
+                    <PasswordTextInput onChangeText={setPassword} />
                     <TextInput
                         placeholder="Username"
                         onChangeText={setUsername}
@@ -58,7 +58,7 @@ export default function Register() {
                 <Button
                     mode="contained"
                     onPress={() => { }}
-                    disabled={ isLoading || !email || !password || !username }
+                    disabled={isLoading || !email || !password || !username}
                 >
                     Register
                 </Button>

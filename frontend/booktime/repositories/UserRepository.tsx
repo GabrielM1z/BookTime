@@ -1,7 +1,6 @@
 import { api } from '@/services/axios';
 import { User, UpdateUserDto } from '@/models/User';
 import { SQLiteDatabase } from 'expo-sqlite';
-import { useSQLite } from '@/hooks/useSQLite';
 
 export interface UserRepository {
     get(id: string): Promise<User | null>;
@@ -19,15 +18,10 @@ export class SQLiteUserRepository implements UserRepository {
     }
 
     async get(id: string): Promise<User | null> {
-        const statement = await this.db.prepareAsync(`
-            SELECT * FROM user WHERE id_user = $id_user;
-        `);
-
-        let result = await statement.executeAsync<User>({
-            $id_user: id
-        });
-
-        return result.getFirstAsync();
+        return this.db.getFirstAsync<User>(
+            `SELECT * FROM user WHERE id_user = $id_user;`,
+            { $id_user: id }
+        );
     }
 
     async getAll(): Promise<User[]> {

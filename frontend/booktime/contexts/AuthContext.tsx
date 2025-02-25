@@ -69,7 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     await logoutAxios(session.refresh_token!);
                 }
                 await sessionController.removeSession(session);
-                await userController.local.delete(session.id_user);
+                await userController.user.local.delete(session.id_user);
                 setSession(null);
             } finally {
                 setIsLoading(false);
