@@ -15,6 +15,7 @@ export interface BookRepository {
 	get: (id: string) => Promise<BookAllInfos>;
 	add: (state: BookAllInfos) => Promise<void>;
 	addBookToLibrary: (id_library: string, book: BookAllInfos) => Promise<void>
+	updateBookLibrary: (id_library: string, id_book: string) => Promise<void>
 	delBookFromLibrary: (id_library: string, id_book: string) => Promise<void>
 }
 
@@ -90,14 +91,12 @@ export class SQLiteBookRepository extends Synchronisable implements BookReposito
 	}
 
 	async delete(id: string): Promise<void> {
-		await this.db.withTransactionAsync(async () => {
-			const deleteBookStmt = await this.db.prepareAsync(
-				'DELETE FROM book WHERE id_book == $id;'
-			);
+		const deleteBookStmt = await this.db.prepareAsync(
+			'DELETE FROM book WHERE id_book == $id;'
+		);
 
-			await deleteBookStmt.executeAsync({
-				$id: id
-			});
+		await deleteBookStmt.executeAsync({
+			$id: id
 		});
 	}
 
@@ -105,12 +104,12 @@ export class SQLiteBookRepository extends Synchronisable implements BookReposito
 
 		try {
 			await this.db.withExclusiveTransactionAsync(async () => {
-				
+
 				const insertBookStmt = await this.db.prepareAsync(
 					`INSERT OR IGNORE INTO book (id_book, title, description, publisher, publication_date, page_number, language, cover_image_url) 
 					VALUES ($id_book, $title, $description, $publisher, $publication_date, $page_number, $language, $cover_image_url);`
 				);
-	
+
 				let resultInsertBook = await insertBookStmt.executeAsync({
 					$id_book: book.id_book,
 					$title: book.title,
@@ -121,16 +120,17 @@ export class SQLiteBookRepository extends Synchronisable implements BookReposito
 					$language: book.language,
 					$cover_image_url: book.cover_image_url,
 				});
-	
-	
+
+
 				const insertLibraryBookStmt = await this.db.prepareAsync(
 					' INSERT OR IGNORE INTO library_book (id_library, id_book) VALUES ($id_library, $id_book);'
 				);
-	
+
 				let resultInsertLibraryBook = await insertLibraryBookStmt.executeAsync({
 					$id_library: id_library,
 					$id_book: book.id_book,
 				});
+
 			});
 
 			console.log("addBookToLibrary: success")
@@ -140,16 +140,39 @@ export class SQLiteBookRepository extends Synchronisable implements BookReposito
 		}
 	}
 
-	async delBookFromLibrary(id_library: string, id_book: string): Promise<void> {
-		await this.db.withTransactionAsync(async () => {
-			const deleteLibraryBookStmt = await this.db.prepareAsync(
-				'DELETE FROM library_book WHERE id_library == $id_library AND id_book == $id_book;'
+	/**
+	 * Ajoute un livre à une librairie sans le creer
+	 * 
+	 * @param id_library 
+	 * @param id_book 
+	 */
+	async updateBookLibrary(id_library: string, id_book: string): Promise<void> {
+		try {
+			const insertLibraryBookStmt = await this.db.prepareAsync(
+				' INSERT OR IGNORE INTO library_book (id_library, id_book) VALUES ($id_library, $id_book);'
 			);
 
-			await deleteLibraryBookStmt.executeAsync({
+			let resultInsertLibraryBook = await insertLibraryBookStmt.executeAsync({
 				$id_library: id_library,
 				$id_book: id_book,
 			});
+
+			console.log("updateBookLibrary: success")
+
+		} catch (error) {
+			console.log("Failed addBookToLibrary :", error)
+
+		}
+	}
+
+	async delBookFromLibrary(id_library: string, id_book: string): Promise<void> {
+		const deleteLibraryBookStmt = await this.db.prepareAsync(
+			'DELETE FROM library_book WHERE id_library == $id_library AND id_book == $id_book;'
+		);
+
+		await deleteLibraryBookStmt.executeAsync({
+			$id_library: id_library,
+			$id_book: id_book,
 		});
 	}
 }
@@ -194,6 +217,10 @@ export class APIBookRepository implements BookRepository {
 	}
 
 	async addBookToLibrary(id_library: string, book: BookAllInfos): Promise<void> {
+		return;
+	}
+
+	async updateBookLibrary(id_library: string, id_book: string): Promise<void> {
 		return;
 	}
 

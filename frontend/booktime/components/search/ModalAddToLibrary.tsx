@@ -1,20 +1,20 @@
-import React, { useCallback, useRef, useMemo, forwardRef, useEffect, useState } from "react";
-import { StyleSheet, View, Text, Button } from "react-native";
-import BottomSheet, { BottomSheetFlatList, BottomSheetModal, BottomSheetModalProvider, BottomSheetSectionList, BottomSheetView } from "@gorhom/bottom-sheet";
-import { CustomBottomSheet } from "@/common";
+import React, { useCallback, forwardRef, useEffect, useState } from "react";
+import { StyleSheet, View, TouchableOpacity } from "react-native";
+import { BottomSheetFlatList, BottomSheetFooter, BottomSheetFooterProps, BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useRepositoryContext } from "@/hooks/useRepository";
 import { Library } from "@/models";
-import { Button } from 'react-native-paper';
+import { Avatar, Button, Text } from 'react-native-paper';
 
 interface ModalAddToLibraryProps {
     idBookAdded: string,
+    closeModal: () => void,
 }
 
-export const ModalAddToLibrary = forwardRef<BottomSheetModal, ModalAddToLibraryProps>(({ idBookAdded }, ref) => {
+export const ModalAddToLibrary = forwardRef<BottomSheetModal, ModalAddToLibraryProps>(({ idBookAdded, closeModal }, ref) => {
     // hooks
     // const ref = useRef<BottomSheetModal>(null);
     const [libraryList, setLibraryList] = useState<Library[]>([])
-    const { libraryRepository } = useRepositoryContext();
+    const { libraryRepository, bookRepository } = useRepositoryContext();
     const [libraryIdListSelected, setLibraryIdListSelected] = useState<string[]>([])
 
     useEffect(() => {
@@ -22,6 +22,8 @@ export const ModalAddToLibrary = forwardRef<BottomSheetModal, ModalAddToLibraryP
             console.log(data)
             setLibraryList(data)
         })
+        initItemSelected();
+    
     }, []);
 
     // callbacks
@@ -42,68 +44,90 @@ export const ModalAddToLibrary = forwardRef<BottomSheetModal, ModalAddToLibraryP
         console.log(libraryIdListSelected)
     }, [libraryIdListSelected]);
 
+    function initItemSelected() {
+        libraryRepository.getAllLibraryFromBook(idBookAdded).then((bookLibraryList) => {
+            // console.log(bookLibraryList.map(library => library.id_library));
+            
+            setLibraryIdListSelected(bookLibraryList.map(library => library.id_library));
+        })
+    }
 
     const renderItem = useCallback(
         ({ item }: { item: Library }) => (
             <TouchableOpacity
                 onPress={() => toggleItemSelect(item.id_library)}
-                style={{
+                style={[{
                     backgroundColor: libraryIdListSelected.includes(item.id_library) ? 'lightgray' : 'white'
-                }}
+
+                }, styles.itemContainer]}
             >
-                <Text>{item.name}</Text>
+                <Avatar.Icon size={24} style={styles.avatarStyle} icon="library" />
+                <View >
+                    <Text variant="titleMedium">{item.name}</Text>
+                    <Text variant="bodyMedium">Livres présents : 10</Text>
+                </View>
             </TouchableOpacity>
         ), [libraryIdListSelected]
     );
 
-    // const validChoice = useCallback(() => {
-    //     return (
-    //         <BottomSheetFooter>
-    //             <Button icon="camera" mode="contained" onPress={() => console.log('Pressed')}>
-    //                 Press me
-    //             </Button>
-    //         </BottomSheetFooter>
-    //     )
-    // }, [libraryIdListSelected])
+    const addToLibrary = async (id_library: string, id_book: string) => {
+        await bookRepository.updateBookLibrary(id_library, id_book);
+        console.log("book added");
+
+    };
+
+    const deleteFromLibrary = async (id_library: string, id_book: string) => {
+        await bookRepository.delBookFromLibrary(id_library, id_book);
+        console.log("book removed");
+    };
+
+    const confirmChoice = useCallback(async () => {
+
+        console.log("Library to add :", libraryIdListSelected)
+
+        for (const library of libraryList) {
+            if (libraryIdListSelected.includes(library.id_library)) {
+                addToLibrary(library.id_library, idBookAdded)
+            } else {
+                deleteFromLibrary(library.id_library, idBookAdded)
+            }
+        };
+        
+        closeModal();
+    }, [libraryList, libraryIdListSelected])
 
     const Footer = ({ animatedFooterPosition }: BottomSheetFooterProps) => {
         return (
-            <BottomSheetFooter animatedFooterPosition={animatedFooterPosition}>
-                <Button icon="camera" mode="contained" onPress={() => console.log('Pressed')}>
-                    Press me
+            <BottomSheetFooter animatedFooterPosition={animatedFooterPosition} >
+                <Button icon="camera" mode="contained" onPress={() => confirmChoice()}>
+                    Ajouter aux librairies
                 </Button>
             </BottomSheetFooter>
         )
     }
-
-    // const toggleItemSelect = useCallback((id: string) => {
-    //     if (libraryIdListSelected.includes(id)) {
-    //         setLibraryIdListSelected(prevIds => prevIds.filter(itemId => itemId !== id));
-    //         console.log("removed :", id)
-
-    //     } else {
-    //         setLibraryIdListSelected(prevIds => [...prevIds, id]);
-    //         console.log("added :", id)
-
-    //     }
-    //     console.log(libraryIdListSelected)
-    // }, [libraryIdListSelected]);
 
     return (
         <BottomSheetModal
             ref={ref}
             onChange={handleSheetChanges}
             index={1}
-            snapPoints={["25%", "50%", "90%"]} // <-- Définition des points d'ancrage
-            enableDynamicSizing={false}
+            snapPoints={["30%", "50%", "70%"]} // <-- Définition des points d'ancrage
+            enableDynamicSizing={true}
             footerComponent={Footer}
+
         >
+            {/* <BottomSheet> */}
+            <Text variant="headlineSmall" style={{ marginLeft: "5%" }}>
+                Toutes les librairies
+            </Text>
+            {/* </BottomSheet> */}
             <BottomSheetFlatList
-                style={styles.contentContainer}
+                style={styles.bottomSheetFlatList}
                 data={libraryList}
                 extraData={libraryIdListSelected}
                 renderItem={renderItem}
-                keyExtractor={(i) => i.id_library} />
+                keyExtractor={(i) => i.id_library}
+            />
 
         </BottomSheetModal>
     );
@@ -111,25 +135,24 @@ export const ModalAddToLibrary = forwardRef<BottomSheetModal, ModalAddToLibraryP
 
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        paddingTop: 200,
-    },
     contentContainer: {
         flex: 1,
         backgroundColor: "white",
     },
-    sectionHeaderContainer: {
-        backgroundColor: "white",
-        padding: 6,
-    },
     itemContainer: {
-        // margin: "auto",
+        width: "100%",
+        flexDirection: "row",
         padding: 10,
-        backgroundColor: "#d73a49",
-        alignItems: "center",
-        borderStyle: "solid",
-        borderBottomWidth: 1,
-        borderColor: "#1e9aa4"
     },
+    bottomSheetFlatList: {
+        margin: "5%",
+        marginBottom: "10%"
+
+    },
+    avatarStyle: {
+        marginTop: "auto",
+        marginBottom: "auto",
+        marginRight: "5%"
+    }
+
 });

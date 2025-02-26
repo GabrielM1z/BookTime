@@ -1,7 +1,7 @@
 import { BookSearchItem } from "@/components/search/BookSearchItem";
 import { ModalAddToLibrary } from "@/components/search/ModalAddToLibrary";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
-import { BookSearchResult } from "@/models/Book";
+import { Book, BookSearchResult } from "@/models/Book";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import React, { useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
@@ -36,8 +36,15 @@ const SearchTab = () => {
     const [filters, setFilters] = useState<TFilters | null>(null);
     const [query, setQuery] = useState<string>("");
 
-    const handlePresentModalPress = () => {
+    const [idLastBookAdded, setIdLastBookAdded] = useState<string>("")
+
+    const handlePresentModalPress = (id_book: string) => {
+        setIdLastBookAdded(id_book)
         bottomSheetRef.current?.present();
+    };
+
+    const closeModal = () => {
+        bottomSheetRef.current?.close();
     };
 
     const handleCancel = () => {
@@ -108,7 +115,7 @@ const SearchTab = () => {
                     </View>
                 }
             />
-            <ModalAddToLibrary ref={bottomSheetRef} />
+            <ModalAddToLibrary ref={bottomSheetRef} idBookAdded={idLastBookAdded} closeModal={closeModal}/>
         </SafeAreaView>
     );
 }

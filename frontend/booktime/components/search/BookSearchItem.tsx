@@ -2,7 +2,7 @@ import { StyleSheet, View, Pressable, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { ThemedText } from '../ThemedText';
 import { BookSearchResult, BookInfosServeur } from '@/models/Book';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Colors } from '@/constants/Colors';
 import { useRepositoryContext } from '@/hooks/useRepository';
@@ -14,13 +14,14 @@ import { ModalAddToLibrary } from './ModalAddToLibrary';
 
 interface BookSearchItemProps {
     book: BookSearchResult;
-    handleModalAddToLibrary: () => void;
+    handleModalAddToLibrary: (idBook: string) => void;
 }
 
 export const BookSearchItem = ({ book, handleModalAddToLibrary }: BookSearchItemProps) => {
 
     const { bookRepository, libraryRepository } = useRepositoryContext();
     const [visible, setVisible] = useState(false);
+    const [bookAdded, setBookAdded] = useState<keyof typeof Ionicons.glyphMap>("add");
 
     const showSnackbar = () => setVisible(true);
     const hideSnackbar = () => setVisible(false);
@@ -44,20 +45,30 @@ export const BookSearchItem = ({ book, handleModalAddToLibrary }: BookSearchItem
         }
     };
 
+    const handleModal = async () => {
+        handleModalAddToLibrary(book.isbn13)
+    }
+
+
+    useEffect(()=>{
+        libraryRepository.getAllLibraryFromBook(book.isbn13).then((data) => {
+            if (data.length != 0) {
+                setBookAdded("checkmark")
+            }
+        })
+    });
+
     return (
         <View style={styles.itemContainer}>
-            <CustomSnackbar visible={visible} onDismiss={hideSnackbar} onPressChange={handleModalAddToLibrary} />
+            <CustomSnackbar visible={visible} onDismiss={hideSnackbar} onPressChange={handleModal} />
             <CoverPressable id_book={book.isbn13} cover={book.thumbnail} mode='search'></CoverPressable>
-            {/* <Image source={typeof imageSource === 'string' ? { uri: imageSource } : imageSource} style={styles.itemImage} resizeMode={'cover'}></Image> */}
-            {/* <Image source={{uri:"data:image/png;base64,"+getImageAsBase64(book.thumbnail)}} defaultSource={defaultCover}  style={styles.itemImage} resizeMode={'cover'} ></Image> */}
-
             <View style={styles.itemInfos}>
                 <ThemedText type="titreLivreHorizontal" numberOfLines={1}>{book.title}</ThemedText>
                 <ThemedText type="auteurLivreHorizontal">{book.authors ? book.authors[0] : "Inconnue"}</ThemedText>
             </View>
             <View style={styles.addItemContainer}>
-                <Pressable onPress={handleAddBook} style={styles.addItem}>
-                    <Ionicons size={20} color={"#1E9AA4"} name={'add'} />
+                <Pressable onPress={handleAddBook} style={bookAdded === "checkmark" ? styles.addedItem : styles.item}>
+                    <Ionicons size={20} color={bookAdded === "checkmark" ? "white" : "#1E9AA4"} name={bookAdded} />
                 </Pressable>
             </View>
         </View>
@@ -77,7 +88,7 @@ const CustomSnackbar = ({ visible, onDismiss, onPressChange }: { visible: boolea
                 onPress: onPressChange,
             }}
         >
-            Custom styled Snackbar!
+            Livre ajouté à "Like"
         </Snackbar>
     </Portal>
 );
@@ -114,7 +125,7 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         flex: 1,
     },
-    addItem: {
+    item: {
         width: 40,
         height: 40,
 
@@ -123,6 +134,22 @@ const styles = StyleSheet.create({
         borderWidth: 3,
         borderRadius: 10,
         backgroundColor: "white",
+
+
+        justifyContent: "center",
+        alignItems: "center",
+
+    },
+    addedItem: {
+        width: 40,
+        height: 40,
+
+        borderColor: "#1E9AA4",
+        borderStyle: "solid",
+        borderWidth: 3,
+        borderRadius: 10,
+        backgroundColor: "#1E9AA4",
+        color: "white",
 
 
         justifyContent: "center",
