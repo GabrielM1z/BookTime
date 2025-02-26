@@ -15,7 +15,6 @@ export const useAuthInterceptor = () => {
             (config) => {
                 if (session && session.access_token && !config.headers['Authorization']) {
                     config.headers['Authorization'] = `${session.token_type || 'Bearer'} ${session.access_token}`;
-                    console.debug('Add token to request', config);
                 }
                 return config;
             },
