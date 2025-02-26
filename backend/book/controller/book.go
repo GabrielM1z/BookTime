@@ -62,11 +62,13 @@ func (bc *BookController) GetBook(c *gin.Context) {
 		imageURL = strings.Replace(imageURL, "&edge=curl", "", -1)
 		bookID := idParam // ID du livre correspondant
 
-		publicURLBase := "http://159.31.247.130:8082/books"
+		publicURLBase := "http://84.235.239.52:8082/books"
 		if os.Getenv("ENVIROMENT") == "development" {
 			publicURLBase = "http://localhost:8082/books"
 		} else if os.Getenv("ENVIROMENT") == "oracle" {
 			publicURLBase = "http://84.235.239.52:8082/books"
+		} else if os.Getenv("ENVIROMENT") == "prod" || os.Getenv("ENVIROMENT") == "production" {
+			publicURLBase = "http://159.31.247.130:8082/books"
 		}
 		// fmt.Println("le publicURLBase est:", publicURLBase)
 
