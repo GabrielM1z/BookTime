@@ -27,14 +27,8 @@ export interface BookSearchResult {
 	authors?: string[];  
 }
 
-export interface Book{
-    id : string;
-    etag : string;
-    volumeInfo : BookInfos
-}
-
 //book model BDD
-export interface BookAllInfos {
+export interface Book {
 	id_book : string;
 	title : string;
 	description : string;

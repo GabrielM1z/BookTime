@@ -1,5 +1,5 @@
 import { StyleSheet, View, Text, ScrollView } from 'react-native';
-import LivreEtagere from '@/components/LivreEtagere';
+import {LivreEtagere} from '@/components/LivreEtagere';
 import { ThemedText } from './ThemedText';
 import React from 'react';
 import { LibraryWithBooksMin } from '@/models/Library';
@@ -22,7 +22,7 @@ export default function Etagere({ label, idEtagere, livres, index }: EtagereProp
 		'#84b6f4'
 	];
 
-	// console.log("livres : ", livres)
+	console.log("livres : ", livres)
 
 	// on fait une rotation sur les coouleurs
 	const randomindex = index % 3;

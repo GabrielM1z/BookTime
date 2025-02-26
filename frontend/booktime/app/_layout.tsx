@@ -1,11 +1,11 @@
 import { QueryProvider } from '@/components/QueryProvider';
-import { AuthProvider } from '@/contexts/AuthContext';
+import { AuthProvider, useAuthContext } from '@/contexts/AuthContext';
 import { FadeTransitionProvider } from '@/contexts/FadeTransitionContext';
 import { migrateDbIfNeeded } from '@/db/init';
 import { useAuthInterceptor } from '@/hooks/useAuthInterceptor';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { ControllerProvider } from '@/providers/ControllerProvider';
-import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import { CustomBottomSheetProvider } from "@/common";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
     DarkTheme as NavigationDarkTheme,
@@ -19,6 +19,7 @@ import React, { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { PaperProvider, adaptNavigationTheme } from 'react-native-paper';
 import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -32,8 +33,10 @@ const { LightTheme, DarkTheme } = adaptNavigationTheme({
 function Routes() {
     useAuthInterceptor();
 
+    const { session } = useAuthContext();
+
     return (
-        <Stack>
+        <Stack key={session?.id_user}>
             <Stack.Screen name="(app)" options={{ headerShown: false }} />
             <Stack.Screen name="(auth)" options={{ headerShown: false }} />
             <Stack.Screen name="+not-found" />
@@ -67,7 +70,7 @@ export default function RootLayout() {
     return (
         <SafeAreaProvider initialMetrics={initialWindowMetrics}>
             <GestureHandlerRootView>
-                <BottomSheetModalProvider>
+                <CustomBottomSheetProvider>
                     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : LightTheme}>
                         <FadeTransitionProvider>
                             <ControllerProvider databaseName='booktime.db' onInit={migrateDbIfNeeded} onError={handleSQLiteError}>
@@ -80,8 +83,9 @@ export default function RootLayout() {
                                 </AuthProvider>
                             </ControllerProvider>
                         </FadeTransitionProvider>
+                        <StatusBar style="auto" />
                     </ThemeProvider>
-                </BottomSheetModalProvider>
+                </CustomBottomSheetProvider>
             </GestureHandlerRootView>
         </SafeAreaProvider>
     );

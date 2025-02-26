@@ -6,7 +6,7 @@ export interface PressableTextProps extends TextProps<string> {
     onPress?: () => void;
 }
 
-const PressableText = ({
+export const PressableText = ({
     onPress,
     ...textProps
 }: PressableTextProps) => {
@@ -22,5 +22,3 @@ const styles = StyleSheet.create({
         alignItems: "center",
     }
 })
-
-export default PressableText;

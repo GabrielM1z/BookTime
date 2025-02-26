@@ -1,3 +1,4 @@
 export { CustomBottomSheet } from "./CustomBottomSheet";
 export type { CustomBottomSheetProps } from "./CustomBottomSheet";
-export { OpacityBackdropBottomSheet } from "./OpacityBackdropBottomSheet";
+export { CustomBottomSheetProvider } from "./BottomSheetContext";
+export type { BottomSheetProviderProps } from "./BottomSheetContext";

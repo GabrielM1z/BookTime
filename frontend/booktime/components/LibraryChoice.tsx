@@ -1,15 +1,15 @@
 import { FlatList, Modal, StyleSheet, TouchableOpacity, View, Text } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { Library } from '@/models/Library';
-import { useRepositoryContext } from '@/hooks/useRepository';
 import LibraryChip from './LibraryChip';
+import { useController } from '@/hooks/useController';
 
 
 export default function LibraryChoice({ book }) {
     const [modalVisible, setModalVisible] = useState(false);
     const [librariesNotOwn, setLibrariesNotOwn] = useState<Library[]>([]);
     const [librariesOwn, setLibrariesOwn] = useState<Library[]>([]);
-    const { libraryRepository, bookRepository } = useRepositoryContext();
+    const { bookController } = useController();
 
     useEffect(() => {
         if (book) {
@@ -21,7 +21,7 @@ export default function LibraryChoice({ book }) {
     const fetchLibrariesOwn = () => {
         try {
             if (book?.id_book && typeof book.id_book === 'string') {
-                libraryRepository.getAllLibraryFromBook(book.id_book).then((data) => {
+                bookController.library.getAllLibraryFromBook(book.id_book).then((data) => {
                     setLibrariesOwn(data);
                 });
             } else if (book?.id_book) {
@@ -34,7 +34,7 @@ export default function LibraryChoice({ book }) {
 
     const fetchLibrariesNotOwn = () => {
         try {
-            libraryRepository.getAllNotLibraryFromBook(book.id_book).then((data) => {
+            bookController.library.getAllNotLibraryFromBook(book.id_book).then((data) => {
                 setLibrariesNotOwn(data);
             });
         } catch (error) {
@@ -49,7 +49,7 @@ export default function LibraryChoice({ book }) {
 
     const selectLibrary = (id_library: string) => {
         // Logique pour ajouter une bibliothèque à un livre
-        bookRepository.addBookToLibrary(id_library, book).then(() => {
+        bookController.book.addToLibrary(id_library, book).then(() => {
             fetchLibrariesOwn();
             fetchLibrariesNotOwn();
         });
@@ -58,7 +58,7 @@ export default function LibraryChoice({ book }) {
 
     const deleteLibrary = (id_library: string) => {
         // Logique pour supprimer une bibliothèque
-        bookRepository.delBookFromLibrary(id_library, book.id_book).then(() => {
+        bookController.book.deleteFromLibrary(id_library, book.id_book).then(() => {
             fetchLibrariesOwn();
             fetchLibrariesNotOwn();
         });

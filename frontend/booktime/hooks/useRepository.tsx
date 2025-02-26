@@ -1,40 +1,31 @@
-import { RepositoryContext } from "@/providers/RepositoryProvider";
-import { useContext, useState, useEffect } from "react";
-
-export function useRepositoryContext() {
-    const context = useContext(RepositoryContext);
-    if (!context) {
-        throw new Error("useRepository must be used within a RepositoryProvider");
-    }
-    return context;
-}
-
+import { useState, useEffect, useCallback } from "react";
 
 export const useRepository = <T extends () => Promise<any>>(
     func: T,
-    deps?: React.DependencyList
+    defaultValue: Awaited<ReturnType<T>> = null as any,
+    deps: React.DependencyList = []
 ) => {
     type R = Awaited<ReturnType<T>>;
 
-    const [data, setData] = useState<R | null>(null);
+    const [data, setData] = useState<R>(defaultValue);
     const [error, setError] = useState<unknown>(null);
     const [loading, setLoading] = useState<boolean>(true);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true);
-            try {
-                const result = await func();
-                setData(result);
-            } catch (err) {
-                setError(err);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchData();
+    const fetchData = useCallback(async () => {
+        setLoading(true);
+        try {
+            const result = await func();
+            setData(result);
+        } catch (err) {
+            setError(err);
+        } finally {
+            setLoading(false);
+        }
     }, deps);
 
-    return { data, error, loading };
-};
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
 
+    return { data, error, loading, refresh: fetchData };
+};

@@ -8,7 +8,7 @@ import {
 import { Href, useRouter, withLayoutContext } from "expo-router";
 import { ParamListBase, TabNavigationState } from "@react-navigation/native";
 import React from "react";
-import { ButtonsTabbar } from "@/components/explore/ExploreTabbar";
+import { SearchTabbar } from "@/components/explore/SearchTabbar";
 
 const { Navigator } = createMaterialTopTabNavigator();
 
@@ -28,7 +28,7 @@ const ExploreTopTabsLayout = () => {
 
     return (
         <MaterialTopTabs
-            tabBar={(props) => <ButtonsTabbar onSearchPress={handleSearch} {...props} />}
+            tabBar={(props) => <SearchTabbar onSearchPress={handleSearch} {...props} />}
             backBehavior="none"
         >
             <MaterialTopTabs.Screen name="feed" options={{ title: 'Feed' }} />

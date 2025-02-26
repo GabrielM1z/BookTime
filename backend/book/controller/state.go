@@ -2,7 +2,6 @@ package controller
 
 import (
 	"database/sql"
-	"log"
 	"net/http"
 	"strings"
 
@@ -142,13 +141,11 @@ func (sc *StateController) GetState(c *gin.Context) {
 }
 
 func (sc *StateController) UpdateState(c *gin.Context) {
-	log.Println("CONTROLLER : UpdateState")
 	db := sc.DB
 	repoState := repository.NewStateRepository(db)
 
 	uuidUser := getUserID(c)
 	idBook := c.Param("bookId")
-	log.Println(idBook)
 
 	// Liaison JSON avec le modèle
 	var state model.State

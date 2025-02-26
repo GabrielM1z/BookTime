@@ -12,8 +12,8 @@ export interface ActionRepository {
 export class SQLiteActionRepository implements ActionRepository {
     private db: SQLiteDatabase;
 
-    constructor() {
-        this.db = useSQLite().db;
+    constructor(db: SQLiteDatabase) {
+        this.db = db;
     }
 
     async getAll(): Promise<Action[]> {

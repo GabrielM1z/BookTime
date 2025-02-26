@@ -8,8 +8,8 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Keyboard, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import styles from "./SignIn.style";
-import { Button, IconButton, Avatar } from "react-native-paper";
-import { Text, TextInput, Switch } from "@/common";
+import { Button, IconButton, Avatar, TextInput } from "react-native-paper";
+import { PressableText, PasswordTextInput, TextSwitch } from "@/common";
 import { AccountCenter } from '@/components/AccountCenter';
 
 export default function SignIn() {
@@ -29,7 +29,7 @@ export default function SignIn() {
 
         try {
             await logIn(email, password, rememberMe)
-            router.replace('/(app)' as Href<'(app)'>);
+            router.replace('/(app)' as Href);
         }
         catch (error) {
             const axiosError = error as AxiosError;
@@ -41,7 +41,7 @@ export default function SignIn() {
         Keyboard.dismiss();
         try {
             await logAsGuest();
-            router.replace('/(app)' as Href<'(app)'>);
+            router.replace('/(app)' as Href);
         }
         catch (error) {
             const axiosError = error as AxiosError;
@@ -50,7 +50,7 @@ export default function SignIn() {
     }, []);
 
     useEffect(() => {
-        if (showSessions && sessions.length > 0) {
+        if (showSessions) {
             accountCenterRef.current?.present();
         }
     }, [showSessions])
@@ -76,8 +76,8 @@ export default function SignIn() {
                         onChangeText={setEmail}
                         autoCapitalize="none"
                     />
-                    <TextInput.Password onChangeText={setPassword} />
-                    <Switch.Text value={rememberMe} onValueChange={setRememberMe}>Se souvenir de moi</Switch.Text>
+                    <PasswordTextInput onChangeText={setPassword} />
+                    <TextSwitch value={rememberMe} onValueChange={setRememberMe}>Se souvenir de moi </TextSwitch>
                 </View>
                 <View style={styles.bodyContainer}>
                     <Button mode="contained" onPress={handleLogIn} disabled={isLoading || !email || !password}>
@@ -86,27 +86,25 @@ export default function SignIn() {
                     <Button mode="contained" onPress={handleLogAsGuest} disabled={isLoading}>
                         Log as guest
                     </Button>
-                    <Text.Pressable
-                        onPress={() => router.push('/ForgotPassword' as Href<'ForgotPassword'>)}
+                    <PressableText
+                        onPress={() => router.push('/ForgotPassword' as Href)}
                     >
                         Forgot Password
-                    </Text.Pressable>
-                    <Text.Pressable onPress={() => router.push('/SignUp' as Href<'SignUp'>)}>Sign Up</Text.Pressable>
+                    </PressableText>
+                    <PressableText onPress={() => router.push('/SignUp' as Href)}>Sign Up</PressableText>
                     {
                         showLoggedUsers && (
-                            <>
-                                <Text.Pressable
-                                    onPress={() => accountCenterRef.current?.present()}
-                                >
-                                    Logged users
-                                </Text.Pressable>
-                                <AccountCenter
-                                    ref={accountCenterRef}
-                                    filter={(user) => user.id_user !== guestUserId}
-                                />
-                            </>
+                            <PressableText
+                                onPress={() => accountCenterRef.current?.present()}
+                            >
+                                Logged users
+                            </PressableText>
                         )
                     }
+                    <AccountCenter
+                        ref={accountCenterRef}
+                        filter={(user) => user.id_user !== guestUserId}
+                    />
                 </View>
             </View>
             <View style={styles.footerContainer}>

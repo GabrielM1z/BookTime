@@ -1,9 +1,9 @@
-import React, { useCallback, forwardRef, useEffect, useState } from "react";
-import { StyleSheet, View, TouchableOpacity } from "react-native";
-import { BottomSheetFlatList, BottomSheetFooter, BottomSheetFooterProps, BottomSheetModal } from "@gorhom/bottom-sheet";
-import { useRepositoryContext } from "@/hooks/useRepository";
+import React, { useCallback, useRef, useMemo, forwardRef, useEffect, useState } from "react";
+import { StyleSheet, View, Text, Button } from "react-native";
+import BottomSheet, { BottomSheetFlatList, BottomSheetModal, BottomSheetModalProvider, BottomSheetSectionList, BottomSheetView } from "@gorhom/bottom-sheet";
+import { CustomBottomSheet } from "@/common";
 import { Library } from "@/models";
-import { Avatar, Button, Text } from 'react-native-paper';
+import { useController } from "@/hooks/useController";
 
 interface ModalAddToLibraryProps {
     idBookAdded: string,
@@ -14,11 +14,15 @@ export const ModalAddToLibrary = forwardRef<BottomSheetModal, ModalAddToLibraryP
     // hooks
     // const ref = useRef<BottomSheetModal>(null);
     const [libraryList, setLibraryList] = useState<Library[]>([])
-    const { libraryRepository, bookRepository } = useRepositoryContext();
-    const [libraryIdListSelected, setLibraryIdListSelected] = useState<string[]>([])
+    const { bookController } = useController();
+
+    // libraryRepository.getAll().then((data) => {
+    //     console.log(data)
+    //     setLibraryList(data)
+    // })
 
     useEffect(() => {
-        libraryRepository.getAll().then((data) => {
+        bookController.library.getAll().then((data) => {
             console.log(data)
             setLibraryList(data)
         })

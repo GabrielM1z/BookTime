@@ -11,7 +11,7 @@ put {
 }
 
 params:path {
-  bookId: 39988601-0a6a-464e-8c71-09d7b56a3c4c
+  bookId: 9781781101032
 }
 
 headers {
@@ -24,13 +24,15 @@ auth:bearer {
 
 body:json {
   {
-      "state": "ToRead",
-      "read_count": 200,
-      "progression": 20,
-      "last_read_date": "1983-03-03",
-      "id_book": "f18251e2-0134-46b8-a09b-8362b023764a",
-      "is_available": true
-  }
+        "state": "ToRead",
+        "progression": 0,
+        "read_count": 0,
+        "last_read_date": "2000-01-01T00:00:00Z",
+        "id_book": "9781781101032",
+        "is_available": false,
+        "rate": 6,
+        "comment": "Commntaire"
+      }
 }
 
 tests {

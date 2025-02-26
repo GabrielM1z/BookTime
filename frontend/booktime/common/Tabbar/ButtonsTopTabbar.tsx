@@ -1,26 +1,54 @@
 import { MaterialTopTabBarProps } from '@react-navigation/material-top-tabs';
-import React from 'react';
-import { ScrollView, StyleSheet, View, Text } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { ScrollView, StyleSheet, View, Text, StyleProp, ViewStyle, LayoutChangeEvent } from 'react-native';
 import { Button, useTheme } from 'react-native-paper';
-import { Searchbar, SearchbarLayoutProps } from './Searchbar';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Edge, SafeAreaView } from 'react-native-safe-area-context';
 
-export interface ButtonsTabbarProps extends MaterialTopTabBarProps {
-    onSearchPress?: (layout: SearchbarLayoutProps) => void;
+export interface ButtonsTopTabbarProps extends MaterialTopTabBarProps {
+    addTopEdge?: boolean;
+    style?: StyleProp<ViewStyle>;
 };
 
-export const ButtonsTabbar: React.FC<ButtonsTabbarProps> = ({
+export const ButtonsTopTabbar: React.FC<ButtonsTopTabbarProps> = ({
     state,
     descriptors,
     navigation,
-    onSearchPress,
+    style,
+
+    addTopEdge = false,
 }) => {
     const { colors } = useTheme();
 
+    const scrollRef = useRef<ScrollView>(null);
+    const buttonRefs = useRef<{ [key: string]: View | null }>({});
+
+    const edges: Edge[] = [];
+    if (addTopEdge) {
+        edges.push('top');
+    }
+
+    const scrollToActiveTab = (index: number) => {
+        const route = state.routes[index];
+        const button = buttonRefs.current[route.key];
+
+        if (button && scrollRef.current) {
+            button.measure((x, y, width, height, pageX) => {
+                scrollRef.current?.scrollTo({
+                    x: pageX - 20, // Décale légèrement pour le centrer mieux
+                    animated: true,
+                });
+            });
+        }
+    };
+
+    // useEffect(() => {
+    //     scrollToActiveTab(state.index);
+    // }, [state.index]);
+
     return (
-        <SafeAreaView style={[styles.container]}>
-            <Searchbar onPress={onSearchPress} />
+        <SafeAreaView edges={edges} style={style}>
             <ScrollView
+                ref={scrollRef}
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={styles.scrollContainer}
@@ -51,11 +79,14 @@ export const ButtonsTabbar: React.FC<ButtonsTabbarProps> = ({
                     return (
                         <Button
                             key={route.key}
+                            ref={(ref) => (buttonRefs.current[route.key] = ref)}
+                            onLayout={(event: LayoutChangeEvent) => {
+                                buttonRefs.current[route.key] = event.target as View;
+                            }}
                             mode="contained"
                             onPress={onPress}
                             buttonColor={focused ? colors.primary : colors.surfaceVariant}
                             textColor={focused ? colors.onPrimary : colors.onSurfaceVariant}
-                            style={styles.button}
                         >
                             {label as string}
                         </Button>
@@ -67,16 +98,9 @@ export const ButtonsTabbar: React.FC<ButtonsTabbarProps> = ({
 };
 
 const styles = StyleSheet.create({
-    container: {
-        padding: 10,
-        gap: 10,
-    },
     scrollContainer: {
         flexDirection: 'row',
-        // paddingHorizontal: 10,
         alignItems: 'center',
-    },
-    button: {
-        marginRight: 10,
+        gap: 10
     },
 })

@@ -1,18 +1,13 @@
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import Etagere from '@/components/Etagere';
 import NewEtagere from '@/components/NewEtagere';
-import React, { useEffect, useRef, useState } from 'react';
-import { useRepositoryContext } from '@/hooks/useRepository';
-import TestBtn from '@/components/TestBtn';
 import { LibraryWithBooksMin } from '@/models/Library';
 import { useFocusEffect } from 'expo-router';
+import React, { useState } from "react";
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useController } from '@/hooks/useController';
 
-// import des images
-const cover1 = require('@/assets/images/logo_refait.png');
-
-// Sous ecran de la bibliotheque, affichage par étagere CLASSIQUE (celle de l'utilisateur)
-export default function pageEtageres() {
-
+const MyShelfTab = () => {
     const [etageres, setEtageres] = useState<LibraryWithBooksMin[] | []>([]);
 
     //Se lance à chaque fois que l'utisateur est sur cette page. 
@@ -22,11 +17,11 @@ export default function pageEtageres() {
             refreshEtageres();
         }, [])
     );
-    const { libraryRepository } = useRepositoryContext();
+    const { bookController } = useController();
 
     const refreshEtageres = () => {
         try {
-            libraryRepository.getAllInfo().then((data) => {
+            bookController.library.getAllInfo().then((data) => {
                 setEtageres(data);
                 console.log("refreshEtageres success")
             })
@@ -44,18 +39,20 @@ export default function pageEtageres() {
     // console.log("etageres :", JSON.stringify(etageres, null, 2));
 
     return (
-        <ScrollView style={styles.etagereContainer}>
-            <NewEtagere onAddEtagere={handleAddEtagere}></NewEtagere>
-            {etageres && etageres.map((etagere, index) => (
-                <Etagere key={index} idEtagere={etagere.id_library} index={index} label={etagere.name} livres={etagere.books}></Etagere>
-            ))}
-            <View style={styles.paddingBottom}></View>
-        </ScrollView>
+        <SafeAreaView style={{ flex: 1 }}>
+            <ScrollView style={styles.etagereContainer}>
+                <NewEtagere onAddEtagere={handleAddEtagere}></NewEtagere>
+                {etageres && etageres.map((etagere, index) => (
+                    <Etagere key={index} idEtagere={etagere.id_library} index={index} label={etagere.name} livres={etagere.books}></Etagere>
+                ))}
+                <View style={styles.paddingBottom}></View>
+            </ScrollView>
+        </SafeAreaView>
     );
 }
 
+export default MyShelfTab;
 
-// style css
 const styles = StyleSheet.create({
     etagereContainer: {
         flexDirection: 'column',

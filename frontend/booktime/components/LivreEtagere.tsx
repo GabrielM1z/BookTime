@@ -10,7 +10,7 @@ interface LivreEtagereProps {
     livre: BookMinInfos;
 }
 
-export default function LivreEtagere({ livre }: LivreEtagereProps) {
+export const LivreEtagere = ({ livre }: LivreEtagereProps) => {
 
     return (
         <View style={styles.livreContainer}>

@@ -23,13 +23,13 @@ func NewActionRepository(db *sql.DB) *ActionRepository {
 func (ar *ActionRepository) InsertAction(post model.PostAction, idUser uuid.UUID) bool {
 	stmt, err := ar.DB.Prepare("INSERT INTO action (id_user, table_name, date, type, action, executed_by) VALUES ($1, $2, $3, $4, $5, $6)")
 	if err != nil {
-		log.Println(err)
+		log.Println("Error while inserting action in db :", err)
 		return false
 	}
 	defer stmt.Close()
 	_, err2 := stmt.Exec(post.IdUser, post.Table, post.Date, post.Type, post.Action, post.ExecutedBy)
 	if err2 != nil {
-		log.Println(err2)
+		log.Println("Error while inserting action in db :", err2)
 		return false
 	}
 	return true

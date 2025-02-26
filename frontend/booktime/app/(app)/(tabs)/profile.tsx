@@ -1,20 +1,20 @@
 import { ProfileMenu } from '@/components/profile/ProfileMenu';
 import { useUser } from '@/hooks/useUser';
 import styles, { headerMaxHeight, headerMinHeight, profileImageMaxSize } from '@/styles/profile';
-import { Ionicons } from '@expo/vector-icons';
-import AntDesign from '@expo/vector-icons/AntDesign';
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
-import React, { forwardRef, useCallback, useRef } from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
-import Animated, { Extrapolation, interpolate, useAnimatedRef, useAnimatedStyle, useScrollViewOffset } from 'react-native-reanimated';
+import { StatusBar } from 'expo-status-bar';
+import React, { useCallback, useRef } from 'react';
+import { Text, View } from 'react-native';
+import { Avatar, IconButton, useTheme } from 'react-native-paper';
+import Animated, { Extrapolation, interpolate, interpolateColor, useAnimatedRef, useAnimatedScrollHandler, useAnimatedStyle, useScrollViewOffset } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Avatar } from 'react-native-paper';
 
 const bannerImage = require('@/assets/images/banner.jpg');
 
 export const headerPageText = "Embark on a journey of transformation with our innovative app designed to enhance every aspect of your life. Whether you're seeking to boost productivity, ignite creativity, or simply streamline daily tasks, our platform empowers you to reach new heights.";
 
-export default function ProfileTab() {
+const ProfileTab = () => {
+    const { colors } = useTheme();
     const scrollRef = useAnimatedRef<Animated.ScrollView>();
     const scrollOffset = useScrollViewOffset(scrollRef);
     const bottomSheetRef = useRef<BottomSheetModal>(null);
@@ -34,13 +34,18 @@ export default function ProfileTab() {
 
     // Style animé pour le header
     const headerAnimatedStyles = useAnimatedStyle(() => {
+        const backgroundColor = interpolateColor(
+            scrollOffset.value,
+            inputRange,
+            [styles.header.backgroundColor, colors.surfaceVariant],
+        )
         const height = interpolate(
             scrollOffset.value,
             inputRange,
             [headerMaxHeight, headerReelMinHeight],
             Extrapolation.CLAMP
         );
-        return { height };
+        return { height, backgroundColor };
     });
 
     // Style animé pour le container du profil
@@ -114,18 +119,6 @@ export default function ProfileTab() {
         return { transform: [{ scale }], opacity };
     });
 
-    // TODO: Ca marche mais c pas fluide, a refaire
-    const handleScrollEndDrag = () => {
-        if (scrollOffset.value < headerMaxHeight - headerReelMinHeight) {
-            if (scrollOffset.value > (headerMaxHeight - headerReelMinHeight) / 2) {
-                scrollRef.current?.scrollTo({ y: headerMaxHeight - headerReelMinHeight, animated: true });
-            }
-            else {
-                scrollRef.current?.scrollTo({ y: 0, animated: true });
-            }
-        }
-    };
-
     return (
         <SafeAreaView>
             <ProfileMenu ref={bottomSheetRef} />
@@ -136,30 +129,28 @@ export default function ProfileTab() {
                     innerHeaderAnimatedStyles,
                     { paddingTop: insets.top } // Add padding top to avoid the status bar overlap. Needed because of the absolute position of the header
                 ]}>
-                    <Animated.View style={[styles.profileImageContainer, profileImageAnimatedStyles]}>
+                    <Animated.View style={[styles.profileImageContainer, { borderColor: colors.primary }, profileImageAnimatedStyles]}>
                         {user && user.profil_image ? (
                             <Avatar.Image source={{ uri: user.profil_image }} style={styles.profileImage} />
                         ) : (
-                            <Avatar.Icon icon="account" style={styles.profileImage} size={18} />
+                            <Avatar.Icon icon="account" style={styles.profileImage} size={profileImageAnimatedStyles.width} />
                         )}
                     </Animated.View>
                     <Animated.Text style={[styles.profileName, profileNameAnimatedStyles]}>
                         {user ? user.name || "Guest" : "User Name"}
                     </Animated.Text>
                 </Animated.View>
-                <View style={[
-                    styles.menuContainer,
-                    {
-                        paddingTop: insets.top,
-                        height: headerReelMinHeight
-                    }
-                ]}>
-                    <TouchableOpacity style={styles.menuButton} onPress={handlePresentModalPress}>
-                        <Ionicons name="menu" size={24} color="white" />
-                    </TouchableOpacity>
-                </View>
+                <SafeAreaView edges={['left', 'right', 'top']} style={[styles.menuContainer, { height: headerReelMinHeight }]}>
+                    <IconButton icon="menu" onPress={handlePresentModalPress} mode='contained' />
+                </SafeAreaView>
             </Animated.View>
-            <Animated.ScrollView ref={scrollRef} onScrollEndDrag={handleScrollEndDrag} contentContainerStyle={styles.scrollContent}>
+            <Animated.ScrollView
+                ref={scrollRef}
+                contentContainerStyle={styles.scrollContent}
+                snapToOffsets={[headerMaxHeight - headerReelMinHeight]}
+                snapToEnd={false}
+                scrollEventThrottle={16}
+            >
                 <View style={styles.innerContainer}>
                     <Text style={styles.description}>
                         {headerPageText}{headerPageText}{headerPageText}{headerPageText}{headerPageText}{headerPageText}{headerPageText}{headerPageText}
@@ -169,3 +160,5 @@ export default function ProfileTab() {
         </SafeAreaView>
     );
 }
+
+export default ProfileTab;

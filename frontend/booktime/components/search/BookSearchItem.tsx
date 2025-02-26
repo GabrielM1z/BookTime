@@ -5,12 +5,12 @@ import { BookSearchResult, BookInfosServeur } from '@/models/Book';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Colors } from '@/constants/Colors';
-import { useRepositoryContext } from '@/hooks/useRepository';
 import CoverPressable from '../CoverPressable';
-import api from '@/services/axios';
+import { api } from '@/services/axios';
 import { Snackbar, PaperProvider, Portal } from "react-native-paper";
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { ModalAddToLibrary } from './ModalAddToLibrary';
+import { useController } from '@/hooks/useController';
 
 interface BookSearchItemProps {
     book: BookSearchResult;
@@ -19,7 +19,7 @@ interface BookSearchItemProps {
 
 export const BookSearchItem = ({ book, handleModalAddToLibrary }: BookSearchItemProps) => {
 
-    const { bookRepository, libraryRepository } = useRepositoryContext();
+    const { bookController } = useController();
     const [visible, setVisible] = useState(false);
     const [bookAdded, setBookAdded] = useState<keyof typeof Ionicons.glyphMap>("add");
 
@@ -33,11 +33,10 @@ export const BookSearchItem = ({ book, handleModalAddToLibrary }: BookSearchItem
             let data: BookInfosServeur = (await api.get(url)).data.data;
             console.log(data);
 
-            const listLibrary = await libraryRepository.getAll()
+            const listLibrary = await bookController.library.getAll()
 
-            await bookRepository.addBookToLibrary(listLibrary[0].id_library, data)
+            await bookController.book.addToLibrary(listLibrary[0].id_library, data)
             showSnackbar();
-
 
         } catch (error) {
             console.log("error handleAddBook :", error);

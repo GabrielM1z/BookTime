@@ -1,21 +1,31 @@
-import { SessionController } from "@/controllers/SessionController";
+import { BookController } from "@/controllers/BookController";
+import { SynchronisationController } from "@/controllers/SynchronisationController";
 import { UserController } from "@/controllers/UserController";
-import { SQLiteProviderProps } from "expo-sqlite";
+import { useSQLite } from "@/hooks/useSQLite";
 import React, { createContext } from "react";
-import { RepositoryProvider } from "./RepositoryProvider";
+import { SQLiteProvider, SQLiteProviderProps } from "./SQLiteProvider";
+
 
 export interface ControllerContextProps {
     userController: UserController;
+    bookController: BookController;
+    synchronisationController: SynchronisationController;
 }
 
 export const ControllerContext = createContext<ControllerContextProps | undefined>(undefined);
 
 export const ControllerProviderInner = ({ children }: { children: React.ReactNode }) => {
-    const userController = new UserController();
+    const { db } = useSQLite();
+
+    const userController = new UserController(db);
+    const bookController = new BookController(db);
+    const synchronisationController = new SynchronisationController(db);
 
     return (
         <ControllerContext.Provider value={{
-            userController
+            userController,
+            bookController,
+            synchronisationController,
         }}>
             {children}
         </ControllerContext.Provider>
@@ -24,10 +34,10 @@ export const ControllerProviderInner = ({ children }: { children: React.ReactNod
 
 export const ControllerProvider = ({ children, ...props }: SQLiteProviderProps) => {
     return (
-        <RepositoryProvider {...props}>
+        <SQLiteProvider {...props}>
             <ControllerProviderInner>
                 {children}
             </ControllerProviderInner>
-        </RepositoryProvider>
+        </SQLiteProvider>
     );
 }
