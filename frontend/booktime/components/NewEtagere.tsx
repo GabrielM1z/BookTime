@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import TitreTab from "./TitreTab";
 import { Modal, TouchableOpacity, View, StyleSheet, TextInput, Text } from "react-native";
 import { Colors } from '@/constants/Colors';
-import { useController } from '@/hooks/useController';
+import { useBookContext } from '@/contexts/BookContext';
 
 export default function NewEtagere({ onAddEtagere })
 {
@@ -10,7 +10,7 @@ export default function NewEtagere({ onAddEtagere })
 	const [formData, setFormData] = useState({
 		name: ''
 	});
-	const { bookController } = useController();
+	const bookController = useBookContext();
 
 	const handleInputChange = (field: any, value: any) => {
 		setFormData({ name: value });

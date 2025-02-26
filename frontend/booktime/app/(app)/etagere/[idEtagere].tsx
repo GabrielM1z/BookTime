@@ -5,14 +5,14 @@ import React, { useEffect, useState } from "react";
 import { useLocalSearchParams, useNavigation } from 'expo-router';
 import { Book } from '@/models/Book';
 import { Ionicons } from '@expo/vector-icons';
-import LivreEtagere from '@/components/LivreEtagere';
+import {LivreEtagere} from '@/components/LivreEtagere';
 import BackButton from '@/components/BackButton';
-import { useController } from '@/hooks/useController';
+import { useBookContext } from '@/contexts/BookContext';
 
 export default function EtagereDetail() {
 
     const { idEtagere, label } = useLocalSearchParams();
-    const { bookController } = useController();
+    const bookController = useBookContext();
     const navigation = useNavigation();
 
     const [books, setBooks] = useState<Book[]>([]);

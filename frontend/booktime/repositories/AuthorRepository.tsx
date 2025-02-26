@@ -1,7 +1,7 @@
 import { Author } from '@/models/Author';
 import { SQLiteDatabase } from 'expo-sqlite';
-import { useSQLite } from "@/hooks/useSQLite";
 import { v4 as uuidv4 } from 'uuid';
+import { SynchronisationController } from '@/controllers/SynchronisationController';
 
 
 export interface AuthorRepository {
@@ -10,11 +10,15 @@ export interface AuthorRepository {
     add: (author: Author) => Promise<void>;
 }
 
-export class SQLiteAuthorRepository implements AuthorRepository {
+export class LocalAuthorRepository implements AuthorRepository {
     private db: SQLiteDatabase;
+    private id_user: string;
+    private sync: SynchronisationController;
 
-    constructor(db: SQLiteDatabase) {
+    constructor(db: SQLiteDatabase, id_user: string, sync: SynchronisationController) {
         this.db = db;
+        this.id_user = id_user;
+        this.sync = sync;
     }
 
     async getAll(): Promise<Author[]> {
@@ -51,7 +55,7 @@ export class SQLiteAuthorRepository implements AuthorRepository {
 }
 
 
-export class APIAuthorRepository implements AuthorRepository {
+export class RemoteAuthorRepository implements AuthorRepository {
     async getAll(): Promise<Author[]> {
         return [];
     }

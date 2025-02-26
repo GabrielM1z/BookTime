@@ -13,11 +13,11 @@ import { Book } from '@/models/Book';
 import { linkToBase64 } from '@/helpers/image';
 import { Ionicons } from '@expo/vector-icons';
 import BackButton from '@/components/BackButton';
-import { useController } from '@/hooks/useController';
+import { useBookContext } from '@/contexts/BookContext';
 
 export default function LivreDetail() {
 
-    const { bookController } = useController();
+    const bookController = useBookContext();
     const navigation = useNavigation();
     const { idBook, cover, mode } = useLocalSearchParams();
 

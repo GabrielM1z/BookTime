@@ -1,5 +1,4 @@
 import { useAuthContext } from "@/contexts/AuthContext";
-import { useController } from "@/hooks/useController";
 import { User } from "@/models/User";
 import { BottomSheetFlatList, BottomSheetModal, useBottomSheetModal, BottomSheetView, BottomSheetFooterProps, BottomSheetFooter } from "@gorhom/bottom-sheet";
 import React, { forwardRef, useCallback, useEffect, useMemo, useState } from "react";
@@ -10,6 +9,7 @@ import { Href, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button } from "react-native-paper";
 import { View, FlatList } from "react-native";
+import { useUserContext } from "@/contexts/UserContext";
 
 export interface AccountCenterProps extends Omit<CustomBottomSheetProps, "children"> {
     addAccountFooter?: boolean;
@@ -30,7 +30,7 @@ export const AccountCenter = forwardRef<BottomSheetModal, AccountCenterProps>(({
 
     const router = useRouter();
     const { dismissAll } = useBottomSheetModal();
-    const { userController } = useController();
+    const userController = useUserContext();
     const { switchSession, session, sessions } = useAuthContext();
 
     const fetchSessions = async () => {

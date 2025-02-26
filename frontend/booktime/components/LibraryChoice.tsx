@@ -2,14 +2,14 @@ import { FlatList, Modal, StyleSheet, TouchableOpacity, View, Text } from 'react
 import React, { useEffect, useState } from 'react';
 import { Library } from '@/models/Library';
 import LibraryChip from './LibraryChip';
-import { useController } from '@/hooks/useController';
+import { useBookContext } from '@/contexts/BookContext';
 
 
 export default function LibraryChoice({ book }) {
     const [modalVisible, setModalVisible] = useState(false);
     const [librariesNotOwn, setLibrariesNotOwn] = useState<Library[]>([]);
     const [librariesOwn, setLibrariesOwn] = useState<Library[]>([]);
-    const { bookController } = useController();
+    const bookController = useBookContext();
 
     useEffect(() => {
         if (book) {

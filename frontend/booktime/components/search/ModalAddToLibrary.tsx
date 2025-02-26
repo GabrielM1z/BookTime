@@ -3,7 +3,7 @@ import { StyleSheet, View, TouchableOpacity } from "react-native";
 import BottomSheet, { BottomSheetFlatList, BottomSheetFooter, BottomSheetFooterProps, BottomSheetModal, BottomSheetModalProvider, BottomSheetSectionList, BottomSheetView } from "@gorhom/bottom-sheet";
 import { CustomBottomSheet } from "@/common";
 import { Library } from "@/models";
-import { useController } from "@/hooks/useController";
+import { useBookContext } from "@/contexts/BookContext";
 import { useRepository } from "@/hooks/useRepository";
 import { Avatar, Text , Button} from "react-native-paper";
 
@@ -16,7 +16,7 @@ export const ModalAddToLibrary = forwardRef<BottomSheetModal, ModalAddToLibraryP
     // hooks
     // const ref = useRef<BottomSheetModal>(null);
     const { data: libraryList } = useRepository(() => bookController.library.getAll())
-    const { bookController } = useController();
+    const bookController = useBookContext();
     const { data: listLibraryOfBook, setData: setListLibraryOfBook, loading, refresh: refreshListLibraryOfBook } = useRepository(() => bookController.library.getAllLibraryFromBook(idBookAdded), [], [idBookAdded])
 
     // callbacks

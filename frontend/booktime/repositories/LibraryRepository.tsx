@@ -2,8 +2,7 @@ import { Library, LibraryWithBooks, LibraryWithBooksMin } from '@/models/Library
 import { SQLiteDatabase } from 'expo-sqlite';
 import uuid from 'react-native-uuid';
 import { Book, BookMinInfos } from '@/models/Book';
-
-
+import { SynchronisationController } from '@/controllers/SynchronisationController';
 
 export interface LibraryRepository {
     getAll: () => Promise<Library[]>;
@@ -16,11 +15,15 @@ export interface LibraryRepository {
     getAllNotLibraryFromBook: (id_book: string) => Promise<Library[]>;
 }
 
-export class SQLiteLibraryRepository implements LibraryRepository {
+export class LocalLibraryRepository implements LibraryRepository {
     private db: SQLiteDatabase;
+    private id_user: string;
+    private sync: SynchronisationController;
 
-    constructor(db: SQLiteDatabase) {
+    constructor(db: SQLiteDatabase, id_user: string, sync: SynchronisationController) {
         this.db = db;
+        this.id_user = id_user;
+        this.sync = sync;
     }
 
     async getAll(): Promise<Library[]> {
@@ -78,9 +81,7 @@ export class SQLiteLibraryRepository implements LibraryRepository {
         });
     }
 
-
     async delete2(id: string): Promise<void> {
-
         await this.db.withTransactionAsync(async () => {
             const deleteLibraryBooks = await this.db.prepareAsync(
                 'DELETE FROM library_book WHERE id_library = $id'
@@ -99,7 +100,6 @@ export class SQLiteLibraryRepository implements LibraryRepository {
         });
     }
 
-
     async getAllBookFromLib(id_library: string): Promise<BookMinInfos[]> {
         const books = this.db.getAllAsync<BookMinInfos>(
             `SELECT book.id_book, book.title, book.cover_image_url
@@ -114,7 +114,6 @@ export class SQLiteLibraryRepository implements LibraryRepository {
     }
 
     async getAllInfo(): Promise<LibraryWithBooksMin[] | []> {
-
         try {
             const allLibrary: Library[] = await this.getAll();
 
@@ -171,8 +170,7 @@ export class SQLiteLibraryRepository implements LibraryRepository {
 
 }
 
-
-export class APILibraryRepository implements LibraryRepository {
+export class RemoteLibraryRepository implements LibraryRepository {
     async getAll(): Promise<Library[]> {
         return [];
     }

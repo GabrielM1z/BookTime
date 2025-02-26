@@ -1,3 +1,4 @@
+import { SynchronisationController } from "@/controllers/SynchronisationController";
 import { Format } from "@/models/Format";
 import { SQLiteDatabase } from 'expo-sqlite';
 import uuid from 'react-native-uuid';
@@ -9,10 +10,12 @@ export interface FormatRepository {
     add: (format: Format) => Promise<void>;
 }
 
-export class SQLiteFormatRepository implements FormatRepository {
+export class LocalFormatRepository implements FormatRepository {
     private db: SQLiteDatabase;
+    private sync: SynchronisationController;
 
-    constructor(db: SQLiteDatabase) {
+    constructor(db: SQLiteDatabase, sync: SynchronisationController) {
+        this.sync = sync;
         this.db = db;
     }
 
@@ -48,7 +51,7 @@ export class SQLiteFormatRepository implements FormatRepository {
 }
 
 
-export class APIFormatRepository implements FormatRepository {
+export class RemoteFormatRepository implements FormatRepository {
     async getAll(): Promise<Format[]> {
         return [];
     }

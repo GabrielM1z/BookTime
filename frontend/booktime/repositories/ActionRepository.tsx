@@ -1,7 +1,6 @@
-import { SQLiteDatabase } from 'expo-sqlite';
-import { useSQLite } from "@/hooks/useSQLite";
 import { Action } from '@/models/Action';
 import { Trigger } from '@/models/Trigger';
+import { SQLiteDatabase } from 'expo-sqlite';
 
 export interface ActionRepository {
     getAll: () => Promise<Action[]>;
@@ -9,41 +8,39 @@ export interface ActionRepository {
     getTrigger: () => Promise<Trigger[]>;
 }
 
-export class SQLiteActionRepository implements ActionRepository {
+export class RemoteActionRepository implements ActionRepository {
+    private tableName: string
     private db: SQLiteDatabase;
 
-    constructor(db: SQLiteDatabase) {
+    constructor(tableName: string, db: SQLiteDatabase) {
+        this.tableName = tableName;
         this.db = db;
     }
 
     async getAll(): Promise<Action[]> {
         let allRows = await this.db.getAllAsync<Action>(
-            'SELECT * FROM action'
+            `SELECT * FROM ${this.tableName}`
         );
         return allRows;
     }
 
-    async get(id: string): Promise<Action|null> {
-        const statement = await this.db.prepareAsync(
-            'SELECT * FROM action WHERE id_action == $id'
+    async get(id: string): Promise<Action> {
+        const action = await this.db.getFirstAsync<Action>(
+            `SELECT * FROM ${this.tableName} WHERE id_action == $id`,
+            { $id: id }
         );
 
-        const result = await statement.executeAsync({
-            $id: id
-        });
-
-        return result ? (result as unknown as Action) : null;
+        return action!;
     }
 
     async deleteAll(): Promise<void> {
-        await this.db.execAsync('DELETE FROM action');
+        await this.db.runAsync(`DELETE FROM ${this.tableName}`);
     }
 
     async getTrigger(): Promise<Trigger[]> {
         let allRows = await this.db.getAllAsync<Trigger>(
-            'SELECT name, tbl_name,type, sql FROM sqlite_master WHERE type = \'trigger\';'
+            `SELECT name, tbl_name,type, sql FROM sqlite_master WHERE type = \'trigger\';`
         );
         return allRows;
     }
-
 }

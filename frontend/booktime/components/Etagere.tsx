@@ -22,8 +22,6 @@ export default function Etagere({ label, idEtagere, livres, index }: EtagereProp
 		'#84b6f4'
 	];
 
-	console.log("livres : ", livres)
-
 	// on fait une rotation sur les coouleurs
 	const randomindex = index % 3;
 

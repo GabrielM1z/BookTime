@@ -3,11 +3,11 @@ import TitreTab from "./TitreTab";
 import { TouchableOpacity, View, StyleSheet } from "react-native";
 import { Colors } from '@/constants/Colors';
 import { Book } from '@/models/Book';
-import { useController } from '@/hooks/useController';
+import { useBookContext } from '@/contexts/BookContext';
 
 export default function TestBtn({})
 {
-	const { bookController } = useController();
+	const bookController = useBookContext();
 	
 	const handleSubmit = async () => {
 		try {
