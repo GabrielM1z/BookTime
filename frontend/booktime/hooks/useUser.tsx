@@ -1,11 +1,11 @@
-import { useController } from "./useController";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { useUserContext } from "@/contexts/UserContext";
 import { User } from "@/models/User";
 import { useState, useEffect } from "react";
 
 
 export const useUser = () => {
-    const { userController } = useController();
+    const userController = useUserContext();
     const { session } = useAuthContext();
 
     const [user, setUser] = useState<User | null>(null);

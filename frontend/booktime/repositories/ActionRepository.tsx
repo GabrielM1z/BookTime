@@ -1,7 +1,6 @@
-import { SQLiteDatabase } from 'expo-sqlite';
-import { useSQLite } from "@/hooks/useSQLite";
 import { Action } from '@/models/Action';
 import { Trigger } from '@/models/Trigger';
+import { SQLiteDatabase } from 'expo-sqlite';
 
 export interface ActionRepository {
     getAll: () => Promise<Action[]>;
@@ -9,7 +8,7 @@ export interface ActionRepository {
     getTrigger: () => Promise<Trigger[]>;
 }
 
-export class SQLiteActionRepository implements ActionRepository {
+export class RemoteActionRepository implements ActionRepository {
     private tableName: string
     private db: SQLiteDatabase;
 

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useUser } from "./useUser";
 
 export const useRepository = <T extends () => Promise<any>>(
     func: T,

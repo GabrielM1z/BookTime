@@ -1,3 +1,4 @@
+import { SynchronisationController } from "@/controllers/SynchronisationController";
 import { State } from "@/models/State";
 import { SQLiteDatabase } from 'expo-sqlite';
 import uuid from 'react-native-uuid';
@@ -8,11 +9,15 @@ export interface StateRepository {
     get: (id: string) => Promise<State | null>;
 }
 
-export class SQLiteStateRepository implements StateRepository {
+export class LocalStateRepository implements StateRepository {
     private db: SQLiteDatabase;
+    private id_user: string;
+    private sync: SynchronisationController;
 
-    constructor(db: SQLiteDatabase) {
+    constructor(db: SQLiteDatabase, id_user: string, sync: SynchronisationController) {
         this.db = db;
+        this.id_user = id_user;
+        this.sync = sync;
     }
 
     async getAll(): Promise<State[]> {
@@ -52,7 +57,7 @@ export class SQLiteStateRepository implements StateRepository {
 }
 
 
-export class APIStateRepository implements StateRepository {
+export class RemoteStateRepository implements StateRepository {
     async getAll(): Promise<State[]> {
         return [];
     }

@@ -1,23 +1,27 @@
-import { BookController } from "@/controllers/BookController";
-import { SynchronisationController } from "@/controllers/SynchronisationController";
-import { UserController } from "@/controllers/UserController";
-import { useSQLite } from "@/hooks/useSQLite";
+import { BookControllerProps } from "@/controllers/BookController";
+import { UserControllerProps } from "@/controllers/UserController";
+import { bookControllerFactory } from "@/controllers/factories/bookControllerFactory";
+import { userControllerFactory } from "@/controllers/factories/userControllerFactory";
 import React, { createContext } from "react";
-import { SQLiteProvider, SQLiteProviderProps } from "./SQLiteProvider";
-
 
 export interface ControllerContextProps {
-    userController: UserController;
-    bookController: BookController;
+    userController: UserControllerProps;
+    bookController: BookControllerProps;
+}
+
+export interface ControllerProviderProps {
+    children: React.ReactNode;
+    id_user: string;
 }
 
 export const ControllerContext = createContext<ControllerContextProps | undefined>(undefined);
 
-export const ControllerProviderInner = ({ children }: { children: React.ReactNode }) => {
-    const { db } = useSQLite();
-
-    const userController = new UserController(db);
-    const bookController = new BookController(db);
+export const ControllerProvider = ({
+    children,
+    id_user,
+}: ControllerProviderProps) => {
+    const userController = userControllerFactory();
+    const bookController = bookControllerFactory(id_user);
 
     return (
         <ControllerContext.Provider value={{
@@ -26,15 +30,5 @@ export const ControllerProviderInner = ({ children }: { children: React.ReactNod
         }}>
             {children}
         </ControllerContext.Provider>
-    );
-}
-
-export const ControllerProvider = ({ children, ...props }: SQLiteProviderProps) => {
-    return (
-        <SQLiteProvider {...props}>
-            <ControllerProviderInner>
-                {children}
-            </ControllerProviderInner>
-        </SQLiteProvider>
     );
 }

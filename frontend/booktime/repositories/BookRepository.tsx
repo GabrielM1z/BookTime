@@ -5,6 +5,7 @@ import { syncAfterMethod, syncBeforeMethod } from '@/decorators/synchronisation'
 import { formatColumns } from '@/helpers';
 import { api } from "@/services/axios"
 import { linkToBase64 } from '@/helpers/image';
+import { SynchronisationController } from '@/controllers/SynchronisationController';
 
 export interface BookRepository {
     get: (id: string, columns?: (keyof Book)[]) => Promise<Book>;
@@ -16,11 +17,15 @@ export interface BookRepository {
     deleteFromLibrary: (id_library: string, id_book: string) => Promise<void>
 }
 
-export class SQLiteBookRepository implements BookRepository {
+export class LocalBookRepository implements BookRepository {
     private db: SQLiteDatabase;
+    private id_user: string;
+    private sync: SynchronisationController;
 
-    constructor(db: SQLiteDatabase) {
+    constructor(db: SQLiteDatabase, id_user: string, sync: SynchronisationController) {
         this.db = db;
+        this.id_user = id_user;
+        this.sync = sync;
     }
 
     async get(id: string, columns: (keyof Book)[] = []): Promise<Book> {
@@ -29,7 +34,6 @@ export class SQLiteBookRepository implements BookRepository {
             `SELECT ${args} FROM book WHERE id_book == $id`,
             { $id: id }
         );
-
         return result!;
     }
 
@@ -60,7 +64,8 @@ export class SQLiteBookRepository implements BookRepository {
         return allRows;
     }
 
-    @syncAfterMethod("book")
+    // @ts-ignore
+    @syncAfterMethod() 
     async add(book: Book): Promise<void> {
         await this.db.runAsync(
             `INSERT INTO book (id_book, title, description, publisher, publication_date, page_number, language, cover_image_url)
@@ -78,7 +83,8 @@ export class SQLiteBookRepository implements BookRepository {
         );
     }
 
-    @syncAfterMethod("book")
+    // @ts-ignore
+    @syncAfterMethod()
     async addToLibrary(id_library: string, book: Book): Promise<void> {
 
         try {
@@ -134,7 +140,7 @@ export class SQLiteBookRepository implements BookRepository {
     }
 }
 
-export class APIBookRepository implements BookRepository {
+export class RemoteBookRepository implements BookRepository {
 
     async get(id: string, columns: (keyof Book)[] = []): Promise<Book> {
         let bookData = await api.get(`/books/books/${id}`)

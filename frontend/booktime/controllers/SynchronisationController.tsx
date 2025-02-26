@@ -1,23 +1,29 @@
-import { SQLiteActionRepository } from "@/repositories/ActionRepository"
+import { RemoteActionRepository } from "@/repositories/ActionRepository"
 import { SQLiteDatabase } from "expo-sqlite";
 import { Platform } from "react-native";
 
+export interface SynchronisationControllerProps {
+    service: string;
+    action: RemoteActionRepository;
+    runSynchronisation: () => void;
+}
+
 export class SynchronisationController {
-    action: SQLiteActionRepository;
+    action: RemoteActionRepository;
     service: string;
 
     constructor(service: string, tableName: string, db: SQLiteDatabase) {
-        this.action = new SQLiteActionRepository(tableName, db);
+        this.action = new RemoteActionRepository(tableName, db);
         this.service = service;
     }
 
-    async runSynchronisation() {
+    async runSync() {
         try {
             if (Platform.OS === "web") return // TODO: Check if needed, normally the function should not be called on web
 
             console.log("Synchronisation en cours...");
 
-            // const { synchronisationController } = useController();
+            // const { synchronisationController } = 
 
             // // TODO appel DB front : fetch action
             const actionsFront = await this.action.getAll();

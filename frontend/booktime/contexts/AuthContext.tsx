@@ -1,8 +1,7 @@
 import { SessionController } from "@/controllers/SessionController";
-import { useController } from "@/hooks/useController";
 import { Session } from "@/models/Session";
 import { AuthRegisterProps, AuthResponseProps } from "@/models/keycloak";
-import { authenticate, logout as logoutAxios, register as registerAxios } from "@/services/axios";
+import { authenticate, logout as logoutAxios } from "@/services/axios";
 import React, { createContext, useContext, useEffect, useState } from "react";
 
 export interface AuthContextProps {
@@ -25,7 +24,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [sessions, setSessions] = useState<Session[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const sessionController = new SessionController();
-    const { userController } = useController();
 
     const register = async (email: string, password: string, username: string) => {
         // try {
@@ -43,7 +41,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const authResponse = await authenticate(email, password);
             const newSession = await sessionController.getSessionFromAuthResponse(authResponse, remember);
             setSession(newSession);
-            await userController.addFromSession(newSession);
         } finally {
             setIsLoading(false);
         }
@@ -55,7 +52,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setIsLoading(true);
             const guestSession = await sessionController.getOrCreateGuestSession();
             setSession(guestSession);
-            await userController.addFromSession(guestSession);
         } finally {
             setIsLoading(false);
         }
@@ -69,7 +65,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     await logoutAxios(session.refresh_token!);
                 }
                 await sessionController.removeSession(session);
-                await userController.user.local.delete(session.id_user);
                 setSession(null);
             } finally {
                 setIsLoading(false);

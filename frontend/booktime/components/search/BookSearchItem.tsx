@@ -10,7 +10,7 @@ import { api } from '@/services/axios';
 import { Snackbar, PaperProvider, Portal } from "react-native-paper";
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { ModalAddToLibrary } from './ModalAddToLibrary';
-import { useController } from '@/hooks/useController';
+import { useBookContext } from '@/contexts/BookContext';
 
 interface BookSearchItemProps {
     book: BookSearchResult;
@@ -19,7 +19,7 @@ interface BookSearchItemProps {
 
 export const BookSearchItem = ({ book, handleModalAddToLibrary }: BookSearchItemProps) => {
 
-    const { bookController } = useController();
+    const bookController = useBookContext();
     const [visible, setVisible] = useState(false);
 
     const showSnackbar = () => setVisible(true);

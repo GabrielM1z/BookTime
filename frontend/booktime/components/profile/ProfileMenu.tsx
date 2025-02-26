@@ -1,6 +1,7 @@
 import { CustomBottomSheet, CustomBottomSheetProps } from "@/common"
 import { AccountCenter } from "@/components/AccountCenter"
 import { useAuthContext } from "@/contexts/AuthContext"
+import { useUserContext } from "@/contexts/UserContext"
 import { BottomSheetModal, useBottomSheetModal, BottomSheetView } from "@gorhom/bottom-sheet"
 import { Href, useRouter } from "expo-router"
 import React, { forwardRef, useCallback, useRef } from "react"
@@ -13,7 +14,8 @@ export const ProfileMenu = forwardRef<BottomSheetModal, ProfileMenuProps>((props
     const router = useRouter();
     const { colors } = useTheme();
     const { dismiss } = useBottomSheetModal();
-    const { logOut } = useAuthContext();
+    const { logOut, session } = useAuthContext();
+    const userController = useUserContext();
 
     const accountCenterRef = useRef<BottomSheetModal>(null);
 
@@ -26,6 +28,11 @@ export const ProfileMenu = forwardRef<BottomSheetModal, ProfileMenuProps>((props
         router.push('/settings' as Href);
     }, [router]);
 
+    const handleLogOut = async () => {
+        logOut();
+        await userController.user.delete(session!.id_user);
+    }
+
     return (
         <>
             <CustomBottomSheet ref={ref} {...props}>
@@ -33,7 +40,7 @@ export const ProfileMenu = forwardRef<BottomSheetModal, ProfileMenuProps>((props
                     <View style={{ gap: 8 }}>
                         <Button mode='outlined' onPress={handleSettings}>Settings</Button>
                         <Button mode='outlined' onPress={handleAccountCenter}>Account Center</Button>
-                        <Button mode='contained' onPress={logOut} buttonColor={colors.error} textColor={colors.onError}>
+                        <Button mode='contained' onPress={handleLogOut} buttonColor={colors.error} textColor={colors.onError}>
                             Log out
                         </Button>
                     </View>

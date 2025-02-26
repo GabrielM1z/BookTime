@@ -232,9 +232,9 @@ const initAction = async (db: SQLiteDatabase, tableName: string) => {
                 executed_by VARCHAR(6)
             );
         `);
-        console.log('Action initialized successfully');
+        console.log(`${tableName} initialized successfully`);
     } catch (error) {
-        console.error('Error initializing Action', error);
+        console.error(`Error initializing ${tableName}`, error);
     }
 }
 
@@ -284,7 +284,7 @@ const initTriggerInsertState = async (db: SQLiteDatabase) => {
             ON state
             FOR EACH ROW
             BEGIN
-                INSERT INTO Action (
+                INSERT INTO book_action (
                     id_action, 
                     table_name, 
                     date, 
@@ -329,7 +329,7 @@ const initTriggerUpdateState = async (db: SQLiteDatabase) => {
             ON state
             FOR EACH ROW
             BEGIN
-                INSERT INTO Action (
+                INSERT INTO book_action (
                     id_action, 
                     table_name, 
                     date, 
@@ -388,7 +388,7 @@ const initTriggerDeleteState = async (db: SQLiteDatabase) => {
             ON state
             FOR EACH ROW
             BEGIN
-                INSERT INTO Action (
+                INSERT INTO book_action (
                     id_action, 
                     table_name, 
                     date, 
@@ -429,7 +429,7 @@ const initTriggerInsertLibrary = async (db: SQLiteDatabase) => {
             ON library
             FOR EACH ROW
             BEGIN
-                INSERT INTO Action (
+                INSERT INTO book_action (
                     table_name, 
                     date, 
                     type, 
@@ -467,7 +467,7 @@ const initTriggerUpdateLibrary = async (db: SQLiteDatabase) => {
             ON library
             FOR EACH ROW
             BEGIN
-                INSERT INTO Action (
+                INSERT INTO book_action (
                     id_action, 
                     table_name, 
                     date, 
@@ -507,7 +507,7 @@ const initTriggerDeleteLibrary = async (db: SQLiteDatabase) => {
             ON library
             FOR EACH ROW
             BEGIN
-                INSERT INTO Action (
+                INSERT INTO book_action (
                     id_action, 
                     table_name, 
                     date, 
@@ -548,7 +548,7 @@ const initTriggerInsertSharedLibrary = async (db: SQLiteDatabase) => {
             ON shared_library
             FOR EACH ROW
             BEGIN
-                INSERT INTO Action (
+                INSERT INTO book_action (
                     id_action, 
                     table_name, 
                     date, 
@@ -587,7 +587,7 @@ const initTriggerDeleteSharedLibrary = async (db: SQLiteDatabase) => {
             ON shared_library
             FOR EACH ROW
             BEGIN
-                INSERT INTO Action (
+                INSERT INTO book_action (
                     id_action, 
                     table_name, 
                     date, 
@@ -629,7 +629,7 @@ const initTriggerInsertLibraryBook = async (db: SQLiteDatabase) => {
             ON library_book
             FOR EACH ROW
             BEGIN
-                INSERT INTO Action (
+                INSERT INTO book_action (
                     id_action, 
                     table_name, 
                     date, 
@@ -669,7 +669,7 @@ const initTriggerDeleteLibraryBook = async (db: SQLiteDatabase) => {
             ON library_book
             FOR EACH ROW
             BEGIN
-                INSERT INTO Action (
+                INSERT INTO book_action (
                     id_action, 
                     table_name, 
                     date, 

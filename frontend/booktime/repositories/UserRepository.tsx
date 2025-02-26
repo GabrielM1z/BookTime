@@ -7,10 +7,10 @@ export interface UserRepository {
     getAll(): Promise<User[]>;
     add(user: User): Promise<void>;
     update(user: User): Promise<void>;
-    delete(user: User): Promise<void>;
+    delete(id_or_user: string | User): Promise<void>;
 }
 
-export class SQLiteUserRepository implements UserRepository {
+export class LocalUserRepository implements UserRepository {
     private db: SQLiteDatabase;
 
     constructor(db: SQLiteDatabase) {
@@ -97,7 +97,7 @@ export class SQLiteUserRepository implements UserRepository {
 }
 
 
-export class APIUserRepository implements UserRepository {
+export class RemoteUserRepository implements UserRepository {
     async getFromToken(): Promise<User> {
         const response = await api.get('/users/userfromtoken');
         // FIXME: weird response structure

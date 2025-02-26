@@ -2,6 +2,7 @@ import { Library, LibraryWithBooks, LibraryWithBooksMin } from '@/models/Library
 import { SQLiteDatabase } from 'expo-sqlite';
 import uuid from 'react-native-uuid';
 import { Book, BookMinInfos } from '@/models/Book';
+import { SynchronisationController } from '@/controllers/SynchronisationController';
 
 
 
@@ -16,11 +17,15 @@ export interface LibraryRepository {
     getAllNotLibraryFromBook: (id_book: string) => Promise<Library[]>;
 }
 
-export class SQLiteLibraryRepository implements LibraryRepository {
+export class LocalLibraryRepository implements LibraryRepository {
     private db: SQLiteDatabase;
+    private id_user: string;
+    private sync: SynchronisationController;
 
-    constructor(db: SQLiteDatabase) {
+    constructor(db: SQLiteDatabase, id_user: string, sync: SynchronisationController) {
         this.db = db;
+        this.id_user = id_user;
+        this.sync = sync;
     }
 
     async getAll(): Promise<Library[]> {
@@ -172,7 +177,7 @@ export class SQLiteLibraryRepository implements LibraryRepository {
 }
 
 
-export class APILibraryRepository implements LibraryRepository {
+export class RemoteLibraryRepository implements LibraryRepository {
     async getAll(): Promise<Library[]> {
         return [];
     }

@@ -1,5 +1,5 @@
 import { Book } from '@/components/library/Book';
-import { useController } from '@/hooks/useController';
+import { useBookContext } from '@/contexts/BookContext';
 import { useRepository } from '@/hooks/useRepository';
 import { useRouter } from "expo-router";
 import React, { useMemo, useState } from "react";
@@ -26,7 +26,7 @@ const { width, height, columns } = calculateBookLayout();
 
 const AllBooksTab = () => {
     const router = useRouter();
-    const { bookController } = useController();
+    const bookController = useBookContext();
     const { data: books, loading, refresh } = useRepository(
         () => bookController.book.getAll(["title", "cover_image_url"]), []);
     const [search, setSearch] = useState<string>("");

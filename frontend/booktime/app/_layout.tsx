@@ -1,10 +1,8 @@
 import { QueryProvider } from '@/components/QueryProvider';
-import { AuthProvider, useAuthContext } from '@/contexts/AuthContext';
-import { FadeTransitionProvider } from '@/contexts/FadeTransitionContext';
+import { AuthProvider } from '@/contexts/AuthContext';
 import { migrateDbIfNeeded } from '@/db/init';
 import { useAuthInterceptor } from '@/hooks/useAuthInterceptor';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { ControllerProvider } from '@/providers/ControllerProvider';
 import { CustomBottomSheetProvider } from "@/common";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
@@ -14,12 +12,13 @@ import {
 import { useFonts } from 'expo-font';
 import { Stack } from "expo-router";
 import * as SplashScreen from 'expo-splash-screen';
-import { deleteDatabaseAsync } from 'expo-sqlite';
+import { SQLiteProvider, deleteDatabaseAsync } from 'expo-sqlite';
 import React, { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { PaperProvider, adaptNavigationTheme } from 'react-native-paper';
 import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
+import { UserProvider } from '@/contexts/UserContext';
 
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -32,14 +31,15 @@ const { LightTheme, DarkTheme } = adaptNavigationTheme({
 
 function Routes() {
     useAuthInterceptor();
-    const { session } = useAuthContext();
 
     return (
-        <Stack key={session?.id_user}>
-            <Stack.Screen name="(app)" options={{ headerShown: false }} />
-            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-            <Stack.Screen name="+not-found" />
-        </Stack>
+        <UserProvider>
+            <Stack>
+                <Stack.Screen name="(app)" options={{ headerShown: false }} />
+                <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                <Stack.Screen name="+not-found" />
+            </Stack>
+        </UserProvider>
     );
 }
 
@@ -67,25 +67,23 @@ export default function RootLayout() {
     }
 
     return (
-        <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-            <GestureHandlerRootView>
-                <CustomBottomSheetProvider>
-                    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : LightTheme}>
-                        <FadeTransitionProvider>
-                            <ControllerProvider databaseName='booktime.db' onInit={migrateDbIfNeeded} onError={handleSQLiteError}>
-                                <AuthProvider>
-                                    <QueryProvider>
-                                        <PaperProvider>
-                                            <Routes />
-                                        </PaperProvider>
-                                    </QueryProvider>
-                                </AuthProvider>
-                            </ControllerProvider>
-                        </FadeTransitionProvider>
-                        <StatusBar style="auto" />
-                    </ThemeProvider>
-                </CustomBottomSheetProvider>
-            </GestureHandlerRootView>
-        </SafeAreaProvider>
+        <PaperProvider>
+            <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+                <StatusBar style="auto" />
+                <GestureHandlerRootView>
+                    <CustomBottomSheetProvider>
+                        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : LightTheme}>
+                            <QueryProvider>
+                                <SQLiteProvider databaseName='booktime.db' onInit={migrateDbIfNeeded} onError={handleSQLiteError}>
+                                    <AuthProvider>
+                                        <Routes />
+                                    </AuthProvider>
+                                </SQLiteProvider>
+                            </QueryProvider>
+                        </ThemeProvider>
+                    </CustomBottomSheetProvider>
+                </GestureHandlerRootView>
+            </SafeAreaProvider>
+        </PaperProvider>
     );
 }
