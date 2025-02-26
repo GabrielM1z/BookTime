@@ -1,9 +1,11 @@
 import React, { useCallback, useRef, useMemo, forwardRef, useEffect, useState } from "react";
-import { StyleSheet, View, Text, Button } from "react-native";
-import BottomSheet, { BottomSheetFlatList, BottomSheetModal, BottomSheetModalProvider, BottomSheetSectionList, BottomSheetView } from "@gorhom/bottom-sheet";
+import { StyleSheet, View, TouchableOpacity } from "react-native";
+import BottomSheet, { BottomSheetFlatList, BottomSheetFooter, BottomSheetFooterProps, BottomSheetModal, BottomSheetModalProvider, BottomSheetSectionList, BottomSheetView } from "@gorhom/bottom-sheet";
 import { CustomBottomSheet } from "@/common";
 import { Library } from "@/models";
 import { useController } from "@/hooks/useController";
+import { useRepository } from "@/hooks/useRepository";
+import { Avatar, Text , Button} from "react-native-paper";
 
 interface ModalAddToLibraryProps {
     idBookAdded: string,
@@ -13,22 +15,10 @@ interface ModalAddToLibraryProps {
 export const ModalAddToLibrary = forwardRef<BottomSheetModal, ModalAddToLibraryProps>(({ idBookAdded, closeModal }, ref) => {
     // hooks
     // const ref = useRef<BottomSheetModal>(null);
-    const [libraryList, setLibraryList] = useState<Library[]>([])
+    const { data: libraryList } = useRepository(() => bookController.library.getAll())
     const { bookController } = useController();
-
-    // libraryRepository.getAll().then((data) => {
-    //     console.log(data)
-    //     setLibraryList(data)
-    // })
-
-    useEffect(() => {
-        bookController.library.getAll().then((data) => {
-            console.log(data)
-            setLibraryList(data)
-        })
-        initItemSelected();
-    
-    }, []);
+    const { data: listLibraryOfBook, loading, refresh: refreshListLibraryOfBook } = useRepository(() => bookController.library.getAllLibraryFromBook(idBookAdded), [], [idBookAdded])
+    const [libraryIdListSelected, setLibraryIdListSelected] = useState<string[]>([])
 
     // callbacks
     const handleSheetChanges = useCallback((index: number) => {
@@ -48,20 +38,12 @@ export const ModalAddToLibrary = forwardRef<BottomSheetModal, ModalAddToLibraryP
         console.log(libraryIdListSelected)
     }, [libraryIdListSelected]);
 
-    function initItemSelected() {
-        libraryRepository.getAllLibraryFromBook(idBookAdded).then((bookLibraryList) => {
-            // console.log(bookLibraryList.map(library => library.id_library));
-            
-            setLibraryIdListSelected(bookLibraryList.map(library => library.id_library));
-        })
-    }
-
     const renderItem = useCallback(
         ({ item }: { item: Library }) => (
             <TouchableOpacity
                 onPress={() => toggleItemSelect(item.id_library)}
                 style={[{
-                    backgroundColor: libraryIdListSelected.includes(item.id_library) ? 'lightgray' : 'white'
+                    backgroundColor: listLibraryOfBook.find(obj => obj.id_library === item.id_library) ? 'lightgray' : 'white'
 
                 }, styles.itemContainer]}
             >
@@ -75,13 +57,13 @@ export const ModalAddToLibrary = forwardRef<BottomSheetModal, ModalAddToLibraryP
     );
 
     const addToLibrary = async (id_library: string, id_book: string) => {
-        await bookRepository.updateBookLibrary(id_library, id_book);
+        await bookController.book.updateBookLibrary(id_library, id_book)
         console.log("book added");
 
     };
 
     const deleteFromLibrary = async (id_library: string, id_book: string) => {
-        await bookRepository.delBookFromLibrary(id_library, id_book);
+        await bookController.book.deleteFromLibrary(id_library, id_book);
         console.log("book removed");
     };
 

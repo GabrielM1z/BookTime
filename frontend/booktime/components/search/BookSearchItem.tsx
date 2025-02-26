@@ -11,6 +11,9 @@ import { Snackbar, PaperProvider, Portal } from "react-native-paper";
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { ModalAddToLibrary } from './ModalAddToLibrary';
 import { useController } from '@/hooks/useController';
+import { useRepository } from '@/hooks/useRepository';
+
+
 
 interface BookSearchItemProps {
     book: BookSearchResult;
@@ -19,7 +22,9 @@ interface BookSearchItemProps {
 
 export const BookSearchItem = ({ book, handleModalAddToLibrary }: BookSearchItemProps) => {
 
+
     const { bookController } = useController();
+    const { data: librairies, loading } = useRepository(() => bookController.library.getAllLibraryFromBook(book.isbn13), [])
     const [visible, setVisible] = useState(false);
     const [bookAdded, setBookAdded] = useState<keyof typeof Ionicons.glyphMap>("add");
 
@@ -35,7 +40,7 @@ export const BookSearchItem = ({ book, handleModalAddToLibrary }: BookSearchItem
 
             const listLibrary = await bookController.library.getAll()
 
-            await bookController.book.addToLibrary(listLibrary[0].id_library, data)
+            await bookController.addToLibrary(listLibrary[0].id_library, data)
             showSnackbar();
 
         } catch (error) {
@@ -48,14 +53,7 @@ export const BookSearchItem = ({ book, handleModalAddToLibrary }: BookSearchItem
         handleModalAddToLibrary(book.isbn13)
     }
 
-
-    useEffect(()=>{
-        libraryRepository.getAllLibraryFromBook(book.isbn13).then((data) => {
-            if (data.length != 0) {
-                setBookAdded("checkmark")
-            }
-        })
-    });
+    const checked = librairies.length != 0
 
     return (
         <View style={styles.itemContainer}>
@@ -66,8 +64,8 @@ export const BookSearchItem = ({ book, handleModalAddToLibrary }: BookSearchItem
                 <ThemedText type="auteurLivreHorizontal">{book.authors ? book.authors[0] : "Inconnue"}</ThemedText>
             </View>
             <View style={styles.addItemContainer}>
-                <Pressable onPress={handleAddBook} style={bookAdded === "checkmark" ? styles.addedItem : styles.item}>
-                    <Ionicons size={20} color={bookAdded === "checkmark" ? "white" : "#1E9AA4"} name={bookAdded} />
+                <Pressable onPress={handleAddBook} style={checked ? styles.addedItem : styles.item}>
+                    <Ionicons size={20} color={checked ? "white" : "#1E9AA4"} name={checked ? "checkmark" : "add"} />
                 </Pressable>
             </View>
         </View>

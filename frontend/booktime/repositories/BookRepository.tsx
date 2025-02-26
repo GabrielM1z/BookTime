@@ -11,7 +11,7 @@ export interface BookRepository {
     getAll: (columns?: (keyof Book)[]) => Promise<Book[]>;
     getAllFromLib: (id_lib: string) => Promise<Book[]>
     add: (state: Book) => Promise<void>;
-    addToLibrary: (id_library: string, book: Book) => Promise<void>
+    // addToLibrary: (id_library: string, book: Book) => Promise<void>
     delete: (id: string) => Promise<void>;
     deleteFromLibrary: (id_library: string, id_book: string) => Promise<void>
 	updateBookLibrary: (id_library: string, id_book: string) => Promise<void>
@@ -78,40 +78,40 @@ export class SQLiteBookRepository implements BookRepository {
         )
     }
 
-    async addToLibrary(id_library: string, book: Book): Promise<void> {
+    // async addToLibrary(id_library: string, book: Book): Promise<void> {
 
-        try {
-            await this.db.withTransactionAsync(async () => {
-                await this.db.runAsync(
-                    `INSERT OR IGNORE INTO book (id_book, title, description, publisher, publication_date, page_number, language, cover_image_url) 
-                    VALUES ($id_book, $title, $description, $publisher, $publication_date, $page_number, $language, $cover_image_url);`,
-                    {
-                        $id_book: book.id_book,
-                        $title: book.title,
-                        $description: book.description,
-                        $publisher: book.publisher,
-                        $publication_date: book.publication_date,
-                        $page_number: book.page_number,
-                        $language: book.language,
-                        $cover_image_url: book.cover_image_url,
-                    }
-                )
+    //     try {
+    //         await this.db.withTransactionAsync(async () => {
+    //             await this.db.runAsync(
+    //                 `INSERT OR IGNORE INTO book (id_book, title, description, publisher, publication_date, page_number, language, cover_image_url) 
+    //                 VALUES ($id_book, $title, $description, $publisher, $publication_date, $page_number, $language, $cover_image_url);`,
+    //                 {
+    //                     $id_book: book.id_book,
+    //                     $title: book.title,
+    //                     $description: book.description,
+    //                     $publisher: book.publisher,
+    //                     $publication_date: book.publication_date,
+    //                     $page_number: book.page_number,
+    //                     $language: book.language,
+    //                     $cover_image_url: book.cover_image_url,
+    //                 }
+    //             )
 
-                await this.db.runAsync(
-                    `INSERT OR IGNORE INTO library_book (id_library, id_book) VALUES ($id_library, $id_book);`,
-                    {
-                        $id_library: id_library,
-                        $id_book: book.id_book,
-                    }
-                )
-            });
+    //             await this.db.runAsync(
+    //                 `INSERT OR IGNORE INTO library_book (id_library, id_book) VALUES ($id_library, $id_book);`,
+    //                 {
+    //                     $id_library: id_library,
+    //                     $id_book: book.id_book,
+    //                 }
+    //             )
+    //         });
 
-            console.log("addBookToLibrary: success")
+    //         console.log("addBookToLibrary: success")
 
-        } catch (error) {
-            console.log("Failed addBookToLibrary :", error)
-        }
-    }
+    //     } catch (error) {
+    //         console.log("Failed addBookToLibrary :", error)
+    //     }
+    // }
 
 	/**
 	 * Ajoute un livre à une librairie sans le creer
@@ -197,9 +197,9 @@ export class APIBookRepository implements BookRepository {
         return;
     }
 
-    async addToLibrary(id_library: string, book: Book): Promise<void> {
-        return;
-    }
+    // async addToLibrary(id_library: string, book: Book): Promise<void> {
+    //     return;
+    // }
 
 	async updateBookLibrary(id_library: string, id_book: string): Promise<void> {
 		return;

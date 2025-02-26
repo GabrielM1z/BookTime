@@ -1,5 +1,16 @@
 import { useState, useEffect, useCallback } from "react";
 
+/**
+ * 
+ * @param {T} func - La fonction à exécuter.
+ * @param {Awaited<ReturnType<T>>} defaultValue - La valeur par défaut de la réponse.
+ * @param {React.DependencyList} deps - Liste des dépendances pour recharger la requête.
+ * @returns {object} Un objet contenant :
+ * - {Awaited<ReturnType<T>>} data : La donnée retournée par la requête.
+ * - {boolean} loading : Indique si la requête est en cours d'exécution.
+ * - {unknown} error : Contient l'erreur en cas d'échec de la requête.
+ * - {() => void} refresh : Fonction permettant de réexécuter la requête manuellement.
+ */
 export const useRepository = <T extends () => Promise<any>>(
     func: T,
     defaultValue: Awaited<ReturnType<T>> = null as any,
