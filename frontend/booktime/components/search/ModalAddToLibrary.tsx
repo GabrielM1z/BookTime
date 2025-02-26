@@ -17,33 +17,37 @@ export const ModalAddToLibrary = forwardRef<BottomSheetModal, ModalAddToLibraryP
     // const ref = useRef<BottomSheetModal>(null);
     const { data: libraryList } = useRepository(() => bookController.library.getAll())
     const { bookController } = useController();
-    const { data: listLibraryOfBook, loading, refresh: refreshListLibraryOfBook } = useRepository(() => bookController.library.getAllLibraryFromBook(idBookAdded), [], [idBookAdded])
-    const [libraryIdListSelected, setLibraryIdListSelected] = useState<string[]>([])
+    const { data: listLibraryOfBook, setData: setListLibraryOfBook, loading, refresh: refreshListLibraryOfBook } = useRepository(() => bookController.library.getAllLibraryFromBook(idBookAdded), [], [idBookAdded])
 
     // callbacks
     const handleSheetChanges = useCallback((index: number) => {
         console.log("handleSheetChange", index);
     }, []);
 
-    const toggleItemSelect = useCallback((id: string) => {
-        if (libraryIdListSelected.includes(id)) {
-            setLibraryIdListSelected(prevIds => prevIds.filter(itemId => itemId !== id));
-            console.log("removed :", id)
-
-        } else {
-            setLibraryIdListSelected(prevIds => [...prevIds, id]);
-            console.log("added :", id)
-
+    const toggleItemSelect = useCallback((item: Library, bookInLibrary: boolean) => {
+        
+        if(bookInLibrary){
+            setListLibraryOfBook(listLibraryOfBook.filter(obj => obj.id_library !== item.id_library));
+        }else{
+            setListLibraryOfBook([...listLibraryOfBook, item]);
         }
-        console.log(libraryIdListSelected)
-    }, [libraryIdListSelected]);
+
+    }, [idBookAdded, listLibraryOfBook]);
 
     const renderItem = useCallback(
-        ({ item }: { item: Library }) => (
+        ({ item }: { item: Library }) => {
+            
+
+            let bookInLibrary = listLibraryOfBook.find(obj => obj.id_library === item.id_library) != undefined
+
+
+            bookInLibrary? console.log("Library name :", item.name, "Is in library :", bookInLibrary) : ""
+            
+            return (
             <TouchableOpacity
-                onPress={() => toggleItemSelect(item.id_library)}
+                onPress={() => toggleItemSelect(item, bookInLibrary)}
                 style={[{
-                    backgroundColor: listLibraryOfBook.find(obj => obj.id_library === item.id_library) ? 'lightgray' : 'white'
+                    backgroundColor: bookInLibrary ? 'lightgray' : 'white'
 
                 }, styles.itemContainer]}
             >
@@ -53,7 +57,7 @@ export const ModalAddToLibrary = forwardRef<BottomSheetModal, ModalAddToLibraryP
                     <Text variant="bodyMedium">Livres présents : 10</Text>
                 </View>
             </TouchableOpacity>
-        ), [libraryIdListSelected]
+        )}, [listLibraryOfBook]
     );
 
     const addToLibrary = async (id_library: string, id_book: string) => {
@@ -69,18 +73,17 @@ export const ModalAddToLibrary = forwardRef<BottomSheetModal, ModalAddToLibraryP
 
     const confirmChoice = useCallback(async () => {
 
-        console.log("Library to add :", libraryIdListSelected)
-
         for (const library of libraryList) {
-            if (libraryIdListSelected.includes(library.id_library)) {
+            let bookInLibrary = listLibraryOfBook.find(libraryOfBook => libraryOfBook.id_library === library.id_library) != undefined
+
+            if (bookInLibrary) {
                 addToLibrary(library.id_library, idBookAdded)
             } else {
                 deleteFromLibrary(library.id_library, idBookAdded)
             }
         };
-        
         closeModal();
-    }, [libraryList, libraryIdListSelected])
+    }, [libraryList])
 
     const Footer = ({ animatedFooterPosition }: BottomSheetFooterProps) => {
         return (
@@ -110,7 +113,7 @@ export const ModalAddToLibrary = forwardRef<BottomSheetModal, ModalAddToLibraryP
             <BottomSheetFlatList
                 style={styles.bottomSheetFlatList}
                 data={libraryList}
-                extraData={libraryIdListSelected}
+                extraData={listLibraryOfBook}
                 renderItem={renderItem}
                 keyExtractor={(i) => i.id_library}
             />

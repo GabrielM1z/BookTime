@@ -38,5 +38,5 @@ export const useRepository = <T extends () => Promise<any>>(
         fetchData();
     }, [fetchData]);
 
-    return { data, error, loading, refresh: fetchData };
+    return { data, setData, error, loading, refresh: fetchData };
 };
