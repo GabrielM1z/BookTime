@@ -1,7 +1,7 @@
 import { SQLiteDatabase } from 'expo-sqlite';
 import { useSQLite } from "@/hooks/useSQLite";
 import { Book, BookInfosServeur, BookMinInfos } from '@/models/Book';
-
+import { syncAfterMethod, syncBeforeMethod } from '@/decorators/synchronisation';
 import { formatColumns } from '@/helpers';
 import { api } from "@/services/axios"
 import { linkToBase64 } from '@/helpers/image';
@@ -60,6 +60,7 @@ export class SQLiteBookRepository implements BookRepository {
         return allRows;
     }
 
+    @syncAfterMethod("book")
     async add(book: Book): Promise<void> {
         await this.db.runAsync(
             `INSERT INTO book (id_book, title, description, publisher, publication_date, page_number, language, cover_image_url)
@@ -74,9 +75,10 @@ export class SQLiteBookRepository implements BookRepository {
                 $language: book.language,
                 $cover_image_url: book.cover_image_url,
             }
-        )
+        );
     }
 
+    @syncAfterMethod("book")
     async addToLibrary(id_library: string, book: Book): Promise<void> {
 
         try {

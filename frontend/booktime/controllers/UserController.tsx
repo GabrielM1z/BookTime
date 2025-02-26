@@ -1,16 +1,18 @@
-import { Session } from "@/models/Session";
-import { UserProps, User } from "@/models/User";
-import { APIUserRepository, SQLiteUserRepository, UserRepository } from "@/repositories/UserRepository";
-import { SessionController } from "./SessionController";
 import { guestUserId } from "@/constants";
-import { proxyRepository, RepositoryProxy } from "@/helpers/proxyRepository";
+import { RepositoryProxy, proxyRepository } from "@/helpers/proxyRepository";
+import { Session } from "@/models/Session";
+import { User } from "@/models/User";
+import { APIUserRepository, SQLiteUserRepository, UserRepository } from "@/repositories/UserRepository";
 import { SQLiteDatabase } from "expo-sqlite";
 import { Platform } from "react-native";
+import { SessionController } from "./SessionController";
+import { SynchronisationController } from "./SynchronisationController";
 
-export class UserController {
+export class UserController extends SynchronisationController {
     user: RepositoryProxy<UserRepository, APIUserRepository, SQLiteUserRepository>;
 
     constructor(db: SQLiteDatabase) {
+        super("user", "user_action", db);
         this.user = proxyRepository(new SQLiteUserRepository(db), new APIUserRepository());
     }
 

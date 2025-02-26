@@ -17,7 +17,8 @@ export const initDB = async (db: SQLiteDatabase) => {
     await initLibraryBook(db)
     await initSharedLibrary(db)
     await initUser(db)
-    await initAction(db)
+    await initAction(db, "book_action")
+    await initAction(db, "user_action")
 
     // init des trigger
     await initTrigger(db)
@@ -218,10 +219,10 @@ const initUser = async (db: SQLiteDatabase) => {
 }
 
 
-const initAction = async (db: SQLiteDatabase) => {
+const initAction = async (db: SQLiteDatabase, tableName: string) => {
     try {
         await db.execAsync(`
-            CREATE TABLE IF NOT EXISTS action (
+            CREATE TABLE IF NOT EXISTS ${tableName} (
                 id_action TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
                 id_user TEXT,
                 table_name VARCHAR(50),

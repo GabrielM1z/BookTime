@@ -32,7 +32,6 @@ const { LightTheme, DarkTheme } = adaptNavigationTheme({
 
 function Routes() {
     useAuthInterceptor();
-
     const { session } = useAuthContext();
 
     return (
