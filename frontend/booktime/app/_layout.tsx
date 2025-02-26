@@ -1,5 +1,5 @@
 import { QueryProvider } from '@/components/QueryProvider';
-import { AuthProvider } from '@/contexts/AuthContext';
+import { AuthProvider, useAuthContext } from '@/contexts/AuthContext';
 import { FadeTransitionProvider } from '@/contexts/FadeTransitionContext';
 import { migrateDbIfNeeded } from '@/db/init';
 import { useAuthInterceptor } from '@/hooks/useAuthInterceptor';
@@ -33,8 +33,10 @@ const { LightTheme, DarkTheme } = adaptNavigationTheme({
 function Routes() {
     useAuthInterceptor();
 
+    const { session } = useAuthContext();
+
     return (
-        <Stack>
+        <Stack key={session?.id_user}>
             <Stack.Screen name="(app)" options={{ headerShown: false }} />
             <Stack.Screen name="(auth)" options={{ headerShown: false }} />
             <Stack.Screen name="+not-found" />

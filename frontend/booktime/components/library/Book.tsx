@@ -1,10 +1,8 @@
 import { defaultCover } from '@/assets/images';
 import { BookMinInfos } from '@/models/Book';
 import React, { useMemo, useState } from 'react';
-import { Dimensions, Image, StyleProp, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
+import { Image, StyleProp, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import { Text } from 'react-native-paper';
-
-const { width, height } = Dimensions.get("window");
 
 interface BookProps {
     book: BookMinInfos;
@@ -13,6 +11,7 @@ interface BookProps {
     onPress?: (idBook: string) => void;
     onLongPress?: (idBook: string) => void;
     onPressOut?: () => void;
+    // preserveAspectRatio?: boolean; // TODO: Implement this feature
 }
 
 export const Book = ({
@@ -22,17 +21,17 @@ export const Book = ({
     onPress,
     onLongPress,
     onPressOut,
+    
 }: BookProps) => {
     const [imageError, setImageError] = useState(false);
-
     const containerStyle = useMemo(() => StyleSheet.flatten([styles.container, style]), [style]);
 
     return (
-        <TouchableOpacity 
-        style={containerStyle} 
-        onPress={() => onPress?.(book.id_book)} 
-        onLongPress={() => onLongPress?.(book.id_book)}
-        onPressOut={onPressOut}
+        <TouchableOpacity
+            style={containerStyle}
+            onPress={() => onPress?.(book.id_book)}
+            onLongPress={() => onLongPress?.(book.id_book)}
+            onPressOut={onPressOut}
         >
             <Image
                 source={imageError || !book.cover_image_url ? defaultCover : { uri: book.cover_image_url }}
