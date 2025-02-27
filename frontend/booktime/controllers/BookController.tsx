@@ -6,6 +6,7 @@ import { RemoteLibraryRepository, LibraryRepository, LocalLibraryRepository } fr
 import { RemoteStateRepository, LocalStateRepository, StateRepository } from "@/repositories/StateRepository";
 import { SQLiteDatabase } from "expo-sqlite";
 import { SynchronisationController } from "./SynchronisationController";
+import { Book } from "@/models";
 
 export interface BookControllerProps {
     book: BookRepository;
@@ -13,6 +14,7 @@ export interface BookControllerProps {
     author: AuthorRepository;
     genre: GenreRepository;
     state: StateRepository;
+    addToLibrary : (id_library: string, book: Book) => Promise<void>
 }
 
 export class LocalBookController implements BookControllerProps {
@@ -83,12 +85,16 @@ export class RemoteBookController implements BookControllerProps {
     author: RemoteAuthorRepository;
     genre: RemoteGenreRepository;
     state: RemoteStateRepository;
-
+    
     constructor(id_user: string) {
         this.book = new RemoteBookRepository();
         this.library = new RemoteLibraryRepository();
         this.author = new RemoteAuthorRepository();
         this.genre = new RemoteGenreRepository();
         this.state = new RemoteStateRepository();
+    }
+
+    addToLibrary(id_library: string, book: Book): Promise<void>{
+        return new Promise<void>(resolve => resolve());
     }
 }
