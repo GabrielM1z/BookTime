@@ -13,6 +13,8 @@ export interface BookControllerProps {
     author: AuthorRepository;
     genre: GenreRepository;
     state: StateRepository;
+
+    addToLibrary: (id_library: string, book: Book) => Promise<void>;
 }
 
 export class LocalBookController implements BookControllerProps {

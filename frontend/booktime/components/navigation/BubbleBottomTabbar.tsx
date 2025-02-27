@@ -1,10 +1,10 @@
 import { withAnimated } from "@/common";
 import { Feather } from "@expo/vector-icons";
+import { BottomTabBarHeightCallbackContext, BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import Color from "color";
-import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
-import React, { useMemo } from "react";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
-import { useTheme, Text } from "react-native-paper";
+import React, { useContext, useMemo } from "react";
+import { LayoutChangeEvent, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Text, useTheme } from "react-native-paper";
 import Animated, {
     FadeIn,
     FadeOut,
@@ -15,12 +15,13 @@ import Animated, {
     withTiming
 } from "react-native-reanimated";
 
+
 const AnimatedTouchableOpacity =
     Animated.createAnimatedComponent(TouchableOpacity);
 
 const AnimatedText = withAnimated(Text);
 
-export interface NavBarProps extends BottomTabBarProps {
+export interface BubbleBottomTabbarProps extends BottomTabBarProps {
     renderIcon?: (routeName: string, color: string) => React.ReactNode;
     excludeRoutes?: string[];
 }
@@ -29,16 +30,17 @@ const defaultRenderIcon = (iconName: keyof typeof Feather.glyphMap, color: strin
     <Feather name={iconName} size={18} color={color} />
 )
 
-export const BubbleNavBar: React.FC<NavBarProps> = ({
+export const BubbleBottomTabbar = ({
     renderIcon,
     excludeRoutes = [],
     state,
     descriptors,
     navigation,
-}) => {
+}: BubbleBottomTabbarProps) => {
     const { colors } = useTheme();
     const tabPositionX = useSharedValue(0);
     const tabWidth = useSharedValue(0);
+    const onHeightChange = useContext(BottomTabBarHeightCallbackContext);
 
     const bubbleAnimation = useAnimatedStyle(() => {
         return {
@@ -53,15 +55,20 @@ export const BubbleNavBar: React.FC<NavBarProps> = ({
         bubbleAnimation
     ], [bubbleAnimation, colors]);
 
-    const tabBarStyle = useMemo(() => [
+    const tabBarStyle = useMemo(() => StyleSheet.flatten([
         styles.container,
         {
             backgroundColor: colors.elevation.level2,
             borderTopColor: colors.outline
-        }], [colors]);
+        }]), [colors]
+    );
+
+    const handleLayout = (event: LayoutChangeEvent) => {
+        onHeightChange?.(event.nativeEvent.layout.height);
+    };
 
     return (
-        <View style={tabBarStyle}>
+        <View style={tabBarStyle} onLayout={handleLayout}>
             <Animated.View style={bubbleStyle} />
             {state.routes.map((route: any, index: number) => {
                 if (excludeRoutes.includes(route.name)) return null;
@@ -125,14 +132,15 @@ export const BubbleNavBar: React.FC<NavBarProps> = ({
 const styles = StyleSheet.create({
     container: {
         position: "absolute",
-        flexDirection: "row",
         justifyContent: "center",
         alignItems: "center",
-        width: "80%",
         alignSelf: "center",
-        bottom: 16,
+        flexDirection: "row",
+        width: "80%",
+        bottom: 4,
         borderRadius: 18,
         paddingVertical: 8,
+        paddingHorizontal: 8,
         gap: 24,
     },
     tabItem: {

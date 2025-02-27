@@ -18,7 +18,7 @@ const AuthenticatedLayout = (session: Session) => {
                 <Stack.Screen name="(tabs)" />
                 <Stack.Screen name="author/[idAuthor]" />
                 <Stack.Screen name="book/[idBook]" />
-                <Stack.Screen name="etagere/[idEtagere]" />
+                <Stack.Screen name="shelf/[idShelf]" />
                 <Stack.Screen name="settings" options={{ headerShown: true }} />
                 <Stack.Screen name="search" options={{ animation: 'fade' }} />
             </Stack>

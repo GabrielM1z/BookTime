@@ -17,7 +17,6 @@ export interface AccountCenterProps extends Omit<CustomBottomSheetProps, "childr
     filter?: (user: User) => boolean;
 }
 
-
 export const AccountCenter = forwardRef<BottomSheetModal, AccountCenterProps>(({
     addAccountFooter = false,
     selectCurrentUser = false,

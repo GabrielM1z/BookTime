@@ -1,4 +1,4 @@
-import { QueryProvider } from '@/components/QueryProvider';
+import { QueryProvider } from '@/providers/QueryProvider';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { migrateDbIfNeeded } from '@/db/init';
 import { useAuthInterceptor } from '@/hooks/useAuthInterceptor';
@@ -15,7 +15,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { SQLiteProvider, deleteDatabaseAsync } from 'expo-sqlite';
 import React, { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { PaperProvider, adaptNavigationTheme } from 'react-native-paper';
+import { PaperProvider, adaptNavigationTheme, useTheme } from 'react-native-paper';
 import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { UserProvider } from '@/contexts/UserContext';
@@ -31,10 +31,11 @@ const { LightTheme, DarkTheme } = adaptNavigationTheme({
 
 function Routes() {
     useAuthInterceptor();
+    const { colors } = useTheme();
 
     return (
         <UserProvider>
-            <Stack>
+            <Stack screenOptions={{ headerShown: false, navigationBarColor: colors.surface }}>
                 <Stack.Screen name="(app)" options={{ headerShown: false }} />
                 <Stack.Screen name="(auth)" options={{ headerShown: false }} />
                 <Stack.Screen name="+not-found" />

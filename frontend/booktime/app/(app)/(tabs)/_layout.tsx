@@ -1,14 +1,14 @@
-import { BubbleNavBar } from '@/components/navigation/BubbleNavBar';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { BubbleBottomTabbar } from '@/components/navigation/BubbleBottomTabbar';
 import { Feather } from "@expo/vector-icons";
 import { Tabs } from 'expo-router';
 import React from 'react';
 
 const BottomTabsLayout = () => {
+
     return (
         <Tabs
             tabBar={(props) => (
-                <BubbleNavBar
+                <BubbleBottomTabbar
                     {...props}
                     renderIcon={(routeName, color) => {
                         switch (routeName) {

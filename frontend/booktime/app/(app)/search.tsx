@@ -9,6 +9,8 @@ import { Text, Searchbar } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { debounce } from "lodash";
+import { SearchItem } from "@/components/search/SearchItem";
+import { ManageLibrarySnackbar } from "@/components/snackbar";
 
 type TFilters = {
     query: string;
@@ -35,8 +37,10 @@ const SearchTab = () => {
     const router = useRouter();
     const [filters, setFilters] = useState<TFilters | null>(null);
     const [query, setQuery] = useState<string>("");
-
     const [idLastBookAdded, setIdLastBookAdded] = useState<string>("")
+
+    const [isSnackbarVisible, setIsSnackbarVisible] = useState(false);
+    const [libraryName, setLibraryName] = useState("");
 
     const handlePresentModalPress = (id_book: string) => {
         setIdLastBookAdded(id_book)
@@ -45,10 +49,6 @@ const SearchTab = () => {
 
     const closeModal = () => {
         bottomSheetRef.current?.close();
-    };
-
-    const handleCancel = () => {
-        router.back();
     };
 
     const fetchData = (query: string) => {
@@ -67,6 +67,10 @@ const SearchTab = () => {
     const handleTextChange = (value: string) => {
         setQuery(value);
         debounceSearch(value);
+    };
+
+    const handleAddBook = (idBook: string, checked: boolean) => {
+
     };
 
     const {
@@ -92,7 +96,7 @@ const SearchTab = () => {
                     inputStyle={styles.textInput}
                     placeholder="Search"
                     icon="arrow-left"
-                    onIconPress={handleCancel}
+                    onIconPress={() => router.push("/(app)/(tabs)/(library)/myShelves")}
                     autoFocus
                     showDivider={false}
                 />
@@ -103,7 +107,15 @@ const SearchTab = () => {
                 onEndReached={onEndReached}
                 removeClippedSubviews={true}
                 data={removeDuplicates(data)}
-                renderItem={({ item }) => <BookSearchItem book={item} handleModalAddToLibrary={handlePresentModalPress} />}
+                renderItem={({ item }) => (
+                    <SearchItem
+                        idBook={item.isbn13}
+                        title={item.title}
+                        authors={item.authors}
+                        uri={item.thumbnail}
+                        onCheck={handleAddBook}
+                    />
+                )}
                 ListEmptyComponent={
                     <View>
                         <Text>{'noResult'}</Text>
@@ -115,7 +127,13 @@ const SearchTab = () => {
                     </View>
                 }
             />
-            <ModalAddToLibrary ref={bottomSheetRef} idBookAdded={idLastBookAdded} closeModal={closeModal}/>
+            <ModalAddToLibrary ref={bottomSheetRef} idBookAdded={idLastBookAdded} closeModal={closeModal} />
+            <ManageLibrarySnackbar
+                library={libraryName}
+                visible={isSnackbarVisible}
+                onDismiss={() => setIsSnackbarVisible(false)}
+                onPressChange={() => setIsSnackbarVisible(false)}
+            />
         </SafeAreaView>
     );
 }

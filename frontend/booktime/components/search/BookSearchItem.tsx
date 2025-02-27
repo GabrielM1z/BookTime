@@ -45,7 +45,6 @@ export const BookSearchItem = ({ book, handleModalAddToLibrary }: BookSearchItem
 
         } catch (error) {
             console.log("error handleAddBook :", error);
-            showSnackbar();
         }
     };
 

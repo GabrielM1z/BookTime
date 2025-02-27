@@ -1,11 +1,12 @@
-import { Book } from '@/components/library/Book';
+import { PressableCover } from '@/components/Cover';
 import { useBookContext } from '@/contexts/BookContext';
 import { useRepository } from '@/hooks/useRepository';
+import { useTopTabbarScroll } from '@/hooks/useTopTabbarScroll';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { useRouter } from "expo-router";
 import React, { useMemo, useState } from "react";
 import { Dimensions, FlatList, StyleSheet } from 'react-native';
 import { Searchbar } from "react-native-paper";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 const DEFAULT_WIDTH_RANGE = [100, 150];
 
@@ -27,9 +28,13 @@ const { width, height, columns } = calculateBookLayout();
 const AllBooksTab = () => {
     const router = useRouter();
     const bookController = useBookContext();
-    const { data: books, loading, refresh } = useRepository(
-        () => bookController.book.getAll(["title", "cover_image_url"]), []);
+    const { data: books, loading, refresh } = useRepository<
+        { id_book: string, title: string, cover_image_url: string }[]>(
+            () => bookController.book.getAll(["title", "cover_image_url"]), []);
     const [search, setSearch] = useState<string>("");
+
+    const tabBarHeight = useBottomTabBarHeight();
+    const { handleScroll } = useTopTabbarScroll(10);
 
     const handleBookPress = (idBook: string) => {
         router.push({
@@ -46,26 +51,34 @@ const AllBooksTab = () => {
     }, [books, search]);
 
     return (
-        <SafeAreaView style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-            <FlatList
-                data={filteredBooks}
-                keyExtractor={(item) => item.id_book.toString()}
-                renderItem={({ item }) => (
-                    <Book book={item} style={{ width, height }} onPress={handleBookPress} />
-                )}
-                numColumns={columns}
-                onRefresh={refresh}
-                refreshing={loading}
-                ListHeaderComponent={
-                    <Searchbar
-                        placeholder="Search"
-                        onChangeText={setSearch}
-                        value={search}
-                    />
-                }
-                ListHeaderComponentStyle={styles.searchbar}
-            />
-        </SafeAreaView>
+        <FlatList
+            data={filteredBooks}
+            keyExtractor={(item) => item.id_book.toString()}
+            renderItem={({ item }) => (
+                <PressableCover
+                    idBook={item.id_book}
+                    title={item.title}
+                    uri={item.cover_image_url}
+                    width={width}
+                    height={height}
+                    onPress={handleBookPress}
+                />
+            )}
+            contentContainerStyle={[styles.contentContainer, { paddingBottom: tabBarHeight }]}
+            onScroll={handleScroll}
+            numColumns={columns}
+            columnWrapperStyle={styles.columnWrapper}
+            onRefresh={refresh}
+            refreshing={loading}
+            ListHeaderComponent={
+                <Searchbar
+                    placeholder="Search"
+                    onChangeText={setSearch}
+                    value={search}
+                />
+            }
+            ListHeaderComponentStyle={styles.searchbar}
+        />
     );
 }
 
@@ -74,9 +87,19 @@ export default AllBooksTab;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        paddingHorizontal: 10,
+        justifyContent: "space-between",
+    },
+    contentContainer: {
+        alignItems: "center",
+        gap: 20,
+    },
+    columnWrapper: {
+        justifyContent: "space-between",
+        gap: 20,
     },
     searchbar: {
-        paddingHorizontal: 10,
-        paddingBottom: 10,
+        marginTop: 8,
+        width: "80%",
     },
 });
