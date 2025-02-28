@@ -9,7 +9,7 @@ import { Text, ActivityIndicator } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack, useNavigation, useRouter } from "expo-router";
 import { SearchItem } from "@/components/search/SearchItem";
-import { ManageLibrarySnackbar } from "@/components/snackbars";
+import { ManageLibrarySnackbar } from "@/components/snackbar";
 import { SearchAppBar } from "@/common/AppBar";
 import Animated, { useAnimatedRef } from "react-native-reanimated";
 import { useManageLibrarySnackbar } from "@/components/snackbar/ManageLibrarySnackbar";
@@ -81,6 +81,7 @@ const SearchTab = () => {
         // if (checked) {
         //     show(library);
         // }
+        router.push("/(app)/ManageLibraryModal");
     };
 
     const {

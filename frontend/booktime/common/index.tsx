@@ -8,6 +8,8 @@ export { PressableText } from "./PressableText";
 export type { PressableTextProps } from "./PressableText";
 export { TextSwitch } from "./TextSwitch";
 export type { TextSwitchProps } from "./TextSwitch";
+export { BottomSheetModal } from "./BottomSheetModal";
+export type { BottomSheetModalProps } from "./BottomSheetModal";
 
 export * from "./CustomBottomSheet";
 export * from "./withAnimation";
