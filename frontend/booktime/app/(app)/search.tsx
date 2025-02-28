@@ -3,14 +3,17 @@ import { ModalAddToLibrary } from "@/components/search/ModalAddToLibrary";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 import { Book, BookSearchResult } from "@/models/Book";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
-import React, { useRef, useState } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
-import { Text, Searchbar } from "react-native-paper";
+import React, { useCallback, useRef, useState } from 'react';
+import { StyleSheet, View } from "react-native";
+import { Text, ActivityIndicator } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
-import { debounce } from "lodash";
+import { Stack, useNavigation, useRouter } from "expo-router";
 import { SearchItem } from "@/components/search/SearchItem";
-import { ManageLibrarySnackbar } from "@/components/snackbar";
+import { ManageLibrarySnackbar } from "@/components/snackbars";
+import { SearchAppBar } from "@/common/AppBar";
+import Animated, { useAnimatedRef } from "react-native-reanimated";
+import { useManageLibrarySnackbar } from "@/components/snackbar/ManageLibrarySnackbar";
+import { useBookContext } from "@/contexts/BookContext";
 
 type TFilters = {
     query: string;
@@ -33,14 +36,16 @@ const removeDuplicates = (items: BookSearchResult[]): BookSearchResult[] => {
 };
 
 const SearchTab = () => {
+    const navigation = useNavigation();
     const bottomSheetRef = useRef<BottomSheetModal>(null);
+    const scrollViewRef = useAnimatedRef<Animated.FlatList<BookSearchResult>>();
     const router = useRouter();
+    const bookController = useBookContext();
+
     const [filters, setFilters] = useState<TFilters | null>(null);
-    const [query, setQuery] = useState<string>("");
     const [idLastBookAdded, setIdLastBookAdded] = useState<string>("")
 
-    const [isSnackbarVisible, setIsSnackbarVisible] = useState(false);
-    const [libraryName, setLibraryName] = useState("");
+    const { visible, library, show, hide } = useManageLibrarySnackbar();
 
     const handlePresentModalPress = (id_book: string) => {
         setIdLastBookAdded(id_book)
@@ -62,15 +67,20 @@ const SearchTab = () => {
         });
     };
 
-    const debounceSearch = debounce(fetchData, 500);
-
-    const handleTextChange = (value: string) => {
-        setQuery(value);
-        debounceSearch(value);
-    };
+    const handleBack = useCallback(() => {
+        // Check if one book has been added to the library
+        if (library !== "") {
+            router.push("/(app)/(tabs)/(library)/myShelves");
+        } else {
+            router.back();
+        }
+    }, [router, library]);
 
     const handleAddBook = (idBook: string, checked: boolean) => {
-
+        // const libraryName = bookController.
+        // if (checked) {
+        //     show(library);
+        // }
     };
 
     const {
@@ -87,21 +97,18 @@ const SearchTab = () => {
 
     return (
         <SafeAreaView style={styles.container}>
-            <View style={styles.headerContainer}>
-                <Searchbar // FIXME: Height not working
-                    mode="view"
-                    value={query}
-                    onChangeText={handleTextChange}
-                    style={styles.searchbar}
-                    inputStyle={styles.textInput}
-                    placeholder="Search"
-                    icon="arrow-left"
-                    onIconPress={() => router.push("/(app)/(tabs)/(library)/myShelves")}
-                    autoFocus
-                    showDivider={false}
-                />
-            </View>
-            <FlatList
+            <Stack.Screen options={{
+                headerShown: true,
+                header: (props) => (
+                    <SearchAppBar
+                        scrollViewRef={scrollViewRef}
+                        onSearchChange={fetchData}
+                        onBack={handleBack}
+                    />
+                )
+            }} />
+            <Animated.FlatList
+                ref={scrollViewRef}
                 keyExtractor={item => item.isbn13}
                 initialNumToRender={NUMBER_OF_ITEMS}
                 onEndReached={onEndReached}
@@ -114,11 +121,12 @@ const SearchTab = () => {
                         authors={item.authors}
                         uri={item.thumbnail}
                         onCheck={handleAddBook}
+                        onPress={(idBook) => router.push({ pathname: "/book/[idBook]", params: { idBook } })}
                     />
                 )}
                 ListEmptyComponent={
-                    <View>
-                        <Text>{'noResult'}</Text>
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                        {isFetchingNextPage ? <ActivityIndicator /> : <Text>No results</Text>}
                     </View>
                 }
                 ListFooterComponent={
@@ -129,10 +137,10 @@ const SearchTab = () => {
             />
             <ModalAddToLibrary ref={bottomSheetRef} idBookAdded={idLastBookAdded} closeModal={closeModal} />
             <ManageLibrarySnackbar
-                library={libraryName}
-                visible={isSnackbarVisible}
-                onDismiss={() => setIsSnackbarVisible(false)}
-                onPressChange={() => setIsSnackbarVisible(false)}
+                library={library}
+                visible={visible}
+                onDismiss={hide}
+                onPressChange={() => router.push("/(modal)/addLibrary")}
             />
         </SafeAreaView>
     );

@@ -8,7 +8,6 @@ import Animated, {
 } from "react-native-reanimated";
 import { withAnimated } from '@/common';
 import { SearchCover } from '../Cover';
-import { ManageLibrarySnackbar } from '@/components/snackbar';
 
 const IconButtonAnimated = withAnimated(IconButton);
 

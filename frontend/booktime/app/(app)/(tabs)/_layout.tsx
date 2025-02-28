@@ -1,10 +1,9 @@
-import { BubbleBottomTabbar } from '@/components/navigation/BubbleBottomTabbar';
+import { BubbleBottomTabbar } from '@/common';
 import { Feather } from "@expo/vector-icons";
 import { Tabs } from 'expo-router';
 import React from 'react';
 
 const BottomTabsLayout = () => {
-
     return (
         <Tabs
             tabBar={(props) => (
@@ -26,6 +25,7 @@ const BottomTabsLayout = () => {
             screenOptions={{
                 headerShown: false,
                 tabBarHideOnKeyboard: true,
+                animation: 'shift',
             }}
         >
             <Tabs.Screen name="(library)" options={{ title: 'Library' }} />

@@ -22,6 +22,7 @@
     "@react-navigation/material-top-tabs": "^7.1.0",
     "@react-navigation/native": "^7.0.14",
     "@tanstack/react-query": "^5.56.2",
+    "@th3rdwave/react-navigation-bottom-sheet": "^0.3.2",
     "axios": "^1.7.7",
     "booktime": "file:",
     "buffer": "^6.0.3",
@@ -31,6 +32,7 @@
     "expo-constants": "~17.0.3",
     "expo-file-system": "~18.0.4",
     "expo-font": "~13.0.1",
+    "expo-image": "~2.0.6",
     "expo-image-picker": "~16.0.6",
     "expo-linear-gradient": "~14.0.1",
     "expo-linking": "~7.0.5",
@@ -56,8 +58,7 @@
     "react-native-screens": "~4.4.0",
     "react-native-uuid": "^2.0.3",
     "react-native-web": "~0.19.13",
-    "uuid": "^11.0.3",
-    "expo-image": "~2.0.6"
+    "uuid": "^11.0.3"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

@@ -73,7 +73,7 @@ export const ButtonsTopTabbar: React.FC<ButtonsTopTabbarProps> = ({
             return tabBarScrollUnderStyle(tabBarScrollUnder);
         }
         return {
-            backgroundColor: withTiming(tabBarScrollUnder ? colors.surfaceVariant : colors.surface, { duration: 200 }),
+            backgroundColor: withTiming(tabBarScrollUnder ? colors.elevation.level2 : colors.surface, { duration: 200 }),
             shadowColor: withTiming(tabBarScrollUnder ? colors.shadow : 'transparent', { duration: 100 }),
             elevation: withTiming(tabBarScrollUnder ? 5 : 0, { duration: 100 }),
         };

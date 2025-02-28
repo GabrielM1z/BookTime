@@ -1,4 +1,4 @@
-import { withAnimated } from "@/common";
+import { withAnimated } from "@/common/withAnimation";
 import { Feather } from "@expo/vector-icons";
 import { BottomTabBarHeightCallbackContext, BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import Color from "color";
@@ -15,10 +15,7 @@ import Animated, {
     withTiming
 } from "react-native-reanimated";
 
-
-const AnimatedTouchableOpacity =
-    Animated.createAnimatedComponent(TouchableOpacity);
-
+const AnimatedTouchableOpacity = withAnimated(TouchableOpacity);
 const AnimatedText = withAnimated(Text);
 
 export interface BubbleBottomTabbarProps extends BottomTabBarProps {

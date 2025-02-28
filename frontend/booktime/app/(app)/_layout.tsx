@@ -7,6 +7,7 @@ import React from 'react';
 import { ActivityIndicator, View } from "react-native";
 import 'react-native-reanimated';
 import { useUserContext } from "@/contexts/UserContext";
+// import { AppBar } from "@/components/navigation/AppBar";
 
 const AuthenticatedLayout = (session: Session) => {
     const userController = useUserContext();
@@ -14,13 +15,12 @@ const AuthenticatedLayout = (session: Session) => {
 
     return (
         <BookProvider id_user={session.id_user}>
-            <Stack screenOptions={{ headerShown: false }}>
+            <Stack screenOptions={{ headerShown: false, animation: 'fade'}}>
                 <Stack.Screen name="(tabs)" />
                 <Stack.Screen name="author/[idAuthor]" />
                 <Stack.Screen name="book/[idBook]" />
                 <Stack.Screen name="shelf/[idShelf]" />
                 <Stack.Screen name="settings" options={{ headerShown: true }} />
-                <Stack.Screen name="search" options={{ animation: 'fade' }} />
             </Stack>
         </BookProvider>
     );
