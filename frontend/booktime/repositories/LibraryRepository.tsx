@@ -1,4 +1,4 @@
-import { Library, LibraryWithBooks, LibraryWithBooksMin } from '@/models/Library';
+import { Library, LibraryDTO, LibraryWithBooks, LibraryWithBooksMin } from '@/models/Library';
 import { SQLiteDatabase } from 'expo-sqlite';
 import uuid from 'react-native-uuid';
 import { Book, BookMinInfos } from '@/models/Book';
@@ -7,12 +7,13 @@ import { SynchronisationController } from '@/controllers/SynchronisationControll
 export interface LibraryRepository {
     getAll: () => Promise<Library[]>;
     get: (id: string) => Promise<Library | null>;
-    add: (name: string) => Promise<void>;
+    create: (library: Library) => Promise<void>;
     delete: (id: string) => Promise<void>;
     getAllInfo: () => Promise<LibraryWithBooksMin[] | []>
     getAllBookFromLib: (id_library: string) => Promise<BookMinInfos[] | null>
     getAllLibraryFromBook: (id_book: string) => Promise<Library[]>;
     getAllNotLibraryFromBook: (id_book: string) => Promise<Library[]>;
+    getLastInsertedId: () => Promise<string|null>
 }
 
 export class LocalLibraryRepository implements LibraryRepository {
@@ -24,6 +25,14 @@ export class LocalLibraryRepository implements LibraryRepository {
         this.db = db;
         this.id_user = id_user;
         this.sync = sync;
+    }
+
+    async getLastInsertedId(): Promise<string|null>{
+        const result = await this.db.getFirstAsync<string>(
+            'SELECT LAST_INSERT_ROWID();',
+        );
+        
+        return result;
     }
 
     async getAll(): Promise<Library[]> {
@@ -42,10 +51,10 @@ export class LocalLibraryRepository implements LibraryRepository {
         return result!;
     }
 
-    async add(name: string): Promise<void> {
+    async create(library: LibraryDTO): Promise<void> {
         await this.db.runAsync(
-            'INSERT INTO library (id_library, name) VALUES ($id_library, $name);',
-            { $id_library: uuid.v4(), $name: name }
+            'INSERT INTO library (name) VALUES ($name);',
+            { $name: library.name }
         )
     }
 
@@ -171,6 +180,11 @@ export class LocalLibraryRepository implements LibraryRepository {
 }
 
 export class RemoteLibraryRepository implements LibraryRepository {
+    
+    async getLastInsertedId() : Promise<string | null>{
+        return ""
+    }
+
     async getAll(): Promise<Library[]> {
         return [];
     }
@@ -179,8 +193,7 @@ export class RemoteLibraryRepository implements LibraryRepository {
         return null;
     }
 
-    async add(name: string): Promise<void> {
-        return;
+    async create(library: Library): Promise<void> {
     }
 
     async delete(id: string): Promise<void> {

@@ -3,9 +3,13 @@ import React, { useEffect, useState } from 'react';
 import { Library } from '@/models/Library';
 import LibraryChip from './LibraryChip';
 import { useBookContext } from '@/contexts/BookContext';
+import { Book } from '@/models';
 
+interface LibraryChoiceProps {
+    book: Book;
+}
 
-export default function LibraryChoice({ book }) {
+export default function LibraryChoice({ book }: LibraryChoiceProps) {
     const [modalVisible, setModalVisible] = useState(false);
     const [librariesNotOwn, setLibrariesNotOwn] = useState<Library[]>([]);
     const [librariesOwn, setLibrariesOwn] = useState<Library[]>([]);
@@ -47,21 +51,28 @@ export default function LibraryChoice({ book }) {
         setModalVisible(true);
     };
 
-    const selectLibrary = (id_library: string) => {
+    const selectLibrary = async (id_library: string) => {
         // Logique pour ajouter une bibliothèque à un livre
-        bookController.book.addToLibrary(id_library, book).then(() => {
-            fetchLibrariesOwn();
-            fetchLibrariesNotOwn();
-        });
         setModalVisible(false);
+        
+        await bookController.libraryBook.create({
+            id_book: book.id_book,
+            id_library: id_library
+        })
+
+        fetchLibrariesOwn();
+        fetchLibrariesNotOwn();
     };
 
-    const deleteLibrary = (id_library: string) => {
+    const deleteLibrary = async (id_library: string) => {
         // Logique pour supprimer une bibliothèque
-        bookController.book.deleteFromLibrary(id_library, book.id_book).then(() => {
-            fetchLibrariesOwn();
-            fetchLibrariesNotOwn();
-        });
+        await bookController.libraryBook.delete({
+            id_book: book.id_book,
+            id_library: id_library
+        })
+
+        fetchLibrariesOwn();
+        fetchLibrariesNotOwn();
     };
 
     return (

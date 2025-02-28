@@ -54,6 +54,12 @@ export interface BookInfosServeur {
 	page_number : number;
 	language : string;
 	cover_image_url : string;
-	authors : string[];
+	authors : Author[];
 	genres : string[];
+}
+
+export interface Author {
+	id_author: string,
+	name: string,
+	description: string
 }
