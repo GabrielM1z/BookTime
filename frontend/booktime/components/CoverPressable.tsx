@@ -2,6 +2,7 @@ import { StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { Link } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { linkToBase64 } from '@/helpers/image';
+import FastImage from "react-native-fast-image";
 
 // component représentant la COUVERTURE du livre qui est CLIQUABLE
 interface CoverPressableProps {
@@ -49,6 +50,7 @@ export default function CoverPressable({ id_book, cover , mode = "search" }: Cov
 		}} asChild>
 			<TouchableOpacity>
 				<Image source={coverUsed == "" ? defaultCover : {uri: coverUsed}}  style={[styles.coverLivre, {width: imageWidth}]} resizeMode='contain' />
+
 			</TouchableOpacity>
 		</Link>
 	);
