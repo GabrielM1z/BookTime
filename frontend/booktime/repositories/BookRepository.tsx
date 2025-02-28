@@ -29,6 +29,14 @@ export class LocalBookRepository implements BookRepository {
         this.sync = sync;
     }
 
+    async getLastInsertedId(): Promise<string> {
+        const result = await this.db.getFirstAsync<Book>(
+            `SELECT * FROM book ORDER BY rowid DESC LIMIT 1;`,
+        );
+
+        return (result as Book).id_book;
+    }
+
     async get(id: string, columns: (keyof Book)[] = []): Promise<Book> {
         const args = formatColumns(columns, ['id_book']);
         const result = await this.db.getFirstAsync<Book>(
@@ -39,11 +47,24 @@ export class LocalBookRepository implements BookRepository {
     }
 
     async getAll(columns: (keyof Book)[] = []): Promise<Book[]> {
-        const args = formatColumns(columns, ['id_book']);
-        let allRows = await this.db.getAllAsync<Book>(
-            `SELECT ${args} FROM book`
-        );
-        return allRows;
+        console.log("id user :", this.id_user);
+        
+        try {
+            const args = formatColumns(columns, ['book.id_book']);
+            let allRows = await this.db.getAllAsync<Book>(
+                `SELECT ${args} FROM book
+                LEFT JOIN state ON state.id_book = book.id_book
+                WHERE state.id_user = $id_user`, 
+                { $id_user: this.id_user }
+            );
+            console.log("allrows: ",allRows);
+            
+            return allRows;
+
+        } catch (error) {
+            console.log("getAll", error)
+            return []
+        }
     }
 
     async create(book: BookInfosServeur): Promise<void> {
@@ -61,7 +82,7 @@ export class LocalBookRepository implements BookRepository {
                     $language: book.language,
                     $cover_image_url: book.cover_image_url,
                 }
-            )            
+            )
         } catch (error) {
             console.log("create :", error);
         }

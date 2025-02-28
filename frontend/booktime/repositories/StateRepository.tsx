@@ -20,6 +20,14 @@ export class LocalStateRepository implements StateRepository {
         this.sync = sync;
     }
 
+    async getLastInsertedId(): Promise<string> {
+        const result = await this.db.getFirstAsync<State>(
+            `SELECT * FROM state ORDER BY rowid DESC LIMIT 1;`,
+        );
+
+        return (result as State).id_book;
+    }
+
     async getAll(): Promise<State[]> {
         let allRows = await this.db.getAllAsync<State>(
             'SELECT * FROM state'
@@ -51,10 +59,10 @@ export class LocalStateRepository implements StateRepository {
                     $read_count: 0,
                 }
             );
-            
+
         } catch (error) {
             console.log("create :", error);
-                        
+
         }
     }
 }

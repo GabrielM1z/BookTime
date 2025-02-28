@@ -27,17 +27,20 @@ export class LocalLibraryRepository implements LibraryRepository {
         this.sync = sync;
     }
 
-    async getLastInsertedId(): Promise<string|null>{
-        const result = await this.db.getFirstAsync<string>(
-            'SELECT LAST_INSERT_ROWID();',
+    async getLastInsertedId(): Promise<string>{
+        const result = await this.db.getFirstAsync<Library>(
+            `SELECT * FROM library ORDER BY rowid DESC LIMIT 1;`,
         );
         
-        return result;
+        return (result as Library).id_library;
     }
 
     async getAll(): Promise<Library[]> {
         let allRows = await this.db.getAllAsync<Library>(
-            'SELECT * FROM library'
+            `SELECT * FROM library 
+            JOIN shared_library ON library.id_library = shared_library.id_library
+            WHERE shared_library.id_user = $id_user`,
+            {$id_user: this.id_user}
         );
         return allRows;
     }
@@ -45,14 +48,14 @@ export class LocalLibraryRepository implements LibraryRepository {
     async get(id: string): Promise<Library | null> {
         const result = await this.db.getFirstAsync<Library>(
             'SELECT * FROM library WHERE id_library == $id',
-            { $id: id }
+            { $id: id,  }
         );
 
         return result!;
     }
 
     async create(library: LibraryDTO): Promise<void> {
-        await this.db.runAsync(
+        const result = await this.db.runAsync(
             'INSERT INTO library (name) VALUES ($name);',
             { $name: library.name }
         )
@@ -194,6 +197,7 @@ export class RemoteLibraryRepository implements LibraryRepository {
     }
 
     async create(library: Library): Promise<void> {
+        
     }
 
     async delete(id: string): Promise<void> {

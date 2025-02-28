@@ -76,6 +76,8 @@ export class LocalBookController implements BookControllerProps {
 
     async addBook(newBookIsbn: string): Promise<void> {
 
+
+        console.log("is_duse", this.id_user)
         let newBook: BookInfosServeur = await this.remote.get(newBookIsbn);
         const listLibrary = await this.library.getAll()
         const id_library = listLibrary[0].id_library;
@@ -89,8 +91,8 @@ export class LocalBookController implements BookControllerProps {
                 }
 
                 const state: State = {
-                    id_book: this.id_user,
-                    id_user: newBook.id_book,
+                    id_book: newBook.id_book,
+                    id_user: this.id_user,
                     state: "",
                     progression: 0,
                     read_count: 0,
@@ -105,6 +107,11 @@ export class LocalBookController implements BookControllerProps {
                         id_book: newBook.id_book,
                     })
                 }
+
+                console.log("add book id_user :", this.id_user)
+                const test = await this.state.getAll();
+                console.log("Liste all state :", test);
+                
 
                 await this.book.create(newBook);
                 await this.state.create(state);
@@ -139,6 +146,8 @@ export class LocalBookController implements BookControllerProps {
 
                 this.sharedLibrary.create(sharedLibrary);
 
+                console.log("Library created :", newIdLibrary);
+                
             })
         } catch (error) {
             console.log("Failed createLibrary :", error)
