@@ -33,16 +33,8 @@ export const BookSearchItem = ({ book, handleModalAddToLibrary }: BookSearchItem
 
     const handleAddBook = async () => {
         try {
-            //Données a récupérer depuis le back !
-            let url: string = "/books/books/" + book.isbn13;
-            let data: BookInfosServeur = (await api.get(url)).data.data;
-            console.log(data);
-
-            const listLibrary = await bookController.library.getAll()
-
-            await bookController.addToLibrary(listLibrary[0].id_library, data)
+            await bookController.addBook(book.isbn13)
             showSnackbar();
-
         } catch (error) {
             console.log("error handleAddBook :", error);
         }
@@ -52,7 +44,6 @@ export const BookSearchItem = ({ book, handleModalAddToLibrary }: BookSearchItem
         handleModalAddToLibrary(book.isbn13)
     }
 
-    const checked = librairies.length != 0
 
     return (
         <View style={styles.itemContainer}>
@@ -63,8 +54,8 @@ export const BookSearchItem = ({ book, handleModalAddToLibrary }: BookSearchItem
                 <ThemedText type="auteurLivreHorizontal">{book.authors ? book.authors[0] : "Inconnue"}</ThemedText>
             </View>
             <View style={styles.addItemContainer}>
-                <Pressable onPress={handleAddBook} style={checked ? styles.addedItem : styles.item}>
-                    <Ionicons size={20} color={checked ? "white" : "#1E9AA4"} name={checked ? "checkmark" : "add"} />
+                <Pressable onPress={handleAddBook} style={librairies.length != 0 ? styles.addedItem : styles.item}>
+                    <Ionicons size={20} color={librairies.length != 0 ? "white" : "#1E9AA4"} name={librairies.length != 0 ? "checkmark" : "add"} />
                 </Pressable>
             </View>
         </View>

@@ -1,4 +1,4 @@
-import { Library, LibraryWithBooks, LibraryWithBooksMin } from '@/models/Library';
+import { Library, LibraryDTO, LibraryWithBooks, LibraryWithBooksMin } from '@/models/Library';
 import { SQLiteDatabase } from 'expo-sqlite';
 import uuid from 'react-native-uuid';
 import { Book, BookMinInfos } from '@/models/Book';
@@ -7,12 +7,13 @@ import { SynchronisationController } from '@/controllers/SynchronisationControll
 export interface LibraryRepository {
     getAll: () => Promise<Library[]>;
     get: (id: string) => Promise<Library | null>;
-    add: (name: string) => Promise<void>;
+    create: (library: Library) => Promise<void>;
     delete: (id: string) => Promise<void>;
     getAllInfo: () => Promise<LibraryWithBooksMin[] | []>
     getAllBookFromLib: (id_library: string) => Promise<BookMinInfos[] | null>
     getAllLibraryFromBook: (id_book: string) => Promise<Library[]>;
     getAllNotLibraryFromBook: (id_book: string) => Promise<Library[]>;
+    getLastInsertedId: () => Promise<string|null>
 }
 
 export class LocalLibraryRepository implements LibraryRepository {
@@ -26,9 +27,20 @@ export class LocalLibraryRepository implements LibraryRepository {
         this.sync = sync;
     }
 
+    async getLastInsertedId(): Promise<string>{
+        const result = await this.db.getFirstAsync<Library>(
+            `SELECT * FROM library ORDER BY rowid DESC LIMIT 1;`,
+        );
+        
+        return (result as Library).id_library;
+    }
+
     async getAll(): Promise<Library[]> {
         let allRows = await this.db.getAllAsync<Library>(
-            'SELECT * FROM library'
+            `SELECT * FROM library 
+            JOIN shared_library ON library.id_library = shared_library.id_library
+            WHERE shared_library.id_user = $id_user`,
+            {$id_user: this.id_user}
         );
         return allRows;
     }
@@ -36,16 +48,16 @@ export class LocalLibraryRepository implements LibraryRepository {
     async get(id: string): Promise<Library | null> {
         const result = await this.db.getFirstAsync<Library>(
             'SELECT * FROM library WHERE id_library == $id',
-            { $id: id }
+            { $id: id,  }
         );
 
         return result!;
     }
 
-    async add(name: string): Promise<void> {
-        await this.db.runAsync(
-            'INSERT INTO library (id_library, name) VALUES ($id_library, $name);',
-            { $id_library: uuid.v4(), $name: name }
+    async create(library: LibraryDTO): Promise<void> {
+        const result = await this.db.runAsync(
+            'INSERT INTO library (name) VALUES ($name);',
+            { $name: library.name }
         )
     }
 
@@ -171,6 +183,11 @@ export class LocalLibraryRepository implements LibraryRepository {
 }
 
 export class RemoteLibraryRepository implements LibraryRepository {
+    
+    async getLastInsertedId() : Promise<string | null>{
+        return ""
+    }
+
     async getAll(): Promise<Library[]> {
         return [];
     }
@@ -179,8 +196,8 @@ export class RemoteLibraryRepository implements LibraryRepository {
         return null;
     }
 
-    async add(name: string): Promise<void> {
-        return;
+    async create(library: Library): Promise<void> {
+        
     }
 
     async delete(id: string): Promise<void> {

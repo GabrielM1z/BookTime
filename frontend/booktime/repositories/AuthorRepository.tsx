@@ -1,5 +1,5 @@
 import { Author } from '@/models/Author';
-import { SQLiteDatabase } from 'expo-sqlite';
+import { SQLiteDatabase, SQLiteRunResult } from 'expo-sqlite';
 import { v4 as uuidv4 } from 'uuid';
 import { SynchronisationController } from '@/controllers/SynchronisationController';
 
@@ -40,6 +40,29 @@ export class LocalAuthorRepository implements AuthorRepository {
         return result ? (result as unknown as Author) : null;
     }
 
+    async createAll(listNewAuthors: Author[]): Promise<void> {
+        
+        const insertAuthor = await this.db.prepareAsync(
+            'INSERT OR IGNORE INTO author (id_author, name, description) VALUES ($id_author, $name, $description);'
+        );
+
+        try {
+
+            for (const author of listNewAuthors) {
+                await insertAuthor.executeAsync({
+                    $id_author: author.id_author,
+                    $name: author.name,
+                    $description: author.description,
+                });
+
+            }
+
+        }finally {
+            await insertAuthor.finalizeAsync();
+        }
+        
+    }
+
     async add(author: Author): Promise<void> {
         const statement = await this.db.prepareAsync(
             'INSERT INTO author (id_author, first_name, last_name, description) VALUES ($id_author, $first_name, $last_name, $description);'
@@ -47,8 +70,7 @@ export class LocalAuthorRepository implements AuthorRepository {
 
         await statement.executeAsync({
             $id_author: uuidv4(),
-            $first_name: author.first_name,
-            $last_name: author.last_name,
+            $name: author.name,
             $description: author.description
         });
     }

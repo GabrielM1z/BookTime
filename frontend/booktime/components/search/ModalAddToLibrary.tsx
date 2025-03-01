@@ -6,6 +6,7 @@ import { Library } from "@/models";
 import { useBookContext } from "@/contexts/BookContext";
 import { useRepository } from "@/hooks/useRepository";
 import { Avatar, Text , Button} from "react-native-paper";
+import { LibraryBook } from "@/models/LibraryBook";
 
 interface ModalAddToLibraryProps {
     idBookAdded: string,
@@ -60,30 +61,46 @@ export const ModalAddToLibrary = forwardRef<BottomSheetModal, ModalAddToLibraryP
         )}, [listLibraryOfBook]
     );
 
-    const addToLibrary = async (id_library: string, id_book: string) => {
-        await bookController.book.updateBookLibrary(id_library, id_book)
-        console.log("book added");
+    const addListLibraryOfBook = async (listNewLibraryBook: LibraryBook[]) => {
+        console.log("listNewLibraryBook :", listNewLibraryBook);
+
+        await bookController.libraryBook.createAll(listNewLibraryBook)
+        console.log("books added");
 
     };
 
-    const deleteFromLibrary = async (id_library: string, id_book: string) => {
-        await bookController.book.deleteFromLibrary(id_library, id_book);
-        console.log("book removed");
+    const deleteListLibraryUnselected = async (listLibraryBookToDelete: LibraryBook[]) => {
+        console.log("listLibraryBookToDelete :", listLibraryBookToDelete);
+        
+
+        await bookController.libraryBook.deleteAll(listLibraryBookToDelete)
+        console.log("books removed");
     };
 
     const confirmChoice = useCallback(async () => {
+        let listNewLibraryBook :LibraryBook[] = [];
+        for (const libraryOfBook of listLibraryOfBook) {
+            listNewLibraryBook.push({
+                id_book: idBookAdded,
+                id_library: libraryOfBook.id_library
+            })
+        }
+        addListLibraryOfBook(listNewLibraryBook);
 
-        for (const library of libraryList) {
-            let bookInLibrary = listLibraryOfBook.find(libraryOfBook => libraryOfBook.id_library === library.id_library) != undefined
+        const selectedIds = new Set(listLibraryOfBook.map(lib => lib.id_library));
+        let listLibraryUnselected :Library[] = libraryList.filter(lib => !selectedIds.has(lib.id_library))
+        let listLibraryBookToDelete :LibraryBook[] = [];
 
-            if (bookInLibrary) {
-                addToLibrary(library.id_library, idBookAdded)
-            } else {
-                deleteFromLibrary(library.id_library, idBookAdded)
-            }
-        };
+        for (const libraryOfBook of listLibraryUnselected) {
+            listLibraryBookToDelete.push({
+                id_book: idBookAdded,
+                id_library: libraryOfBook.id_library
+            })
+        }
+        deleteListLibraryUnselected(listLibraryBookToDelete);
+
         closeModal();
-    }, [libraryList])
+    }, [libraryList, listLibraryOfBook])
 
     const Footer = ({ animatedFooterPosition }: BottomSheetFooterProps) => {
         return (

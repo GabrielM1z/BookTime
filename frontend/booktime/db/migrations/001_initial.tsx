@@ -64,8 +64,7 @@ const initAuthor = async (db: SQLiteDatabase) => {
         await db.execAsync(`
             CREATE TABLE IF NOT EXISTS author (
                 id_author TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
-                first_name VARCHAR(100) NOT NULL,
-                last_name VARCHAR(100) NOT NULL,
+                name VARCHAR(100) NOT NULL,
                 description TEXT
             );
         `);
@@ -298,7 +297,6 @@ const initTriggerInsertState = async (db: SQLiteDatabase) => {
                     CURRENT_TIMESTAMP, 
                     'INSERT', 
                     json_object(
-                        'id_state', NEW.id_state,
                         'state', NEW.state,
                         'progression', NEW.progression,
                         'read_count', NEW.read_count,

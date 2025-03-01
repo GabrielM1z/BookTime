@@ -3,6 +3,8 @@ import TitreTab from "./TitreTab";
 import { Modal, TouchableOpacity, View, StyleSheet, TextInput, Text } from "react-native";
 import { Colors } from '@/constants/Colors';
 import { useBookContext } from '@/contexts/BookContext';
+import { Library } from '@/models';
+import { LibraryDTO } from '@/models/Library';
 
 export default function NewEtagere({ onAddEtagere })
 {
@@ -19,8 +21,12 @@ export default function NewEtagere({ onAddEtagere })
 	const handleSubmit = async () => {
 		try {
             console.log('Form Data Submitted:', formData);
-            await bookController.library.add(formData.name); // Ajoute l'étagère
-            setModalVisible(false); // Ferme la popup après soumission
+			const newLibrary: LibraryDTO ={
+				name: formData.name
+			}
+
+			await bookController.createLibrary(newLibrary)
+			setModalVisible(false); // Ferme la popup après soumission
             onAddEtagere(); // Notifie le parent pour rafraîchir la liste des étagères
         } catch (error) {
             console.error('Error adding etagere:', error);

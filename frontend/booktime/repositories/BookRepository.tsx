@@ -1,4 +1,4 @@
-import { SQLiteDatabase } from 'expo-sqlite';
+import { SQLiteDatabase, SQLiteRunResult } from 'expo-sqlite';
 import { useSQLite } from "@/hooks/useSQLite";
 import { Book, BookInfosServeur, BookMinInfos } from '@/models/Book';
 import { syncAfterMethod, syncBeforeMethod } from '@/decorators/synchronisation';
@@ -14,8 +14,8 @@ export interface BookRepository {
     add: (state: Book) => Promise<void>;
     // addToLibrary: (id_library: string, book: Book) => Promise<void>
     delete: (id: string) => Promise<void>;
-    deleteFromLibrary: (id_library: string, id_book: string) => Promise<void>
-	updateBookLibrary: (id_library: string, id_book: string) => Promise<void>
+    // deleteFromLibrary: (id_library: string, id_book: string) => Promise<void>
+    // updateBookLibrary: (id_library: string, id_book: string) => Promise<void>
 }
 
 export class LocalBookRepository implements BookRepository {
@@ -29,6 +29,14 @@ export class LocalBookRepository implements BookRepository {
         this.sync = sync;
     }
 
+    async getLastInsertedId(): Promise<string> {
+        const result = await this.db.getFirstAsync<Book>(
+            `SELECT * FROM book ORDER BY rowid DESC LIMIT 1;`,
+        );
+
+        return (result as Book).id_book;
+    }
+
     async get(id: string, columns: (keyof Book)[] = []): Promise<Book> {
         const args = formatColumns(columns, ['id_book']);
         const result = await this.db.getFirstAsync<Book>(
@@ -39,11 +47,45 @@ export class LocalBookRepository implements BookRepository {
     }
 
     async getAll(columns: (keyof Book)[] = []): Promise<Book[]> {
-        const args = formatColumns(columns, ['id_book']);
-        let allRows = await this.db.getAllAsync<Book>(
-            `SELECT ${args} FROM book`
-        );
-        return allRows;
+        console.log("id user :", this.id_user);
+        
+        try {
+            const args = formatColumns(columns, ['book.id_book']);
+            let allRows = await this.db.getAllAsync<Book>(
+                `SELECT ${args} FROM book
+                LEFT JOIN state ON state.id_book = book.id_book
+                WHERE state.id_user = $id_user`, 
+                { $id_user: this.id_user }
+            );
+            console.log("allrows: ",allRows);
+            
+            return allRows;
+
+        } catch (error) {
+            console.log("getAll", error)
+            return []
+        }
+    }
+
+    async create(book: BookInfosServeur): Promise<void> {
+        try {
+            await this.db.runAsync(
+                `INSERT OR IGNORE INTO book (id_book, title, description, publisher, publication_date, page_number, language, cover_image_url) 
+                VALUES ($id_book, $title, $description, $publisher, $publication_date, $page_number, $language, $cover_image_url);`,
+                {
+                    $id_book: book.id_book,
+                    $title: book.title,
+                    $description: book.description,
+                    $publisher: book.publisher,
+                    $publication_date: book.publication_date,
+                    $page_number: book.page_number,
+                    $language: book.language,
+                    $cover_image_url: book.cover_image_url,
+                }
+            )
+        } catch (error) {
+            console.log("create :", error);
+        }
     }
 
     async getAllMin(): Promise<BookMinInfos[]> {
@@ -66,7 +108,7 @@ export class LocalBookRepository implements BookRepository {
     }
 
     // @ts-ignore
-    @syncAfterMethod() 
+    @syncAfterMethod()
     async add(book: Book): Promise<void> {
         await this.db.runAsync(
             `INSERT INTO book (id_book, title, description, publisher, publication_date, page_number, language, cover_image_url)
@@ -84,65 +126,30 @@ export class LocalBookRepository implements BookRepository {
         );
     }
 
-    // async addToLibrary(id_library: string, book: Book): Promise<void> {
-
+    // /**
+    //  * Ajoute un livre à une librairie sans le creer
+    //  * 
+    //  * @param id_library 
+    //  * @param id_book 
+    //  */
+    // async updateBookLibrary(id_library: string, id_book: string): Promise<void> {
     //     try {
-    //         await this.db.withTransactionAsync(async () => {
-    //             await this.db.runAsync(
-    //                 `INSERT OR IGNORE INTO book (id_book, title, description, publisher, publication_date, page_number, language, cover_image_url) 
-    //                 VALUES ($id_book, $title, $description, $publisher, $publication_date, $page_number, $language, $cover_image_url);`,
-    //                 {
-    //                     $id_book: book.id_book,
-    //                     $title: book.title,
-    //                     $description: book.description,
-    //                     $publisher: book.publisher,
-    //                     $publication_date: book.publication_date,
-    //                     $page_number: book.page_number,
-    //                     $language: book.language,
-    //                     $cover_image_url: book.cover_image_url,
-    //                 }
-    //             )
+    //         const insertLibraryBookStmt = await this.db.prepareAsync(
+    //             ' INSERT OR IGNORE INTO library_book (id_library, id_book) VALUES ($id_library, $id_book);'
+    //         );
 
-    //             await this.db.runAsync(
-    //                 `INSERT OR IGNORE INTO library_book (id_library, id_book) VALUES ($id_library, $id_book);`,
-    //                 {
-    //                     $id_library: id_library,
-    //                     $id_book: book.id_book,
-    //                 }
-    //             )
+    //         let resultInsertLibraryBook = await insertLibraryBookStmt.executeAsync({
+    //             $id_library: id_library,
+    //             $id_book: id_book,
     //         });
 
-    //         console.log("addBookToLibrary: success")
+    //         console.log("updateBookLibrary: success")
 
     //     } catch (error) {
     //         console.log("Failed addBookToLibrary :", error)
+
     //     }
     // }
-
-	/**
-	 * Ajoute un livre à une librairie sans le creer
-	 * 
-	 * @param id_library 
-	 * @param id_book 
-	 */
-	async updateBookLibrary(id_library: string, id_book: string): Promise<void> {
-		try {
-			const insertLibraryBookStmt = await this.db.prepareAsync(
-				' INSERT OR IGNORE INTO library_book (id_library, id_book) VALUES ($id_library, $id_book);'
-			);
-
-			let resultInsertLibraryBook = await insertLibraryBookStmt.executeAsync({
-				$id_library: id_library,
-				$id_book: id_book,
-			});
-
-			console.log("updateBookLibrary: success")
-
-		} catch (error) {
-			console.log("Failed addBookToLibrary :", error)
-
-		}
-	}
 
     async delete(id: string): Promise<void> {
         await this.db.runAsync(
@@ -153,27 +160,27 @@ export class LocalBookRepository implements BookRepository {
         );
     }
 
-    async deleteFromLibrary(id_library: string, id_book: string): Promise<void> {
-        await this.db.runAsync(
-            `DELETE FROM library_book WHERE id_library == $id_library AND id_book == $id_book;`,
-            {
-                $id_library: id_library,
-                $id_book: id_book,
-            }
-        )
-    }
+    // async deleteFromLibrary(id_library: string, id_book: string): Promise<void> {
+    //     await this.db.runAsync(
+    //         `DELETE FROM library_book WHERE id_library == $id_library AND id_book == $id_book;`,
+    //         {
+    //             $id_library: id_library,
+    //             $id_book: id_book,
+    //         }
+    //     )
+    // }
 }
 
 export class RemoteBookRepository implements BookRepository {
 
-    async get(id: string, columns: (keyof Book)[] = []): Promise<Book> {
+    async get(id: string, columns: (keyof Book)[] = []): Promise<BookInfosServeur> {
         let bookData = await api.get(`/books/books/${id}`)
 
         if (bookData == null) {
             throw new Error("yeay"); //A custom celon la pagge erreur.
         }
-        let imageBase64 = await linkToBase64(bookData.data.data.cover_image_url)
-        const book: Book = {
+        // let imageBase64 = await linkToBase64(bookData.data.data.cover_image_url)
+        const book: BookInfosServeur = {
             id_book: bookData.data.data.id_book,
             title: bookData.data.data.title,
             description: bookData.data.data.description,
@@ -181,7 +188,9 @@ export class RemoteBookRepository implements BookRepository {
             publication_date: bookData.data.data.publication_date,
             page_number: bookData.data.data.page_number,
             language: bookData.data.data.language,
-            cover_image_url: imageBase64,
+            cover_image_url: bookData.data.data.cover_image_url,
+            authors: bookData.data.data.authors,
+            genres: bookData.data.data.genres
         };
 
         return book;
@@ -207,9 +216,9 @@ export class RemoteBookRepository implements BookRepository {
     //     return;
     // }
 
-	async updateBookLibrary(id_library: string, id_book: string): Promise<void> {
-		return;
-	}
+    async updateBookLibrary(id_library: string, id_book: string): Promise<void> {
+        return;
+    }
 
     async delete(id: string): Promise<void> {
         return;

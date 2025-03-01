@@ -1,6 +1,6 @@
 import { SynchronisationController } from "@/controllers/SynchronisationController";
 import { State } from "@/models/State";
-import { SQLiteDatabase } from 'expo-sqlite';
+import { SQLiteDatabase, SQLiteRunResult } from 'expo-sqlite';
 import uuid from 'react-native-uuid';
 
 
@@ -18,6 +18,14 @@ export class LocalStateRepository implements StateRepository {
         this.db = db;
         this.id_user = id_user;
         this.sync = sync;
+    }
+
+    async getLastInsertedId(): Promise<string> {
+        const result = await this.db.getFirstAsync<State>(
+            `SELECT * FROM state ORDER BY rowid DESC LIMIT 1;`,
+        );
+
+        return (result as State).id_book;
     }
 
     async getAll(): Promise<State[]> {
@@ -39,20 +47,23 @@ export class LocalStateRepository implements StateRepository {
         return result ? (result as unknown as State) : null;
     }
 
-    async add(state: State): Promise<void> {
-        const statement = await this.db.prepareAsync(
-            'INSERT INTO state (state, progression, read_count, last_read_date, id_user, id_book, is_available) VALUES ($state, $progression, $read_count, $last_read_date, $id_user, $id_book, $is_available);'
-        );
+    async create(state: State): Promise<void> {
+        try {
+            await this.db.runAsync(
+                `INSERT OR IGNORE INTO state (progression, id_user, id_book, read_count)
+                 VALUES ($progression, $id_user, $id_book, $read_count);`,
+                {
+                    $progression: 0,
+                    $id_user: state.id_user,
+                    $id_book: state.id_book,
+                    $read_count: 0,
+                }
+            );
 
-        await statement.executeAsync({
-            $state: state.state,
-            $progression: state.progression,
-            $read_count: state.read_count,
-            $last_read_date: state.last_read_date,
-            $id_user: state.id_user,
-            $id_book: state.id_book,
-            $is_available: state.is_available,
-        });
+        } catch (error) {
+            console.log("create :", error);
+
+        }
     }
 }
 
