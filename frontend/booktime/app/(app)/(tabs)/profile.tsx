@@ -1,8 +1,6 @@
-import { ProfileMenu } from '@/components/profile/ProfileMenu';
 import { useUser } from '@/hooks/useUser';
 import styles, { headerMaxHeight, headerMinHeight, profileImageMaxSize } from '@/styles/profile';
-import { BottomSheetModal } from '@gorhom/bottom-sheet';
-import { StatusBar } from 'expo-status-bar';
+import { useRouter } from 'expo-router';
 import React, { useCallback, useRef } from 'react';
 import { Text, View } from 'react-native';
 import { Avatar, IconButton, useTheme } from 'react-native-paper';
@@ -14,15 +12,15 @@ const bannerImage = require('@/assets/images/banner.jpg');
 export const headerPageText = "Embark on a journey of transformation with our innovative app designed to enhance every aspect of your life. Whether you're seeking to boost productivity, ignite creativity, or simply streamline daily tasks, our platform empowers you to reach new heights.";
 
 const ProfileTab = () => {
+    const router = useRouter();
     const { colors } = useTheme();
     const scrollRef = useAnimatedRef<Animated.ScrollView>();
     const scrollOffset = useScrollViewOffset(scrollRef);
-    const bottomSheetRef = useRef<BottomSheetModal>(null);
 
     const user = useUser();
 
     const handlePresentModalPress = useCallback(() => {
-        bottomSheetRef.current?.present();
+        router.push({ pathname: '/ProfileMenuModal'});
     }, []);
 
     const insets = useSafeAreaInsets();
@@ -121,7 +119,6 @@ const ProfileTab = () => {
 
     return (
         <SafeAreaView>
-            <ProfileMenu ref={bottomSheetRef} />
             <Animated.View style={[styles.header, headerAnimatedStyles]}>
                 <Animated.Image source={bannerImage} style={[styles.bannerImage, bannerImageAnimatedStyles]} />
                 <Animated.View style={[

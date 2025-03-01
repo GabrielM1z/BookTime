@@ -19,6 +19,7 @@ import { PaperProvider, adaptNavigationTheme, useTheme } from 'react-native-pape
 import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { UserProvider } from '@/contexts/UserContext';
+import { BottomSheetModalScreenOptions } from '@/common';
 
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -36,8 +37,9 @@ function Routes() {
     return (
         <UserProvider>
             <Stack screenOptions={{ headerShown: false, navigationBarColor: colors.surface }}>
-                <Stack.Screen name="(app)" options={{ headerShown: false }} />
-                <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                <Stack.Screen name="(app)" />
+                <Stack.Screen name="(auth)" />
+                <Stack.Screen name="AccountCenterModal" options={BottomSheetModalScreenOptions} />
                 <Stack.Screen name="+not-found" />
             </Stack>
         </UserProvider>

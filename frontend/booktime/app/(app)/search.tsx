@@ -36,25 +36,15 @@ const removeDuplicates = (items: BookSearchResult[]): BookSearchResult[] => {
 };
 
 const SearchTab = () => {
-    const navigation = useNavigation();
-    const bottomSheetRef = useRef<BottomSheetModal>(null);
     const scrollViewRef = useAnimatedRef<Animated.FlatList<BookSearchResult>>();
     const router = useRouter();
     const bookController = useBookContext();
 
+    //TODO: chnage debounce to useDeferredValue
+
     const [filters, setFilters] = useState<TFilters | null>(null);
-    const [idLastBookAdded, setIdLastBookAdded] = useState<string>("")
 
     const { visible, library, show, hide } = useManageLibrarySnackbar();
-
-    const handlePresentModalPress = (id_book: string) => {
-        setIdLastBookAdded(id_book)
-        bottomSheetRef.current?.present();
-    };
-
-    const closeModal = () => {
-        bottomSheetRef.current?.close();
-    };
 
     const fetchData = (query: string) => {
         if (!query) {
@@ -77,11 +67,10 @@ const SearchTab = () => {
     }, [router, library]);
 
     const handleAddBook = (idBook: string, checked: boolean) => {
-        // const libraryName = bookController.
-        // if (checked) {
-        //     show(library);
-        // }
-        router.push("/(app)/ManageLibraryModal");
+        if (checked) {
+            bookController.addToLibrary
+            show("My Library");
+        }
     };
 
     const {
@@ -105,6 +94,7 @@ const SearchTab = () => {
                         scrollViewRef={scrollViewRef}
                         onSearchChange={fetchData}
                         onBack={handleBack}
+                        {...props}
                     />
                 )
             }} />
@@ -136,12 +126,11 @@ const SearchTab = () => {
                     </View>
                 }
             />
-            <ModalAddToLibrary ref={bottomSheetRef} idBookAdded={idLastBookAdded} closeModal={closeModal} />
             <ManageLibrarySnackbar
                 library={library}
                 visible={visible}
                 onDismiss={hide}
-                onPressChange={() => router.push("/(modal)/addLibrary")}
+                onPressChange={() => router.push({pathname: "/(app)/ManageLibraryModal", params: {idBook: ""}})}
             />
         </SafeAreaView>
     );

@@ -1,14 +1,15 @@
 import BottomSheet, { BottomSheetBackdrop, BottomSheetBackdropProps, BottomSheetProps } from '@gorhom/bottom-sheet';
 import { useRouter } from 'expo-router';
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { StyleSheet } from 'react-native';
 import { useTheme } from 'react-native-paper';
+//@ts-ignore
+import { StackNavigationOptions } from "@react-navigation/stack";
 
 export interface BottomSheetModalProps extends BottomSheetProps { }
 
 export const BottomSheetModal = ({
     children,
-    style,
     ...bottomSheetProps
 }: BottomSheetModalProps) => {
     const { colors } = useTheme();
@@ -31,21 +32,13 @@ export const BottomSheetModal = ({
         />
     ), [colors]);
 
-    const sheetContainerStyle = useMemo(() => [
-        styles.sheetContainer,
-        style
-    ], [style]);
-
     return (
         <BottomSheet
             ref={bottomSheetRef}
-            style={sheetContainerStyle}
-            bottomInset={8}
-            enableDynamicSizing={true}
+            containerStyle={styles.sheetContainer}
             onChange={handleSheetChanges}
             backdropComponent={renderBackdrop}
             detached={true}
-            enablePanDownToClose={true}
             {...bottomSheetProps}
         >
             {children}
@@ -53,8 +46,14 @@ export const BottomSheetModal = ({
     );
 };
 
+export const BottomSheetModalScreenOptions: StackNavigationOptions = {
+    headerShown: false,
+    presentation: 'transparentModal',
+    animation: 'none'
+}
+
 const styles = StyleSheet.create({
     sheetContainer: {
-
+        margin: 8,
     }
 });

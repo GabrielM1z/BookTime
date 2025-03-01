@@ -1,7 +1,6 @@
 import { guestUserId } from '@/constants';
 import { useAuthContext } from '@/contexts/AuthContext';
 import commonStyles from '@/styles/commonStyles';
-import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { AxiosError } from 'axios';
 import { Href, useRouter, useLocalSearchParams } from 'expo-router';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -10,14 +9,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import styles from "./SignIn.style";
 import { Button, IconButton, Avatar, TextInput } from "react-native-paper";
 import { PressableText, PasswordTextInput, TextSwitch } from "@/common";
-import { AccountCenter } from '@/components/AccountCenter';
 
 export default function SignIn() {
     const { showSessions = false } = useLocalSearchParams();
     const { logIn, logAsGuest, isLoading, sessions } = useAuthContext();
     const router = useRouter();
-
-    const accountCenterRef = useRef<BottomSheetModal>(null);
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -51,7 +47,7 @@ export default function SignIn() {
 
     useEffect(() => {
         if (showSessions && sessions.length > 0) {
-            accountCenterRef.current?.present();
+            router.push({ pathname: '/AccountCenterModal' });
         }
     }, [showSessions])
 
@@ -101,10 +97,6 @@ export default function SignIn() {
                             </PressableText>
                         )
                     }
-                    <AccountCenter
-                        ref={accountCenterRef}
-                        filter={(user) => user.id_user !== guestUserId}
-                    />
                 </View>
             </View>
             <View style={styles.footerContainer}>

@@ -1,17 +1,19 @@
-import { router } from "expo-router";
+import { NavigationHeaderProps } from "@react-navigation/stack";
+import { useRouter } from "expo-router";
 import { debounce } from "lodash";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { StyleProp, StyleSheet, TextInput, View, ViewStyle } from "react-native";
-import { IconButton, useTheme, Searchbar, Appbar } from "react-native-paper";
+import React, { useCallback, useMemo, useState } from "react";
+import { StyleProp, StyleSheet, TextInput, ViewStyle } from "react-native";
+import { IconButton, Text, useTheme } from "react-native-paper";
 import type { IconSource } from "react-native-paper/lib/typescript/components/Icon";
 import { modeAppbarHeight } from "react-native-paper/src/components/Appbar/utils";
 import Animated, { AnimatedRef, useAnimatedStyle, useDerivedValue, useScrollViewOffset, withTiming } from "react-native-reanimated";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { withAnimated } from "./withAnimation";
+import { getHeaderTitle } from '@react-navigation/elements';
 
 const SafeAreaViewAnimated = withAnimated(SafeAreaView);
 
-export interface AppBarProps {
+export interface AppBarProps extends NavigationHeaderProps {
     addTopEdge?: boolean;
     children?: React.ReactNode;
     leftIcon?: IconSource;
@@ -44,10 +46,13 @@ export const AppBar = ({
     scrollUnderUpdater,
     backgroundColor: customBackgroundColor,
     backgroundColorScrollUnder: customBackgroundColorScrollUnder,
+    ...appBarProps
 }: AppBarProps) => {
+    const router = useRouter();
     const insets = useSafeAreaInsets();
     const { colors } = useTheme();
     const scrollY = useScrollViewOffset(scrollViewRef as AnimatedRef<Animated.ScrollView> | null);
+    const title = getHeaderTitle(appBarProps.options, appBarProps.route.name);
 
     const backgroundColor = useMemo(() => customBackgroundColor ?? colors.surface, [customBackgroundColor, colors]);
     const backgroundColorScrollUnder = useMemo(() => customBackgroundColorScrollUnder ?? colors.elevation.level2, [customBackgroundColorScrollUnder, colors]);
@@ -89,7 +94,7 @@ export const AppBar = ({
                     onPress={onLeftIconPress ?? handleBack}
                 />
             )}
-            {children}
+            {children ?? <Text>{title}</Text>}
             {rightIcon && (
                 <IconButton
                     icon={rightIcon}

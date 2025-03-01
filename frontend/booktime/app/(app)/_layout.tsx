@@ -7,6 +7,7 @@ import React from 'react';
 import { ActivityIndicator, View } from "react-native";
 import 'react-native-reanimated';
 import { useUserContext } from "@/contexts/UserContext";
+import { BottomSheetModalScreenOptions } from "@/common";
 
 const AuthenticatedLayout = (session: Session) => {
     const userController = useUserContext();
@@ -20,12 +21,7 @@ const AuthenticatedLayout = (session: Session) => {
                 <Stack.Screen name="book/[idBook]" />
                 <Stack.Screen name="shelf/[idShelf]" />
                 <Stack.Screen name="settings" options={{ headerShown: true }} />
-                <Stack.Screen name="ManageLibraryModal" options={{
-                    headerShown: false,
-                    presentation: 'transparentModal',
-                    animation: 'none'
-                }} />
-
+                <Stack.Screen name="ProfileMenuModal" options={BottomSheetModalScreenOptions} />
             </Stack>
         </BookProvider>
     );

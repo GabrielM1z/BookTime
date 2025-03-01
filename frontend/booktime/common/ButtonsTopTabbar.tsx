@@ -77,7 +77,7 @@ export const ButtonsTopTabbar: React.FC<ButtonsTopTabbarProps> = ({
             shadowColor: withTiming(tabBarScrollUnder ? colors.shadow : 'transparent', { duration: 100 }),
             elevation: withTiming(tabBarScrollUnder ? 5 : 0, { duration: 100 }),
         };
-    }, [tabBarScrollUnder, tabBarScrollUnderStyle]);
+    }, [tabBarScrollUnder, tabBarScrollUnderStyle, colors]);
 
     const tabbarStyle = useMemo(
         () => ([
