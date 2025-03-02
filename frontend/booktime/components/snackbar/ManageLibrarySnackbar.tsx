@@ -1,12 +1,12 @@
 import React from 'react';
-import { Text, Snackbar, Portal } from 'react-native-paper';
+import { Text, Snackbar, Portal, useTheme } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 
 class ManageLibrarySnackbarSingleton {
     private static instance: ManageLibrarySnackbarSingleton;
     private showSnackbarCallback: ((library: string, lastAddedIdBook: string) => void) | null = null;
 
-    private constructor() {}
+    private constructor() { }
 
     static getInstance(): ManageLibrarySnackbarSingleton {
         if (!ManageLibrarySnackbarSingleton.instance) {
@@ -32,6 +32,7 @@ export const ManageLibrarySnackbar = ManageLibrarySnackbarSingleton.getInstance(
 
 export const ManageLibrarySnackbarComponent = () => {
     const router = useRouter();
+    const { colors } = useTheme();
     const [visible, setVisible] = React.useState(false);
     const [library, setLibrary] = React.useState("");
     const [lastAddedIdBook, setLastAddedIdBook] = React.useState("");
@@ -45,20 +46,23 @@ export const ManageLibrarySnackbarComponent = () => {
     }, []);
 
     return (
-        <Portal>
-            <Snackbar
-                visible={visible}
-                onDismiss={() => setVisible(false)}
-                duration={2000}
-                action={{
-                    label: "Change",
-                    onPress: () => {
-                        router.push({ pathname: "/(app)/ManageLibraryModal", params: { idBook: lastAddedIdBook } });
-                    },
-                }}
+        <Snackbar
+            style={{ backgroundColor: colors.surface }}
+            visible={visible}
+            onDismiss={() => setVisible(false)}
+            duration={2000}
+            action={{
+                label: "Change",
+                onPress: () => {
+                    router.push({ pathname: "/(app)/ManageLibraryModal", params: { idBook: lastAddedIdBook } });
+                },
+            }}
+        >
+            <Text
+                style={{ color: colors.onSurface }}
             >
-                <Text>{`Book added to ${library}`}</Text>
-            </Snackbar>
-        </Portal>
+                {`Book added to ${library}`}
+            </Text>
+        </Snackbar>
     );
 };
