@@ -25,7 +25,7 @@ export default function LibraryChoice({ book }: LibraryChoiceProps) {
     const fetchLibrariesOwn = () => {
         try {
             if (book?.id_book && typeof book.id_book === 'string') {
-                bookController.library.getAllLibraryFromBook(book.id_book).then((data) => {
+                bookController.library.getAllFromBook(book.id_book).then((data) => {
                     setLibrariesOwn(data);
                 });
             } else if (book?.id_book) {

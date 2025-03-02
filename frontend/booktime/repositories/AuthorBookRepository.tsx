@@ -4,12 +4,9 @@ import { LibraryBook } from "@/models/LibraryBook";
 import { SQLiteDatabase } from 'expo-sqlite';
 import uuid from 'react-native-uuid';
 
-
-
 export interface AuthorBookRepository {
     create: (newAuthorBook: AuthorBook) => Promise<void>;
     createAll: (listNewAuthorBook: AuthorBook[]) => Promise<void>;
-
 }
 
 export class LocalAuthorBookRepository implements AuthorBookRepository {
@@ -34,14 +31,12 @@ export class LocalAuthorBookRepository implements AuthorBookRepository {
     }
 
     async createAll(listNewAuthorBook: AuthorBook[]) : Promise<void>{
-
         const insertAuthorBook = await this.db.prepareAsync(
             `INSERT OR IGNORE INTO book_author (id_author, id_book) VALUES ($id_author, $id_book);`,
         );
         
         try {
             for (const newAuthorBook of listNewAuthorBook) {
-    
                 await insertAuthorBook.executeAsync({
                     $id_author: newAuthorBook.id_author,
                     $id_book: newAuthorBook.id_book,
@@ -53,7 +48,6 @@ export class LocalAuthorBookRepository implements AuthorBookRepository {
     }
 
 }
-
 
 export class RemoteAuthorBookRepository implements AuthorBookRepository {
 

@@ -1,44 +1,64 @@
-import { Snackbar } from "react-native-paper";
-import React, { useCallback, useState } from "react";
+import React from 'react';
+import { Text, Snackbar, Portal } from 'react-native-paper';
+import { useRouter } from 'expo-router';
 
-export const useManageLibrarySnackbar = () => {
-    const [visible, setVisible] = useState(false);
-    const [library, setLibrary] = useState("");
+class ManageLibrarySnackbarSingleton {
+    private static instance: ManageLibrarySnackbarSingleton;
+    private showSnackbarCallback: ((library: string, lastAddedIdBook: string) => void) | null = null;
 
-    const show = useCallback((lib: string) => {
-        setLibrary(lib);
-        setVisible(true);
-    }, []);
+    private constructor() {}
 
-    const hide = useCallback(() => {
-        setVisible(false);
-    }, []);
+    static getInstance(): ManageLibrarySnackbarSingleton {
+        if (!ManageLibrarySnackbarSingleton.instance) {
+            ManageLibrarySnackbarSingleton.instance = new ManageLibrarySnackbarSingleton();
+        }
+        return ManageLibrarySnackbarSingleton.instance;
+    }
 
-    return { visible, library, show, hide };
-};
+    setShowSnackbarCallback(callback: (library: string, lastAddedIdBook: string) => void) {
+        this.showSnackbarCallback = callback;
+    }
 
-interface ManageLibrarySnackbarProps {
-    library: string;
-    visible: boolean;
-    onDismiss: () => void;
-    onPressChange: () => void;
+    show(library: string, lastAddedIdBook: string) {
+        if (this.showSnackbarCallback) {
+            this.showSnackbarCallback(library, lastAddedIdBook);
+        } else {
+            console.warn("Snackbar callback not set.");
+        }
+    }
 }
 
-export const ManageLibrarySnackbar = ({
-    library,
-    visible,
-    onDismiss,
-    onPressChange,
-}: ManageLibrarySnackbarProps) => (
-    <Snackbar
-        visible={visible}
-        onDismiss={onDismiss}
-        duration={3000}
-        action={{
-            label: "Change",
-            onPress: onPressChange,
-        }}
-    >
-        Book added to "{library}"
-    </Snackbar>
-);
+export const ManageLibrarySnackbar = ManageLibrarySnackbarSingleton.getInstance();
+
+export const ManageLibrarySnackbarComponent = () => {
+    const router = useRouter();
+    const [visible, setVisible] = React.useState(false);
+    const [library, setLibrary] = React.useState("");
+    const [lastAddedIdBook, setLastAddedIdBook] = React.useState("");
+
+    React.useEffect(() => {
+        ManageLibrarySnackbar.setShowSnackbarCallback((library, lastAddedIdBook) => {
+            setLibrary(library);
+            setLastAddedIdBook(lastAddedIdBook);
+            setVisible(true);
+        });
+    }, []);
+
+    return (
+        <Portal>
+            <Snackbar
+                visible={visible}
+                onDismiss={() => setVisible(false)}
+                duration={2000}
+                action={{
+                    label: "Change",
+                    onPress: () => {
+                        router.push({ pathname: "/(app)/ManageLibraryModal", params: { idBook: lastAddedIdBook } });
+                    },
+                }}
+            >
+                <Text>{`Book added to ${library}`}</Text>
+            </Snackbar>
+        </Portal>
+    );
+};

@@ -1,13 +1,13 @@
-import React, { useMemo, useState } from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
-import { Divider, IconButton, Text, useTheme } from 'react-native-paper';
-import Animated, {
-    useAnimatedStyle,
-    useSharedValue,
-    withSpring,
-} from "react-native-reanimated";
 import { withAnimated } from '@/common';
+import { useBookContext } from '@/contexts/BookContext';
+import { useRepository } from '@/hooks/useRepository';
+import { useFocusEffect, useRouter } from 'expo-router';
+import React, { useMemo } from 'react';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Divider, IconButton, Text } from 'react-native-paper';
+import { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import { SearchCover } from '../Cover';
+import { ManageLibrarySnackbar } from '../snackbar';
 
 const IconButtonAnimated = withAnimated(IconButton);
 
@@ -16,33 +16,46 @@ export interface SearchItemProps {
     title: string;
     authors?: string[];
     uri: string;
-    onPress?: (idBook: string) => void;
-    checked?: boolean;
-    onCheck?: (idBook: string, checked: boolean) => void;
 }
 
-export const SearchItem = ({ idBook, title, authors, uri, checked = false, onPress, onCheck }: SearchItemProps) => {
-    const { colors } = useTheme();
-    const [toggled, setToggled] = useState(checked);
+export const SearchItem = ({ idBook, title, authors, uri }: SearchItemProps) => {
     const scale = useSharedValue(1);
+    const bookController = useBookContext();
+    const router = useRouter();
 
-    const handlePress = () => {
-        setToggled(!toggled);
-        onCheck?.(idBook, !toggled);
+    const { data: checked, refresh } = useRepository(async () => (await bookController.library.getFirstFromBook(idBook)) != null, false);
 
+    const handlePress = async () => {
+        // FIXME: the animation is not triggered when the user remove all lib from ManageLibraryModal
         scale.value = withSpring(1.2, { damping: 8, stiffness: 100 }, () => {
             scale.value = withSpring(1);
         });
+
+        let liked;
+        if (!checked) {
+            liked = await bookController.library.getFirst(); // TODO: replace by getLikedLibrary and move to useManageLibrarySnackbar ?
+        }
+
+        if (liked) {
+            await bookController.addBook(idBook, liked.id_library); // FIXME: this take a lot of time try to async it
+            ManageLibrarySnackbar.show(liked!.name, idBook);
+            refresh();
+        } else {
+            router.push({ pathname: "/(app)/ManageLibraryModal", params: { idBook } });
+        }
+    };
+
+    useFocusEffect(() => {
+        refresh();
+    });
+
+    const handleItemPress = () => {
+        router.push({ pathname: "/book/[idBook]", params: { idBook } });
     };
 
     const iconAnimatedStyle = useAnimatedStyle(() => ({
         transform: [{ scale: scale.value }],
-    }), [toggled]);
-
-    const containerStyle = useMemo(() => [
-        { borderBottomColor: colors.outline },
-        styles.container
-    ], [colors]);
+    }), [checked]);
 
     const iconStyle = useMemo(() => [
         styles.icon,
@@ -51,18 +64,18 @@ export const SearchItem = ({ idBook, title, authors, uri, checked = false, onPre
 
     return (
         <>
-            <TouchableOpacity style={containerStyle} onPress={() => onPress?.(idBook)}>
+            <TouchableOpacity style={styles.container} onPress={handleItemPress}>
                 <SearchCover uri={uri} style={styles.image} />
                 <View style={styles.textContainer}>
                     <Text style={styles.title} numberOfLines={2}>{title}</Text>
                     {authors && <Text style={styles.authors} numberOfLines={1}>{authors.join(', ')}</Text>}
                 </View>
                 <IconButtonAnimated
-                    icon={toggled ? "check" : "plus"}
+                    icon={checked ? "check" : "plus"}
                     mode={"contained"}
                     style={iconStyle}
                     onPress={handlePress}
-                    selected={toggled}
+                    selected={checked}
                 />
             </TouchableOpacity >
             <Divider />

@@ -14,7 +14,7 @@ import { AuthorBookRepository, LocalAuthorBookRepository, RemoteAuthorBookReposi
 import { AuthorBook } from "@/models/AuthorBook";
 import { SharedLibrary } from "@/models/SharedLibrary";
 import { LocalSharedLibraryRepository, RemoteSharedLibraryRepository, SharedLibraryRepository } from "@/repositories/SharedLibrariesRepository";
-import { LibraryDTO, LibraryWithBooksMin } from "@/models/Library";
+import { CreateLibraryDto, LibraryWithBooksMin } from "@/models/Library";
 
 export interface BookControllerProps {
     book: BookRepository;
@@ -25,8 +25,8 @@ export interface BookControllerProps {
     libraryBook: LibraryBookRepository;
     authorBook: AuthorBookRepository;
     sharedLibrary: SharedLibraryRepository;
-    addBook: (newBookIsbn: string) => Promise<void>
-    createLibrary: (library: LibraryDTO) => Promise<void>
+    addBook: (idBook: string, idLibrary: string) => Promise<void>
+    createLibrary: (library: CreateLibraryDto) => Promise<void>
 }
 
 export class LocalBookController implements BookControllerProps {
@@ -61,37 +61,18 @@ export class LocalBookController implements BookControllerProps {
         this.sharedLibrary = new LocalSharedLibraryRepository(db, id_user, this.sync);
     }
 
-    // async addBookToLibrary(): Promise<void> {
-    //     try {
-    //         await this.db.withExclusiveTransactionAsync(async () => {
-
-    //             const libraryBook: LibraryBook = {
-    //                 id_book: newBook.id_book,
-    //                 id_library: id_library,
-    //             }
-
-    //             this.libraryBook.create(libraryBook);
-    //         });
-    // }
-
-    async addBook(newBookIsbn: string): Promise<void> {
-
-
-        console.log("is_duse", this.id_user)
-        let newBook: BookInfosServeur = await this.remote.get(newBookIsbn);
-        const listLibrary = await this.library.getAll()
-        const id_library = listLibrary[0].id_library;
+    async addBook(idBook: string, idLibrary: string): Promise<void> {
+        const book = await this.remote.get(idBook);
 
         try {
             await this.db.withExclusiveTransactionAsync(async () => {
-
                 const libraryBook: LibraryBook = {
-                    id_book: newBook.id_book,
-                    id_library: id_library,
+                    id_book: book.id_book,
+                    id_library: idLibrary,
                 }
 
                 const state: State = {
-                    id_book: newBook.id_book,
+                    id_book: book.id_book,
                     id_user: this.id_user,
                     state: "",
                     progression: 0,
@@ -100,24 +81,16 @@ export class LocalBookController implements BookControllerProps {
                     is_available: false
                 }
 
-                const listAuthorBook: AuthorBook[] = []
-                for (const authors of newBook.authors) {
-                    listAuthorBook.push({
-                        id_author: authors.id_author,
-                        id_book: newBook.id_book,
-                    })
-                }
+                const authorBooks = (book.authors ?? []).map((author) => ({
+                    id_author: author.id_author,
+                    id_book: book.id_book,
+                }))
 
-                console.log("add book id_user :", this.id_user)
-                const test = await this.state.getAll();
-                console.log("Liste all state :", test);
-                
-
-                await this.book.create(newBook);
+                await this.book.create(book);
                 await this.state.create(state);
                 await this.libraryBook.create(libraryBook);
-                await this.author.createAll(newBook.authors);
-                await this.authorBook.createAll(listAuthorBook);
+                await this.author.createAll(book.authors);
+                await this.authorBook.createAll(authorBooks);
             });
 
             console.log("addBook: success")
@@ -127,27 +100,20 @@ export class LocalBookController implements BookControllerProps {
         }
     }
 
-    async createLibrary(library: LibraryDTO): Promise<void> {
+    async createLibrary(library: CreateLibraryDto): Promise<void> {
         try {
             await this.db.withExclusiveTransactionAsync(async () => {
 
-                await this.library.create(library);
-
-                const newIdLibrary = await this.library.getLastInsertedId();
-
-                if (newIdLibrary == null) {
-                    throw Error("newIdLibrary is null")
-                }
+                const idLibrary = await this.library.create(library);
 
                 const sharedLibrary: SharedLibrary = {
                     id_user: this.id_user,
-                    id_library: newIdLibrary,
+                    id_library: idLibrary,
                 }
 
                 this.sharedLibrary.create(sharedLibrary);
 
-                console.log("Library created :", newIdLibrary);
-                
+                console.log("Library created :", idLibrary);
             })
         } catch (error) {
             console.log("Failed createLibrary :", error)
@@ -202,12 +168,8 @@ export class RemoteBookController implements BookControllerProps {
         this.authorBook = new RemoteAuthorBookRepository();
         this.sharedLibrary = new RemoteSharedLibraryRepository();
     }
-    
-    async addBook(newBookIsbn: string): Promise<void> {
 
-    }
+    async addBook(idBook: string, idLibrary: string): Promise<void> { }
 
-    async createLibrary(library: LibraryDTO): Promise<void> {
-
-    }
+    async createLibrary(library: CreateLibraryDto): Promise<void> { }
 }

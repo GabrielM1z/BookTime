@@ -1,28 +1,32 @@
+import { AppBar } from '@/common';
 import { useBookContext } from '@/contexts/BookContext';
 import { useRepository } from '@/hooks/useRepository';
-import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useCallback, useMemo, useState } from 'react';
-import { FlatList, KeyboardAvoidingView, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { useTheme, Button, Icon, Divider, Text, Searchbar } from 'react-native-paper';
 import { useSelectableList } from '@/hooks/useSelectableList';
 import { Library } from '@/models';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { AppBar } from '@/common';
+import { Link, Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useCallback, useMemo, useState } from 'react';
+import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Button, Divider, Icon, Searchbar, Text, useTheme } from 'react-native-paper';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const ManageLibraryModal = () => {
+    const router = useRouter();
     const { idBook } = useLocalSearchParams<{ idBook: string }>();
     const scrollViewRef = useAnimatedRef<Animated.FlatList<Library>>();
     const [search, setSearch] = useState<string>("");
 
     const bookController = useBookContext();
-    const { data: libraries } = useRepository(() => bookController.library.getAll(), []);
-    const { data: defaultLibraries } = useRepository(() => bookController.library.getAllLibraryFromBook(idBook), [], [idBook])
-    const { selectedItems, toggleSelection, isSelected } = useSelectableList(libraries, defaultLibraries, true);
-    const librariesSorted = useMemo(() => [
-        ...selectedItems,
-        ...libraries.filter(item => !selectedItems.includes(item))
-    ], [libraries]);
+    const { data: libraries, refresh: refreshAll } = useRepository(() => bookController.library.getAll(), [], [idBook]);
+    const { data: defaultLibraries } = useRepository(() => bookController.library.getAllFromBook(idBook), [], [idBook, libraries]);
+    const { selectedItems, toggleSelection, isSelected, unselectedItems } = useSelectableList(libraries, defaultLibraries, 'id_library', true, [defaultLibraries]);
+
+    const librariesSorted = useMemo(() => {
+        const selectedSet = new Set(selectedItems.map(item => item.id_library));
+        const selectedLibraries = libraries.filter(item => selectedSet.has(item.id_library));
+        const unselectedLibraries = libraries.filter(item => !selectedSet.has(item.id_library));
+        return [...selectedLibraries, ...unselectedLibraries];
+    }, [libraries]);
 
     const filteredBooks = useMemo(() => {
         if (!search) return librariesSorted;
@@ -31,39 +35,55 @@ const ManageLibraryModal = () => {
         );
     }, [librariesSorted, search]);
 
+    const handleDone = useCallback(async () => {
+        await bookController.libraryBook.deleteAll(unselectedItems().map(
+            (library: Library) => ({ id_book: idBook, id_library: library.id_library })
+        ));
+        await bookController.libraryBook.createAll(selectedItems.map(
+            (library: Library) => ({ id_book: idBook, id_library: library.id_library })
+        ));
+        router.back();
+    }, [unselectedItems, selectedItems, idBook]);
+
+    useFocusEffect(
+        useCallback(() => {
+            refreshAll();
+        }, [refreshAll])
+    );
+
     return (
         <SafeAreaView style={{ flex: 1 }}>
-            <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
-                <Stack.Screen name="ManageLibraryModal" options={{
-                    title: "Manage library",
-                    presentation: "modal",
-                    animation: "fade_from_bottom",
-                    headerShown: true,
-                    header: (props: any) => (<AppBar scrollViewRef={scrollViewRef} {...props} />)
-                }} />
-                <FlatList
-                    ref={scrollViewRef}
-                    data={filteredBooks}
-                    extraData={selectedItems}
-                    keyExtractor={item => item.id_library}
-                    renderItem={({ item }) => (
-                        <Item
-                            item={item}
-                            isSelected={isSelected(item)}
-                            onPress={toggleSelection}
-                        />
-                    )}
-                    ListHeaderComponent={
-                        <View style={{ alignItems: 'center', padding: 8, gap: 8, paddingBottom: 16 }}>
+            <Stack.Screen name="ManageLibraryModal" options={{
+                title: "Manage library",
+                presentation: "modal",
+                animation: "fade_from_bottom",
+                headerShown: true,
+                header: (props: any) => (<AppBar scrollViewRef={scrollViewRef} {...props} />)
+            }} />
+            <FlatList
+                ref={scrollViewRef}
+                data={filteredBooks}
+                extraData={selectedItems}
+                keyExtractor={item => item.id_library}
+                renderItem={({ item }) => (
+                    <Item
+                        item={item}
+                        isSelected={isSelected(item)}
+                        onPress={toggleSelection}
+                    />
+                )}
+                ListHeaderComponent={
+                    <View style={{ alignItems: 'center', padding: 8, gap: 8, paddingBottom: 16 }}>
+                        <Link href="/(app)/AddLibraryModal" asChild>
                             <Button mode='contained-tonal'>Add Library</Button>
-                            <Searchbar placeholder="Search" value={search} onChangeText={setSearch} />
-                        </View>
-                    }
-                />
-                <View style={styles.footerContainer}>
-                    <Button mode='contained'>Press me</Button>
-                </View>
-            </KeyboardAvoidingView>
+                        </Link>
+                        <Searchbar placeholder="Search" value={search} onChangeText={setSearch} />
+                    </View>
+                }
+            />
+            <View style={styles.footerContainer}>
+                <Button mode='contained' onPress={handleDone}>Done</Button>
+            </View>
         </SafeAreaView>
     );
 }

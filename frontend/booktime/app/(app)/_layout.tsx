@@ -22,6 +22,7 @@ const AuthenticatedLayout = (session: Session) => {
                 <Stack.Screen name="shelf/[idShelf]" />
                 <Stack.Screen name="settings" options={{ headerShown: true }} />
                 <Stack.Screen name="ProfileMenuModal" options={BottomSheetModalScreenOptions} />
+                <Stack.Screen name="AddLibraryModal" options={{ presentation: 'transparentModal' }} />
             </Stack>
         </BookProvider>
     );

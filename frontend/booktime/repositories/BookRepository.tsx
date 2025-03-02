@@ -68,24 +68,20 @@ export class LocalBookRepository implements BookRepository {
     }
 
     async create(book: BookInfosServeur): Promise<void> {
-        try {
-            await this.db.runAsync(
-                `INSERT OR IGNORE INTO book (id_book, title, description, publisher, publication_date, page_number, language, cover_image_url) 
-                VALUES ($id_book, $title, $description, $publisher, $publication_date, $page_number, $language, $cover_image_url);`,
-                {
-                    $id_book: book.id_book,
-                    $title: book.title,
-                    $description: book.description,
-                    $publisher: book.publisher,
-                    $publication_date: book.publication_date,
-                    $page_number: book.page_number,
-                    $language: book.language,
-                    $cover_image_url: book.cover_image_url,
-                }
-            )
-        } catch (error) {
-            console.log("create :", error);
-        }
+        await this.db.runAsync(
+            `INSERT OR IGNORE INTO book (id_book, title, description, publisher, publication_date, page_number, language, cover_image_url) 
+            VALUES ($id_book, $title, $description, $publisher, $publication_date, $page_number, $language, $cover_image_url);`,
+            {
+                $id_book: book.id_book,
+                $title: book.title,
+                $description: book.description,
+                $publisher: book.publisher,
+                $publication_date: book.publication_date,
+                $page_number: book.page_number,
+                $language: book.language,
+                $cover_image_url: book.cover_image_url,
+            }
+        )
     }
 
     async getAllMin(): Promise<BookMinInfos[]> {
@@ -179,18 +175,19 @@ export class RemoteBookRepository implements BookRepository {
         if (bookData == null) {
             throw new Error("yeay"); //A custom celon la pagge erreur.
         }
-        // let imageBase64 = await linkToBase64(bookData.data.data.cover_image_url)
+
+        const data = bookData.data.data;
         const book: BookInfosServeur = {
-            id_book: bookData.data.data.id_book,
-            title: bookData.data.data.title,
-            description: bookData.data.data.description,
-            publisher: bookData.data.data.publisher,
-            publication_date: bookData.data.data.publication_date,
-            page_number: bookData.data.data.page_number,
-            language: bookData.data.data.language,
-            cover_image_url: bookData.data.data.cover_image_url,
-            authors: bookData.data.data.authors,
-            genres: bookData.data.data.genres
+            id_book: data.id_book,
+            title: data.title,
+            description: data.description,
+            publisher: data.publisher,
+            publication_date: data.publication_date,
+            page_number: data.page_number,
+            language: data.language,
+            cover_image_url: data.cover_image_url,
+            authors: data.authors,
+            genres: data.genres
         };
 
         return book;

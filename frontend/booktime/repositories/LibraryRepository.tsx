@@ -1,4 +1,4 @@
-import { Library, LibraryDTO, LibraryWithBooks, LibraryWithBooksMin } from '@/models/Library';
+import { Library, CreateLibraryDto, LibraryWithBooks, LibraryWithBooksMin } from '@/models/Library';
 import { SQLiteDatabase } from 'expo-sqlite';
 import uuid from 'react-native-uuid';
 import { Book, BookMinInfos } from '@/models/Book';
@@ -7,13 +7,15 @@ import { SynchronisationController } from '@/controllers/SynchronisationControll
 export interface LibraryRepository {
     getAll: () => Promise<Library[]>;
     get: (id: string) => Promise<Library | null>;
-    create: (library: Library) => Promise<void>;
+    getFirst: () => Promise<Library | null>;
+    create: (library: CreateLibraryDto) => Promise<string>;
     delete: (id: string) => Promise<void>;
     getAllInfo: () => Promise<LibraryWithBooksMin[] | []>
     getAllBookFromLib: (id_library: string) => Promise<BookMinInfos[] | null>
-    getAllLibraryFromBook: (id_book: string) => Promise<Library[]>;
+    getAllFromBook: (id_book: string) => Promise<Library[]>;
     getAllNotLibraryFromBook: (id_book: string) => Promise<Library[]>;
-    getLastInsertedId: () => Promise<string|null>
+    getLastInsertedId: () => Promise<string | null>
+    getFirstFromBook: (idBook: string) => Promise<Library | null>
 }
 
 export class LocalLibraryRepository implements LibraryRepository {
@@ -27,11 +29,11 @@ export class LocalLibraryRepository implements LibraryRepository {
         this.sync = sync;
     }
 
-    async getLastInsertedId(): Promise<string>{
+    async getLastInsertedId(): Promise<string> {
         const result = await this.db.getFirstAsync<Library>(
             `SELECT * FROM library ORDER BY rowid DESC LIMIT 1;`,
         );
-        
+
         return (result as Library).id_library;
     }
 
@@ -40,7 +42,7 @@ export class LocalLibraryRepository implements LibraryRepository {
             `SELECT * FROM library 
             JOIN shared_library ON library.id_library = shared_library.id_library
             WHERE shared_library.id_user = $id_user`,
-            {$id_user: this.id_user}
+            { $id_user: this.id_user }
         );
         return allRows;
     }
@@ -48,70 +50,36 @@ export class LocalLibraryRepository implements LibraryRepository {
     async get(id: string): Promise<Library | null> {
         const result = await this.db.getFirstAsync<Library>(
             'SELECT * FROM library WHERE id_library == $id',
-            { $id: id,  }
+            { $id: id, }
         );
 
         return result!;
     }
 
-    async create(library: LibraryDTO): Promise<void> {
-        const result = await this.db.runAsync(
+    async getFirst(): Promise<Library> {
+        const result = await this.db.getFirstAsync<Library>(
+            'SELECT * FROM library LIMIT 1;'
+        );
+
+        return result!;
+    }
+
+    async create(library: CreateLibraryDto): Promise<string> {
+        await this.db.runAsync(
             'INSERT INTO library (name) VALUES ($name);',
             { $name: library.name }
         )
+        return await this.getLastInsertedId();
     }
 
     async delete(id: string): Promise<void> {
-        await this.db.withTransactionAsync(async () => {
-            try {
-                // Suppression des associations entre la bibliothèque et les livres
-                const deleteLibraryBooks = await this.db.prepareAsync(
-                    'DELETE FROM library_book WHERE id_library = $id'
-                );
-                await deleteLibraryBooks.executeAsync({ $id: id });
-                await deleteLibraryBooks.finalizeAsync(); // Fermer la déclaration
-
-                // Suppression des associations entre la bibliothèque et les utilisateurs partagés
-                const deleteSharedLibrary = await this.db.prepareAsync(
-                    'DELETE FROM shared_library WHERE id_library = $id'
-                );
-                await deleteSharedLibrary.executeAsync({ $id: id });
-                await deleteSharedLibrary.finalizeAsync(); // Fermer la déclaration
-
-                // Suppression de la bibliothèque elle-même
-                const deleteLibrary = await this.db.prepareAsync(
-                    'DELETE FROM library WHERE id_library = $id'
-                );
-                await deleteLibrary.executeAsync({ $id: id });
-                await deleteLibrary.finalizeAsync(); // Fermer la déclaration
-
-                console.log("deleted");
-            } catch (error) {
-                console.error('Error deleting library:', error);
-                throw error; // Re-throw the error to handle it at a higher level if needed
-            }
-        });
+        await this.db.runAsync(
+            'DELETE FROM library_book WHERE id_library = $id',
+            { $id: id }
+        );
     }
 
-    async delete2(id: string): Promise<void> {
-        await this.db.withTransactionAsync(async () => {
-            const deleteLibraryBooks = await this.db.prepareAsync(
-                'DELETE FROM library_book WHERE id_library = $id'
-            );
-            await deleteLibraryBooks.executeAsync({ $id: id });
-
-            const deleteSharedLibrary = await this.db.prepareAsync(
-                'DELETE FROM shared_library WHERE id_library = $id'
-            );
-            await deleteSharedLibrary.executeAsync({ $id: id });
-
-            const deleteLibrary = await this.db.prepareAsync(
-                'DELETE FROM library WHERE id_library = $id'
-            );
-            await deleteLibrary.executeAsync({ $id: id });
-        });
-    }
-
+    // TODO: move to book repo
     async getAllBookFromLib(id_library: string): Promise<BookMinInfos[]> {
         const books = this.db.getAllAsync<BookMinInfos>(
             `SELECT book.id_book, book.title, book.cover_image_url
@@ -125,6 +93,7 @@ export class LocalLibraryRepository implements LibraryRepository {
         return books;
     }
 
+    // TODO: move to controller
     async getAllInfo(): Promise<LibraryWithBooksMin[] | []> {
         try {
             const allLibrary: Library[] = await this.getAll();
@@ -150,7 +119,7 @@ export class LocalLibraryRepository implements LibraryRepository {
         }
     }
 
-    async getAllLibraryFromBook(id_book: string): Promise<Library[]> {
+    async getAllFromBook(id_book: string): Promise<Library[]> {
         const libraries = this.db.getAllAsync<Library>(
             `SELECT library.*
             FROM library
@@ -180,11 +149,24 @@ export class LocalLibraryRepository implements LibraryRepository {
         return libraries;
     }
 
+    async getFirstFromBook(idBook: string): Promise<Library | null> {
+        const result = await this.db.getFirstAsync<Library>(
+            `SELECT library.*
+            FROM library
+            JOIN library_book ON library.id_library = library_book.id_library
+            WHERE library_book.id_book = $id_book
+            LIMIT 1;`,
+            { $id_book: idBook }
+        );
+
+        return result;
+    }
+
 }
 
 export class RemoteLibraryRepository implements LibraryRepository {
-    
-    async getLastInsertedId() : Promise<string | null>{
+
+    async getLastInsertedId(): Promise<string | null> {
         return ""
     }
 
@@ -196,8 +178,12 @@ export class RemoteLibraryRepository implements LibraryRepository {
         return null;
     }
 
-    async create(library: Library): Promise<void> {
-        
+    async getFirst(): Promise<Library> {
+        return {} as Library;
+    }
+
+    async create(library: CreateLibraryDto): Promise<string> {
+        return "";
     }
 
     async delete(id: string): Promise<void> {
@@ -212,7 +198,7 @@ export class RemoteLibraryRepository implements LibraryRepository {
         return null;
     }
 
-    async getAllLibraryFromBook(id_book: string): Promise<Library[]> {
+    async getAllFromBook(id_book: string): Promise<Library[]> {
         return [];
     }
 

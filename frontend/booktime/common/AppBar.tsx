@@ -3,7 +3,7 @@ import { useRouter } from "expo-router";
 import { debounce } from "lodash";
 import React, { useCallback, useMemo, useState } from "react";
 import { StyleProp, StyleSheet, TextInput, ViewStyle } from "react-native";
-import { IconButton, Text, useTheme } from "react-native-paper";
+import { IconButton, Text, useTheme, Appbar } from "react-native-paper";
 import type { IconSource } from "react-native-paper/lib/typescript/components/Icon";
 import { modeAppbarHeight } from "react-native-paper/src/components/Appbar/utils";
 import Animated, { AnimatedRef, useAnimatedStyle, useDerivedValue, useScrollViewOffset, withTiming } from "react-native-reanimated";
@@ -94,7 +94,7 @@ export const AppBar = ({
                     onPress={onLeftIconPress ?? handleBack}
                 />
             )}
-            {children ?? <Text>{title}</Text>}
+            {children ?? <Text variant="titleLarge">{title}</Text>}
             {rightIcon && (
                 <IconButton
                     icon={rightIcon}

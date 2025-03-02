@@ -1,19 +1,14 @@
-import { BookSearchItem } from "@/components/search/BookSearchItem";
-import { ModalAddToLibrary } from "@/components/search/ModalAddToLibrary";
-import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
-import { Book, BookSearchResult } from "@/models/Book";
-import { BottomSheetModal } from "@gorhom/bottom-sheet";
-import React, { useCallback, useRef, useState } from 'react';
-import { StyleSheet, View } from "react-native";
-import { Text, ActivityIndicator } from "react-native-paper";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Stack, useNavigation, useRouter } from "expo-router";
-import { SearchItem } from "@/components/search/SearchItem";
-import { ManageLibrarySnackbar } from "@/components/snackbar";
 import { SearchAppBar } from "@/common/AppBar";
+import { SearchItem } from "@/components/search/SearchItem";
+import { ManageLibrarySnackbarComponent } from "@/components/snackbar/ManageLibrarySnackbar";
+import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
+import { BookSearchResult } from "@/models/Book";
+import { Stack, useRouter } from "expo-router";
+import React, { useCallback, useState } from 'react';
+import { StyleSheet, View } from "react-native";
+import { ActivityIndicator, Text } from "react-native-paper";
 import Animated, { useAnimatedRef } from "react-native-reanimated";
-import { useManageLibrarySnackbar } from "@/components/snackbar/ManageLibrarySnackbar";
-import { useBookContext } from "@/contexts/BookContext";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 type TFilters = {
     query: string;
@@ -36,17 +31,21 @@ const removeDuplicates = (items: BookSearchResult[]): BookSearchResult[] => {
 };
 
 const SearchTab = () => {
-    const scrollViewRef = useAnimatedRef<Animated.FlatList<BookSearchResult>>();
     const router = useRouter();
-    const bookController = useBookContext();
-
-    //TODO: chnage debounce to useDeferredValue
+    const scrollViewRef = useAnimatedRef<Animated.FlatList<BookSearchResult>>();
 
     const [filters, setFilters] = useState<TFilters | null>(null);
+    const { data, onEndReached, isFetchingNextPage } = useInfiniteScroll<BookSearchResult, TFilters>({
+        url: "/books/search/",
+        filters,
+        limit: NUMBER_OF_ITEMS,
+        initialPage: 0,
+        key: 'search',
+    });
 
-    const { visible, library, show, hide } = useManageLibrarySnackbar();
+    // TODO: chnage debounce to useDeferredValue or both
 
-    const fetchData = (query: string) => {
+    const fetchData = useCallback((query: string) => {
         if (!query) {
             setFilters(null);
             return;
@@ -55,35 +54,21 @@ const SearchTab = () => {
             ...filters,
             query,
         });
-    };
+    }, [filters]);
+
+    // TODO
+    // const handleBack = useCallback(() => {
+    //     // Check if one book has been added to the library
+    //     if (libraryName !== "") {
+    //         router.push("/(app)/(tabs)/(library)/myShelves");
+    //     } else {
+    //         router.back();
+    //     }
+    // }, [router, libraryName]);
 
     const handleBack = useCallback(() => {
-        // Check if one book has been added to the library
-        if (library !== "") {
-            router.push("/(app)/(tabs)/(library)/myShelves");
-        } else {
-            router.back();
-        }
-    }, [router, library]);
-
-    const handleAddBook = (idBook: string, checked: boolean) => {
-        if (checked) {
-            bookController.addToLibrary
-            show("My Library");
-        }
-    };
-
-    const {
-        data,
-        onEndReached,
-        isFetchingNextPage
-    } = useInfiniteScroll<BookSearchResult, TFilters>({
-        url: "/books/search/",
-        filters,
-        limit: NUMBER_OF_ITEMS,
-        initialPage: 0,
-        key: 'search',
-    });
+        router.back();
+    }, [router]);
 
     return (
         <SafeAreaView style={styles.container}>
@@ -111,8 +96,6 @@ const SearchTab = () => {
                         title={item.title}
                         authors={item.authors}
                         uri={item.thumbnail}
-                        onCheck={handleAddBook}
-                        onPress={(idBook) => router.push({ pathname: "/book/[idBook]", params: { idBook } })}
                     />
                 )}
                 ListEmptyComponent={
@@ -126,12 +109,7 @@ const SearchTab = () => {
                     </View>
                 }
             />
-            <ManageLibrarySnackbar
-                library={library}
-                visible={visible}
-                onDismiss={hide}
-                onPressChange={() => router.push({pathname: "/(app)/ManageLibraryModal", params: {idBook: ""}})}
-            />
+            <ManageLibrarySnackbarComponent />
         </SafeAreaView>
     );
 }

@@ -341,8 +341,6 @@ const initTriggerUpdateState = async (db: SQLiteDatabase) => {
                     CURRENT_TIMESTAMP, 
                     'INSERT', 
                     json_object(
-                        'id_state', NEW.id_state,
-
                         CASE WHEN OLD.state != NEW.state THEN 'state' ELSE NULL END, 
                         CASE WHEN OLD.state != NEW.state THEN NEW.state ELSE NULL END,
 
@@ -706,7 +704,7 @@ const initTriggerDeleteLibraryBook = async (db: SQLiteDatabase) => {
  */
 const initBaseData = async (db: SQLiteDatabase) => {
 
-    await initBaseLibraryData(db);
+    // await initBaseLibraryData(db);
     
 }
 

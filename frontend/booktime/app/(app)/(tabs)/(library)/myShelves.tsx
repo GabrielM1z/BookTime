@@ -1,11 +1,12 @@
-import NewEtagere from '@/components/NewEtagere';
 import { Shelf } from '@/components/library/Shelf';
 import { useBookContext } from '@/contexts/BookContext';
 import { useRepository } from '@/hooks/useRepository';
 import { useTopTabbarScroll } from '@/hooks/useTopTabbarScroll';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
-import React from "react";
-import { FlatList, StyleSheet } from 'react-native';
+import { Link, useFocusEffect } from 'expo-router';
+import React, { useCallback } from "react";
+import { FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { Text } from 'react-native-paper';
 
 const MyShelvesTab = () => {
     const bookController = useBookContext();
@@ -16,9 +17,9 @@ const MyShelvesTab = () => {
     const tabBarHeight = useBottomTabBarHeight();
     const { handleScroll } = useTopTabbarScroll(10);
 
-    const handleAddEtagere = () => {
+    useFocusEffect(useCallback(() => {
         refresh();
-    };
+    }, [refresh]));
 
     return (
         <FlatList
@@ -35,7 +36,24 @@ const MyShelvesTab = () => {
                 />
             )}
             contentContainerStyle={[styles.shelvesContainer, { paddingBottom: tabBarHeight }]}
-            ListHeaderComponent={<NewEtagere onAddEtagere={handleAddEtagere} />}
+            ListHeaderComponent={
+                <Link href="/(app)/AddLibraryModal" asChild>
+                    <TouchableOpacity
+                        style={{
+                            alignSelf: 'center',
+                            width: '90%',
+                            padding: 10,
+                            borderRadius: 20,
+                            marginTop: 10,
+                            marginBottom: 10,
+                            borderWidth: 5,
+                            borderStyle: 'dashed',
+                        }}
+                    >
+                        <Text>Add Lib</Text>
+                    </TouchableOpacity>
+                </Link>
+            }
             onRefresh={refresh}
             refreshing={loading}
         />
