@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 
 
 export const useUser = () => {
-    const userController = useUserContext();
+    const { userController } = useUserContext();
     const { session } = useAuthContext();
 
     const [user, setUser] = useState<User | null>(null);

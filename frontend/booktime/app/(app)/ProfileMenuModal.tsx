@@ -11,7 +11,7 @@ const ProfileMenuModal = () => {
     const router = useRouter();
     const { colors } = useTheme();
     const { logOut, session } = useAuthContext();
-    const userController = useUserContext();
+    const { userController } = useUserContext();
 
     const handleAccountCenter = useCallback(() => {
         router.back();

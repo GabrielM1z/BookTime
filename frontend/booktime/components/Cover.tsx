@@ -3,7 +3,7 @@ import { linkToBase64 } from '@/helpers/image';
 import { Image, ImageProps } from 'expo-image';
 import { useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { StyleSheet, TouchableOpacity } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { ActivityIndicator, Text } from 'react-native-paper';
 
 const DEFAULT_SIZE = 150;
@@ -41,11 +41,11 @@ export const Cover = ({
     width,
     height,
     ratio,
-    loading = true,
+    loading,
     ...imageProps
 }: CoverProps) => {
     const [imageRatio, setImageRatio] = useState(1);
-    const [_loading, setLoading] = useState(loading);
+    const [_loading, setLoading] = useState(true);
 
     const calculatedWidth = useMemo(() => {
         if (width) return width;
@@ -81,17 +81,17 @@ export const Cover = ({
     ), [uri, imageStyle, imageProps]);
 
     return (
-        <>
-            {(_loading || loading) && (
-                <ActivityIndicator style={{ position: 'absolute' }} />
-            )}
+        <View>
             {memorizedImage}
+            {(loading ?? _loading) && (
+                <ActivityIndicator style={styles.activityIndicator} />
+            )}
             {showTitle && title && (
                 <Text style={[styles.title, { width: calculatedWidth }]} numberOfLines={2} ellipsizeMode="tail">
                     {title}
                 </Text>
             )}
-        </>
+        </View>
     );
 }
 
@@ -177,7 +177,8 @@ const styles = StyleSheet.create({
         textAlign: "center",
     },
     activityIndicator: {
-        position: 'absolute',
-        alignSelf: 'center',
+        ...StyleSheet.absoluteFillObject,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 });

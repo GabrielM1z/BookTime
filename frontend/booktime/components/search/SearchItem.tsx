@@ -20,7 +20,7 @@ export interface SearchItemProps {
 
 export const SearchItem = ({ idBook, title, authors, uri }: SearchItemProps) => {
     const scale = useSharedValue(1);
-    const bookController = useBookContext();
+    const { bookController } = useBookContext();
     const router = useRouter();
 
     const { data: checked, refresh } = useRepository(async () => (await bookController.library.getFirstFromBook(idBook)) != null, false);

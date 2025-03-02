@@ -21,7 +21,6 @@ import { StatusBar } from 'expo-status-bar';
 import { UserProvider } from '@/contexts/UserContext';
 import { BottomSheetModalScreenOptions } from '@/common';
 
-
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
@@ -30,7 +29,7 @@ const { LightTheme, DarkTheme } = adaptNavigationTheme({
     reactNavigationDark: NavigationDarkTheme,
 });
 
-function Routes() {
+const Routes = () => {
     useAuthInterceptor();
     const { colors } = useTheme();
 
@@ -46,7 +45,7 @@ function Routes() {
     );
 }
 
-export default function RootLayout() {
+const RootLayout = () => {
     const [loaded] = useFonts({
         SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     });
@@ -66,6 +65,7 @@ export default function RootLayout() {
     }
 
     const handleSQLiteError = (error: Error) => {
+        console.error('SQLite error:', error);
         throw error;
     }
 
@@ -90,3 +90,5 @@ export default function RootLayout() {
         </PaperProvider>
     );
 }
+
+export default RootLayout;

@@ -27,7 +27,7 @@ const { width, height, columns } = calculateBookLayout();
 
 const AllBooksTab = () => {
     const router = useRouter();
-    const bookController = useBookContext();
+    const { bookController } = useBookContext();
     const { data: books, loading, refresh } = useRepository<
         { id_book: string, title: string, cover_image_url: string }[]>(
             () => bookController.book.getAll(["title", "cover_image_url"]), []);

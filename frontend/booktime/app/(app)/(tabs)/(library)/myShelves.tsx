@@ -9,9 +9,9 @@ import { FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from 'react-native-paper';
 
 const MyShelvesTab = () => {
-    const bookController = useBookContext();
+    const { bookController } = useBookContext();
     const { data: shelves, loading, refresh } = useRepository(
-        () => bookController.library.getAllInfo(), []
+        () => bookController.getAllLibraryInfo(), []
     );
 
     const tabBarHeight = useBottomTabBarHeight();

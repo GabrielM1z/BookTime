@@ -17,7 +17,7 @@ const AccountCenterModal = () => {
         selectCurrent: params.selectCurrent === 'true' ?? false,
     }), [params]);
 
-    const userController = useUserContext();
+    const { userController } = useUserContext();
     const { switchSession, session, sessions } = useAuthContext();
     const { data } = useRepository(() => userController.getAllBySession(sessions), [], [sessions]);
     const users = useMemo(() => (showGuest ? data : data.filter(user => user.id_user !== 'guest')), [data, showGuest]);

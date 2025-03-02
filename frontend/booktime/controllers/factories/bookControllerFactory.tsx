@@ -1,3 +1,4 @@
+import { useSQLite } from "@/hooks/useSQLite";
 import { useSQLiteContext } from "expo-sqlite";
 import { Platform } from "react-native";
 import { BookControllerProps, LocalBookController, RemoteBookController } from "../BookController";
@@ -7,6 +8,7 @@ export function bookControllerFactory(id_user: string): BookControllerProps {
         return new RemoteBookController(id_user);
     }
 
+    // const db = useSQLite();
     const db = useSQLiteContext();
     return new LocalBookController(db, id_user);
 }

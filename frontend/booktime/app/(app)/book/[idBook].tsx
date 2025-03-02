@@ -17,7 +17,7 @@ import { useBookContext } from '@/contexts/BookContext';
 
 export default function LivreDetail() {
 
-    const bookController = useBookContext();
+    const { bookController } = useBookContext();
     const navigation = useNavigation();
     const { idBook, cover, mode } = useLocalSearchParams();
 
@@ -95,12 +95,12 @@ export default function LivreDetail() {
         <ThemedView style={styles.container}>
 
             <View style={styles.header}>
-                <BackButton/>
+                <BackButton />
             </View>
 
             <ScrollView style={styles.containerScrollable}>
 
-                
+
 
                 <View style={styles.containerTitre}>
 
@@ -147,7 +147,7 @@ export default function LivreDetail() {
 
                 <View style={styles.containerResume}>
                     <ThemedText type='sousTab'>Bibliothèques</ThemedText>
-                    <LibraryChoice book={book}/>
+                    <LibraryChoice book={book} />
                 </View>
 
             </ScrollView>

@@ -27,6 +27,7 @@ export interface BookControllerProps {
     sharedLibrary: SharedLibraryRepository;
     addBook: (idBook: string, idLibrary: string) => Promise<void>
     createLibrary: (library: CreateLibraryDto) => Promise<void>
+    getAllLibraryInfo: () => Promise<LibraryWithBooksMin[] | []>
 }
 
 export class LocalBookController implements BookControllerProps {
@@ -121,13 +122,13 @@ export class LocalBookController implements BookControllerProps {
         }
     }
 
-    async getAllInfoLibrary(): Promise<LibraryWithBooksMin[] | []> {
+    async getAllLibraryInfo(): Promise<LibraryWithBooksMin[] | []> {
         try {
             const allLibrary: Library[] = await this.library.getAll();
 
             // Tableau de promesses pour récupérer tous les livres
             const libraryPromises = allLibrary.map(async (library) => {
-                const listBookOfLibrary = await this.library.getAllBookFromLib(library.id_library);
+                const listBookOfLibrary = await this.book.getAllFromLibrary(library.id_library);
                 return {
                     id_library: library.id_library,
                     name: library.name,
@@ -172,4 +173,8 @@ export class RemoteBookController implements BookControllerProps {
     async addBook(idBook: string, idLibrary: string): Promise<void> { }
 
     async createLibrary(library: CreateLibraryDto): Promise<void> { }
+
+    async getAllLibraryInfo(): Promise<LibraryWithBooksMin[] | []> {
+        return [];
+    }
 }

@@ -7,7 +7,7 @@ import { Button, Text, TextInput, useTheme } from 'react-native-paper';
 const AddLibraryModal = () => {
     const { colors } = useTheme();
     const router = useRouter();
-    const bookController = useBookContext();
+    const { bookController } = useBookContext();
     const [libraryName, setLibraryName] = useState<string>('');
 
     const handleAddLibrary = useCallback(async () => {

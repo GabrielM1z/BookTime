@@ -1,23 +1,31 @@
 import { BookControllerProps } from "@/controllers/BookController";
 import { bookControllerFactory } from "@/controllers/factories/bookControllerFactory";
 import { ContextNotFound } from "@/errors/ContextNotFound";
+import { usePersistentState } from "@/hooks/usePersistantState";
 import React, { createContext } from "react";
 
-export interface BookContextProps {
+export interface BookProviderProps {
     children: React.ReactNode;
     id_user: string;
 }
 
-const BookContext = createContext<BookControllerProps | undefined>(undefined);
+export interface BookContextProps {
+    bookController: BookControllerProps;
+    lastSync: string | null;
+    setLastSync: (lastSync: string | null) => void;
+}
+
+const BookContext = createContext<BookContextProps | undefined>(undefined);
 
 export const BookProvider = ({
     children,
     id_user,
-}: BookContextProps) => {
+}: BookProviderProps) => {
+    const [lastSync, setLastSync] = usePersistentState<string | null>('book_lastSync', null);
     const bookController = bookControllerFactory(id_user);
 
     return (
-        <BookContext.Provider key={id_user} value={bookController}>
+        <BookContext.Provider key={id_user} value={{ bookController, lastSync, setLastSync }}>
             {children}
         </BookContext.Provider>
     );

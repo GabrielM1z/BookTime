@@ -10,8 +10,6 @@ export interface LibraryRepository {
     getFirst: () => Promise<Library | null>;
     create: (library: CreateLibraryDto) => Promise<string>;
     delete: (id: string) => Promise<void>;
-    getAllInfo: () => Promise<LibraryWithBooksMin[] | []>
-    getAllBookFromLib: (id_library: string) => Promise<BookMinInfos[] | null>
     getAllFromBook: (id_book: string) => Promise<Library[]>;
     getAllNotLibraryFromBook: (id_book: string) => Promise<Library[]>;
     getLastInsertedId: () => Promise<string | null>
@@ -79,46 +77,6 @@ export class LocalLibraryRepository implements LibraryRepository {
         );
     }
 
-    // TODO: move to book repo
-    async getAllBookFromLib(id_library: string): Promise<BookMinInfos[]> {
-        const books = this.db.getAllAsync<BookMinInfos>(
-            `SELECT book.id_book, book.title, book.cover_image_url
-            FROM book
-            JOIN library_book ON book.id_book = library_book.id_book
-            JOIN library ON library_book.id_library = library.id_library
-            WHERE library.id_library = $id_library; `,
-            { $id_library: id_library }
-        );
-
-        return books;
-    }
-
-    // TODO: move to controller
-    async getAllInfo(): Promise<LibraryWithBooksMin[] | []> {
-        try {
-            const allLibrary: Library[] = await this.getAll();
-
-            // Tableau de promesses pour récupérer tous les livres
-            const libraryPromises = allLibrary.map(async (library) => {
-                const listBookOfLibrary = await this.getAllBookFromLib(library.id_library);
-                return {
-                    id_library: library.id_library,
-                    name: library.name,
-                    books: listBookOfLibrary
-                };
-            });
-
-            // Attendre que toutes les promesses soient résolues
-            const allLibraryWithBook: LibraryWithBooksMin[] = await Promise.all(libraryPromises);
-
-            return allLibraryWithBook;
-
-        } catch (error) {
-            console.log("Error", error);
-            return [];
-        }
-    }
-
     async getAllFromBook(id_book: string): Promise<Library[]> {
         const libraries = this.db.getAllAsync<Library>(
             `SELECT library.*
@@ -182,20 +140,16 @@ export class RemoteLibraryRepository implements LibraryRepository {
         return {} as Library;
     }
 
+    async getFirstFromBook(idBook: string): Promise<Library | null> {
+        return null;
+    }
+
     async create(library: CreateLibraryDto): Promise<string> {
         return "";
     }
 
     async delete(id: string): Promise<void> {
         return;
-    }
-
-    async getAllInfo(): Promise<LibraryWithBooksMin[] | []> {
-        return [];
-    }
-
-    async getAllBookFromLib(id_library: string): Promise<BookMinInfos[] | null> {
-        return null;
     }
 
     async getAllFromBook(id_book: string): Promise<Library[]> {

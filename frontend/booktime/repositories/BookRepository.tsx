@@ -10,7 +10,7 @@ import { SynchronisationController } from '@/controllers/SynchronisationControll
 export interface BookRepository {
     get: (id: string, columns?: (keyof Book)[]) => Promise<Book>;
     getAll: (columns?: (keyof Book)[]) => Promise<Book[]>;
-    getAllFromLib: (id_lib: string) => Promise<Book[]>
+    getAllFromLibrary: (id_lib: string) => Promise<Book[]>
     add: (state: Book) => Promise<void>;
     // addToLibrary: (id_library: string, book: Book) => Promise<void>
     delete: (id: string) => Promise<void>;
@@ -91,7 +91,7 @@ export class LocalBookRepository implements BookRepository {
         return allRows;
     }
 
-    async getAllFromLib(id_library: string): Promise<Book[]> {
+    async getAllFromLibrary(id_library: string): Promise<Book[]> {
         let allRows = await this.db.getAllAsync<Book>(
             'SELECT * ' +
             'FROM book ' +
@@ -197,7 +197,7 @@ export class RemoteBookRepository implements BookRepository {
         return [];
     }
 
-    async getAllFromLib(): Promise<Book[]> {
+    async getAllFromLibrary(): Promise<Book[]> {
         return [];
     }
 

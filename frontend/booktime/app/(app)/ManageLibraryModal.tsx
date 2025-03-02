@@ -16,7 +16,7 @@ const ManageLibraryModal = () => {
     const scrollViewRef = useAnimatedRef<Animated.FlatList<Library>>();
     const [search, setSearch] = useState<string>("");
 
-    const bookController = useBookContext();
+    const { bookController } = useBookContext();
     const { data: libraries, refresh: refreshAll } = useRepository(() => bookController.library.getAll(), [], [idBook]);
     const { data: defaultLibraries } = useRepository(() => bookController.library.getAllFromBook(idBook), [], [idBook, libraries]);
     const { selectedItems, toggleSelection, isSelected, unselectedItems } = useSelectableList(libraries, defaultLibraries, 'id_library', true, [defaultLibraries]);

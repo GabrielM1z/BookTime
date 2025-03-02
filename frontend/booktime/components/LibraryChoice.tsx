@@ -13,7 +13,7 @@ export default function LibraryChoice({ book }: LibraryChoiceProps) {
     const [modalVisible, setModalVisible] = useState(false);
     const [librariesNotOwn, setLibrariesNotOwn] = useState<Library[]>([]);
     const [librariesOwn, setLibrariesOwn] = useState<Library[]>([]);
-    const bookController = useBookContext();
+    const { bookController } = useBookContext();
 
     useEffect(() => {
         if (book) {

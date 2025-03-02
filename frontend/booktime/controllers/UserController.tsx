@@ -72,11 +72,13 @@ export class RemoteUserController extends UserController implements UserControll
         return await this.user.getFromToken();
     }
 
-    async addFromSession(session: Session): Promise<void> {}
+    async addFromSession(session: Session): Promise<void> { }
 
     async getAll(): Promise<User[]> {
         return [await this.user.getFromToken()];
     }
 
-    async getAllBySession(sessions: Session[]): Promise<User[]> {} // TODO: implement
+    async getAllBySession(sessions: Session[]): Promise<User[]> {
+        return [];
+    } // TODO: implement
 }

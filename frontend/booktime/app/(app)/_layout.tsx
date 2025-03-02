@@ -10,7 +10,7 @@ import { useUserContext } from "@/contexts/UserContext";
 import { BottomSheetModalScreenOptions } from "@/common";
 
 const AuthenticatedLayout = (session: Session) => {
-    const userController = useUserContext();
+    const { userController } = useUserContext();
     userController.addFromSession(session);
 
     return (

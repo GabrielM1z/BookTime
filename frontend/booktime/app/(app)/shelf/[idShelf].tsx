@@ -12,7 +12,7 @@ import { useBookContext } from '@/contexts/BookContext';
 export default function EtagereDetail() {
 
     const { idEtagere, label } = useLocalSearchParams();
-    const bookController = useBookContext();
+    const { bookController } = useBookContext();
     const navigation = useNavigation();
 
     const [books, setBooks] = useState<Book[]>([]);
@@ -29,7 +29,7 @@ export default function EtagereDetail() {
     // Récupère tous les livres de l'étagère
     const fetchAllBooksFromLib = () => {
         try {
-            bookController.book.getAllFromLib(idEtagere as string).then((data) => {
+            bookController.book.getAllFromLibrary(idEtagere as string).then((data) => {
                 setBooks(data);
             });
         } catch (error) {
