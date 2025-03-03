@@ -2,7 +2,9 @@ package repository
 
 import (
 	"database/sql"
+	"encoding/json"
 	"log"
+	"time"
 
 	"user/model"
 	"user/repository/interfaces"
@@ -25,7 +27,18 @@ func (br *UserRepository) InsertUser(user model.User) bool {
 		log.Println(err)
 		return false
 	}
-	return true
+
+	actionMap := map[string]interface{}{
+		"id_user":      user.IdUser,
+		"pseudo":       user.Pseudo,
+		"description":  user.Description,
+		"private":      user.Private,
+		"profil_image": user.ProfilImage,
+		"banner_image": user.BannerImage,
+		"birthdate":    user.Birthday,
+	}
+
+	return br.LogAction(user.IdUser, "USER_BOOKTIME", "INSERT", actionMap)
 }
 
 func (ur *UserRepository) SelectUser(id uuid.UUID) (*model.User, error) {
@@ -67,15 +80,20 @@ func (ur *UserRepository) SelectUsers() []model.User {
 	return users
 }
 
-func (ur *UserRepository) DeleteUser(id uuid.UUID) bool {
+func (ur *UserRepository) DeleteUser(idUser uuid.UUID) bool {
 	query := "DELETE FROM user_booktime WHERE id_user = $1"
 
-	_, err := ur.DB.Exec(query, id)
+	_, err := ur.DB.Exec(query, idUser)
 	if err != nil {
 		log.Println(err)
 		return false
 	}
-	return true
+
+	actionMap := map[string]interface{}{
+		"id_user": idUser,
+	}
+
+	return ur.LogAction(idUser, "USER_BOOKTIME", "DELETE", actionMap)
 }
 
 func (ur *UserRepository) UpdateUser(user model.User) bool {
@@ -87,7 +105,36 @@ func (ur *UserRepository) UpdateUser(user model.User) bool {
 		return false
 	}
 
-	return true
+	actionMap := map[string]interface{}{
+		"id_user":      user.IdUser,
+		"pseudo":       user.Pseudo,
+		"description":  user.Description,
+		"private":      user.Private,
+		"profil_image": user.ProfilImage,
+		"banner_image": user.BannerImage,
+		"birthdate":    user.Birthday,
+	}
+
+	return ur.LogAction(user.IdUser, "USER_BOOKTIME", "UPDATE", actionMap)
+}
+
+func (ur *UserRepository) LogAction(idUser uuid.UUID, tableName, actionType string, actionData map[string]interface{}) bool {
+	actionJSON, err := json.Marshal(actionData)
+	if err != nil {
+		log.Println("Erreur lors de l'encodage JSON:", err)
+		return false
+	}
+
+	action := model.PostAction{
+		IdUser:     idUser,
+		Table:      tableName,
+		Date:       time.Now(),
+		Type:       actionType,
+		Action:     actionJSON,
+		ExecutedBy: "SERVER",
+	}
+
+	return NewActionRepository(ur.DB).InsertAction(action, idUser)
 }
 
 var _ interfaces.UserRepositoryInterface = &UserRepository{}
