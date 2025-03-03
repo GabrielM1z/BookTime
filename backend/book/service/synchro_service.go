@@ -54,6 +54,18 @@ type stateReadCountActionInfo struct {
 	Date      time.Time
 }
 
+type stateRateActionInfo struct {
+	ActionId uuid.UUID
+	Rate     uint
+	Date     time.Time
+}
+
+type stateCommentActionInfo struct {
+	ActionId uuid.UUID
+	Comment  string
+	Date     time.Time
+}
+
 type stateStateActionInfo struct {
 	ActionId uuid.UUID
 	State    string
@@ -298,6 +310,8 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 	statesIsAvailableActionInfo := make(map[string]stateIsAvailableActionInfo)
 	statesLastReadDateActionInfo := make(map[string]stateLastReadDateActionInfo)
 	statesReadCountActionInfo := make(map[string]stateReadCountActionInfo)
+	statesRateActionInfo := make(map[string]stateRateActionInfo)
+	statesCommentActionInfo := make(map[string]stateCommentActionInfo)
 	statesStateActionInfo := make(map[string]stateStateActionInfo)
 
 	for _, action := range updateStateActions {
@@ -410,6 +424,52 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 					}
 				}
 
+				if rate, ok := stateActionData["rate"]; ok {
+					rateFloat, ok := rate.(float64)
+					if !ok {
+						log.Fatalf("Erreur : rate n'est pas un nombre valide")
+					}
+
+					if _, exists := statesRateActionInfo[idBook]; exists {
+						if action.Date.After(statesRateActionInfo[idBook].Date) {
+							statesRateActionInfo[idBook] = stateRateActionInfo{
+								ActionId: action.IdAction,
+								Rate:     uint(rateFloat),
+								Date:     action.Date,
+							}
+						}
+					} else {
+						statesRateActionInfo[idBook] = stateRateActionInfo{
+							ActionId: action.IdAction,
+							Rate:     uint(rateFloat),
+							Date:     action.Date,
+						}
+					}
+				}
+
+				if comment, ok := stateActionData["comment"]; ok {
+					commentStr, ok := comment.(string)
+					if !ok {
+						log.Fatalf("Erreur : comment n'est pas une chaîne valide")
+					}
+
+					if _, exists := statesCommentActionInfo[idBook]; exists {
+						if action.Date.After(statesCommentActionInfo[idBook].Date) {
+							statesCommentActionInfo[idBook] = stateCommentActionInfo{
+								ActionId: action.IdAction,
+								Comment:  commentStr,
+								Date:     action.Date,
+							}
+						}
+					} else {
+						statesCommentActionInfo[idBook] = stateCommentActionInfo{
+							ActionId: action.IdAction,
+							Comment:  commentStr,
+							Date:     action.Date,
+						}
+					}
+				}
+
 				if state, ok := stateActionData["state"]; ok {
 					stateStr, ok := state.(string)
 					if !ok {
@@ -464,6 +524,24 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 	}
 
 	for _, action := range statesReadCountActionInfo {
+		actionToAdd := updateStateActions[action.ActionId]
+		if actionToAdd.ExecutedBy == "CLIENT" {
+			serverActions = append(serverActions, actionToAdd)
+		} else if actionToAdd.ExecutedBy == "SERVER" {
+			clientActions = append(clientActions, actionToAdd)
+		}
+	}
+
+	for _, action := range statesRateActionInfo {
+		actionToAdd := updateStateActions[action.ActionId]
+		if actionToAdd.ExecutedBy == "CLIENT" {
+			serverActions = append(serverActions, actionToAdd)
+		} else if actionToAdd.ExecutedBy == "SERVER" {
+			clientActions = append(clientActions, actionToAdd)
+		}
+	}
+
+	for _, action := range statesCommentActionInfo {
 		actionToAdd := updateStateActions[action.ActionId]
 		if actionToAdd.ExecutedBy == "CLIENT" {
 			serverActions = append(serverActions, actionToAdd)
