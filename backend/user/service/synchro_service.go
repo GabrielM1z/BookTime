@@ -74,13 +74,15 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 	clientActions := []model.Action{}
 	serverActions := []model.Action{}
 
+	fmt.Println("clientActions111", clientActions)
+
 	// var updateUserActions []model.Action
 	updateUserActions := make(map[uuid.UUID]model.Action)
 
 	// var updateLibraryActions []model.Action
 	var insertActions []model.Action
 	var deleteActions []model.Action
-	var deletedUsers []uuid.UUID
+	var deletedUsers []string
 
 	//On met chaque action dans une liste qui regroupe toutes les actions de meme type UPDATE INSERT DELETE
 	for _, action := range filteredActions {
@@ -114,7 +116,7 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 				log.Fatalf("Erreur lors du décodage du JSON : %v", err)
 			}
 
-			deletedUsers = append(deletedUsers, user.IdUser)
+			deletedUsers = append(deletedUsers, user.IdUser.String())
 
 			if deletedUsersMap[user.IdUser] {
 				isDuplicate = true // Doublon détecté
@@ -137,6 +139,7 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 	// Mise à jour des listes d'actions après suppression des doublons
 	serverActions = append(serverActions, filteredServerActions...)
 	clientActions = append(clientActions, filteredClientActions...)
+	fmt.Println("clientActions222", clientActions)
 
 	// --== INSERT ==--
 
@@ -147,25 +150,27 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 			err := json.Unmarshal(action.Action, &user)
 			if err != nil {
 				log.Fatalf("Erreur lors du décodage du JSON : %v", err)
-			} else if !contains(deletedUsers, user.IdUser) {
+			} else if !contains(deletedUsers, user.IdUser.String()) {
 				if action.ExecutedBy == "CLIENT" {
 					serverActions = append(serverActions, action)
 				} else if action.ExecutedBy == "SERVER" {
 					clientActions = append(clientActions, action)
+					fmt.Println("clientActions333", clientActions)
 				}
 			}
 		}
 	}
+	fmt.Println("clientActions444", clientActions)
 
 	// --== UPDATE ==--
 
 	//USER
-	usersPseudoActionsInfos := make(map[uuid.UUID]userPseudoActionInfo)
-	usersDescriptionActionInfo := make(map[uuid.UUID]userDescriptionActionInfo)
-	usersPrivateActionInfo := make(map[uuid.UUID]userPrivateActionInfo)
-	usersProfilImageActionInfo := make(map[uuid.UUID]userProfilImageActionInfo)
-	usersBannerImageActionInfo := make(map[uuid.UUID]userBannerImageActionInfo)
-	usersBirthdayActionInfo := make(map[uuid.UUID]userBirthdayActionInfo)
+	usersPseudoActionsInfos := make(map[string]userPseudoActionInfo)
+	usersDescriptionActionInfo := make(map[string]userDescriptionActionInfo)
+	usersPrivateActionInfo := make(map[string]userPrivateActionInfo)
+	usersProfilImageActionInfo := make(map[string]userProfilImageActionInfo)
+	usersBannerImageActionInfo := make(map[string]userBannerImageActionInfo)
+	usersBirthdayActionInfo := make(map[string]userBirthdayActionInfo)
 
 	for _, action := range updateUserActions {
 		var userActionData map[string]interface{}
@@ -177,8 +182,7 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 		// Vérifie si "id_user" existe
 		if idUser, ok := userActionData["id_user"]; ok {
 
-			fmt.Println("idUser", idUser)
-			if !contains(deletedUsers, idUser.(uuid.UUID)) {
+			if !contains(deletedUsers, idUser.(string)) {
 
 				// Vérifie si "pseudo" existe
 				if pseudo, ok := userActionData["pseudo"]; ok {
@@ -187,16 +191,16 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 						log.Fatalf("Erreur : pseudo n'est pas une chaîne valide")
 					}
 
-					if _, exists := usersPseudoActionsInfos[idUser.(uuid.UUID)]; exists {
-						if action.Date.After(usersPseudoActionsInfos[idUser.(uuid.UUID)].Date) {
-							usersPseudoActionsInfos[idUser.(uuid.UUID)] = userPseudoActionInfo{
+					if _, exists := usersPseudoActionsInfos[idUser.(string)]; exists {
+						if action.Date.After(usersPseudoActionsInfos[idUser.(string)].Date) {
+							usersPseudoActionsInfos[idUser.(string)] = userPseudoActionInfo{
 								ActionId: action.IdAction,
 								Pseudo:   pseudoStr,
 								Date:     action.Date,
 							}
 						}
 					} else {
-						usersPseudoActionsInfos[idUser.(uuid.UUID)] = userPseudoActionInfo{
+						usersPseudoActionsInfos[idUser.(string)] = userPseudoActionInfo{
 							ActionId: action.IdAction,
 							Pseudo:   pseudoStr,
 							Date:     action.Date,
@@ -211,16 +215,16 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 						log.Fatalf("Erreur : description n'est pas une chaîne valide")
 					}
 
-					if _, exists := usersDescriptionActionInfo[idUser.(uuid.UUID)]; exists {
-						if action.Date.After(usersDescriptionActionInfo[idUser.(uuid.UUID)].Date) {
-							usersDescriptionActionInfo[idUser.(uuid.UUID)] = userDescriptionActionInfo{
+					if _, exists := usersDescriptionActionInfo[idUser.(string)]; exists {
+						if action.Date.After(usersDescriptionActionInfo[idUser.(string)].Date) {
+							usersDescriptionActionInfo[idUser.(string)] = userDescriptionActionInfo{
 								ActionId:    action.IdAction,
 								Description: descriptionStr,
 								Date:        action.Date,
 							}
 						}
 					} else {
-						usersDescriptionActionInfo[idUser.(uuid.UUID)] = userDescriptionActionInfo{
+						usersDescriptionActionInfo[idUser.(string)] = userDescriptionActionInfo{
 							ActionId:    action.IdAction,
 							Description: descriptionStr,
 							Date:        action.Date,
@@ -235,16 +239,16 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 						log.Fatalf("Erreur : private n'est pas un booléen")
 					}
 
-					if _, exists := usersPrivateActionInfo[idUser.(uuid.UUID)]; exists {
-						if action.Date.After(usersPrivateActionInfo[idUser.(uuid.UUID)].Date) {
-							usersPrivateActionInfo[idUser.(uuid.UUID)] = userPrivateActionInfo{
+					if _, exists := usersPrivateActionInfo[idUser.(string)]; exists {
+						if action.Date.After(usersPrivateActionInfo[idUser.(string)].Date) {
+							usersPrivateActionInfo[idUser.(string)] = userPrivateActionInfo{
 								ActionId: action.IdAction,
 								Private:  privateBool,
 								Date:     action.Date,
 							}
 						}
 					} else {
-						usersPrivateActionInfo[idUser.(uuid.UUID)] = userPrivateActionInfo{
+						usersPrivateActionInfo[idUser.(string)] = userPrivateActionInfo{
 							ActionId: action.IdAction,
 							Private:  privateBool,
 							Date:     action.Date,
@@ -259,16 +263,16 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 						log.Fatalf("Erreur : profil_image n'est pas une chaîne valide")
 					}
 
-					if _, exists := usersProfilImageActionInfo[idUser.(uuid.UUID)]; exists {
-						if action.Date.After(usersProfilImageActionInfo[idUser.(uuid.UUID)].Date) {
-							usersProfilImageActionInfo[idUser.(uuid.UUID)] = userProfilImageActionInfo{
+					if _, exists := usersProfilImageActionInfo[idUser.(string)]; exists {
+						if action.Date.After(usersProfilImageActionInfo[idUser.(string)].Date) {
+							usersProfilImageActionInfo[idUser.(string)] = userProfilImageActionInfo{
 								ActionId:    action.IdAction,
 								ProfilImage: profilImageStr,
 								Date:        action.Date,
 							}
 						}
 					} else {
-						usersProfilImageActionInfo[idUser.(uuid.UUID)] = userProfilImageActionInfo{
+						usersProfilImageActionInfo[idUser.(string)] = userProfilImageActionInfo{
 							ActionId:    action.IdAction,
 							ProfilImage: profilImageStr,
 							Date:        action.Date,
@@ -283,16 +287,16 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 						log.Fatalf("Erreur : banner_image n'est pas une chaîne valide")
 					}
 
-					if _, exists := usersBannerImageActionInfo[idUser.(uuid.UUID)]; exists {
-						if action.Date.After(usersBannerImageActionInfo[idUser.(uuid.UUID)].Date) {
-							usersBannerImageActionInfo[idUser.(uuid.UUID)] = userBannerImageActionInfo{
+					if _, exists := usersBannerImageActionInfo[idUser.(string)]; exists {
+						if action.Date.After(usersBannerImageActionInfo[idUser.(string)].Date) {
+							usersBannerImageActionInfo[idUser.(string)] = userBannerImageActionInfo{
 								ActionId:    action.IdAction,
 								BannerImage: bannerImageStr,
 								Date:        action.Date,
 							}
 						}
 					} else {
-						usersBannerImageActionInfo[idUser.(uuid.UUID)] = userBannerImageActionInfo{
+						usersBannerImageActionInfo[idUser.(string)] = userBannerImageActionInfo{
 							ActionId:    action.IdAction,
 							BannerImage: bannerImageStr,
 							Date:        action.Date,
@@ -307,16 +311,16 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 						log.Fatalf("Erreur : birthday n'est pas une chaîne valide")
 					}
 
-					if _, exists := usersBirthdayActionInfo[idUser.(uuid.UUID)]; exists {
-						if action.Date.After(usersBirthdayActionInfo[idUser.(uuid.UUID)].Date) {
-							usersBirthdayActionInfo[idUser.(uuid.UUID)] = userBirthdayActionInfo{
+					if _, exists := usersBirthdayActionInfo[idUser.(string)]; exists {
+						if action.Date.After(usersBirthdayActionInfo[idUser.(string)].Date) {
+							usersBirthdayActionInfo[idUser.(string)] = userBirthdayActionInfo{
 								ActionId: action.IdAction,
 								Birthday: birthdayStr,
 								Date:     action.Date,
 							}
 						}
 					} else {
-						usersBirthdayActionInfo[idUser.(uuid.UUID)] = userBirthdayActionInfo{
+						usersBirthdayActionInfo[idUser.(string)] = userBirthdayActionInfo{
 							ActionId: action.IdAction,
 							Birthday: birthdayStr,
 							Date:     action.Date,
@@ -335,6 +339,7 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 			clientActions = append(clientActions, actionToAdd)
 		}
 	}
+	fmt.Println("clientActions666", clientActions)
 
 	for _, action := range usersDescriptionActionInfo {
 		actionToAdd := updateUserActions[action.ActionId]
@@ -344,6 +349,7 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 			clientActions = append(clientActions, actionToAdd)
 		}
 	}
+	fmt.Println("clientActions777", clientActions)
 
 	for _, action := range usersPrivateActionInfo {
 		actionToAdd := updateUserActions[action.ActionId]
@@ -353,6 +359,8 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 			clientActions = append(clientActions, actionToAdd)
 		}
 	}
+
+	fmt.Println("clientActions888", clientActions)
 
 	for _, action := range usersProfilImageActionInfo {
 		actionToAdd := updateUserActions[action.ActionId]
@@ -380,6 +388,8 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 			clientActions = append(clientActions, actionToAdd)
 		}
 	}
+
+	fmt.Println("clientActions999", clientActions)
 
 	return serverActions, clientActions, nil
 }
