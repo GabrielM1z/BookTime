@@ -39,6 +39,7 @@ export const BottomSheetModal = ({
             onChange={handleSheetChanges}
             backdropComponent={renderBackdrop}
             detached={true}
+            backgroundStyle={{ backgroundColor: colors.surface }}
             {...bottomSheetProps}
         >
             {children}
