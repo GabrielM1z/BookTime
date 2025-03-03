@@ -39,10 +39,7 @@ func (bs *SearchService) SearchBookByISBN(isbn string) (*model.Book, error) {
 	baseURL := "https://www.googleapis.com/books/v1/volumes"
 	params := url.Values{}
 
-	maxResults := "1"
-
-	params.Add("q", "isbn:"+isbn)
-	params.Add("maxResults", maxResults)
+	params.Add("q", isbn)
 	params.Add("key", bs.ApiKey)
 
 	apiURL := fmt.Sprintf("%s?%s", baseURL, params.Encode())

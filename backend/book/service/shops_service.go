@@ -25,7 +25,7 @@ func NewShopsService(apiKey string) *ShopsService {
 func (ss *ShopsService) fetchGoogleBook(isbn string) (model.BookInfo, error) {
 	baseURL := "https://www.googleapis.com/books/v1/volumes"
 	params := url.Values{}
-	params.Add("q", "isbn:"+isbn)
+	params.Add("q", isbn)
 	params.Add("key", ss.ApiKey)
 	apiURL := fmt.Sprintf("%s?%s", baseURL, params.Encode())
 

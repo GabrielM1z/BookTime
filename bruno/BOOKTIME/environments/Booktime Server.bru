@@ -4,11 +4,11 @@ vars {
   username: test@booktime.fr
   base_keycloak_url: {{base_url}}:8080/realms/booktime
   base_user_url: {{base_url}}:8082/users
-  base_url: http://84.235.239.52
   admin_client_secret: {{process.env.KEYCLOAK_ADMIN_CLIENT_SECRET_SERVER}}
 }
 vars:secret [
   refresh_token,
+  base_url,
   access_token,
   password,
   admin_token
