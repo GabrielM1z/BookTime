@@ -1,21 +1,22 @@
-import { Author } from '@/models/Author';
+import { Author, CreateAuthorDto, UpdateAuthorDto } from '@/models/Author';
 import { SQLiteDatabase, SQLiteRunResult } from 'expo-sqlite';
-import { v4 as uuidv4 } from 'uuid';
-import { SynchronisationController } from '@/controllers/SynchronisationController';
+import { SynchronisationProxy } from "@/controllers/SynchronisationProxy";
+import { CrudRepository } from '@/types/repositories';
 
-
-export interface AuthorRepository {
+export interface AuthorRepository extends CrudRepository<Author> {
     getAll: () => Promise<Author[]>
-    get: (id: string) => Promise<Author | null>;
-    add: (author: Author) => Promise<void>;
+    get: (id: string) => Promise<Author>;
+    create: (author: CreateAuthorDto) => Promise<void>;
+    update: (id: string, author: UpdateAuthorDto) => Promise<void>;
+    delete: (id: string) => Promise<void>;
 }
 
 export class LocalAuthorRepository implements AuthorRepository {
     private db: SQLiteDatabase;
     private id_user: string;
-    private sync: SynchronisationController;
+    private sync: SynchronisationProxy;
 
-    constructor(db: SQLiteDatabase, id_user: string, sync: SynchronisationController) {
+    constructor(db: SQLiteDatabase, id_user: string, sync: SynchronisationProxy) {
         this.db = db;
         this.id_user = id_user;
         this.sync = sync;
@@ -23,70 +24,90 @@ export class LocalAuthorRepository implements AuthorRepository {
 
     async getAll(): Promise<Author[]> {
         let allRows = await this.db.getAllAsync<Author>(
-            'SELECT * FROM author'
+            `SELECT * FROM author;`
         );
         return allRows;
     }
 
-    async get(id: string): Promise<Author | null> {
-        const statement = await this.db.prepareAsync(
-            'SELECT * FROM author WHERE id_author == $id'
+    async get(id: string): Promise<Author> {
+        const result = await this.db.getFirstAsync<Author>(
+            'SELECT * FROM author WHERE id_author = $id_author',
+            { $id_author: id }
         );
 
-        const result = await statement.executeAsync({
-            $id: id
-        });
-
-        return result ? (result as unknown as Author) : null;
+        return result!;
     }
 
-    async createAll(listNewAuthors: Author[]): Promise<void> {
-        
+    async create(author: CreateAuthorDto): Promise<void> {
+        await this.db.runAsync(
+            `INSERT INTO author (id_author, name, description) 
+            VALUES ($id_author, $name, $description);`,
+            {
+                $id_author: author.id_author,
+                $name: author.name,
+                $description: author.description
+            }
+        );
+    }
+
+    async createAll(listNewAuthors: CreateAuthorDto[]): Promise<void> {
         const insertAuthor = await this.db.prepareAsync(
-            'INSERT OR IGNORE INTO author (id_author, name, description) VALUES ($id_author, $name, $description);'
+            `INSERT OR IGNORE INTO author (id_author, name, description)
+            VALUES ($id_author, $name, $description);`
         );
 
         try {
-
             for (const author of listNewAuthors) {
                 await insertAuthor.executeAsync({
                     $id_author: author.id_author,
                     $name: author.name,
                     $description: author.description,
                 });
-
             }
 
-        }finally {
+        } finally {
             await insertAuthor.finalizeAsync();
         }
-        
     }
 
-    async add(author: Author): Promise<void> {
-        const statement = await this.db.prepareAsync(
-            'INSERT INTO author (id_author, first_name, last_name, description) VALUES ($id_author, $first_name, $last_name, $description);'
+    async update(id: string, author: UpdateAuthorDto): Promise<void> {
+        await this.db.runAsync(
+            `UPDATE author SET name = $name, description = $description
+            WHERE id_author = $id_author;`,
+            {
+                $id_author: id,
+                $name: author.name,
+                $description: author.description
+            }
         );
+    }
 
-        await statement.executeAsync({
-            $id_author: uuidv4(),
-            $name: author.name,
-            $description: author.description
-        });
+    async delete(id: string): Promise<void> {
+        await this.db.runAsync(
+            `DELETE FROM author WHERE id_author = $id_author;`,
+            { $id_author: id }
+        );
     }
 }
 
-
 export class RemoteAuthorRepository implements AuthorRepository {
+    async get(id: string): Promise<Author> {
+        throw new Error("Method not implemented.");
+    }
+
     async getAll(): Promise<Author[]> {
         return [];
     }
 
-    async get(id: string): Promise<Author | null> {
-        return null;
+    async create(author: CreateAuthorDto): Promise<void> {
+        throw new Error("Method not implemented.");
     }
 
-    async add(author: Author): Promise<void> {
-        return;
+    async update(id: string, author: UpdateAuthorDto): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
+
+    async delete(id: string): Promise<void> {
+        throw new Error("Method not implemented.");
     }
 }

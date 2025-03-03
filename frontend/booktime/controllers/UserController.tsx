@@ -31,7 +31,7 @@ export class LocalUserController extends UserController implements UserControlle
 
     constructor(db: SQLiteDatabase) {
         super();
-        this.sync = new SynchronisationController("user", "user_action", db);
+        this.sync = new SynchronisationController("users", "user_action", db);
         this.user = new LocalUserRepository(db);
         this.remote = new RemoteUserController();
     }

@@ -1,26 +1,27 @@
-import { SynchronisationController } from "@/controllers/SynchronisationController";
-import { LibraryBook } from "@/models/LibraryBook";
+import { SynchronisationProxy } from "@/controllers/SynchronisationProxy";
+import { CreateLibraryBookDto, DeleteLibraryBookDto, LibraryBook } from "@/models/LibraryBook";
+import { CrudJunctionRepository } from "@/types/repositories";
 import { SQLiteDatabase } from 'expo-sqlite';
 
-export interface LibraryBookRepository {
-    create: (libraryBook: LibraryBook) => Promise<void>;
-    createAll: (libraryBooks: LibraryBook[]) => Promise<void>;
-    delete(libraryBook: LibraryBook): Promise<void>
-    deleteAll(libraryBooks: LibraryBook[]): Promise<void>
+export interface LibraryBookRepository extends CrudJunctionRepository<LibraryBook> {
+    create: (libraryBook: CreateLibraryBookDto) => Promise<void>;
+    createAll: (libraryBooks: CreateLibraryBookDto[]) => Promise<void>;
+    delete(libraryBook: DeleteLibraryBookDto): Promise<void>
+    deleteAll(libraryBooks: DeleteLibraryBookDto[]): Promise<void>
 }
 
 export class LocalLibraryBookRepository implements LibraryBookRepository {
     private db: SQLiteDatabase;
     private id_user: string;
-    private sync: SynchronisationController;
+    private sync: SynchronisationProxy;
 
-    constructor(db: SQLiteDatabase, id_user: string, sync: SynchronisationController) {
+    constructor(db: SQLiteDatabase, id_user: string, sync: SynchronisationProxy) {
         this.db = db;
         this.id_user = id_user;
         this.sync = sync;
     }
 
-    async create(newLibraryBook: LibraryBook): Promise<void> {
+    async create(newLibraryBook: CreateLibraryBookDto): Promise<void> {
         await this.db.runAsync(
             `INSERT OR IGNORE INTO library_book (id_library, id_book) 
             VALUES ($id_library, $id_book);`,
@@ -28,11 +29,10 @@ export class LocalLibraryBookRepository implements LibraryBookRepository {
                 $id_library: newLibraryBook.id_library,
                 $id_book: newLibraryBook.id_book,
             }
-        )
-
+        );
     }
 
-    async createAll(libraryBooks: LibraryBook[]): Promise<void> {
+    async createAll(libraryBooks: CreateLibraryBookDto[]): Promise<void> {
         const insertLibraryBook = await this.db.prepareAsync(
             `INSERT OR IGNORE INTO library_book (id_library, id_book) 
             VALUES ($id_library, $id_book);`,
@@ -49,7 +49,7 @@ export class LocalLibraryBookRepository implements LibraryBookRepository {
         }
     }
 
-    async delete(libraryBook: LibraryBook): Promise<void> {
+    async delete(libraryBook: DeleteLibraryBookDto): Promise<void> {
         await this.db.runAsync(
             `DELETE FROM library_book 
             WHERE id_library == $id_library 
@@ -58,10 +58,10 @@ export class LocalLibraryBookRepository implements LibraryBookRepository {
                 $id_library: libraryBook.id_library,
                 $id_book: libraryBook.id_book,
             }
-        )
+        );
     }
 
-    async deleteAll(libraryBooks: LibraryBook[]): Promise<void> {
+    async deleteAll(libraryBooks: DeleteLibraryBookDto[]): Promise<void> {
         const deleteLibraryBook = await this.db.prepareAsync(
             `DELETE FROM library_book 
             WHERE id_library == $id_library 
@@ -83,11 +83,19 @@ export class LocalLibraryBookRepository implements LibraryBookRepository {
 export class RemoteLibraryBookRepository implements LibraryBookRepository {
     constructor() { }
 
-    async create(newLibraryBook: LibraryBook): Promise<void> { }
+    async create(newLibraryBook: CreateLibraryBookDto): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
 
-    async createAll(listNewLibraryBook: LibraryBook[]): Promise<void> { }
+    async createAll(listNewLibraryBook: CreateLibraryBookDto[]): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
 
-    async delete(newLibraryBook: LibraryBook): Promise<void> { }
+    async delete(newLibraryBook: DeleteLibraryBookDto): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
 
-    async deleteAll(listNewLibraryBook: LibraryBook[]): Promise<void> { }
+    async deleteAll(listNewLibraryBook: DeleteLibraryBookDto[]): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
 }

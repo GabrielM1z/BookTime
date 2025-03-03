@@ -1,29 +1,26 @@
-import { SQLiteDatabase, SQLiteRunResult } from 'expo-sqlite';
-import { useSQLite } from "@/hooks/useSQLite";
-import { Book, BookInfosServeur, BookMinInfos } from '@/models/Book';
+import { SQLiteDatabase } from 'expo-sqlite';
+import { Book, BookInfosServeur, BookMinInfos, CreateBookDto, UpdateBookDto } from '@/models/Book';
 import { syncAfterMethod, syncBeforeMethod } from '@/decorators/synchronisation';
 import { formatColumns } from '@/helpers';
 import { api } from "@/services/axios"
-import { linkToBase64 } from '@/helpers/image';
-import { SynchronisationController } from '@/controllers/SynchronisationController';
+import { SynchronisationProxy } from '@/controllers/SynchronisationProxy';
+import { CrudRepository } from '@/types/repositories';
 
-export interface BookRepository {
+export interface BookRepository extends CrudRepository<Book> {
     get: (id: string, columns?: (keyof Book)[]) => Promise<Book>;
     getAll: (columns?: (keyof Book)[]) => Promise<Book[]>;
     getAllFromLibrary: (id_lib: string) => Promise<Book[]>
-    add: (state: Book) => Promise<void>;
-    // addToLibrary: (id_library: string, book: Book) => Promise<void>
+    create: (book: CreateBookDto) => Promise<void>;
+    update: (id: string, book: UpdateBookDto) => Promise<void>;
     delete: (id: string) => Promise<void>;
-    // deleteFromLibrary: (id_library: string, id_book: string) => Promise<void>
-    // updateBookLibrary: (id_library: string, id_book: string) => Promise<void>
 }
 
 export class LocalBookRepository implements BookRepository {
     private db: SQLiteDatabase;
     private id_user: string;
-    private sync: SynchronisationController;
+    private sync: SynchronisationProxy;
 
-    constructor(db: SQLiteDatabase, id_user: string, sync: SynchronisationController) {
+    constructor(db: SQLiteDatabase, id_user: string, sync: SynchronisationProxy) {
         this.db = db;
         this.id_user = id_user;
         this.sync = sync;
@@ -46,9 +43,7 @@ export class LocalBookRepository implements BookRepository {
         return result!;
     }
 
-    async getAll(columns: (keyof Book)[] = []): Promise<Book[]> {
-        console.log("id user :", this.id_user);
-        
+    async getAll(columns: (keyof Book)[] = []): Promise<Book[]> {        
         try {
             const args = formatColumns(columns, ['book.id_book']);
             let allRows = await this.db.getAllAsync<Book>(
@@ -65,23 +60,6 @@ export class LocalBookRepository implements BookRepository {
             console.log("getAll", error)
             return []
         }
-    }
-
-    async create(book: BookInfosServeur): Promise<void> {
-        await this.db.runAsync(
-            `INSERT OR IGNORE INTO book (id_book, title, description, publisher, publication_date, page_number, language, cover_image_url) 
-            VALUES ($id_book, $title, $description, $publisher, $publication_date, $page_number, $language, $cover_image_url);`,
-            {
-                $id_book: book.id_book,
-                $title: book.title,
-                $description: book.description,
-                $publisher: book.publisher,
-                $publication_date: book.publication_date,
-                $page_number: book.page_number,
-                $language: book.language,
-                $cover_image_url: book.cover_image_url,
-            }
-        )
     }
 
     async getAllMin(): Promise<BookMinInfos[]> {
@@ -103,11 +81,9 @@ export class LocalBookRepository implements BookRepository {
         return allRows;
     }
 
-    // @ts-ignore
-    @syncAfterMethod()
-    async add(book: Book): Promise<void> {
+    async create(book: CreateBookDto): Promise<void> {
         await this.db.runAsync(
-            `INSERT INTO book (id_book, title, description, publisher, publication_date, page_number, language, cover_image_url)
+            `INSERT OR IGNORE INTO book (id_book, title, description, publisher, publication_date, page_number, language, cover_image_url) 
             VALUES ($id_book, $title, $description, $publisher, $publication_date, $page_number, $language, $cover_image_url);`,
             {
                 $id_book: book.id_book,
@@ -122,53 +98,19 @@ export class LocalBookRepository implements BookRepository {
         );
     }
 
-    // /**
-    //  * Ajoute un livre à une librairie sans le creer
-    //  * 
-    //  * @param id_library 
-    //  * @param id_book 
-    //  */
-    // async updateBookLibrary(id_library: string, id_book: string): Promise<void> {
-    //     try {
-    //         const insertLibraryBookStmt = await this.db.prepareAsync(
-    //             ' INSERT OR IGNORE INTO library_book (id_library, id_book) VALUES ($id_library, $id_book);'
-    //         );
-
-    //         let resultInsertLibraryBook = await insertLibraryBookStmt.executeAsync({
-    //             $id_library: id_library,
-    //             $id_book: id_book,
-    //         });
-
-    //         console.log("updateBookLibrary: success")
-
-    //     } catch (error) {
-    //         console.log("Failed addBookToLibrary :", error)
-
-    //     }
-    // }
+    async update(id: string, book: UpdateBookDto): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
 
     async delete(id: string): Promise<void> {
         await this.db.runAsync(
             `DELETE FROM library_book WHERE id_book == $id;`,
-            {
-                $id: id,
-            }
+            { $id: id }
         );
     }
-
-    // async deleteFromLibrary(id_library: string, id_book: string): Promise<void> {
-    //     await this.db.runAsync(
-    //         `DELETE FROM library_book WHERE id_library == $id_library AND id_book == $id_book;`,
-    //         {
-    //             $id_library: id_library,
-    //             $id_book: id_book,
-    //         }
-    //     )
-    // }
 }
 
 export class RemoteBookRepository implements BookRepository {
-
     async get(id: string, columns: (keyof Book)[] = []): Promise<BookInfosServeur> {
         let bookData = await api.get(`/books/books/${id}`)
 
@@ -194,34 +136,26 @@ export class RemoteBookRepository implements BookRepository {
     }
 
     async getAll(columns: (keyof Book)[] = []): Promise<Book[]> {
-        return [];
+        throw new Error("Method not implemented.");
     }
 
     async getAllFromLibrary(): Promise<Book[]> {
-        return [];
+        throw new Error("Method not implemented.");
     }
 
     async getAllMin(): Promise<BookMinInfos[]> {
-        return [];
+        throw new Error("Method not implemented.");
     }
 
-    async add(book: Book): Promise<void> {
-        return;
+    async create(book: CreateBookDto): Promise<void> {
+        throw new Error("Method not implemented.");
     }
 
-    // async addToLibrary(id_library: string, book: Book): Promise<void> {
-    //     return;
-    // }
-
-    async updateBookLibrary(id_library: string, id_book: string): Promise<void> {
-        return;
+    async update(id: string, book: UpdateBookDto): Promise<void> {
+        throw new Error("Method not implemented.");
     }
 
     async delete(id: string): Promise<void> {
-        return;
-    }
-
-    async deleteFromLibrary(id_library: string, id_book: string): Promise<void> {
-        return;
+        throw new Error("Method not implemented.");
     }
 }

@@ -1,5 +1,5 @@
 import { useAuthContext } from "@/contexts/AuthContext";
-import { BookProvider } from "@/contexts/BookContext";
+import { BookProvider, useBookContext } from "@/contexts/BookContext";
 import { Session } from "@/models";
 import commonStyles from "@/styles/commonStyles";
 import { Redirect, Stack } from "expo-router";

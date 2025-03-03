@@ -31,13 +31,15 @@ export const SearchItem = ({ idBook, title, authors, uri }: SearchItemProps) => 
             scale.value = withSpring(1);
         });
 
+        await bookController.addBook(idBook); // FIXME: this take a lot of time try to async it
+
         let liked;
         if (!checked) {
             liked = await bookController.library.getFirst(); // TODO: replace by getLikedLibrary and move to useManageLibrarySnackbar ?
         }
 
         if (liked) {
-            await bookController.addBook(idBook, liked.id_library); // FIXME: this take a lot of time try to async it
+            await bookController.libraryBook.create({ id_book: idBook, id_library: liked.id_library });
             ManageLibrarySnackbar.show(liked!.name, idBook);
             refresh();
         } else {
