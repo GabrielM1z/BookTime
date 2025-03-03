@@ -1,7 +1,6 @@
+import { SynchronisationController } from "@/controllers/SynchronisationController";
 import { Genre } from "@/models/Genre";
 import { SQLiteDatabase } from 'expo-sqlite';
-import { useSQLite } from "@/hooks/useSQLite";
-import { Synchronisable } from './synchronisable';
 import uuid from 'react-native-uuid';
 
 
@@ -12,14 +11,15 @@ export interface GenreRepository {
     add: (genre: Genre) => Promise<void>;
 }
 
-export class SQLiteGenreRepository extends Synchronisable implements GenreRepository {
+export class LocalGenreRepository implements GenreRepository {
     private db: SQLiteDatabase;
-    private api: APIGenreRepository;
+    private id_user: string;
+    private sync: SynchronisationController;
 
-    constructor() {
-        super();
-        this.db = useSQLite().db;
-        this.api = new APIGenreRepository();
+    constructor(db: SQLiteDatabase, id_user: string, sync: SynchronisationController) {
+        this.db = db;
+        this.id_user = id_user;
+        this.sync = sync;
     }
 
     async getAll(): Promise<Genre[]> {
@@ -54,7 +54,7 @@ export class SQLiteGenreRepository extends Synchronisable implements GenreReposi
 }
 
 
-export class APIGenreRepository implements GenreRepository {
+export class RemoteGenreRepository implements GenreRepository {
     async getAll(): Promise<Genre[]> {
         return [];
     }

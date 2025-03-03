@@ -1,8 +1,7 @@
 import { Author } from '@/models/Author';
-import { SQLiteDatabase } from 'expo-sqlite';
-import { useSQLite } from "@/hooks/useSQLite";
-import { Synchronisable } from './synchronisable';
+import { SQLiteDatabase, SQLiteRunResult } from 'expo-sqlite';
 import { v4 as uuidv4 } from 'uuid';
+import { SynchronisationController } from '@/controllers/SynchronisationController';
 
 
 export interface AuthorRepository {
@@ -11,12 +10,15 @@ export interface AuthorRepository {
     add: (author: Author) => Promise<void>;
 }
 
-export class SQLiteAuthorRepository extends Synchronisable implements AuthorRepository {
+export class LocalAuthorRepository implements AuthorRepository {
     private db: SQLiteDatabase;
+    private id_user: string;
+    private sync: SynchronisationController;
 
-    constructor() {
-        super();
-        this.db = useSQLite().db;
+    constructor(db: SQLiteDatabase, id_user: string, sync: SynchronisationController) {
+        this.db = db;
+        this.id_user = id_user;
+        this.sync = sync;
     }
 
     async getAll(): Promise<Author[]> {
@@ -38,6 +40,29 @@ export class SQLiteAuthorRepository extends Synchronisable implements AuthorRepo
         return result ? (result as unknown as Author) : null;
     }
 
+    async createAll(listNewAuthors: Author[]): Promise<void> {
+        
+        const insertAuthor = await this.db.prepareAsync(
+            'INSERT OR IGNORE INTO author (id_author, name, description) VALUES ($id_author, $name, $description);'
+        );
+
+        try {
+
+            for (const author of listNewAuthors) {
+                await insertAuthor.executeAsync({
+                    $id_author: author.id_author,
+                    $name: author.name,
+                    $description: author.description,
+                });
+
+            }
+
+        }finally {
+            await insertAuthor.finalizeAsync();
+        }
+        
+    }
+
     async add(author: Author): Promise<void> {
         const statement = await this.db.prepareAsync(
             'INSERT INTO author (id_author, first_name, last_name, description) VALUES ($id_author, $first_name, $last_name, $description);'
@@ -45,15 +70,14 @@ export class SQLiteAuthorRepository extends Synchronisable implements AuthorRepo
 
         await statement.executeAsync({
             $id_author: uuidv4(),
-            $first_name: author.first_name,
-            $last_name: author.last_name,
+            $name: author.name,
             $description: author.description
         });
     }
 }
 
 
-export class APIAuthorRepository implements AuthorRepository {
+export class RemoteAuthorRepository implements AuthorRepository {
     async getAll(): Promise<Author[]> {
         return [];
     }

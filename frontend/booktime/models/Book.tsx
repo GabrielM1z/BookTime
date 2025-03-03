@@ -19,7 +19,7 @@ export interface BookInfos {
 	genres?: string[];   
 }
 
-export interface BookInfosSearch {
+export interface BookSearchResult {
 	id : string;
 	title: string
 	isbn13: string;    
@@ -27,14 +27,8 @@ export interface BookInfosSearch {
 	authors?: string[];  
 }
 
-export interface Book{
-    id : string;
-    etag : string;
-    volumeInfo : BookInfos
-}
-
 //book model BDD
-export interface BookAllInfos {
+export interface Book {
 	id_book : string;
 	title : string;
 	description : string;
@@ -60,6 +54,12 @@ export interface BookInfosServeur {
 	page_number : number;
 	language : string;
 	cover_image_url : string;
-	authors : string[];
+	authors : Author[];
 	genres : string[];
+}
+
+export interface Author {
+	id_author: string,
+	name: string,
+	description: string
 }

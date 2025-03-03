@@ -1,35 +1,27 @@
-import api from '@/services/axios';
+import { api } from '@/services/axios';
 import { User, UpdateUserDto } from '@/models/User';
 import { SQLiteDatabase } from 'expo-sqlite';
-import { Synchronisable } from './synchronisable';
-import { useSQLite } from '@/hooks/useSQLite';
 
 export interface UserRepository {
     get(id: string): Promise<User | null>;
     getAll(): Promise<User[]>;
     add(user: User): Promise<void>;
     update(user: User): Promise<void>;
-    delete(user: User): Promise<void>;
+    delete(id_or_user: string | User): Promise<void>;
 }
 
-export class SQLiteUserRepository extends Synchronisable implements UserRepository {
+export class LocalUserRepository implements UserRepository {
     private db: SQLiteDatabase;
 
-    constructor() {
-        super();
-        this.db = useSQLite().db;
+    constructor(db: SQLiteDatabase) {
+        this.db = db;
     }
 
     async get(id: string): Promise<User | null> {
-        const statement = await this.db.prepareAsync(`
-            SELECT * FROM user WHERE id_user = $id_user;
-        `);
-
-        let result = await statement.executeAsync<User>({
-            $id_user: id
-        });
-
-        return result.getFirstAsync();
+        return this.db.getFirstAsync<User>(
+            `SELECT * FROM user WHERE id_user = $id_user;`,
+            { $id_user: id }
+        );
     }
 
     async getAll(): Promise<User[]> {
@@ -105,11 +97,11 @@ export class SQLiteUserRepository extends Synchronisable implements UserReposito
 }
 
 
-export class APIUserRepository implements UserRepository {
+export class RemoteUserRepository implements UserRepository {
     async getFromToken(): Promise<User> {
         const response = await api.get('/users/userfromtoken');
         // FIXME: weird response structure
-        return response["data"]["data"]["user"];
+        return response["data"]["data"];
     }
 
     async get(id: string): Promise<User | null> {

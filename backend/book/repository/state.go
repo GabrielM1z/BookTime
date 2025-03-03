@@ -94,6 +94,7 @@ func (sr StateRepository) SelectStateByUserAndBook(idUser uuid.UUID, idBook stri
 func (sr *StateRepository) UpdateState(idUser uuid.UUID, idBook string, state model.State) bool {
 	baseState, err := sr.SelectStateByUserAndBook(idUser, idBook)
 	if err != nil {
+		log.Println(err)
 		return false
 	}
 

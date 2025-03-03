@@ -15,7 +15,7 @@ import { Alert } from 'react-native';
 
 export type Api = AxiosInstance;
 
-const api = axios.create({
+export const api = axios.create({
     baseURL: apiBaseUrl,
     timeout: 5000,
     headers: {
@@ -31,10 +31,6 @@ export const keycloak = axios.create({
     },
 })
 
-
-export default api;
-
-
 export const checkServerAliveOrWarning = async () => {
     await axios.head(baseURL).catch(() => {
         Alert.alert(
@@ -45,18 +41,17 @@ export const checkServerAliveOrWarning = async () => {
     })
 }
 
-
-export const authenticate = async (username: string, password: string): Promise<AuthResponseProps> => {
+export const authenticate = async (email: string, password: string): Promise<AuthResponseProps> => {
     const response = await keycloak.post(
         keycloakRealmUrl + "/protocol/openid-connect/token",
         new URLSearchParams({
             grant_type: 'password',
             client_id: keycloakClientId,
             client_secret: keycloakClientSecret,
-            username: username,
+            username: email,
             password: password,
             audience: 'gateway-client',
-            scope: 'openid profile email'
+            // scope: 'openid profile email'
         }).toString(),
     );
 
@@ -66,7 +61,6 @@ export const authenticate = async (username: string, password: string): Promise<
 
     return response.data;
 }
-
 
 export const refresh = async (refreshToken: string): Promise<AuthResponseProps> => {
     const response = await keycloak.post(
@@ -88,7 +82,6 @@ export const refresh = async (refreshToken: string): Promise<AuthResponseProps> 
     return response.data;
 }
 
-
 export const logout = async (refreshToken: string): Promise<void> => {
     await keycloak.post(
         keycloakRealmUrl + "/protocol/openid-connect/logout",
@@ -99,7 +92,6 @@ export const logout = async (refreshToken: string): Promise<void> => {
         }).toString(),
     );
 }
-
 
 export const register = async (email: string, password: string, firstName: string, lastName: string): Promise<void> => {
     const response = await keycloak.post(

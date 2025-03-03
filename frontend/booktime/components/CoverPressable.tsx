@@ -2,6 +2,7 @@ import { StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { Link } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { linkToBase64 } from '@/helpers/image';
+import FastImage from "react-native-fast-image";
 
 // component représentant la COUVERTURE du livre qui est CLIQUABLE
 interface CoverPressableProps {
@@ -13,22 +14,26 @@ interface CoverPressableProps {
 const defaultCover = require('@/assets/images/logo_refait.png');
 
 
-export default function CoverPressable({ id_book, cover, mode = "search" }: CoverPressableProps) {
+export default function CoverPressable({ id_book, cover , mode = "search" }: CoverPressableProps) {
 	// TODO: Faire une diff entre les livre venant de la recherche et les livres de l'étagère
 	// car les livres de la recherches ne sont pas dans la BDD
 
-	const [coverBase64, setCoverBase64] = useState("");
+	const [coverUsed, setCoverUsed] = useState("");
 	const [imageWidth, setImageWidth] = useState(150)
 
-	useEffect(() => {
-		linkToBase64(cover).then((data) => {
-			setCoverBase64(data)
-			
-			Image.getSize(data, (width, height) => {
-			  const aspectRatio = width / height; // Calcul du ratio largeur/hauteur
-			  setImageWidth(150 * aspectRatio); // Largeur ajustée pour 150px de hauteur
-			});
-		})
+	useEffect(() => {		
+		if(mode = "search"){
+			linkToBase64(cover).then((data) => {
+				setCoverUsed(data)
+				
+				Image.getSize(data, (width, height) => {
+				  const aspectRatio = width / height; // Calcul du ratio largeur/hauteur
+				  setImageWidth(150 * aspectRatio); // Largeur ajustée pour 150px de hauteur
+				});
+			})
+		}else{
+			setCoverUsed(cover)
+		}
 		
 
 	}, [cover]);
@@ -44,11 +49,13 @@ export default function CoverPressable({ id_book, cover, mode = "search" }: Cove
 			}
 		}} asChild>
 			<TouchableOpacity>
-				<Image source={coverBase64 == "" ? defaultCover : {uri: coverBase64}}  style={[styles.coverLivre, {width: imageWidth}]} resizeMode='contain' />
+				<Image source={coverUsed == "" ? defaultCover : {uri: coverUsed}}  style={[styles.coverLivre, {width: imageWidth}]} resizeMode='contain' />
+
 			</TouchableOpacity>
 		</Link>
 	);
 }
+
 
 
 const styles = StyleSheet.create({

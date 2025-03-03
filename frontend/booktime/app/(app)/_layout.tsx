@@ -1,11 +1,34 @@
 import { useAuthContext } from "@/contexts/AuthContext";
+import { BookProvider } from "@/contexts/BookContext";
+import { Session } from "@/models";
 import commonStyles from "@/styles/commonStyles";
 import { Redirect, Stack } from "expo-router";
 import React from 'react';
 import { ActivityIndicator, View } from "react-native";
 import 'react-native-reanimated';
+import { useUserContext } from "@/contexts/UserContext";
+import { BottomSheetModalScreenOptions } from "@/common";
 
-export default function AppLayout() {
+const AuthenticatedLayout = (session: Session) => {
+    const { userController } = useUserContext();
+    userController.addFromSession(session);
+
+    return (
+        <BookProvider id_user={session.id_user}>
+            <Stack screenOptions={{ headerShown: false, animation: 'fade' }}>
+                <Stack.Screen name="(tabs)" />
+                <Stack.Screen name="author/[idAuthor]" />
+                <Stack.Screen name="book/[idBook]" />
+                <Stack.Screen name="shelf/[idShelf]" />
+                <Stack.Screen name="settings" options={{ headerShown: true }} />
+                <Stack.Screen name="ProfileMenuModal" options={BottomSheetModalScreenOptions} />
+                <Stack.Screen name="AddLibraryModal" options={{ presentation: 'transparentModal' }} />
+            </Stack>
+        </BookProvider>
+    );
+}
+
+const AppLayout = () => {
     const { session, isLoading } = useAuthContext();
 
     if (isLoading) {
@@ -21,32 +44,8 @@ export default function AppLayout() {
     }
 
     return (
-        <Stack>
-
-            <Stack.Screen
-                name='(tabs)'
-                options={{ headerShown: false }}
-            />
-
-            <Stack.Screen
-                name='author/[idAuthor]'
-                options={{ headerShown: false }}
-            />
-
-            <Stack.Screen
-                name='book/[idBook]'
-                options={{ headerShown: false }}
-            />
-
-            <Stack.Screen
-                name='etagere/[idEtagere]'
-                options={{ headerShown: false }}
-            />
-
-            <Stack.Screen
-                name='settings'
-                options={{ headerShown: true }}
-            />
-        </Stack>
+        <AuthenticatedLayout {...session} />
     );
 }
+
+export default AppLayout;

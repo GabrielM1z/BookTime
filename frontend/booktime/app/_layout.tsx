@@ -1,40 +1,51 @@
-import { QueryProvider } from '@/components/QueryProvider';
+import { QueryProvider } from '@/providers/QueryProvider';
+import { AuthProvider } from '@/contexts/AuthContext';
 import { migrateDbIfNeeded } from '@/db/init';
-import { checkServerAliveOrWarning } from '@/services/axios';
 import { useAuthInterceptor } from '@/hooks/useAuthInterceptor';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { AuthProvider, useAuthContext } from '@/contexts/AuthContext';
-import { FadeTransitionProvider } from '@/contexts/FadeTransitionContext';
-import { ControllerProvider } from '@/providers/ControllerProvider';
-import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import { CustomBottomSheetProvider } from "@/common";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import {
+    DarkTheme as NavigationDarkTheme,
+    DefaultTheme as NavigationDefaultTheme, ThemeProvider
+} from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from "expo-router";
 import * as SplashScreen from 'expo-splash-screen';
-import { deleteDatabaseAsync } from 'expo-sqlite';
+import { SQLiteProvider, deleteDatabaseAsync } from 'expo-sqlite';
 import React, { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { PaperProvider, adaptNavigationTheme, useTheme } from 'react-native-paper';
 import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
-import { PaperProvider } from 'react-native-paper';
-
+import { StatusBar } from 'expo-status-bar';
+import { UserProvider } from '@/contexts/UserContext';
+import { BottomSheetModalScreenOptions } from '@/common';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
-function Routes() {
+const { LightTheme, DarkTheme } = adaptNavigationTheme({
+    reactNavigationLight: NavigationDefaultTheme,
+    reactNavigationDark: NavigationDarkTheme,
+});
+
+const Routes = () => {
     useAuthInterceptor();
+    const { colors } = useTheme();
 
     return (
-        <Stack>
-            <Stack.Screen name="(app)" options={{ headerShown: false }} />
-            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-            <Stack.Screen name="+not-found" />
-        </Stack>
+        <UserProvider>
+            <Stack screenOptions={{ headerShown: false, navigationBarColor: colors.surface }}>
+                <Stack.Screen name="(app)" />
+                <Stack.Screen name="(auth)" />
+                <Stack.Screen name="AccountCenterModal" options={BottomSheetModalScreenOptions} />
+                <Stack.Screen name="+not-found" />
+            </Stack>
+        </UserProvider>
     );
 }
 
-export default function RootLayout() {
+const RootLayout = () => {
     const [loaded] = useFonts({
         SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     });
@@ -42,12 +53,6 @@ export default function RootLayout() {
 
     // deleteDatabaseAsync('booktime.db');
     // AsyncStorage.clear();
-
-    useEffect(() => {
-        if (__DEV__) {
-            checkServerAliveOrWarning();
-        }
-    }, []);
 
     useEffect(() => {
         if (loaded) {
@@ -60,28 +65,30 @@ export default function RootLayout() {
     }
 
     const handleSQLiteError = (error: Error) => {
+        console.error('SQLite error:', error);
         throw error;
     }
 
     return (
-        <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-            <GestureHandlerRootView>
-                <BottomSheetModalProvider>
-                    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-                        <FadeTransitionProvider>
-                            <ControllerProvider databaseName='booktime.db' onInit={migrateDbIfNeeded} onError={handleSQLiteError}>
-                                <AuthProvider>
-                                    <QueryProvider>
-                                        <PaperProvider>
-                                            <Routes />
-                                        </PaperProvider>
-                                    </QueryProvider>
-                                </AuthProvider>
-                            </ControllerProvider>
-                        </FadeTransitionProvider>
-                    </ThemeProvider>
-                </BottomSheetModalProvider>
-            </GestureHandlerRootView>
-        </SafeAreaProvider>
+        <PaperProvider>
+            <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+                <StatusBar style="auto" />
+                <GestureHandlerRootView>
+                    <CustomBottomSheetProvider>
+                        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : LightTheme}>
+                            <QueryProvider>
+                                <SQLiteProvider databaseName='booktime.db' onInit={migrateDbIfNeeded} onError={handleSQLiteError}>
+                                    <AuthProvider>
+                                        <Routes />
+                                    </AuthProvider>
+                                </SQLiteProvider>
+                            </QueryProvider>
+                        </ThemeProvider>
+                    </CustomBottomSheetProvider>
+                </GestureHandlerRootView>
+            </SafeAreaProvider>
+        </PaperProvider>
     );
 }
+
+export default RootLayout;

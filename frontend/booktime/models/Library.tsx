@@ -1,4 +1,4 @@
-import { BookAllInfos, BookMinInfos } from "./Book";
+import { Book, BookMinInfos } from "./Book";
 import { Book2 } from "./Book2";
 
 export interface Library {
@@ -6,10 +6,12 @@ export interface Library {
 	name: string;
 }
 
+export interface CreateLibraryDto extends Omit<Library, "id_library"> { }
+
 export interface LibraryWithBooks {
 	id_library: string;
 	name: string;
-	books: BookAllInfos[]
+	books: Book[]
 }
 
 export interface LibraryWithBooksMin {
