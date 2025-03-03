@@ -1,11 +1,11 @@
 meta {
-  name: synchronisation
+  name: UserSynchronisation
   type: http
-  seq: 1
+  seq: 2
 }
 
 post {
-  url: {{base_book_url}}/synchro/:lastSyncDate
+  url: {{base_user_url}}/synchro/:lastSyncDate
   body: json
   auth: bearer
 }

@@ -124,3 +124,14 @@ CREATE TABLE IF NOT EXISTS user_booktime (
     birthdate DATE,
     PRIMARY KEY (id_user)
 );
+
+-- Table ACTION
+CREATE TABLE IF NOT EXISTS action (
+    id_action UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    id_user UUID,
+    table_name VARCHAR(50),
+    date TIMESTAMP,
+    type VARCHAR(50),
+    action JSON,
+    executed_by VARCHAR(6)
+);

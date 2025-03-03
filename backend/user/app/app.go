@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"user/controller"
+	"user/service"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
@@ -36,6 +37,11 @@ func (a *App) CreateRoutes() {
 	// }
 
 	prefix := "/users"
+
+	userSynchroService := service.NewSynchroService(a.DB)
+	// Synchro routes
+	synchroController := controller.NewSynchroController(userSynchroService)
+	routes.POST(prefix+"/synchro/:lastSyncDate", synchroController.Synchro)
 
 	// Users routes
 	userController := controller.NewUserController(a.DB)
