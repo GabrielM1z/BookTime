@@ -5,9 +5,13 @@ meta {
 }
 
 get {
-  url: {{base_book_url}}/states/book
+  url: {{base_book_url}}/states/book/:bookId
   body: none
   auth: bearer
+}
+
+params:path {
+  bookId: 9782355221347
 }
 
 auth:bearer {

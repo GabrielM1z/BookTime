@@ -1,11 +1,13 @@
 vars {
-  base_keycloak_url: http://84.235.239.52:8080/realms/booktime
+  base_keycloak_url: {{base_url}}:8080/realms/booktime
   client_secret: {{process.env.KEYCLOAK_CLIENT_SECRET_SERVER_ORACLE}}
-  base_url: http://84.235.239.52
-  access_token: undefined
-  refresh_token: undefined
   username: test@booktime.fr
-  password: test
   base_book_url: {{base_url}}:8082/books
   base_user_url: {{base_url}}:8082/users
 }
+vars:secret [
+  password,
+  base_url,
+  access_token,
+  refresh_token
+]
