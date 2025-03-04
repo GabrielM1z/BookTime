@@ -1,62 +1,37 @@
-import { RemoteActionRepository } from "@/repositories/ActionRepository"
+import { SynchronisationProxy } from "./SynchronisationProxy";
 import { SQLiteDatabase } from "expo-sqlite";
-import { Platform } from "react-native";
+import { CrudRepositoryWithoutGet } from "@/types/repositories";
 
-export interface SynchronisationControllerProps {
-    service: string;
-    action: RemoteActionRepository;
-    runSynchronisation: () => void;
+export interface SynchronisationControllerProps<T> {
+    sync: SynchronisationProxy
+    processActions: (data: T) => void;
+    getRepositoryByTableName: (tableName: string) => any;
+    getCudByActionName: (actionName: string) => any;
 }
 
-export class SynchronisationController {
-    action: RemoteActionRepository;
-    service: string;
+export abstract class SynchronisationController<T = any> implements SynchronisationControllerProps<T> {
+    protected abstract tableToRepositoryMap: { [key: string]: string };
+    abstract processActions(data: T): void;
+    sync: SynchronisationProxy;
+    [key: string]: any;
 
-    constructor(service: string, tableName: string, db: SQLiteDatabase) {
-        this.action = new RemoteActionRepository(tableName, db);
-        this.service = service;
+    actionToCudMap: { [key: string]: keyof CrudRepositoryWithoutGet<any> } = {
+        "INSERT": "create",
+        "UPDATE": "update",
+        "DELETE": "delete"
     }
 
-    async runSync() {
-        try {
-            if (Platform.OS === "web") return // TODO: Check if needed, normally the function should not be called on web
+    constructor(service: string, tableName: string, db: SQLiteDatabase) {
+        this.sync = new SynchronisationProxy(service, tableName, this, db);
+    }
 
-            console.log("Synchronisation en cours...");
+    getRepositoryByTableName(tableName: string): any {
+        const propertyName = this.tableToRepositoryMap[tableName];
+        return this[propertyName];
+    }
 
-            // const { synchronisationController } = 
-
-            // // TODO appel DB front : fetch action
-            const actionsFront = await this.action.getAll();
-
-            // const actionsWithBase64 = actionsFront.map((actionItem) => {
-            //     const actionBase64 = btoa(JSON.stringify(actionItem.action)); // Encodage en Base64
-            //     return {
-            //         ...actionItem, // Conserve les autres champs de l'élément
-            //         action: actionBase64, // Remplace "action" par sa version encodée
-            //     };
-            // });
-
-            // console.log("Actions encodées en Base64 :", actionsWithBase64);
-
-            // // TODO appel API : send action
-            const url = `/${this.service}/synchro`
-            // const param = actionsWithBase64
-            // const actionsBack = api.post(url, param)
-
-            // TODO récupération des actions du back
-
-
-            // TODO éxecution des actions dans l'ordre
-
-
-            // TODO recup des isbn des livres
-
-            // TODO comparaison des isbn server et client
-
-            // TODO faire un getBook si il manque des livres
-
-        } catch (error) {
-            console.error("Erreur lors de la synchronisation :", error);
-        }
+    getCudByActionName(actionName: string): any {
+        const propertyName = this.tableToRepositoryMap[actionName];
+        return this[propertyName];
     }
 }

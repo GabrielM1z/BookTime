@@ -19,7 +19,8 @@ export const api = axios.create({
     baseURL: apiBaseUrl,
     timeout: 5000,
     headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        // 'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'application/json',
     },
 })
 

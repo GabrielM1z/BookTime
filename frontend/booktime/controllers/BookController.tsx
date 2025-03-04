@@ -6,7 +6,8 @@ import { RemoteLibraryRepository, LibraryRepository, LocalLibraryRepository } fr
 import { RemoteStateRepository, LocalStateRepository, StateRepository } from "@/repositories/StateRepository";
 import { SQLiteDatabase } from "expo-sqlite";
 import { SynchronisationController } from "./SynchronisationController";
-import { Book, State, Author, Library } from "@/models";
+import { SynchronisationProxy } from "./SynchronisationProxy";
+import { Book, State, Author, Library, Action } from "@/models";
 import { BookInfosServeur } from "@/models/Book";
 import { LibraryBook } from "@/models/LibraryBook";
 import { LibraryBookRepository, LocalLibraryBookRepository, RemoteLibraryBookRepository } from "@/repositories/LibraryBookRepository";
@@ -15,6 +16,7 @@ import { AuthorBook } from "@/models/AuthorBook";
 import { SharedLibrary } from "@/models/SharedLibrary";
 import { LocalSharedLibraryRepository, RemoteSharedLibraryRepository, SharedLibraryRepository } from "@/repositories/SharedLibrariesRepository";
 import { CreateLibraryDto, LibraryWithBooksMin } from "@/models/Library";
+import { guestUserId } from "@/constants";
 
 export interface BookControllerProps {
     book: BookRepository;
@@ -25,17 +27,23 @@ export interface BookControllerProps {
     libraryBook: LibraryBookRepository;
     authorBook: AuthorBookRepository;
     sharedLibrary: SharedLibraryRepository;
-    addBook: (idBook: string, idLibrary: string) => Promise<void>
+    enter: () => Promise<void>
+    exit: () => void
+    addBook: (idBook: string) => Promise<void>
     createLibrary: (library: CreateLibraryDto) => Promise<void>
     getAllLibraryInfo: () => Promise<LibraryWithBooksMin[] | []>
 }
 
-export class LocalBookController implements BookControllerProps {
+interface SyncResponse {
+    require_books: string[],
+    actions_to_exec: Action[]
+}
+
+export class LocalBookController extends SynchronisationController<SyncResponse> implements BookControllerProps {
     protected db: SQLiteDatabase;
     protected id_user: string;
     protected remote: RemoteBookRepository;
 
-    sync: SynchronisationController;
     book: LocalBookRepository;
     library: LocalLibraryRepository;
     author: LocalAuthorRepository;
@@ -45,8 +53,19 @@ export class LocalBookController implements BookControllerProps {
     authorBook: LocalAuthorBookRepository;
     sharedLibrary: LocalSharedLibraryRepository;
 
+    protected tableToRepositoryMap: { [key: string]: keyof BookControllerProps } = {
+        "book": "book",
+        "library": "library",
+        "author": "author",
+        "genre": "genre",
+        "state": "state",
+        "library_book": "libraryBook",
+        "author_book": "authorBook",
+        "shared_library": "sharedLibrary"
+    };
+
     constructor(db: SQLiteDatabase, id_user: string) {
-        this.sync = new SynchronisationController("book", "book_action", db);
+        super("books", "book_action", db);
 
         this.db = db;
         this.id_user = id_user;
@@ -62,16 +81,39 @@ export class LocalBookController implements BookControllerProps {
         this.sharedLibrary = new LocalSharedLibraryRepository(db, id_user, this.sync);
     }
 
-    async addBook(idBook: string, idLibrary: string): Promise<void> {
+    async processActions({ require_books, actions_to_exec }: SyncResponse) {
+        console.log("Livres à récupérer :", require_books);
+        console.log("Actions à exécuter :", actions_to_exec);
+
+        for (const action of actions_to_exec) {
+            // action.action = JSON.parse(atob(action.action));
+            // console.log("Action à exécuter :", action);
+            const { table, type, action: data } = action; // FIXME: named table_name in back instead of table
+            const decodedData: object = JSON.parse(atob(data))
+            const repository = this.tableToRepositoryMap[table.toLowerCase()];
+            const func = this.actionToCudMap[type];
+
+            console.log("repository :", repository, ",func :", func, ",data :", decodedData);
+            
+        }
+    }
+
+    async enter() {
+        // console.log("BookController enter", this.id_user);
+        if (this.id_user !== guestUserId) {
+            await this.sync.runSync(); // Sync all data
+        }
+    }
+
+    async exit() {
+
+    }
+
+    async addBook(idBook: string): Promise<void> {
         const book = await this.remote.get(idBook);
 
         try {
             await this.db.withExclusiveTransactionAsync(async () => {
-                const libraryBook: LibraryBook = {
-                    id_book: book.id_book,
-                    id_library: idLibrary,
-                }
-
                 const state: State = {
                     id_book: book.id_book,
                     id_user: this.id_user,
@@ -89,7 +131,6 @@ export class LocalBookController implements BookControllerProps {
 
                 await this.book.create(book);
                 await this.state.create(state);
-                await this.libraryBook.create(libraryBook);
                 await this.author.createAll(book.authors);
                 await this.authorBook.createAll(authorBooks);
             });
@@ -104,8 +145,8 @@ export class LocalBookController implements BookControllerProps {
     async createLibrary(library: CreateLibraryDto): Promise<void> {
         try {
             await this.db.withExclusiveTransactionAsync(async () => {
-
-                const idLibrary = await this.library.create(library);
+                await this.library.create(library);
+                const idLibrary = await this.library.getLastInsertedId();
 
                 const sharedLibrary: SharedLibrary = {
                     id_user: this.id_user,
@@ -169,6 +210,9 @@ export class RemoteBookController implements BookControllerProps {
         this.authorBook = new RemoteAuthorBookRepository();
         this.sharedLibrary = new RemoteSharedLibraryRepository();
     }
+
+    async enter() { }
+    async exit() { }
 
     async addBook(idBook: string, idLibrary: string): Promise<void> { }
 

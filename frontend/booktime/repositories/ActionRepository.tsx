@@ -8,7 +8,7 @@ export interface ActionRepository {
     getTrigger: () => Promise<Trigger[]>;
 }
 
-export class RemoteActionRepository implements ActionRepository {
+export class LocalActionRepository implements ActionRepository {
     private tableName: string
     private db: SQLiteDatabase;
 

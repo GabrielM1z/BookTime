@@ -27,7 +27,7 @@ func (ar *ActionRepository) InsertAction(post model.PostAction, idUser uuid.UUID
 		return false
 	}
 	defer stmt.Close()
-	_, err2 := stmt.Exec(post.IdUser, post.Table, post.Date, post.Type, post.Action, post.ExecutedBy)
+	_, err2 := stmt.Exec(post.IdUser, post.TableName, post.Date, post.Type, post.Action, post.ExecutedBy)
 	if err2 != nil {
 		log.Println("Error while inserting action in db :", err2)
 		return false
@@ -46,7 +46,7 @@ func (ar *ActionRepository) SelectActions(idUser uuid.UUID) []model.Action {
 	actions := []model.Action{}
 	for rows.Next() {
 		var action model.Action
-		if err := rows.Scan(&action.IdAction, &action.IdUser, &action.Table, &action.Date, &action.Type, &action.Action, &action.ExecutedBy); err != nil {
+		if err := rows.Scan(&action.IdAction, &action.IdUser, &action.TableName, &action.Date, &action.Type, &action.Action, &action.ExecutedBy); err != nil {
 			log.Fatal(err)
 		}
 		actions = append(actions, action)
@@ -70,7 +70,7 @@ func (ar *ActionRepository) SelectActionsFromDate(idUser uuid.UUID, lastSyncDate
 	actions := []model.Action{}
 	for rows.Next() {
 		var action model.Action
-		if err := rows.Scan(&action.IdAction, &action.IdUser, &action.Table, &action.Date, &action.Type, &action.Action, &action.ExecutedBy); err != nil {
+		if err := rows.Scan(&action.IdAction, &action.IdUser, &action.TableName, &action.Date, &action.Type, &action.Action, &action.ExecutedBy); err != nil {
 			log.Fatal(err)
 		}
 		actions = append(actions, action)
@@ -105,7 +105,7 @@ func (ar *ActionRepository) UpdateAction(idUser uuid.UUID, idAction uuid.UUID, a
 	query := `UPDATE action SET action = $1, table_name = $2, progression = $3, read_count = $4, last_read_date = $5, is_available = $6
 			  WHERE id_user = $7 AND id_action = $8`
 
-	_, err := ar.DB.Exec(query, action.Table, action.Date, action.Type, action.Action, action.ExecutedBy, idUser, idAction)
+	_, err := ar.DB.Exec(query, action.TableName, action.Date, action.Type, action.Action, action.ExecutedBy, idUser, idAction)
 	if err != nil {
 		log.Println(err)
 		return false

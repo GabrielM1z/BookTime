@@ -20,6 +20,7 @@ const ManageLibraryModal = () => {
     const { data: libraries, refresh: refreshAll } = useRepository(() => bookController.library.getAll(), [], [idBook]);
     const { data: defaultLibraries } = useRepository(() => bookController.library.getAllFromBook(idBook), [], [idBook, libraries]);
     const { selectedItems, toggleSelection, isSelected, unselectedItems } = useSelectableList(libraries, defaultLibraries, 'id_library', true, [defaultLibraries]);
+    // FIXME: Got 'user_id' in library don't know why
 
     const librariesSorted = useMemo(() => {
         const selectedSet = new Set(selectedItems.map(item => item.id_library));
@@ -36,6 +37,7 @@ const ManageLibraryModal = () => {
     }, [librariesSorted, search]);
 
     const handleDone = useCallback(async () => {
+        console.log(unselectedItems(), selectedItems);
         await bookController.libraryBook.deleteAll(unselectedItems().map(
             (library: Library) => ({ id_book: idBook, id_library: library.id_library })
         ));

@@ -2,7 +2,7 @@ import { guestUserId } from '@/constants';
 import { useAuthContext } from '@/contexts/AuthContext';
 import commonStyles from '@/styles/commonStyles';
 import { AxiosError } from 'axios';
-import { Href, useRouter, useLocalSearchParams } from 'expo-router';
+import { Href, useRouter, useLocalSearchParams, Link } from 'expo-router';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Keyboard, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -90,11 +90,9 @@ export default function SignIn() {
                     <PressableText onPress={() => router.push('/SignUp' as Href)}>Sign Up</PressableText>
                     {
                         showLoggedUsers && (
-                            <PressableText
-                                onPress={() => accountCenterRef.current?.present()}
-                            >
-                                Logged users
-                            </PressableText>
+                            <Link href={"/AccountCenterModal"} asChild>
+                                <PressableText>Logged users</PressableText>
+                            </Link>
                         )
                     }
                 </View>
