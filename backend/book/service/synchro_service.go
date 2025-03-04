@@ -314,8 +314,20 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 	statesCommentActionInfo := make(map[string]stateCommentActionInfo)
 	statesStateActionInfo := make(map[string]stateStateActionInfo)
 
-	// Parcourir les actions dans l'ordre antihoraire
+	var actionList []model.Action
 	for _, action := range updateStateActions {
+		actionList = append(actionList, action)
+	}
+
+	sort.Slice(actionList, func(i, j int) bool {
+		return actionList[i].Date.After(actionList[j].Date)
+	})
+
+	// Parcourir les actions dans l'ordre chronologique inverse
+	log.Println("for _, action := range updateStateActions {")
+	for _, action := range actionList {
+		log.Println("action date", action.Date)
+		log.Println("action id", action.IdAction)
 		var stateActionData map[string]interface{}
 		err := json.Unmarshal(action.Action, &stateActionData)
 		if err != nil {
@@ -491,7 +503,11 @@ func (ss *SynchroService) Synchro(uuidUser uuid.UUID, client_actions []model.Act
 
 	mixed_actions := slices.Concat(server_actions, client_actions)
 
+	fmt.Println("mixed_actions executed : ", mixed_actions)
+
 	server_actions_to_exec, client_actions_to_exec, err := ss.whoDoWhichActions(mixed_actions)
+
+	fmt.Println("whoDoWhichActions executed server_actions_to_exec : ", server_actions_to_exec)
 
 	ss.executeActionsToSynchronizeServer(server_actions_to_exec)
 

@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -28,6 +29,8 @@ func (bc *synchroController) Synchro(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "problem with datas"})
 		return
 	}
+
+	fmt.Println("Synchro controler actions : ", actions)
 
 	actions_to_exec, err := bc.SynchroService.Synchro(uuidUser, actions, lastSyncDate)
 	if err != nil {
