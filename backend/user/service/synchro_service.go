@@ -436,15 +436,15 @@ func (ss *SynchroService) executeActionsToSynchronizeServer(clientActionsToExecu
 
 			switch action.Type {
 			case "INSERT":
-				if res := repository.NewUserRepository(ss.DB).InsertUser(user); !res {
+				if res := repository.NewUserRepository(ss.DB).InsertUser(user, action.Date); !res {
 					return fmt.Errorf("insert failed for ID %s", action.IdAction)
 				}
 			case "UPDATE":
-				if res := repository.NewUserRepository(ss.DB).UpdateUser(user); !res {
+				if res := repository.NewUserRepository(ss.DB).UpdateUser(user, action.Date); !res {
 					return fmt.Errorf("update failed for ID %s", action.IdAction)
 				}
 			case "DELETE":
-				if res := repository.NewUserRepository(ss.DB).DeleteUser(user.IdUser); !res {
+				if res := repository.NewUserRepository(ss.DB).DeleteUser(user.IdUser, action.Date); !res {
 					return fmt.Errorf("delete failed for ID %s", action.IdAction)
 				}
 			default:
