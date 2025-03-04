@@ -593,15 +593,15 @@ func (ss *SynchroService) executeActionsToSynchronizeServer(clientActionsToExecu
 			}
 			switch action.Type {
 			case "INSERT":
-				if res := repository.NewLibraryRepository(ss.DB).InsertLibrary(library, action.IdUser); !res {
+				if res := repository.NewLibraryRepository(ss.DB).InsertLibrary(library, action.IdUser, action.Date); !res {
 					return fmt.Errorf("insert failed for ID %s", action.IdAction)
 				}
 			case "UPDATE":
-				if res := repository.NewLibraryRepository(ss.DB).UpdateLibrary(library, action.IdUser); !res {
+				if res := repository.NewLibraryRepository(ss.DB).UpdateLibrary(library, action.IdUser, action.Date); !res {
 					return fmt.Errorf("update failed for ID %s", action.IdAction)
 				}
 			case "DELETE":
-				if res := repository.NewLibraryRepository(ss.DB).DeleteLibrary(library.IdLibrary, action.IdUser); !res {
+				if res := repository.NewLibraryRepository(ss.DB).DeleteLibrary(library.IdLibrary, action.IdUser, action.Date); !res {
 					return fmt.Errorf("delete failed for ID %s", action.IdAction)
 				}
 			default:
@@ -616,11 +616,11 @@ func (ss *SynchroService) executeActionsToSynchronizeServer(clientActionsToExecu
 			}
 			switch action.Type {
 			case "INSERT":
-				if res := repository.NewLibraryBookRepository(ss.DB).InsertLibraryBook(libraryBook, action.IdUser); !res {
+				if res := repository.NewLibraryBookRepository(ss.DB).InsertLibraryBook(libraryBook, action.IdUser, action.Date); !res {
 					return fmt.Errorf("insert failed for ID %s", action.IdAction)
 				}
 			case "DELETE":
-				if res := repository.NewLibraryBookRepository(ss.DB).DeleteLibraryBook(libraryBook.LibraryId, libraryBook.IdBook, action.IdUser); !res {
+				if res := repository.NewLibraryBookRepository(ss.DB).DeleteLibraryBook(libraryBook.LibraryId, libraryBook.IdBook, action.IdUser, action.Date); !res {
 					return fmt.Errorf("delete failed for ID %s", action.IdAction)
 				}
 			default:
@@ -635,11 +635,11 @@ func (ss *SynchroService) executeActionsToSynchronizeServer(clientActionsToExecu
 			}
 			switch action.Type {
 			case "INSERT":
-				if res := repository.NewSharedLibraryRepository(ss.DB).InsertSharedLibrary(sharedLibrary, action.IdUser); !res {
+				if res := repository.NewSharedLibraryRepository(ss.DB).InsertSharedLibrary(sharedLibrary, action.IdUser, action.Date); !res {
 					return fmt.Errorf("insert failed for ID %s", action.IdAction)
 				}
 			case "DELETE":
-				if res := repository.NewSharedLibraryRepository(ss.DB).DeleteSharedLibrary(action.IdUser, sharedLibrary.IdLibrary); !res {
+				if res := repository.NewSharedLibraryRepository(ss.DB).DeleteSharedLibrary(action.IdUser, sharedLibrary.IdLibrary, action.Date); !res {
 					return fmt.Errorf("delete failed for ID %s", action.IdAction)
 				}
 			default:
@@ -657,7 +657,7 @@ func (ss *SynchroService) executeActionsToSynchronizeServer(clientActionsToExecu
 
 			switch action.Type {
 			case "INSERT":
-				if res := repository.NewStateRepository(ss.DB).InsertState(state); !res {
+				if res := repository.NewStateRepository(ss.DB).InsertState(state, action.Date); !res {
 					return fmt.Errorf("insert failed for ID %s", action.IdAction)
 				}
 			case "UPDATE":
@@ -706,11 +706,11 @@ func (ss *SynchroService) executeActionsToSynchronizeServer(clientActionsToExecu
 						statex.State = stateActionData["state"].(string)
 					}
 				}
-				if res := repository.NewStateRepository(ss.DB).UpdateState(statex.IdUser, statex.IdBook, statex); !res {
+				if res := repository.NewStateRepository(ss.DB).UpdateState(statex.IdUser, statex.IdBook, statex, action.Date); !res {
 					return fmt.Errorf("update failed for ID %s", action.IdAction)
 				}
 			case "DELETE":
-				if res := repository.NewStateRepository(ss.DB).DeleteState(state.IdUser, state.IdBook); !res {
+				if res := repository.NewStateRepository(ss.DB).DeleteState(state.IdUser, state.IdBook, action.Date); !res {
 					return fmt.Errorf("delete failed for ID %s", action.IdAction)
 				}
 			default:
