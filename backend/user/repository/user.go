@@ -20,7 +20,7 @@ func NewUserRepository(db *sql.DB) *UserRepository {
 	return &UserRepository{DB: db}
 }
 
-func (br *UserRepository) InsertUser(user model.User) bool {
+func (br *UserRepository) InsertUser(user model.User, actionDate ...time.Time) bool {
 	_, err := br.DB.Exec("INSERT INTO user_booktime (id_user, pseudo, description, private, profil_image, banner_image, birthdate) VALUES ($1, $2, $3, $4, $5, $6, $7)",
 		user.IdUser, user.Pseudo, user.Description, user.Private, user.ProfilImage, user.BannerImage, user.Birthday)
 	if err != nil {
@@ -38,7 +38,7 @@ func (br *UserRepository) InsertUser(user model.User) bool {
 		"birthdate":    user.Birthday,
 	}
 
-	return br.LogAction(user.IdUser, "USER_BOOKTIME", "INSERT", actionMap)
+	return br.LogAction(user.IdUser, "USER_BOOKTIME", "INSERT", actionMap, actionDate...)
 }
 
 func (ur *UserRepository) SelectUser(id uuid.UUID) (*model.User, error) {
@@ -80,7 +80,7 @@ func (ur *UserRepository) SelectUsers() []model.User {
 	return users
 }
 
-func (ur *UserRepository) DeleteUser(idUser uuid.UUID) bool {
+func (ur *UserRepository) DeleteUser(idUser uuid.UUID, actionDate ...time.Time) bool {
 	query := "DELETE FROM user_booktime WHERE id_user = $1"
 
 	_, err := ur.DB.Exec(query, idUser)
@@ -93,10 +93,10 @@ func (ur *UserRepository) DeleteUser(idUser uuid.UUID) bool {
 		"id_user": idUser,
 	}
 
-	return ur.LogAction(idUser, "USER_BOOKTIME", "DELETE", actionMap)
+	return ur.LogAction(idUser, "USER_BOOKTIME", "DELETE", actionMap, actionDate...)
 }
 
-func (ur *UserRepository) UpdateUser(user model.User) bool {
+func (ur *UserRepository) UpdateUser(user model.User, actionDate ...time.Time) bool {
 	query := `UPDATE user_booktime SET pseudo = $1, description = $2, private = $3, profil_image = $4, banner_image = $5, birthdate = $6 WHERE id_user = $7`
 
 	_, err := ur.DB.Exec(query, user.Pseudo, user.Description, user.Private, user.ProfilImage, user.BannerImage, user.Birthday, user.IdUser)
@@ -115,20 +115,27 @@ func (ur *UserRepository) UpdateUser(user model.User) bool {
 		"birthdate":    user.Birthday,
 	}
 
-	return ur.LogAction(user.IdUser, "USER_BOOKTIME", "UPDATE", actionMap)
+	return ur.LogAction(user.IdUser, "USER_BOOKTIME", "UPDATE", actionMap, actionDate...)
 }
 
-func (ur *UserRepository) LogAction(idUser uuid.UUID, tableName, actionType string, actionData map[string]interface{}) bool {
+func (ur *UserRepository) LogAction(idUser uuid.UUID, tableName, actionType string, actionData map[string]interface{}, actionDate ...time.Time) bool {
 	actionJSON, err := json.Marshal(actionData)
 	if err != nil {
 		log.Println("Erreur lors de l'encodage JSON:", err)
 		return false
 	}
 
+	var date time.Time
+	if len(actionDate) > 0 {
+		date = actionDate[0]
+	} else {
+		date = time.Now()
+	}
+
 	action := model.PostAction{
 		IdUser:     idUser,
 		Table:      tableName,
-		Date:       time.Now(),
+		Date:       date,
 		Type:       actionType,
 		Action:     actionJSON,
 		ExecutedBy: "SERVER",
