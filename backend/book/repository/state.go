@@ -218,7 +218,7 @@ func (sr *StateRepository) LogAction(idUser uuid.UUID, tableName, actionType str
 
 	action := model.PostAction{
 		IdUser:     idUser,
-		Table:      tableName,
+		TableName:  tableName,
 		Date:       time.Now(),
 		Type:       actionType,
 		Action:     actionJSON,

@@ -9,7 +9,7 @@ import (
 type Action struct {
 	IdAction   uuid.UUID `json:"id_action"`
 	IdUser     uuid.UUID `json:"id_user"`
-	Table      string    `json:"table"`
+	TableName  string    `json:"table_name"`
 	Date       time.Time `json:"date"`
 	Type       string    `json:"type"`
 	Action     []byte    `json:"action"`
@@ -18,7 +18,7 @@ type Action struct {
 
 type PostAction struct {
 	IdUser     uuid.UUID `json:"id_user"`
-	Table      string    `json:"table"`
+	TableName  string    `json:"table_name"`
 	Date       time.Time `json:"date"`
 	Type       string    `json:"type"`
 	Action     []byte    `json:"action"`

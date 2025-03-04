@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"time"
 
 	"book/controller/interfaces"
 	"book/model"
@@ -38,7 +39,7 @@ func (bc *synchroController) Synchro(c *gin.Context) {
 	var required_books []string
 
 	for _, action := range actions_to_exec {
-		if action.Table == "LIBRARY_BOOK" && action.Type == "INSERT" {
+		if action.TableName == "LIBRARY_BOOK" && action.Type == "INSERT" {
 			var libraryBook model.LibraryBook
 			err := json.Unmarshal(action.Action, &libraryBook)
 			if err != nil {
@@ -51,11 +52,13 @@ func (bc *synchroController) Synchro(c *gin.Context) {
 	type ReturningDatas struct {
 		RequiredBooks []string       `json:"required_books"`
 		ActionsToExec []model.Action `json:"actions_to_exec"`
+		SyncDate      string         `json:"sync_date"`
 	}
 
 	datas := ReturningDatas{
 		RequiredBooks: required_books,
 		ActionsToExec: actions_to_exec,
+		SyncDate:      time.Now().Format(time.RFC3339),
 	}
 
 	c.JSON(http.StatusOK, datas)

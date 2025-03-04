@@ -117,7 +117,7 @@ func (sr *SharedLibraryRepository) LogAction(idUser uuid.UUID, tableName, action
 
 	action := model.PostAction{
 		IdUser:     idUser,
-		Table:      tableName,
+		TableName:  tableName,
 		Date:       time.Now(),
 		Type:       actionType,
 		Action:     actionJSON,

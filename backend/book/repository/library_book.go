@@ -166,7 +166,7 @@ func (lbr *LibraryBookRepository) LogAction(idUser uuid.UUID, tableName, actionT
 
 	action := model.PostAction{
 		IdUser:     idUser,
-		Table:      tableName,
+		TableName:  tableName,
 		Date:       time.Now(),
 		Type:       actionType,
 		Action:     actionJSON,

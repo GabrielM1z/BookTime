@@ -100,9 +100,9 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 	//On met chaque action dans une liste qui regroupe toutes les actions de meme type UPDATE INSERT DELETE
 	for _, action := range filteredActions {
 		if action.Type == "UPDATE" {
-			if action.Table == "STATE" {
+			if action.TableName == "STATE" {
 				updateStateActions[action.IdAction] = action
-			} else if action.Table == "LIBRARY" {
+			} else if action.TableName == "LIBRARY" {
 				updateLibraryActions[action.IdAction] = action
 			}
 		} else if action.Type == "INSERT" {
@@ -127,7 +127,7 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 	for _, action := range deleteActions {
 		var isDuplicate bool // Indicateur de doublon
 
-		if action.Table == "LIBRARY" {
+		if action.TableName == "LIBRARY" {
 			var library model.Library
 			err := json.Unmarshal(action.Action, &library)
 			if err != nil {
@@ -142,7 +142,7 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 				deletedLibrariesMap[library.IdLibrary] = true
 			}
 
-		} else if action.Table == "STATE" {
+		} else if action.TableName == "STATE" {
 			var state model.State
 			err := json.Unmarshal(action.Action, &state)
 			if err != nil {
@@ -157,7 +157,7 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 				deletedStatesMap[state.IdBook] = true
 			}
 
-		} else if action.Table == "LIBRARY_BOOK" {
+		} else if action.TableName == "LIBRARY_BOOK" {
 			var libraryBook model.LibraryBook
 			err := json.Unmarshal(action.Action, &libraryBook)
 			if err != nil {
@@ -174,7 +174,7 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 				deletedLibrariesBooksMap[libraryBookKey] = true
 			}
 
-		} else if action.Table == "SHARED_LIBRARY" {
+		} else if action.TableName == "SHARED_LIBRARY" {
 			var sharedLibrary model.SharedLibrary
 			err := json.Unmarshal(action.Action, &sharedLibrary)
 			if err != nil {
@@ -209,7 +209,7 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 	//On met chaque action INSERT dans une liste des actions a executer pour le CLIENT ou SERVER si l'objet n'est pas dans la liste des objets supprimes
 	for _, action := range insertActions {
 
-		if action.Table == "LIBRARY" {
+		if action.TableName == "LIBRARY" {
 			var library model.Library
 			err := json.Unmarshal(action.Action, &library)
 			if err != nil {
@@ -221,7 +221,7 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 					clientActions = append(clientActions, action)
 				}
 			}
-		} else if action.Table == "STATE" {
+		} else if action.TableName == "STATE" {
 			var state model.State
 			err := json.Unmarshal(action.Action, &state)
 			if err != nil {
@@ -233,7 +233,7 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 					clientActions = append(clientActions, action)
 				}
 			}
-		} else if action.Table == "LIBRARY_BOOK" {
+		} else if action.TableName == "LIBRARY_BOOK" {
 			var libraryBook model.LibraryBook
 			err := json.Unmarshal(action.Action, &libraryBook)
 			if err != nil {
@@ -245,7 +245,7 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 					clientActions = append(clientActions, action)
 				}
 			}
-		} else if action.Table == "SHARED_LIBRARY" {
+		} else if action.TableName == "SHARED_LIBRARY" {
 			var sharedLibrary model.SharedLibrary
 			err := json.Unmarshal(action.Action, &sharedLibrary)
 			if err != nil {
@@ -506,7 +506,7 @@ func (ss *SynchroService) executeActionsToSynchronizeServer(clientActionsToExecu
 	})
 
 	for _, action := range clientActionsToExecute {
-		switch action.Table {
+		switch action.TableName {
 		case "LIBRARY":
 			var library model.Library
 			err := json.Unmarshal(action.Action, &library)
@@ -593,7 +593,7 @@ func (ss *SynchroService) executeActionsToSynchronizeServer(clientActionsToExecu
 				return fmt.Errorf("Unknown action's Type '%s' for ID %s", action.Type, action.IdAction)
 			}
 		default:
-			return fmt.Errorf("Unknown action's Table name '%s' for ID %s", action.Table, action.IdAction)
+			return fmt.Errorf("Unknown action's Table name '%s' for ID %s", action.TableName, action.IdAction)
 		}
 	}
 
