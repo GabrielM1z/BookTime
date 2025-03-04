@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"time"
 
@@ -97,25 +98,72 @@ func (ur *UserRepository) DeleteUser(idUser uuid.UUID, actionDate ...time.Time) 
 }
 
 func (ur *UserRepository) UpdateUser(user model.User, actionDate ...time.Time) bool {
-	query := `UPDATE user_booktime SET pseudo = $1, description = $2, private = $3, profil_image = $4, banner_image = $5, birthdate = $6 WHERE id_user = $7`
-
-	_, err := ur.DB.Exec(query, user.Pseudo, user.Description, user.Private, user.ProfilImage, user.BannerImage, user.Birthday, user.IdUser)
+	baseUser, err := ur.SelectUser(user.IdUser)
 	if err != nil {
 		log.Println(err)
 		return false
 	}
 
-	actionMap := map[string]interface{}{
-		"id_user":      user.IdUser,
-		"pseudo":       user.Pseudo,
-		"description":  user.Description,
-		"private":      user.Private,
-		"profil_image": user.ProfilImage,
-		"banner_image": user.BannerImage,
-		"birthdate":    user.Birthday,
-	}
+	query := `UPDATE user_booktime SET `
+	params := []interface{}{}
+	counter := 1 // Compteur des paramètres sql ($1, $2, etc.)
 
-	return ur.LogAction(user.IdUser, "USER_BOOKTIME", "UPDATE", actionMap, actionDate...)
+	if user.Pseudo != "" || user.Description != "" || user.Private != false || user.ProfilImage != "" || user.BannerImage != "" || user.Birthday != "" {
+		actionMap := map[string]interface{}{}
+
+		if user.Pseudo != "" && user.Pseudo != baseUser.Pseudo {
+			query += "pseudo = $" + fmt.Sprint(counter) + ", "
+			params = append(params, user.Pseudo)
+			counter++
+			actionMap["pseudo"] = user.Pseudo
+		}
+		if user.Description != "" && user.Description != baseUser.Description {
+			query += "description = $" + fmt.Sprint(counter) + ", "
+			params = append(params, user.Description)
+			counter++
+			actionMap["description"] = user.Description
+		}
+		if user.Private != baseUser.Private {
+			query += "private = $" + fmt.Sprint(counter) + ", "
+			params = append(params, user.Private)
+			counter++
+			actionMap["private"] = user.Private
+		}
+		if user.ProfilImage != "" && user.ProfilImage != baseUser.ProfilImage {
+			query += "profil_image = $" + fmt.Sprint(counter) + ", "
+			params = append(params, user.ProfilImage)
+			counter++
+			actionMap["profil_image"] = user.ProfilImage
+		}
+		if user.BannerImage != "" && user.BannerImage != baseUser.BannerImage {
+			query += "banner_image = $" + fmt.Sprint(counter) + ", "
+			params = append(params, user.BannerImage)
+			counter++
+			actionMap["banner_image"] = user.BannerImage
+		}
+		if user.Birthday != "" && user.Birthday != baseUser.Birthday {
+			query += "birthdate = $" + fmt.Sprint(counter) + ", "
+			params = append(params, user.Birthday)
+			counter++
+			actionMap["birthdate"] = user.Birthday
+		}
+
+		query = query[:len(query)-2] // Suppression de la dernière virgule
+		query += " WHERE id_user = $" + fmt.Sprint(counter)
+
+		params = append(params, user.IdUser)
+
+		_, err := ur.DB.Exec(query, params...)
+		if err != nil {
+			log.Println(err)
+			return false
+		}
+
+		actionMap["id_user"] = user.IdUser.String()
+
+		return ur.LogAction(user.IdUser, "USER_BOOKTIME", "UPDATE", actionMap, actionDate...)
+	}
+	return false
 }
 
 func (ur *UserRepository) LogAction(idUser uuid.UUID, tableName, actionType string, actionData map[string]interface{}, actionDate ...time.Time) bool {
@@ -134,7 +182,7 @@ func (ur *UserRepository) LogAction(idUser uuid.UUID, tableName, actionType stri
 
 	action := model.PostAction{
 		IdUser:     idUser,
-		Table:      tableName,
+		TableName:  tableName,
 		Date:       date,
 		Type:       actionType,
 		Action:     actionJSON,
