@@ -314,6 +314,7 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 	statesCommentActionInfo := make(map[string]stateCommentActionInfo)
 	statesStateActionInfo := make(map[string]stateStateActionInfo)
 
+	// Parcourir les actions dans l'ordre antihoraire
 	for _, action := range updateStateActions {
 		var stateActionData map[string]interface{}
 		err := json.Unmarshal(action.Action, &stateActionData)
@@ -323,30 +324,19 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 
 		// Vérifie si "book_id" existe
 		if idBook, ok := stateActionData["id_book"]; ok {
-			// Conversion de idBook en uuid.UUID
 			idBook, ok := idBook.(string)
 			if !ok {
 				log.Fatalf("Erreur : id_book n'est pas une chaîne de caractères")
 			}
 			if !contains(deletedStates, idBook) {
 
-				// Vérifie si "progression" existe
+				// Vérifie et met à jour les différentes propriétés de l'état
 				if progression, ok := stateActionData["progression"]; ok {
-					progressionUint, ok := progression.(float64) // JSON utilise float64 pour les nombres
+					progressionUint, ok := progression.(float64)
 					if !ok {
 						log.Fatalf("Erreur : progression n'est pas un nombre valide")
 					}
-
-					// Ajout à la map si l'ID existe ou si la date est plus récente
-					if _, exists := statesProgressionActionsInfos[idBook]; exists {
-						if action.Date.After(statesProgressionActionsInfos[idBook].Date) {
-							statesProgressionActionsInfos[idBook] = stateProgressionActionInfo{
-								ActionId:    action.IdAction,
-								Progression: uint(progressionUint),
-								Date:        action.Date,
-							}
-						}
-					} else {
+					if _, exists := statesProgressionActionsInfos[idBook]; !exists {
 						statesProgressionActionsInfos[idBook] = stateProgressionActionInfo{
 							ActionId:    action.IdAction,
 							Progression: uint(progressionUint),
@@ -360,16 +350,7 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 					if !ok {
 						log.Fatalf("Erreur : is_available n'est pas un booléen")
 					}
-
-					if _, exists := statesIsAvailableActionInfo[idBook]; exists {
-						if action.Date.After(statesIsAvailableActionInfo[idBook].Date) {
-							statesIsAvailableActionInfo[idBook] = stateIsAvailableActionInfo{
-								ActionId:    action.IdAction,
-								IsAvailable: isAvailableBool,
-								Date:        action.Date,
-							}
-						}
-					} else {
+					if _, exists := statesIsAvailableActionInfo[idBook]; !exists {
 						statesIsAvailableActionInfo[idBook] = stateIsAvailableActionInfo{
 							ActionId:    action.IdAction,
 							IsAvailable: isAvailableBool,
@@ -383,16 +364,7 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 					if !ok {
 						log.Fatalf("Erreur : last_read_date n'est pas une chaîne valide")
 					}
-
-					if _, exists := statesLastReadDateActionInfo[idBook]; exists {
-						if action.Date.After(statesLastReadDateActionInfo[idBook].Date) {
-							statesLastReadDateActionInfo[idBook] = stateLastReadDateActionInfo{
-								ActionId:     action.IdAction,
-								LastReadDate: lastReadDateStr,
-								Date:         action.Date,
-							}
-						}
-					} else {
+					if _, exists := statesLastReadDateActionInfo[idBook]; !exists {
 						statesLastReadDateActionInfo[idBook] = stateLastReadDateActionInfo{
 							ActionId:     action.IdAction,
 							LastReadDate: lastReadDateStr,
@@ -406,16 +378,7 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 					if !ok {
 						log.Fatalf("Erreur : read_count n'est pas un nombre valide")
 					}
-
-					if _, exists := statesReadCountActionInfo[idBook]; exists {
-						if action.Date.After(statesReadCountActionInfo[idBook].Date) {
-							statesReadCountActionInfo[idBook] = stateReadCountActionInfo{
-								ActionId:  action.IdAction,
-								ReadCount: uint(readCountFloat),
-								Date:      action.Date,
-							}
-						}
-					} else {
+					if _, exists := statesReadCountActionInfo[idBook]; !exists {
 						statesReadCountActionInfo[idBook] = stateReadCountActionInfo{
 							ActionId:  action.IdAction,
 							ReadCount: uint(readCountFloat),
@@ -429,16 +392,7 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 					if !ok {
 						log.Fatalf("Erreur : rate n'est pas un nombre valide")
 					}
-
-					if _, exists := statesRateActionInfo[idBook]; exists {
-						if action.Date.After(statesRateActionInfo[idBook].Date) {
-							statesRateActionInfo[idBook] = stateRateActionInfo{
-								ActionId: action.IdAction,
-								Rate:     uint(rateFloat),
-								Date:     action.Date,
-							}
-						}
-					} else {
+					if _, exists := statesRateActionInfo[idBook]; !exists {
 						statesRateActionInfo[idBook] = stateRateActionInfo{
 							ActionId: action.IdAction,
 							Rate:     uint(rateFloat),
@@ -452,16 +406,7 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 					if !ok {
 						log.Fatalf("Erreur : comment n'est pas une chaîne valide")
 					}
-
-					if _, exists := statesCommentActionInfo[idBook]; exists {
-						if action.Date.After(statesCommentActionInfo[idBook].Date) {
-							statesCommentActionInfo[idBook] = stateCommentActionInfo{
-								ActionId: action.IdAction,
-								Comment:  commentStr,
-								Date:     action.Date,
-							}
-						}
-					} else {
+					if _, exists := statesCommentActionInfo[idBook]; !exists {
 						statesCommentActionInfo[idBook] = stateCommentActionInfo{
 							ActionId: action.IdAction,
 							Comment:  commentStr,
@@ -475,16 +420,7 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 					if !ok {
 						log.Fatalf("Erreur : state n'est pas une chaîne valide")
 					}
-
-					if _, exists := statesStateActionInfo[idBook]; exists {
-						if action.Date.After(statesStateActionInfo[idBook].Date) {
-							statesStateActionInfo[idBook] = stateStateActionInfo{
-								ActionId: action.IdAction,
-								State:    stateStr,
-								Date:     action.Date,
-							}
-						}
-					} else {
+					if _, exists := statesStateActionInfo[idBook]; !exists {
 						statesStateActionInfo[idBook] = stateStateActionInfo{
 							ActionId: action.IdAction,
 							State:    stateStr,
@@ -496,66 +432,52 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 		}
 	}
 
+	// Ajout des actions à exécuter sans doublons
+	uniqueActions := make(map[uuid.UUID]model.Action)
+
 	for _, action := range statesProgressionActionsInfos {
-		actionToAdd := updateStateActions[action.ActionId]
-		if actionToAdd.ExecutedBy == "CLIENT" {
-			serverActions = append(serverActions, actionToAdd)
-		} else if actionToAdd.ExecutedBy == "SERVER" {
-			clientActions = append(clientActions, actionToAdd)
-		}
+		uniqueActions[action.ActionId] = updateStateActions[action.ActionId]
 	}
 
 	for _, action := range statesIsAvailableActionInfo {
-		actionToAdd := updateStateActions[action.ActionId]
-		if actionToAdd.ExecutedBy == "CLIENT" {
-			serverActions = append(serverActions, actionToAdd)
-		} else if actionToAdd.ExecutedBy == "SERVER" {
-			clientActions = append(clientActions, actionToAdd)
-		}
+		uniqueActions[action.ActionId] = updateStateActions[action.ActionId]
 	}
 
 	for _, action := range statesLastReadDateActionInfo {
-		actionToAdd := updateStateActions[action.ActionId]
-		if actionToAdd.ExecutedBy == "CLIENT" {
-			serverActions = append(serverActions, actionToAdd)
-		} else if actionToAdd.ExecutedBy == "SERVER" {
-			clientActions = append(clientActions, actionToAdd)
-		}
+		uniqueActions[action.ActionId] = updateStateActions[action.ActionId]
 	}
 
 	for _, action := range statesReadCountActionInfo {
-		actionToAdd := updateStateActions[action.ActionId]
-		if actionToAdd.ExecutedBy == "CLIENT" {
-			serverActions = append(serverActions, actionToAdd)
-		} else if actionToAdd.ExecutedBy == "SERVER" {
-			clientActions = append(clientActions, actionToAdd)
-		}
+		uniqueActions[action.ActionId] = updateStateActions[action.ActionId]
 	}
 
 	for _, action := range statesRateActionInfo {
-		actionToAdd := updateStateActions[action.ActionId]
-		if actionToAdd.ExecutedBy == "CLIENT" {
-			serverActions = append(serverActions, actionToAdd)
-		} else if actionToAdd.ExecutedBy == "SERVER" {
-			clientActions = append(clientActions, actionToAdd)
-		}
+		uniqueActions[action.ActionId] = updateStateActions[action.ActionId]
 	}
 
 	for _, action := range statesCommentActionInfo {
-		actionToAdd := updateStateActions[action.ActionId]
-		if actionToAdd.ExecutedBy == "CLIENT" {
-			serverActions = append(serverActions, actionToAdd)
-		} else if actionToAdd.ExecutedBy == "SERVER" {
-			clientActions = append(clientActions, actionToAdd)
-		}
+		uniqueActions[action.ActionId] = updateStateActions[action.ActionId]
 	}
 
 	for _, action := range statesStateActionInfo {
-		actionToAdd := updateStateActions[action.ActionId]
-		if actionToAdd.ExecutedBy == "CLIENT" {
-			serverActions = append(serverActions, actionToAdd)
-		} else if actionToAdd.ExecutedBy == "SERVER" {
-			clientActions = append(clientActions, actionToAdd)
+		uniqueActions[action.ActionId] = updateStateActions[action.ActionId]
+	}
+
+	// Convertir la map en slice et trier par ordre chronologique
+	var actionsToExecute []model.Action
+	for _, action := range uniqueActions {
+		actionsToExecute = append(actionsToExecute, action)
+	}
+
+	sort.Slice(actionsToExecute, func(i, j int) bool {
+		return actionsToExecute[i].Date.Before(actionsToExecute[j].Date)
+	})
+
+	for _, action := range actionsToExecute {
+		if action.ExecutedBy == "CLIENT" {
+			serverActions = append(serverActions, action)
+		} else if action.ExecutedBy == "SERVER" {
+			clientActions = append(clientActions, action)
 		}
 	}
 
