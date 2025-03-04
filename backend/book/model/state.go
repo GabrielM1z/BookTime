@@ -10,6 +10,6 @@ type State struct {
 	IdUser       uuid.UUID `json:"id_user"`
 	IdBook       string    `json:"id_book" binding:"required"`
 	IsAvailable  bool      `json:"is_available"`
-	Rate         int       `json:"rate"`
+	Rate         uint      `json:"rate"`
 	Comment      string    `json:"comment"`
 }

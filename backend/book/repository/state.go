@@ -154,16 +154,27 @@ func (sr *StateRepository) UpdateState(idUser uuid.UUID, idBook string, state mo
 			return false
 		}
 
+		fmt.Println("baseState", baseState)
+		fmt.Println("state", state)
+
 		actionMap := map[string]interface{}{}
 		if baseState.State != state.State {
 			actionMap["state"] = state.State
 		}
+
+		fmt.Println("actionMap state", actionMap)
+
 		if baseState.Progression != state.Progression {
 			actionMap["progression"] = state.Progression
 		}
+
+		fmt.Println("actionMap progression", actionMap)
+
 		if baseState.ReadCount != state.ReadCount {
 			actionMap["read_count"] = state.ReadCount
 		}
+
+		fmt.Println("actionMap read_count", actionMap)
 
 		parsedBaseDate, _ := time.Parse(time.RFC3339, baseState.LastReadDate)
 		parsedStateDate, _ := time.Parse("2006-01-02", state.LastReadDate)
@@ -171,15 +182,25 @@ func (sr *StateRepository) UpdateState(idUser uuid.UUID, idBook string, state mo
 			actionMap["last_read_date"] = state.LastReadDate
 		}
 
+		fmt.Println("actionMap last_read_date", actionMap)
+
 		if baseState.IsAvailable != state.IsAvailable {
 			actionMap["is_available"] = state.IsAvailable
 		}
+
+		fmt.Println("actionMap is_available", actionMap)
+
 		if baseState.Rate != state.Rate {
 			actionMap["rate"] = state.Rate
 		}
+
+		fmt.Println("actionMap rate", actionMap)
+
 		if baseState.Comment != state.Comment {
 			actionMap["comment"] = state.Comment
 		}
+
+		fmt.Println("actionMap comment", actionMap)
 
 		if len(actionMap) == 0 {
 			return true
@@ -187,6 +208,8 @@ func (sr *StateRepository) UpdateState(idUser uuid.UUID, idBook string, state mo
 
 		actionMap["id_user"] = idUser.String()
 		actionMap["id_book"] = idBook
+
+		fmt.Println("actionMap FINAL", actionMap)
 
 		return sr.LogAction(idUser, "STATE", "UPDATE", actionMap)
 	}

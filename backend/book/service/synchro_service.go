@@ -647,6 +647,7 @@ func (ss *SynchroService) executeActionsToSynchronizeServer(clientActionsToExecu
 			}
 
 		case "STATE":
+
 			var state model.State
 			err := json.Unmarshal(action.Action, &state)
 
@@ -660,7 +661,52 @@ func (ss *SynchroService) executeActionsToSynchronizeServer(clientActionsToExecu
 					return fmt.Errorf("insert failed for ID %s", action.IdAction)
 				}
 			case "UPDATE":
-				if res := repository.NewStateRepository(ss.DB).UpdateState(state.IdUser, state.IdBook, state); !res {
+				var stateActionData map[string]interface{}
+				err := json.Unmarshal(action.Action, &stateActionData)
+				fmt.Println("stateActionData", stateActionData)
+				if err != nil {
+					log.Fatalf("Erreur lors du décodage du JSON : %v", err)
+				}
+				var statex model.State
+
+				// Vérifie si "book_id" existe
+				if idBook, ok := stateActionData["id_book"]; ok {
+					// Conversion de idBook en string
+					idBook, ok := idBook.(string)
+					if !ok {
+						log.Fatalf("Erreur : id_book n'est pas une chaîne de caractères")
+					}
+					statex, err = repository.NewStateRepository(ss.DB).SelectStateByUserAndBook(action.IdUser, idBook)
+					if err != nil {
+						log.Fatalf("Erreur lors du recuperation du state existant%v", err)
+					}
+
+					if stateActionData["progression"] != nil {
+						progression := stateActionData["progression"].(float64)
+						statex.Progression = uint(progression)
+					}
+					if stateActionData["is_available"] != nil {
+						statex.IsAvailable = stateActionData["is_available"].(bool)
+					}
+					if stateActionData["last_read_date"] != nil {
+						statex.LastReadDate = stateActionData["last_read_date"].(string)
+					}
+					if stateActionData["read_count"] != nil {
+						readCount := stateActionData["read_count"].(float64)
+						statex.ReadCount = uint(readCount)
+					}
+					if stateActionData["rate"] != nil {
+						rate := stateActionData["rate"].(float64)
+						statex.Rate = uint(rate)
+					}
+					if stateActionData["comment"] != nil {
+						statex.Comment = stateActionData["comment"].(string)
+					}
+					if stateActionData["state"] != nil {
+						statex.State = stateActionData["state"].(string)
+					}
+				}
+				if res := repository.NewStateRepository(ss.DB).UpdateState(statex.IdUser, statex.IdBook, statex); !res {
 					return fmt.Errorf("update failed for ID %s", action.IdAction)
 				}
 			case "DELETE":
