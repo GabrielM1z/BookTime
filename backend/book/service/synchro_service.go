@@ -324,10 +324,7 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 	})
 
 	// Parcourir les actions dans l'ordre chronologique inverse
-	log.Println("for _, action := range updateStateActions {")
 	for _, action := range actionList {
-		log.Println("action date", action.Date)
-		log.Println("action id", action.IdAction)
 		var stateActionData map[string]interface{}
 		err := json.Unmarshal(action.Action, &stateActionData)
 		if err != nil {

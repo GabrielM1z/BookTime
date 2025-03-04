@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"time"
 
 	"user/controller/interfaces"
 	"user/model"
@@ -33,7 +34,18 @@ func (bc *synchroController) Synchro(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, actions_to_exec)
+	type ReturningDatas struct {
+		RequiredBooks []string       `json:"required_books"`
+		ActionsToExec []model.Action `json:"actions_to_exec"`
+		SyncDate      string         `json:"sync_date"`
+	}
+
+	datas := ReturningDatas{
+		ActionsToExec: actions_to_exec,
+		SyncDate:      time.Now().Format(time.RFC3339),
+	}
+
+	c.JSON(http.StatusOK, datas)
 
 }
 

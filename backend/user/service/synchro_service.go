@@ -172,7 +172,17 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 	usersBannerImageActionInfo := make(map[string]userBannerImageActionInfo)
 	usersBirthdayActionInfo := make(map[string]userBirthdayActionInfo)
 
+
+	var actionList []model.Action
 	for _, action := range updateUserActions {
+		actionList = append(actionList, action)
+	}
+
+	sort.Slice(actionList, func(i, j int) bool {
+		return actionList[i].Date.After(actionList[j].Date)
+	})
+	// Parcourir les actions dans l'ordre chronologique inverse
+	for _, action := range actionList {
 		var userActionData map[string]interface{}
 		err := json.Unmarshal(action.Action, &userActionData)
 		if err != nil {
@@ -181,26 +191,20 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 
 		// Vérifie si "id_user" existe
 		if idUser, ok := userActionData["id_user"]; ok {
+			idUser, ok := idUser.(string)
+			if !ok {
+				log.Fatalf("Erreur : id_user n'est pas une chaîne de caractères")
+			}
+			if !contains(deletedUsers, idUser) {
 
-			if !contains(deletedUsers, idUser.(string)) {
-
-				// Vérifie si "pseudo" existe
+				// Vérifie et met à jour les différentes propriétés de l'utilisateur
 				if pseudo, ok := userActionData["pseudo"]; ok {
 					pseudoStr, ok := pseudo.(string)
 					if !ok {
 						log.Fatalf("Erreur : pseudo n'est pas une chaîne valide")
 					}
-
-					if _, exists := usersPseudoActionsInfos[idUser.(string)]; exists {
-						if action.Date.After(usersPseudoActionsInfos[idUser.(string)].Date) {
-							usersPseudoActionsInfos[idUser.(string)] = userPseudoActionInfo{
-								ActionId: action.IdAction,
-								Pseudo:   pseudoStr,
-								Date:     action.Date,
-							}
-						}
-					} else {
-						usersPseudoActionsInfos[idUser.(string)] = userPseudoActionInfo{
+					if _, exists := usersPseudoActionsInfos[idUser]; !exists {
+						usersPseudoActionsInfos[idUser] = userPseudoActionInfo{
 							ActionId: action.IdAction,
 							Pseudo:   pseudoStr,
 							Date:     action.Date,
@@ -208,23 +212,13 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 					}
 				}
 
-				// Vérifie si "description" existe
 				if description, ok := userActionData["description"]; ok {
 					descriptionStr, ok := description.(string)
 					if !ok {
 						log.Fatalf("Erreur : description n'est pas une chaîne valide")
 					}
-
-					if _, exists := usersDescriptionActionInfo[idUser.(string)]; exists {
-						if action.Date.After(usersDescriptionActionInfo[idUser.(string)].Date) {
-							usersDescriptionActionInfo[idUser.(string)] = userDescriptionActionInfo{
-								ActionId:    action.IdAction,
-								Description: descriptionStr,
-								Date:        action.Date,
-							}
-						}
-					} else {
-						usersDescriptionActionInfo[idUser.(string)] = userDescriptionActionInfo{
+					if _, exists := usersDescriptionActionInfo[idUser]; !exists {
+						usersDescriptionActionInfo[idUser] = userDescriptionActionInfo{
 							ActionId:    action.IdAction,
 							Description: descriptionStr,
 							Date:        action.Date,
@@ -232,23 +226,13 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 					}
 				}
 
-				// Vérifie si "private" existe
 				if private, ok := userActionData["private"]; ok {
 					privateBool, ok := private.(bool)
 					if !ok {
 						log.Fatalf("Erreur : private n'est pas un booléen")
 					}
-
-					if _, exists := usersPrivateActionInfo[idUser.(string)]; exists {
-						if action.Date.After(usersPrivateActionInfo[idUser.(string)].Date) {
-							usersPrivateActionInfo[idUser.(string)] = userPrivateActionInfo{
-								ActionId: action.IdAction,
-								Private:  privateBool,
-								Date:     action.Date,
-							}
-						}
-					} else {
-						usersPrivateActionInfo[idUser.(string)] = userPrivateActionInfo{
+					if _, exists := usersPrivateActionInfo[idUser]; !exists {
+						usersPrivateActionInfo[idUser] = userPrivateActionInfo{
 							ActionId: action.IdAction,
 							Private:  privateBool,
 							Date:     action.Date,
@@ -256,23 +240,13 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 					}
 				}
 
-				// Vérifie si "profil_image" existe
 				if profilImage, ok := userActionData["profil_image"]; ok {
 					profilImageStr, ok := profilImage.(string)
 					if !ok {
 						log.Fatalf("Erreur : profil_image n'est pas une chaîne valide")
 					}
-
-					if _, exists := usersProfilImageActionInfo[idUser.(string)]; exists {
-						if action.Date.After(usersProfilImageActionInfo[idUser.(string)].Date) {
-							usersProfilImageActionInfo[idUser.(string)] = userProfilImageActionInfo{
-								ActionId:    action.IdAction,
-								ProfilImage: profilImageStr,
-								Date:        action.Date,
-							}
-						}
-					} else {
-						usersProfilImageActionInfo[idUser.(string)] = userProfilImageActionInfo{
+					if _, exists := usersProfilImageActionInfo[idUser]; !exists {
+						usersProfilImageActionInfo[idUser] = userProfilImageActionInfo{
 							ActionId:    action.IdAction,
 							ProfilImage: profilImageStr,
 							Date:        action.Date,
@@ -280,23 +254,13 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 					}
 				}
 
-				// Vérifie si "banner_image" existe
 				if bannerImage, ok := userActionData["banner_image"]; ok {
 					bannerImageStr, ok := bannerImage.(string)
 					if !ok {
 						log.Fatalf("Erreur : banner_image n'est pas une chaîne valide")
 					}
-
-					if _, exists := usersBannerImageActionInfo[idUser.(string)]; exists {
-						if action.Date.After(usersBannerImageActionInfo[idUser.(string)].Date) {
-							usersBannerImageActionInfo[idUser.(string)] = userBannerImageActionInfo{
-								ActionId:    action.IdAction,
-								BannerImage: bannerImageStr,
-								Date:        action.Date,
-							}
-						}
-					} else {
-						usersBannerImageActionInfo[idUser.(string)] = userBannerImageActionInfo{
+					if _, exists := usersBannerImageActionInfo[idUser]; !exists {
+						usersBannerImageActionInfo[idUser] = userBannerImageActionInfo{
 							ActionId:    action.IdAction,
 							BannerImage: bannerImageStr,
 							Date:        action.Date,
@@ -304,23 +268,13 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 					}
 				}
 
-				// Vérifie si "birthday" existe
 				if birthday, ok := userActionData["birthday"]; ok {
 					birthdayStr, ok := birthday.(string)
 					if !ok {
 						log.Fatalf("Erreur : birthday n'est pas une chaîne valide")
 					}
-
-					if _, exists := usersBirthdayActionInfo[idUser.(string)]; exists {
-						if action.Date.After(usersBirthdayActionInfo[idUser.(string)].Date) {
-							usersBirthdayActionInfo[idUser.(string)] = userBirthdayActionInfo{
-								ActionId: action.IdAction,
-								Birthday: birthdayStr,
-								Date:     action.Date,
-							}
-						}
-					} else {
-						usersBirthdayActionInfo[idUser.(string)] = userBirthdayActionInfo{
+					if _, exists := usersBirthdayActionInfo[idUser]; !exists {
+						usersBirthdayActionInfo[idUser] = userBirthdayActionInfo{
 							ActionId: action.IdAction,
 							Birthday: birthdayStr,
 							Date:     action.Date,
@@ -331,65 +285,50 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 		}
 	}
 
+	// Ajout des actions à exécuter sans doublons
+	uniqueActions := make(map[uuid.UUID]model.Action)
+
 	for _, action := range usersPseudoActionsInfos {
-		actionToAdd := updateUserActions[action.ActionId]
-		if actionToAdd.ExecutedBy == "CLIENT" {
-			serverActions = append(serverActions, actionToAdd)
-		} else if actionToAdd.ExecutedBy == "SERVER" {
-			clientActions = append(clientActions, actionToAdd)
-		}
+		uniqueActions[action.ActionId] = updateUserActions[action.ActionId]
 	}
-	fmt.Println("clientActions666", clientActions)
 
 	for _, action := range usersDescriptionActionInfo {
-		actionToAdd := updateUserActions[action.ActionId]
-		if actionToAdd.ExecutedBy == "CLIENT" {
-			serverActions = append(serverActions, actionToAdd)
-		} else if actionToAdd.ExecutedBy == "SERVER" {
-			clientActions = append(clientActions, actionToAdd)
-		}
+		uniqueActions[action.ActionId] = updateUserActions[action.ActionId]
 	}
-	fmt.Println("clientActions777", clientActions)
 
 	for _, action := range usersPrivateActionInfo {
-		actionToAdd := updateUserActions[action.ActionId]
-		if actionToAdd.ExecutedBy == "CLIENT" {
-			serverActions = append(serverActions, actionToAdd)
-		} else if actionToAdd.ExecutedBy == "SERVER" {
-			clientActions = append(clientActions, actionToAdd)
-		}
+		uniqueActions[action.ActionId] = updateUserActions[action.ActionId]
 	}
 
-	fmt.Println("clientActions888", clientActions)
-
 	for _, action := range usersProfilImageActionInfo {
-		actionToAdd := updateUserActions[action.ActionId]
-		if actionToAdd.ExecutedBy == "CLIENT" {
-			serverActions = append(serverActions, actionToAdd)
-		} else if actionToAdd.ExecutedBy == "SERVER" {
-			clientActions = append(clientActions, actionToAdd)
-		}
+		uniqueActions[action.ActionId] = updateUserActions[action.ActionId]
 	}
 
 	for _, action := range usersBannerImageActionInfo {
-		actionToAdd := updateUserActions[action.ActionId]
-		if actionToAdd.ExecutedBy == "CLIENT" {
-			serverActions = append(serverActions, actionToAdd)
-		} else if actionToAdd.ExecutedBy == "SERVER" {
-			clientActions = append(clientActions, actionToAdd)
-		}
+		uniqueActions[action.ActionId] = updateUserActions[action.ActionId]
 	}
 
 	for _, action := range usersBirthdayActionInfo {
-		actionToAdd := updateUserActions[action.ActionId]
-		if actionToAdd.ExecutedBy == "CLIENT" {
-			serverActions = append(serverActions, actionToAdd)
-		} else if actionToAdd.ExecutedBy == "SERVER" {
-			clientActions = append(clientActions, actionToAdd)
-		}
+		uniqueActions[action.ActionId] = updateUserActions[action.ActionId]
 	}
 
-	fmt.Println("clientActions999", clientActions)
+	// Convertir la map en slice et trier par ordre chronologique
+	var actionsToExecute []model.Action
+	for _, action := range uniqueActions {
+		actionsToExecute = append(actionsToExecute, action)
+	}
+
+	sort.Slice(actionsToExecute, func(i, j int) bool {
+		return actionsToExecute[i].Date.Before(actionsToExecute[j].Date)
+	})
+
+	for _, action := range actionsToExecute {
+		if action.ExecutedBy == "CLIENT" {
+			serverActions = append(serverActions, action)
+		} else if action.ExecutedBy == "SERVER" {
+			clientActions = append(clientActions, action)
+		}
+	}
 
 	return serverActions, clientActions, nil
 }
