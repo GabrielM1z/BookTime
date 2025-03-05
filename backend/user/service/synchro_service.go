@@ -112,9 +112,14 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 
 		if action.TableName == "USER_BOOKTIME" {
 			var user model.User
-			err := json.Unmarshal(action.Action, &user)
+			var unescapedAction string
+			err := json.Unmarshal(action.Action, &unescapedAction)
 			if err != nil {
-				log.Fatalf("Erreur lors du décodage du JSON : %v", err)
+				log.Fatalf("Erreur lors du déséchappement du JSON 1 : %v", err)
+			}
+			err = json.Unmarshal([]byte(unescapedAction), &user)
+			if err != nil {
+				log.Fatalf("Erreur lors du décodage du JSON 1 : %v", err)
 			}
 
 			deletedUsers = append(deletedUsers, user.IdUser.String())
@@ -148,9 +153,14 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 	for _, action := range insertActions {
 		if action.TableName == "USER_BOOKTIME" {
 			var user model.User
-			err := json.Unmarshal(action.Action, &user)
+			var unescapedAction string
+			err := json.Unmarshal(action.Action, &unescapedAction)
 			if err != nil {
-				log.Fatalf("Erreur lors du décodage du JSON : %v", err)
+				log.Fatalf("Erreur lors du déséchappement du JSON 2 : %v", err)
+			}
+			err = json.Unmarshal([]byte(unescapedAction), &user)
+			if err != nil {
+				log.Fatalf("Erreur lors du décodage du JSON 2 : %v", err)
 			} else if !contains(deletedUsers, user.IdUser.String()) {
 				if action.ExecutedBy == "CLIENT" {
 					serverActions = append(serverActions, action)
@@ -184,9 +194,14 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 	// Parcourir les actions dans l'ordre chronologique inverse
 	for _, action := range actionList {
 		var userActionData map[string]interface{}
-		err := json.Unmarshal(action.Action, &userActionData)
+		var unescapedAction string
+		err := json.Unmarshal(action.Action, &unescapedAction)
 		if err != nil {
-			log.Fatalf("Erreur lors du décodage du JSON : %v", err)
+			log.Fatalf("Erreur lors du déséchappement du JSON 3 : %v", err)
+		}
+		err = json.Unmarshal([]byte(unescapedAction), &userActionData)
+		if err != nil {
+			log.Fatalf("Erreur lors du décodage du JSON  3 : %v", err)
 		}
 
 		// Vérifie si "id_user" existe
@@ -367,10 +382,14 @@ func (ss *SynchroService) executeActionsToSynchronizeServer(clientActionsToExecu
 		switch action.TableName {
 		case "USER_BOOKTIME":
 			var user model.User
-			err := json.Unmarshal(action.Action, &user)
-
+			var unescapedAction string
+			err := json.Unmarshal(action.Action, &unescapedAction)
 			if err != nil {
-				log.Fatalf("Erreur lors du décodage du JSON : %v", err)
+				log.Fatalf("Erreur lors du déséchappement du JSON 4 : %v", err)
+			}
+			err = json.Unmarshal([]byte(unescapedAction), &user)
+			if err != nil {
+				log.Fatalf("Erreur lors du décodage du JSON 4 : %v", err)
 			}
 
 			switch action.Type {

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strconv"
 	"time"
 
 	"user/model"
@@ -185,7 +186,7 @@ func (ur *UserRepository) LogAction(idUser uuid.UUID, tableName, actionType stri
 		TableName:  tableName,
 		Date:       date,
 		Type:       actionType,
-		Action:     actionJSON,
+		Action:     []byte(strconv.Quote(string(actionJSON))),
 		ExecutedBy: "SERVER",
 	}
 
