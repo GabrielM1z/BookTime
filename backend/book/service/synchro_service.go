@@ -141,7 +141,12 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 
 		if action.TableName == "LIBRARY" {
 			var library model.Library
-			err := json.Unmarshal(action.Action, &library)
+			var unescapedAction string
+			err := json.Unmarshal(action.Action, &unescapedAction)
+			if err != nil {
+				log.Fatalf("Erreur lors du déséchappement du JSON : %v", err)
+			}
+			err = json.Unmarshal([]byte(unescapedAction), &library)
 			if err != nil {
 				log.Fatalf("Erreur lors du décodage du JSON : %v", err)
 			}
@@ -222,8 +227,14 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 	for _, action := range insertActions {
 
 		if action.TableName == "LIBRARY" {
+
 			var library model.Library
-			err := json.Unmarshal(action.Action, &library)
+			var unescapedAction string
+			err := json.Unmarshal(action.Action, &unescapedAction)
+			if err != nil {
+				log.Fatalf("Erreur lors du déséchappement du JSON : %v", err)
+			}
+			err = json.Unmarshal([]byte(unescapedAction), &library)
 			if err != nil {
 				log.Fatalf("Erreur lors du décodage du JSON : %v", err)
 			} else if !contains(deletedLibraries, library.IdLibrary) {
