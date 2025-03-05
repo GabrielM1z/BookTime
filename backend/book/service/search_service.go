@@ -105,7 +105,6 @@ func (bs *SearchService) SearchBookByISBN(isbn string) (*model.Book, error) {
 		var genre model.Genre
 		genre, err = repository.NewGenreRepository(bs.DB).SelectGenreByName(genreName)
 
-
 		if genre.Name == "" {
 			repository.NewGenreRepository(bs.DB).InsertGenre(model.PostGenre{Name: genreName})
 			genre, err = repository.NewGenreRepository(bs.DB).SelectGenreByName(genreName)

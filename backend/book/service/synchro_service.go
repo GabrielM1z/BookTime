@@ -141,9 +141,14 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 
 		if action.TableName == "LIBRARY" {
 			var library model.Library
-			err := json.Unmarshal(action.Action, &library)
+			var unescapedAction string
+			err := json.Unmarshal(action.Action, &unescapedAction)
 			if err != nil {
-				log.Fatalf("Erreur lors du décodage du JSON : %v", err)
+				log.Fatalf("Erreur lors du déséchappement du JSON : %v", err)
+			}
+			err = json.Unmarshal([]byte(unescapedAction), &library)
+			if err != nil {
+				log.Fatalf("Erreur lors du décodage du JSON  lib del : %v", err)
 			}
 
 			deletedLibraries = append(deletedLibraries, library.IdLibrary)
@@ -222,10 +227,16 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 	for _, action := range insertActions {
 
 		if action.TableName == "LIBRARY" {
+
 			var library model.Library
-			err := json.Unmarshal(action.Action, &library)
+			var unescapedAction string
+			err := json.Unmarshal(action.Action, &unescapedAction)
 			if err != nil {
-				log.Fatalf("Erreur lors du décodage du JSON : %v", err)
+				log.Fatalf("Erreur lors du déséchappement du JSON : %v", err)
+			}
+			err = json.Unmarshal([]byte(unescapedAction), &library)
+			if err != nil {
+				log.Fatalf("Erreur lors du décodage du JSON ici : %v", err)
 			} else if !contains(deletedLibraries, library.IdLibrary) {
 				if action.ExecutedBy == "CLIENT" {
 					serverActions = append(serverActions, action)
@@ -237,7 +248,7 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 			var state model.State
 			err := json.Unmarshal(action.Action, &state)
 			if err != nil {
-				log.Fatalf("Erreur lors du décodage du JSON : %v", err)
+				log.Fatalf("Erreur lors du décodage du JSON state insert : %v", err)
 			} else if !contains(deletedStates, state.IdBook) {
 				if action.ExecutedBy == "CLIENT" {
 					serverActions = append(serverActions, action)
@@ -521,10 +532,16 @@ func (ss *SynchroService) executeActionsToSynchronizeServer(clientActionsToExecu
 	for _, action := range clientActionsToExecute {
 		switch action.TableName {
 		case "LIBRARY":
+
 			var library model.Library
-			err := json.Unmarshal(action.Action, &library)
+			var unescapedAction string
+			err := json.Unmarshal(action.Action, &unescapedAction)
 			if err != nil {
-				log.Fatalf("Erreur lors du décodage du JSON : %v", err)
+				log.Fatalf("Erreur lors du déséchappement du JSON : %v", err)
+			}
+			err = json.Unmarshal([]byte(unescapedAction), &library)
+			if err != nil {
+				log.Fatalf("Erreur lors du décodage du JSON  lib harry : %v", err)
 			}
 			switch action.Type {
 			case "INSERT":
