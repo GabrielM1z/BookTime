@@ -161,9 +161,14 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 
 		} else if action.TableName == "STATE" {
 			var state model.State
-			err := json.Unmarshal(action.Action, &state)
+			var unescapedAction string
+			err := json.Unmarshal(action.Action, &unescapedAction)
 			if err != nil {
-				log.Fatalf("Erreur lors du décodage du JSON : %v", err)
+				log.Fatalf("Erreur lors du déséchappement du JSON : %v", err)
+			}
+			err = json.Unmarshal([]byte(unescapedAction), &state)
+			if err != nil {
+				log.Fatalf("Erreur lors du décodage du JSON  lib harry : %v", err)
 			}
 
 			deletedStates = append(deletedStates, state.IdBook)
@@ -176,9 +181,14 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 
 		} else if action.TableName == "LIBRARY_BOOK" {
 			var libraryBook model.LibraryBook
-			err := json.Unmarshal(action.Action, &libraryBook)
+			var unescapedAction string
+			err := json.Unmarshal(action.Action, &unescapedAction)
 			if err != nil {
-				log.Fatalf("Erreur lors du décodage du JSON : %v", err)
+				log.Fatalf("Erreur lors du déséchappement du JSON : %v", err)
+			}
+			err = json.Unmarshal([]byte(unescapedAction), &libraryBook)
+			if err != nil {
+				log.Fatalf("Erreur lors du décodage du JSON  lib harry : %v", err)
 			}
 
 			libraryBookKey := model.LibraryBook{LibraryId: libraryBook.LibraryId, IdBook: libraryBook.IdBook}
@@ -193,9 +203,14 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 
 		} else if action.TableName == "SHARED_LIBRARY" {
 			var sharedLibrary model.SharedLibrary
-			err := json.Unmarshal(action.Action, &sharedLibrary)
+			var unescapedAction string
+			err := json.Unmarshal(action.Action, &unescapedAction)
 			if err != nil {
-				log.Fatalf("Erreur lors du décodage du JSON : %v", err)
+				log.Fatalf("Erreur lors du déséchappement du JSON : %v", err)
+			}
+			err = json.Unmarshal([]byte(unescapedAction), &sharedLibrary)
+			if err != nil {
+				log.Fatalf("Erreur lors du décodage du JSON  lib harry : %v", err)
 			}
 
 			deletedSharedLibraries = append(deletedSharedLibraries, sharedLibrary.IdLibrary)
@@ -246,9 +261,14 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 			}
 		} else if action.TableName == "STATE" {
 			var state model.State
-			err := json.Unmarshal(action.Action, &state)
+			var unescapedAction string
+			err := json.Unmarshal(action.Action, &unescapedAction)
 			if err != nil {
-				log.Fatalf("Erreur lors du décodage du JSON state insert : %v", err)
+				log.Fatalf("Erreur lors du déséchappement du JSON : %v", err)
+			}
+			err = json.Unmarshal([]byte(unescapedAction), &state)
+			if err != nil {
+				log.Fatalf("Erreur lors du décodage du JSON  lib harry : %v", err)
 			} else if !contains(deletedStates, state.IdBook) {
 				if action.ExecutedBy == "CLIENT" {
 					serverActions = append(serverActions, action)
@@ -258,9 +278,14 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 			}
 		} else if action.TableName == "LIBRARY_BOOK" {
 			var libraryBook model.LibraryBook
-			err := json.Unmarshal(action.Action, &libraryBook)
+			var unescapedAction string
+			err := json.Unmarshal(action.Action, &unescapedAction)
 			if err != nil {
-				log.Fatalf("Erreur lors du décodage du JSON : %v", err)
+				log.Fatalf("Erreur lors du déséchappement du JSON : %v", err)
+			}
+			err = json.Unmarshal([]byte(unescapedAction), &libraryBook)
+			if err != nil {
+				log.Fatalf("Erreur lors du décodage du JSON  lib harry : %v", err)
 			} else if !containsLibraryBook(deletedLibrariesBooks, model.LibraryBook{LibraryId: libraryBook.LibraryId, IdBook: libraryBook.IdBook}) {
 				if action.ExecutedBy == "CLIENT" {
 					serverActions = append(serverActions, action)
@@ -270,9 +295,14 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 			}
 		} else if action.TableName == "SHARED_LIBRARY" {
 			var sharedLibrary model.SharedLibrary
-			err := json.Unmarshal(action.Action, &sharedLibrary)
+			var unescapedAction string
+			err := json.Unmarshal(action.Action, &unescapedAction)
 			if err != nil {
-				log.Fatalf("Erreur lors du décodage du JSON : %v", err)
+				log.Fatalf("Erreur lors du déséchappement du JSON : %v", err)
+			}
+			err = json.Unmarshal([]byte(unescapedAction), &sharedLibrary)
+			if err != nil {
+				log.Fatalf("Erreur lors du décodage du JSON  lib harry : %v", err)
 			} else if !contains(deletedSharedLibraries, sharedLibrary.IdLibrary) {
 				if action.ExecutedBy == "CLIENT" {
 					serverActions = append(serverActions, action)
@@ -292,9 +322,14 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 	// Sinon ajout a la liste !DEVICE
 	for _, action := range updateLibraryActions {
 		var library model.Library
-		err := json.Unmarshal(action.Action, &library)
+		var unescapedAction string
+		err := json.Unmarshal(action.Action, &unescapedAction)
 		if err != nil {
-			log.Fatalf("Erreur lors du décodage du JSON : %v", err)
+			log.Fatalf("Erreur lors du déséchappement du JSON : %v", err)
+		}
+		err = json.Unmarshal([]byte(unescapedAction), &library)
+		if err != nil {
+			log.Fatalf("Erreur lors du décodage du JSON  lib harry : %v", err)
 		}
 		if !contains(deletedLibraries, library.IdLibrary) {
 			if _, exists := libraryiesActionsInfos[library.IdLibrary]; exists {
@@ -336,10 +371,21 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 
 	// Parcourir les actions dans l'ordre chronologique inverse
 	for _, action := range actionList {
+		// var stateActionData map[string]interface{}
+		// err := json.Unmarshal(action.Action, &stateActionData)
+		// if err != nil {
+		// 	log.Fatalf("Erreur lors du décodage du JSON : %v", err)
+		// }
+
 		var stateActionData map[string]interface{}
-		err := json.Unmarshal(action.Action, &stateActionData)
+		var unescapedAction string
+		err := json.Unmarshal(action.Action, &unescapedAction)
 		if err != nil {
-			log.Fatalf("Erreur lors du décodage du JSON : %v", err)
+			log.Fatalf("Erreur lors du déséchappement du JSON : %v", err)
+		}
+		err = json.Unmarshal([]byte(unescapedAction), &stateActionData)
+		if err != nil {
+			log.Fatalf("Erreur lors du décodage du JSON  lib harry : %v", err)
 		}
 
 		// Vérifie si "book_id" existe
@@ -532,7 +578,6 @@ func (ss *SynchroService) executeActionsToSynchronizeServer(clientActionsToExecu
 	for _, action := range clientActionsToExecute {
 		switch action.TableName {
 		case "LIBRARY":
-
 			var library model.Library
 			var unescapedAction string
 			err := json.Unmarshal(action.Action, &unescapedAction)
@@ -562,9 +607,14 @@ func (ss *SynchroService) executeActionsToSynchronizeServer(clientActionsToExecu
 
 		case "LIBRARY_BOOK":
 			var libraryBook model.LibraryBook
-			err := json.Unmarshal(action.Action, &libraryBook)
+			var unescapedAction string
+			err := json.Unmarshal(action.Action, &unescapedAction)
 			if err != nil {
-				log.Fatalf("Erreur lors du décodage du JSON : %v", err)
+				log.Fatalf("Erreur lors du déséchappement du JSON : %v", err)
+			}
+			err = json.Unmarshal([]byte(unescapedAction), &libraryBook)
+			if err != nil {
+				log.Fatalf("Erreur lors du décodage du JSON  lib harry : %v", err)
 			}
 			switch action.Type {
 			case "INSERT":
@@ -581,9 +631,14 @@ func (ss *SynchroService) executeActionsToSynchronizeServer(clientActionsToExecu
 
 		case "SHARED_LIBRARY":
 			var sharedLibrary model.PostSharedLibrary
-			err := json.Unmarshal(action.Action, &sharedLibrary)
+			var unescapedAction string
+			err := json.Unmarshal(action.Action, &unescapedAction)
 			if err != nil {
-				log.Fatalf("Erreur lors du décodage du JSON : %v", err)
+				log.Fatalf("Erreur lors du déséchappement du JSON : %v", err)
+			}
+			err = json.Unmarshal([]byte(unescapedAction), &sharedLibrary)
+			if err != nil {
+				log.Fatalf("Erreur lors du décodage du JSON  lib harry : %v", err)
 			}
 			switch action.Type {
 			case "INSERT":
@@ -601,10 +656,14 @@ func (ss *SynchroService) executeActionsToSynchronizeServer(clientActionsToExecu
 		case "STATE":
 
 			var state model.State
-			err := json.Unmarshal(action.Action, &state)
-
+			var unescapedAction string
+			err := json.Unmarshal(action.Action, &unescapedAction)
 			if err != nil {
-				log.Fatalf("Erreur lors du décodage du JSON : %v", err)
+				log.Fatalf("Erreur lors du déséchappement du JSON : %v", err)
+			}
+			err = json.Unmarshal([]byte(unescapedAction), &state)
+			if err != nil {
+				log.Fatalf("Erreur lors du décodage du JSON  lib harry : %v", err)
 			}
 
 			switch action.Type {
@@ -613,12 +672,24 @@ func (ss *SynchroService) executeActionsToSynchronizeServer(clientActionsToExecu
 					return fmt.Errorf("insert failed for ID %s", action.IdAction)
 				}
 			case "UPDATE":
+				// var stateActionData map[string]interface{}
+				// err := json.Unmarshal(action.Action, &stateActionData)
+				// fmt.Println("stateActionData", stateActionData)
+				// if err != nil {
+				// 	log.Fatalf("Erreur lors du décodage du JSON : %v", err)
+				// }
+
 				var stateActionData map[string]interface{}
-				err := json.Unmarshal(action.Action, &stateActionData)
-				fmt.Println("stateActionData", stateActionData)
+				var unescapedAction string
+				err := json.Unmarshal(action.Action, &unescapedAction)
 				if err != nil {
-					log.Fatalf("Erreur lors du décodage du JSON : %v", err)
+					log.Fatalf("Erreur lors du déséchappement du JSON : %v", err)
 				}
+				err = json.Unmarshal([]byte(unescapedAction), &stateActionData)
+				if err != nil {
+					log.Fatalf("Erreur lors du décodage du JSON  lib harry : %v", err)
+				}
+
 				var statex model.State
 
 				// Vérifie si "book_id" existe
