@@ -5,9 +5,13 @@ meta {
 }
 
 delete {
-  url: {{base_book_url}}/books/41
+  url: {{base_book_url}}/books/:isbn
   body: none
   auth: bearer
+}
+
+params:path {
+  isbn: 9782864973065
 }
 
 auth:bearer {
