@@ -2,15 +2,43 @@ import { SafeAreaView, FlatList, View, StyleSheet, Image, TouchableOpacity, Link
 import React, { useEffect, useState } from "react";
 import { Text, Card, Paragraph, Title } from "react-native-paper";
 import { api } from "@/services/axios";
+import { useTheme } from 'react-native-paper';
 
 const FeedTab = () => {
+
+    const { colors } = useTheme();
+
     const [newsData, setNewsData] = useState(null);
     const [loading, setLoading] = useState(true);
+
+    const stylesThemed = StyleSheet.create({
+        container: {
+            backgroundColor: colors.background,
+        },
+        newsItem: {
+            backgroundColor: colors.onPrimaryContainer,
+        },
+        newsTitle: {
+            color: colors.onPrimary,
+        },
+        newsDescription: {
+            color: colors.onPrimary,
+        },
+        newsSource: {
+            color: colors.onPrimary,
+        },
+        loadingText: {
+            color: colors.onPrimaryContainer,
+        },
+        loader: {
+            color: colors.onPrimaryContainer,
+        }
+    });
 
     useEffect(() => {
         const fetchNewsData = async () => {
             try {
-                const response = await api.get(`/news/search?topic=livre&language=fr`);
+                const response = await api.get(`/news/search?language=fr`);
                 setNewsData(response.data);
             } catch (error) {
                 console.error("Error fetching news data:", error);
@@ -23,22 +51,22 @@ const FeedTab = () => {
     }, []);
 
     const renderNewsItem = ({ item }) => (
-        <TouchableOpacity style={styles.newsItem} onPress={() => Linking.openURL(item.url)}>
+        <TouchableOpacity style={[styles.newsItem, stylesThemed.newsItem]} onPress={() => Linking.openURL(item.url)}>
             <Image source={{ uri: item.urlToImage }} style={styles.newsImage} />
             <View style={styles.newsContent}>
-                <Title style={styles.newsTitle} numberOfLines={2}>{item.title}</Title>
-                <Paragraph style={styles.newsDescription} numberOfLines={3}>{item.description}</Paragraph>
-                <Text style={styles.newsSource}>{item.source.name}</Text>
+                <Title style={[styles.newsTitle, stylesThemed.newsTitle]} numberOfLines={2}>{item.title}</Title>
+                <Paragraph style={[styles.newsDescription, stylesThemed.newsDescription]} numberOfLines={3}>{item.description}</Paragraph>
+                <Text style={[styles.newsSource, stylesThemed.newsSource]}>{item.source.name}</Text>
             </View>
         </TouchableOpacity>
     );
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={[styles.container, stylesThemed.container]}>
             {loading ? (
-                <View style={styles.loadingContainer}>
-                    <ActivityIndicator animating={true} color="#0000ff" size="large" />
-                    <Text style={styles.loadingText}>Chargement des nouvelles...</Text>
+                <View style={[styles.loadingContainer, stylesThemed.container]}>
+                    <ActivityIndicator color={stylesThemed.loader.color} animating={true} size="large" />
+                    <Text style={[styles.loadingText, stylesThemed.loadingText]}>Chargement des nouvelles...</Text>
                 </View>
             ) : (
                 <FlatList
