@@ -19,14 +19,10 @@ func NewNewsController(NewsService *service.NewsService) *newsController {
 
 func (nc *newsController) SearchNews(c *gin.Context) {
 	topic := c.Query("topic")
-	if topic == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Topic parameter is required"})
-		return
-	}
+
 	language := c.Query("language")
 	if language == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Language parameter is required"})
-		return
+		language = "fr"
 	}
 
 	sortBy := c.Query("sortBy")
