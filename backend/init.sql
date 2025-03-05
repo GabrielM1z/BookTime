@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS state (
     last_read_date TIMESTAMP,
     id_user UUID,
     id_book VARCHAR(13),
-    is_available BOOLEAN DEFAULT FALSE,
+    is_available INT DEFAULT 0,
     rate INT,
     comment VARCHAR(500),
     PRIMARY KEY (id_user, id_book),

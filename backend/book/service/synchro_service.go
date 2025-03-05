@@ -168,7 +168,7 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 			}
 			err = json.Unmarshal([]byte(unescapedAction), &state)
 			if err != nil {
-				log.Fatalf("Erreur lors du décodage du JSON  lib harry : %v", err)
+				log.Fatalf("Erreur lors du décodage du JSON state 1 : %v", err)
 			}
 
 			deletedStates = append(deletedStates, state.IdBook)
@@ -268,7 +268,7 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 			}
 			err = json.Unmarshal([]byte(unescapedAction), &state)
 			if err != nil {
-				log.Fatalf("Erreur lors du décodage du JSON  lib harry : %v", err)
+				log.Fatalf("Erreur lors du décodage du JSON state 3 : %v", err)
 			} else if !contains(deletedStates, state.IdBook) {
 				if action.ExecutedBy == "CLIENT" {
 					serverActions = append(serverActions, action)
@@ -385,7 +385,7 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 		}
 		err = json.Unmarshal([]byte(unescapedAction), &stateActionData)
 		if err != nil {
-			log.Fatalf("Erreur lors du décodage du JSON  lib harry : %v", err)
+			log.Fatalf("Erreur lors du décodage du JSON state 2 : %v", err)
 		}
 
 		// Vérifie si "book_id" existe
@@ -663,7 +663,7 @@ func (ss *SynchroService) executeActionsToSynchronizeServer(clientActionsToExecu
 			}
 			err = json.Unmarshal([]byte(unescapedAction), &state)
 			if err != nil {
-				log.Fatalf("Erreur lors du décodage du JSON  lib harry : %v", err)
+				log.Fatalf("Erreur lors du décodage du JSON state 7 : %v", err)
 			}
 
 			switch action.Type {
@@ -687,7 +687,7 @@ func (ss *SynchroService) executeActionsToSynchronizeServer(clientActionsToExecu
 				}
 				err = json.Unmarshal([]byte(unescapedAction), &stateActionData)
 				if err != nil {
-					log.Fatalf("Erreur lors du décodage du JSON  lib harry : %v", err)
+					log.Fatalf("Erreur lors du décodage du JSON state 5 : %v", err)
 				}
 
 				var statex model.State
@@ -709,7 +709,8 @@ func (ss *SynchroService) executeActionsToSynchronizeServer(clientActionsToExecu
 						statex.Progression = uint(progression)
 					}
 					if stateActionData["is_available"] != nil {
-						statex.IsAvailable = stateActionData["is_available"].(bool)
+						readCount := stateActionData["is_available"].(float64)
+						statex.IsAvailable = uint(readCount)
 					}
 					if stateActionData["last_read_date"] != nil {
 						statex.LastReadDate = stateActionData["last_read_date"].(string)
