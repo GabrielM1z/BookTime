@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"log"
+	"strconv"
 	"time"
 
 	"book/model"
@@ -179,10 +180,10 @@ func (lr *LibraryRepository) LogAction(idUser uuid.UUID, tableName, actionType s
 
 	action := model.PostAction{
 		IdUser:     idUser,
-		TableName:      tableName,
+		TableName:  tableName,
 		Date:       date,
 		Type:       actionType,
-		Action:     actionJSON,
+		Action:     []byte(strconv.Quote(string(actionJSON))),
 		ExecutedBy: "SERVER",
 	}
 

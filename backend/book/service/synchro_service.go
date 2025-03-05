@@ -144,7 +144,7 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 			var unescapedAction string
 			err := json.Unmarshal(action.Action, &unescapedAction)
 			if err != nil {
-				log.Fatalf("Erreur lors du déséchappement du JSON : %v", err)
+				log.Fatalf("Erreur lors du déséchappement du JSON 1 : %v", err)
 			}
 			err = json.Unmarshal([]byte(unescapedAction), &library)
 			if err != nil {
@@ -164,7 +164,7 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 			var unescapedAction string
 			err := json.Unmarshal(action.Action, &unescapedAction)
 			if err != nil {
-				log.Fatalf("Erreur lors du déséchappement du JSON : %v", err)
+				log.Fatalf("Erreur lors du déséchappement du JSON 2 : %v", err)
 			}
 			err = json.Unmarshal([]byte(unescapedAction), &state)
 			if err != nil {
@@ -184,7 +184,7 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 			var unescapedAction string
 			err := json.Unmarshal(action.Action, &unescapedAction)
 			if err != nil {
-				log.Fatalf("Erreur lors du déséchappement du JSON : %v", err)
+				log.Fatalf("Erreur lors du déséchappement du JSON 3 : %v", err)
 			}
 			err = json.Unmarshal([]byte(unescapedAction), &libraryBook)
 			if err != nil {
@@ -206,7 +206,7 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 			var unescapedAction string
 			err := json.Unmarshal(action.Action, &unescapedAction)
 			if err != nil {
-				log.Fatalf("Erreur lors du déséchappement du JSON : %v", err)
+				log.Fatalf("Erreur lors du déséchappement du JSON 4 : %v", err)
 			}
 			err = json.Unmarshal([]byte(unescapedAction), &sharedLibrary)
 			if err != nil {
@@ -247,7 +247,7 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 			var unescapedAction string
 			err := json.Unmarshal(action.Action, &unescapedAction)
 			if err != nil {
-				log.Fatalf("Erreur lors du déséchappement du JSON : %v", err)
+				log.Fatalf("Erreur lors du déséchappement du JSON 5 : %v", err)
 			}
 			err = json.Unmarshal([]byte(unescapedAction), &library)
 			if err != nil {
@@ -264,7 +264,7 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 			var unescapedAction string
 			err := json.Unmarshal(action.Action, &unescapedAction)
 			if err != nil {
-				log.Fatalf("Erreur lors du déséchappement du JSON : %v", err)
+				log.Fatalf("Erreur lors du déséchappement du JSON 6 : %v", err)
 			}
 			err = json.Unmarshal([]byte(unescapedAction), &state)
 			if err != nil {
@@ -281,7 +281,7 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 			var unescapedAction string
 			err := json.Unmarshal(action.Action, &unescapedAction)
 			if err != nil {
-				log.Fatalf("Erreur lors du déséchappement du JSON : %v", err)
+				log.Fatalf("Erreur lors du déséchappement du JSON 7 : %v", err)
 			}
 			err = json.Unmarshal([]byte(unescapedAction), &libraryBook)
 			if err != nil {
@@ -298,7 +298,7 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 			var unescapedAction string
 			err := json.Unmarshal(action.Action, &unescapedAction)
 			if err != nil {
-				log.Fatalf("Erreur lors du déséchappement du JSON : %v", err)
+				log.Fatalf("Erreur lors du déséchappement du JSON 8 : %v", err)
 			}
 			err = json.Unmarshal([]byte(unescapedAction), &sharedLibrary)
 			if err != nil {
@@ -325,7 +325,7 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 		var unescapedAction string
 		err := json.Unmarshal(action.Action, &unescapedAction)
 		if err != nil {
-			log.Fatalf("Erreur lors du déséchappement du JSON : %v", err)
+			log.Fatalf("Erreur lors du déséchappement du JSON 9 : %v", err)
 		}
 		err = json.Unmarshal([]byte(unescapedAction), &library)
 		if err != nil {
@@ -381,7 +381,7 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 		var unescapedAction string
 		err := json.Unmarshal(action.Action, &unescapedAction)
 		if err != nil {
-			log.Fatalf("Erreur lors du déséchappement du JSON : %v", err)
+			log.Fatalf("Erreur lors du déséchappement du JSON 10 : %v", err)
 		}
 		err = json.Unmarshal([]byte(unescapedAction), &stateActionData)
 		if err != nil {
@@ -582,7 +582,7 @@ func (ss *SynchroService) executeActionsToSynchronizeServer(clientActionsToExecu
 			var unescapedAction string
 			err := json.Unmarshal(action.Action, &unescapedAction)
 			if err != nil {
-				log.Fatalf("Erreur lors du déséchappement du JSON : %v", err)
+				log.Fatalf("Erreur lors du déséchappement du JSON 11 : %v", err)
 			}
 			err = json.Unmarshal([]byte(unescapedAction), &library)
 			if err != nil {
@@ -610,7 +610,7 @@ func (ss *SynchroService) executeActionsToSynchronizeServer(clientActionsToExecu
 			var unescapedAction string
 			err := json.Unmarshal(action.Action, &unescapedAction)
 			if err != nil {
-				log.Fatalf("Erreur lors du déséchappement du JSON : %v", err)
+				log.Fatalf("Erreur lors du déséchappement du JSON 12 : %v", err)
 			}
 			err = json.Unmarshal([]byte(unescapedAction), &libraryBook)
 			if err != nil {
@@ -634,7 +634,7 @@ func (ss *SynchroService) executeActionsToSynchronizeServer(clientActionsToExecu
 			var unescapedAction string
 			err := json.Unmarshal(action.Action, &unescapedAction)
 			if err != nil {
-				log.Fatalf("Erreur lors du déséchappement du JSON : %v", err)
+				log.Fatalf("Erreur lors du déséchappement du JSON 13 : %v", err)
 			}
 			err = json.Unmarshal([]byte(unescapedAction), &sharedLibrary)
 			if err != nil {
@@ -659,7 +659,7 @@ func (ss *SynchroService) executeActionsToSynchronizeServer(clientActionsToExecu
 			var unescapedAction string
 			err := json.Unmarshal(action.Action, &unescapedAction)
 			if err != nil {
-				log.Fatalf("Erreur lors du déséchappement du JSON : %v", err)
+				log.Fatalf("Erreur lors du déséchappement du JSON 14 : %v", err)
 			}
 			err = json.Unmarshal([]byte(unescapedAction), &state)
 			if err != nil {
@@ -683,7 +683,7 @@ func (ss *SynchroService) executeActionsToSynchronizeServer(clientActionsToExecu
 				var unescapedAction string
 				err := json.Unmarshal(action.Action, &unescapedAction)
 				if err != nil {
-					log.Fatalf("Erreur lors du déséchappement du JSON : %v", err)
+					log.Fatalf("Erreur lors du déséchappement du JSON 15 : %v", err)
 				}
 				err = json.Unmarshal([]byte(unescapedAction), &stateActionData)
 				if err != nil {

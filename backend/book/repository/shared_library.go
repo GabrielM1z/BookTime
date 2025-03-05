@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"log"
+	"strconv"
 	"time"
 
 	"book/model"
@@ -127,7 +128,7 @@ func (sr *SharedLibraryRepository) LogAction(idUser uuid.UUID, tableName, action
 		TableName:  tableName,
 		Date:       date,
 		Type:       actionType,
-		Action:     actionJSON,
+		Action:     []byte(strconv.Quote(string(actionJSON))),
 		ExecutedBy: "SERVER",
 	}
 

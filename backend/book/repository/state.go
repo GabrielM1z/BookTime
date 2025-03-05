@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strconv"
 	"time"
 
 	"book/model"
@@ -252,7 +253,7 @@ func (sr *StateRepository) LogAction(idUser uuid.UUID, tableName, actionType str
 		TableName:  tableName,
 		Date:       date,
 		Type:       actionType,
-		Action:     actionJSON,
+		Action:     []byte(strconv.Quote(string(actionJSON))),
 		ExecutedBy: "SERVER",
 	}
 
