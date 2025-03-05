@@ -39,7 +39,8 @@ func (bs *SearchService) SearchBookByISBN(isbn string) (*model.Book, error) {
 	baseURL := "https://www.googleapis.com/books/v1/volumes"
 	params := url.Values{}
 
-	params.Add("q", isbn)
+	//Recherche avec le paramètre ISBN (isbn:)
+	params.Add("q", "isbn:"+isbn)
 	params.Add("key", bs.ApiKey)
 
 	apiURL := fmt.Sprintf("%s?%s", baseURL, params.Encode())
@@ -54,19 +55,41 @@ func (bs *SearchService) SearchBookByISBN(isbn string) (*model.Book, error) {
 		return nil, errors.New("API request : ' " + apiURL + " 'failed with status: " + strconv.Itoa(resp.StatusCode))
 	}
 
+	//On récupère la réponse de l'API
 	var apiResponse model.BookAPIResponse
 	if err := json.NewDecoder(resp.Body).Decode(&apiResponse); err != nil {
 		return nil, err
 	}
 
+	//SI aucun livre n'est trouvé pour l'ISBN donné, on veut rechercher le livre sans le paramètre ISBN
 	if len(apiResponse.Items) == 0 {
-		return nil, fmt.Errorf("no books found for ISBN %s", isbn)
+		newParams := url.Values{}
+		newParams.Add("q", isbn)
+		newParams.Add("key", bs.ApiKey)
+		apiURL = fmt.Sprintf("%s?%s", baseURL, newParams.Encode())
+
+		resp, err = http.Get(apiURL)
+		if err != nil {
+			return nil, err
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusOK {
+			return nil, errors.New("API request : ' " + apiURL + " 'failed with status: " + strconv.Itoa(resp.StatusCode))
+		}
+
+		if err := json.NewDecoder(resp.Body).Decode(&apiResponse); err != nil {
+			return nil, err
+		}
 	}
+
 	respBook := apiResponse.Items[0].VolumeInfo
 
 	var book model.Book
 	var authors []model.Author
 	var genres []model.Genre
+
+	//On récupère les auteurs
 	for _, authorName := range respBook.Authors {
 		author, err := NewSearchAuthorService(db).GetAuthorByName(authorName)
 		if err != nil {
@@ -76,6 +99,7 @@ func (bs *SearchService) SearchBookByISBN(isbn string) (*model.Book, error) {
 		authors = append(authors, *author)
 	}
 
+	//On récupère les genres
 	for _, genreName := range respBook.Categories {
 
 		var genre model.Genre
