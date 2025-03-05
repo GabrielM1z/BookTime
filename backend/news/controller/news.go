@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"news/controller/interfaces"
 	"news/service"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -28,7 +29,17 @@ func (nc *newsController) SearchNews(c *gin.Context) {
 		return
 	}
 
-	news, err := nc.NewsService.SearchNews(topic, language)
+	sortBy := c.Query("sortBy")
+	if sortBy == "" {
+		sortBy = "relevancy"
+	}
+
+	pageSize, _ := strconv.Atoi(c.Query("pageSize"))
+	if pageSize <= 0 {
+		pageSize = 20
+	}
+
+	news, err := nc.NewsService.SearchNews(topic, language, sortBy, pageSize)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
