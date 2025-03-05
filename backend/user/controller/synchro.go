@@ -35,7 +35,6 @@ func (bc *synchroController) Synchro(c *gin.Context) {
 	}
 
 	type ReturningDatas struct {
-		RequiredBooks []string       `json:"required_books"`
 		ActionsToExec []model.Action `json:"actions_to_exec"`
 		SyncDate      string         `json:"sync_date"`
 	}

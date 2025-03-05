@@ -74,6 +74,7 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 	clientActions := []model.Action{}
 	serverActions := []model.Action{}
 
+	fmt.Println("filteredActions :", filteredActions)
 	fmt.Println("clientActions111", clientActions)
 
 	// var updateUserActions []model.Action
@@ -86,7 +87,7 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 
 	//On met chaque action dans une liste qui regroupe toutes les actions de meme type UPDATE INSERT DELETE
 	for _, action := range filteredActions {
-		if action.Table == "USER_BOOKTIME" {
+		if action.TableName == "USER_BOOKTIME" {
 			if action.Type == "UPDATE" {
 				updateUserActions[action.IdAction] = action
 			} else if action.Type == "INSERT" {
@@ -109,7 +110,7 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 	for _, action := range deleteActions {
 		var isDuplicate bool // Indicateur de doublon
 
-		if action.Table == "USER_BOOKTIME" {
+		if action.TableName == "USER_BOOKTIME" {
 			var user model.User
 			err := json.Unmarshal(action.Action, &user)
 			if err != nil {
@@ -145,7 +146,7 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 
 	//On met chaque action INSERT dans une liste des actions a executer pour le CLIENT ou SERVER si l'objet n'est pas dans la liste des objets supprimes
 	for _, action := range insertActions {
-		if action.Table == "USER_BOOKTIME" {
+		if action.TableName == "USER_BOOKTIME" {
 			var user model.User
 			err := json.Unmarshal(action.Action, &user)
 			if err != nil {
@@ -171,7 +172,6 @@ func (ss *SynchroService) whoDoWhichActions(filteredActions []model.Action) ([]m
 	usersProfilImageActionInfo := make(map[string]userProfilImageActionInfo)
 	usersBannerImageActionInfo := make(map[string]userBannerImageActionInfo)
 	usersBirthdayActionInfo := make(map[string]userBirthdayActionInfo)
-
 
 	var actionList []model.Action
 	for _, action := range updateUserActions {
@@ -364,7 +364,7 @@ func (ss *SynchroService) executeActionsToSynchronizeServer(clientActionsToExecu
 	})
 
 	for _, action := range clientActionsToExecute {
-		switch action.Table {
+		switch action.TableName {
 		case "USER_BOOKTIME":
 			var user model.User
 			err := json.Unmarshal(action.Action, &user)
@@ -390,7 +390,7 @@ func (ss *SynchroService) executeActionsToSynchronizeServer(clientActionsToExecu
 				return fmt.Errorf("Unknown action's Type '%s' for ID %s", action.Type, action.IdAction)
 			}
 		default:
-			return fmt.Errorf("Unknown action's Table name '%s' for ID %s", action.Table, action.IdAction)
+			return fmt.Errorf("Unknown action's Table name '%s' for ID %s", action.TableName, action.IdAction)
 		}
 	}
 
