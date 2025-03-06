@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"log"
+	"strconv"
 	"time"
 
 	"book/model"
@@ -20,7 +21,7 @@ func NewLibraryRepository(db *sql.DB) *LibraryRepository {
 	return &LibraryRepository{DB: db}
 }
 
-func (lr *LibraryRepository) InsertLibrary(libary model.Library, idUser uuid.UUID) bool {
+func (lr *LibraryRepository) InsertLibrary(libary model.Library, idUser uuid.UUID, actionDate ...time.Time) bool {
 	var IdLibrary uuid.UUID
 	var query string
 
@@ -46,7 +47,7 @@ func (lr *LibraryRepository) InsertLibrary(libary model.Library, idUser uuid.UUI
 		"id_library": IdLibrary,
 	}
 
-	return lr.LogAction(idUser, "LIBRARY", "INSERT", actionMap)
+	return lr.LogAction(idUser, "LIBRARY", "INSERT", actionMap, actionDate...)
 }
 
 // SelectLibraries - Sélectionne toutes les bibliothèques
@@ -98,7 +99,7 @@ func (lr *LibraryRepository) SelectLibrary(id uuid.UUID) (model.Library, error) 
 }
 
 // UpdateLibrary - Met à jour une bibliothèque
-func (lr *LibraryRepository) UpdateLibrary(library model.Library, idUser uuid.UUID) bool {
+func (lr *LibraryRepository) UpdateLibrary(library model.Library, idUser uuid.UUID, actionDate ...time.Time) bool {
 	baseLibrary, error := lr.SelectLibrary(library.IdLibrary)
 
 	if error != nil {
@@ -125,11 +126,11 @@ func (lr *LibraryRepository) UpdateLibrary(library model.Library, idUser uuid.UU
 
 	actionMap["id_library"] = library.IdLibrary
 
-	return lr.LogAction(idUser, "LIBRARY", "UPDATE", actionMap)
+	return lr.LogAction(idUser, "LIBRARY", "UPDATE", actionMap, actionDate...)
 }
 
 // DeleteLibrary - Supprime une bibliothèque par ID
-func (lr *LibraryRepository) DeleteLibrary(id uuid.UUID, idUser uuid.UUID) bool {
+func (lr *LibraryRepository) DeleteLibrary(id uuid.UUID, idUser uuid.UUID, actionDate ...time.Time) bool {
 	query := "DELETE FROM library WHERE id_library = $1"
 
 	_, err := lr.DB.Exec(query, id)
@@ -142,7 +143,7 @@ func (lr *LibraryRepository) DeleteLibrary(id uuid.UUID, idUser uuid.UUID) bool 
 		"id_library": id,
 	}
 
-	return lr.LogAction(idUser, "LIBRARY", "DELETE", actionMap)
+	return lr.LogAction(idUser, "LIBRARY", "DELETE", actionMap, actionDate...)
 }
 
 func (lr *LibraryRepository) SelectLibraryByUser(idUser uuid.UUID) []model.Library {
@@ -163,19 +164,26 @@ func (lr *LibraryRepository) SelectLibraryByUser(idUser uuid.UUID) []model.Libra
 	return libraries
 }
 
-func (lr *LibraryRepository) LogAction(idUser uuid.UUID, tableName, actionType string, actionData map[string]interface{}) bool {
+func (lr *LibraryRepository) LogAction(idUser uuid.UUID, tableName, actionType string, actionData map[string]interface{}, actionDate ...time.Time) bool {
 	actionJSON, err := json.Marshal(actionData)
 	if err != nil {
 		log.Println("Erreur lors de l'encodage JSON:", err)
 		return false
 	}
 
+	var date time.Time
+	if len(actionDate) > 0 {
+		date = actionDate[0]
+	} else {
+		date = time.Now()
+	}
+
 	action := model.PostAction{
 		IdUser:     idUser,
-		Table:      tableName,
-		Date:       time.Now(),
+		TableName:  tableName,
+		Date:       date,
 		Type:       actionType,
-		Action:     actionJSON,
+		Action:     []byte(strconv.Quote(string(actionJSON))),
 		ExecutedBy: "SERVER",
 	}
 

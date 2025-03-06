@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"log"
+	"strconv"
 	"time"
 
 	"book/model"
@@ -101,7 +102,7 @@ func (lbr *LibraryBookRepository) SelectLibraryBookByLibrary(idLibrary string) [
 }
 
 // InsertLibraryBook - Insère un lien bibliothèque-livre
-func (lbr *LibraryBookRepository) InsertLibraryBook(post model.LibraryBook, idUser uuid.UUID) bool {
+func (lbr *LibraryBookRepository) InsertLibraryBook(post model.LibraryBook, idUser uuid.UUID, actionDate ...time.Time) bool {
 	stmt, err := lbr.DB.Prepare("INSERT INTO library_book (id_library, id_book) VALUES ($1, $2)")
 	if err != nil {
 		log.Println(err)
@@ -120,7 +121,7 @@ func (lbr *LibraryBookRepository) InsertLibraryBook(post model.LibraryBook, idUs
 		"id_library": post.LibraryId,
 	}
 
-	return lbr.LogAction(idUser, "LIBRARY_BOOK", "INSERT", actionMap)
+	return lbr.LogAction(idUser, "LIBRARY_BOOK", "INSERT", actionMap, actionDate...)
 }
 
 // UpdateLibraryBook - Met à jour un lien bibliothèque-livre
@@ -135,7 +136,7 @@ func (r *LibraryBookRepository) UpdateLibraryBook(idLibrary uuid.UUID, idBook st
 }
 
 // DeleteLibraryBook - Supprime un lien bibliothèque-livre
-func (lbr *LibraryBookRepository) DeleteLibraryBook(idLibrary uuid.UUID, idBook string, idUser uuid.UUID) bool {
+func (lbr *LibraryBookRepository) DeleteLibraryBook(idLibrary uuid.UUID, idBook string, idUser uuid.UUID, actionDate ...time.Time) bool {
 	stmt, err := lbr.DB.Prepare("DELETE FROM library_book WHERE id_library = $1 AND id_book = $2")
 	if err != nil {
 		log.Println(err)
@@ -154,22 +155,29 @@ func (lbr *LibraryBookRepository) DeleteLibraryBook(idLibrary uuid.UUID, idBook 
 		"id_book":    idBook,
 	}
 
-	return lbr.LogAction(idUser, "LIBRARY_BOOK", "DELETE", actionMap)
+	return lbr.LogAction(idUser, "LIBRARY_BOOK", "DELETE", actionMap, actionDate...)
 }
 
-func (lbr *LibraryBookRepository) LogAction(idUser uuid.UUID, tableName, actionType string, actionData map[string]interface{}) bool {
+func (lbr *LibraryBookRepository) LogAction(idUser uuid.UUID, tableName, actionType string, actionData map[string]interface{}, actionDate ...time.Time) bool {
 	actionJSON, err := json.Marshal(actionData)
 	if err != nil {
 		log.Println("Erreur lors de l'encodage JSON:", err)
 		return false
 	}
 
+	var date time.Time
+	if len(actionDate) > 0 {
+		date = actionDate[0]
+	} else {
+		date = time.Now()
+	}
+
 	action := model.PostAction{
 		IdUser:     idUser,
-		Table:      tableName,
-		Date:       time.Now(),
+		TableName:  tableName,
+		Date:       date,
 		Type:       actionType,
-		Action:     actionJSON,
+		Action:     []byte(strconv.Quote(string(actionJSON))),
 		ExecutedBy: "SERVER",
 	}
 

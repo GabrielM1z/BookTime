@@ -6,8 +6,8 @@ import (
 	"log"
 	"time"
 
-	"book/model"
-	"book/repository/interfaces"
+	"user/model"
+	"user/repository/interfaces"
 
 	"github.com/google/uuid"
 )

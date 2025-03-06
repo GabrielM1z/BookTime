@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strconv"
 	"time"
 
 	"book/model"
@@ -21,7 +22,7 @@ func NewStateRepository(db *sql.DB) *StateRepository {
 	return &StateRepository{DB: db}
 }
 
-func (sr *StateRepository) InsertState(state model.State) bool {
+func (sr *StateRepository) InsertState(state model.State, actionDate ...time.Time) bool {
 	stmt, err := sr.DB.Prepare("INSERT INTO state (state, progression, read_count, last_read_date, is_available, id_user, id_book, rate, comment) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)")
 	if err != nil {
 		log.Println(err)
@@ -47,7 +48,7 @@ func (sr *StateRepository) InsertState(state model.State) bool {
 		"comment":        state.Comment,
 	}
 
-	return sr.LogAction(state.IdUser, "STATE", "INSERT", actionMap)
+	return sr.LogAction(state.IdUser, "STATE", "INSERT", actionMap, actionDate...)
 }
 
 func (ar *StateRepository) SelectStates() []model.State {
@@ -91,7 +92,8 @@ func (sr StateRepository) SelectStateByUserAndBook(idUser uuid.UUID, idBook stri
 	}
 }
 
-func (sr *StateRepository) UpdateState(idUser uuid.UUID, idBook string, state model.State) bool {
+func (sr *StateRepository) UpdateState(idUser uuid.UUID, idBook string, state model.State, actionDate ...time.Time) bool {
+	fmt.Println("UPDATE state", state)
 	baseState, err := sr.SelectStateByUserAndBook(idUser, idBook)
 	if err != nil {
 		log.Println(err)
@@ -154,16 +156,27 @@ func (sr *StateRepository) UpdateState(idUser uuid.UUID, idBook string, state mo
 			return false
 		}
 
+		fmt.Println("baseState", baseState)
+		fmt.Println("state", state)
+
 		actionMap := map[string]interface{}{}
 		if baseState.State != state.State {
 			actionMap["state"] = state.State
 		}
+
+		fmt.Println("actionMap state", actionMap)
+
 		if baseState.Progression != state.Progression {
 			actionMap["progression"] = state.Progression
 		}
+
+		fmt.Println("actionMap progression", actionMap)
+
 		if baseState.ReadCount != state.ReadCount {
 			actionMap["read_count"] = state.ReadCount
 		}
+
+		fmt.Println("actionMap read_count", actionMap)
 
 		parsedBaseDate, _ := time.Parse(time.RFC3339, baseState.LastReadDate)
 		parsedStateDate, _ := time.Parse("2006-01-02", state.LastReadDate)
@@ -171,15 +184,25 @@ func (sr *StateRepository) UpdateState(idUser uuid.UUID, idBook string, state mo
 			actionMap["last_read_date"] = state.LastReadDate
 		}
 
+		fmt.Println("actionMap last_read_date", actionMap)
+
 		if baseState.IsAvailable != state.IsAvailable {
 			actionMap["is_available"] = state.IsAvailable
 		}
+
+		fmt.Println("actionMap is_available", actionMap)
+
 		if baseState.Rate != state.Rate {
 			actionMap["rate"] = state.Rate
 		}
+
+		fmt.Println("actionMap rate", actionMap)
+
 		if baseState.Comment != state.Comment {
 			actionMap["comment"] = state.Comment
 		}
+
+		fmt.Println("actionMap comment", actionMap)
 
 		if len(actionMap) == 0 {
 			return true
@@ -188,12 +211,14 @@ func (sr *StateRepository) UpdateState(idUser uuid.UUID, idBook string, state mo
 		actionMap["id_user"] = idUser.String()
 		actionMap["id_book"] = idBook
 
-		return sr.LogAction(idUser, "STATE", "UPDATE", actionMap)
+		fmt.Println("actionMap FINAL", actionMap)
+
+		return sr.LogAction(idUser, "STATE", "UPDATE", actionMap, actionDate...)
 	}
 	return true
 }
 
-func (sr *StateRepository) DeleteState(idUser uuid.UUID, idBook string) bool {
+func (sr *StateRepository) DeleteState(idUser uuid.UUID, idBook string, actionDate ...time.Time) bool {
 	query := "DELETE FROM state WHERE id_user = $1 AND id_book = $2"
 	_, err := sr.DB.Exec(query, idUser, idBook)
 	if err != nil {
@@ -206,22 +231,29 @@ func (sr *StateRepository) DeleteState(idUser uuid.UUID, idBook string) bool {
 		"id_book": idBook,
 	}
 
-	return sr.LogAction(idUser, "STATE", "DELETE", actionMap)
+	return sr.LogAction(idUser, "STATE", "DELETE", actionMap, actionDate...)
 }
 
-func (sr *StateRepository) LogAction(idUser uuid.UUID, tableName, actionType string, actionData map[string]interface{}) bool {
+func (sr *StateRepository) LogAction(idUser uuid.UUID, tableName, actionType string, actionData map[string]interface{}, actionDate ...time.Time) bool {
 	actionJSON, err := json.Marshal(actionData)
 	if err != nil {
 		log.Println("Erreur lors de l'encodage JSON:", err)
 		return false
 	}
 
+	var date time.Time
+	if len(actionDate) > 0 {
+		date = actionDate[0]
+	} else {
+		date = time.Now()
+	}
+
 	action := model.PostAction{
 		IdUser:     idUser,
-		Table:      tableName,
-		Date:       time.Now(),
+		TableName:  tableName,
+		Date:       date,
 		Type:       actionType,
-		Action:     actionJSON,
+		Action:     []byte(strconv.Quote(string(actionJSON))),
 		ExecutedBy: "SERVER",
 	}
 

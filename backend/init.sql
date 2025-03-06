@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS state (
     last_read_date TIMESTAMP,
     id_user UUID,
     id_book VARCHAR(13),
-    is_available BOOLEAN DEFAULT FALSE,
+    is_available INT DEFAULT 0,
     rate INT,
     comment VARCHAR(500),
     PRIMARY KEY (id_user, id_book),
@@ -123,4 +123,15 @@ CREATE TABLE IF NOT EXISTS user_booktime (
     banner_image VARCHAR(150),
     birthdate DATE,
     PRIMARY KEY (id_user)
+);
+
+-- Table ACTION
+CREATE TABLE IF NOT EXISTS action (
+    id_action UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    id_user UUID,
+    table_name VARCHAR(50),
+    date TIMESTAMP,
+    type VARCHAR(50),
+    action JSON,
+    executed_by VARCHAR(6)
 );

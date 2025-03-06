@@ -1,21 +1,35 @@
 meta {
-  name: Get book by Id
+  name: BookSynchronisation
   type: http
-  seq: 4
+  seq: 1
 }
 
-get {
-  url: {{base_book_url}}/books/:isbn
-  body: none
+post {
+  url: {{base_book_url}}/synchro/:lastSyncDate
+  body: json
   auth: bearer
 }
 
 params:path {
-  isbn: 9782806253651
+  lastSyncDate: 2010-11-09T18:30:20.832616Z
 }
 
 auth:bearer {
   token: {{access_token}}
+}
+
+body:json {
+  [
+    {
+      "id_action": "53a8671a-2f02-40f5-9f9f-bb28e36c105d",
+      "id_user": "14b81625-ebed-4fee-9990-dc76bffebf49",
+      "table": "STATE",
+      "date": "2020-06-05T18:30:20.832616Z",
+      "type": "UPDATE",
+      "action": "ewogICAgInByb2dyZXNzaW9uIjogODc2LAogICAgImlkX2Jvb2siOiAiOTc4MjgwNjI1MzY1MSIsCiAgICAiaWRfdXNlciI6ICIxNGI4MTYyNS1lYmVkLTRmZWUtOTk5MC1kYzc2YmZmZWJmNDkiCn0=",
+      "executed_by": "CLIENT"
+    }
+  ]
 }
 
 tests {
