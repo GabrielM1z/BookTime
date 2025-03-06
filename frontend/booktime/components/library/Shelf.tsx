@@ -2,7 +2,7 @@ import { StyleSheet, View, FlatList } from 'react-native';
 import { PressableCover } from '../Cover';
 import React from 'react';
 import { BookMinInfos } from '@/models/Book';
-import { Link } from 'expo-router';
+import { Link, router } from 'expo-router';
 import { useTheme, Text } from 'react-native-paper';
 
 interface ShelfProps {
@@ -13,9 +13,15 @@ interface ShelfProps {
 }
 
 export const Shelf = ({ title, idShelf, books, index }: ShelfProps) => {
-    const { colors, fonts } = useTheme();
-    // const colors = ['#ff6961', '#77dd77', '#84b6f4'];
-    // const backgroundColor = colors[index % colors.length];
+    const { colors } = useTheme();
+
+    const handleBookPress = (idBook: string) => {        
+        router.push({
+            pathname: "/book/[idBook]",
+            params: { idBook, mode: 'library' },
+        });
+    }
+
 
     return (
         <View style={[styles.shelfContainer, { backgroundColor: colors.primaryContainer }]}>
@@ -34,7 +40,13 @@ export const Shelf = ({ title, idShelf, books, index }: ShelfProps) => {
                 data={books}
                 keyExtractor={(item) => item.id_book.toString()}
                 renderItem={({ item }) => (
-                    <PressableCover idBook={item.id_book} uri={item.cover_image_url} width={120} height={180} />
+                    <PressableCover 
+                        idBook={item.id_book} 
+                        uri={item.cover_image_url} 
+                        width={120} 
+                        height={180}
+                        onPress={handleBookPress} 
+                    />
                 )}
                 contentContainerStyle={styles.flatListContainer}
                 showsHorizontalScrollIndicator={false}

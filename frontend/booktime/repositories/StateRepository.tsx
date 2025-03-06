@@ -6,7 +6,8 @@ import uuid from 'react-native-uuid';
 
 export interface StateRepository {
     getAll: () => Promise<State[]>;
-    get: (id: string) => Promise<State | null>;
+    getFromIdBook: (idBook: string) => Promise<State | null>;
+    updateState: (state: State) => Promise<boolean>
 }
 
 export class LocalStateRepository implements StateRepository {
@@ -35,16 +36,48 @@ export class LocalStateRepository implements StateRepository {
         return allRows;
     }
 
-    async get(id: string): Promise<State | null> {
-        const statement = await this.db.prepareAsync(
-            'SELECT * FROM state WHERE id_state == $id'
-        );
+    async updateState(state: State): Promise<boolean> {
 
-        const result = await statement.executeAsync({
-            $id: id
-        });
+        try {
+            // Création dynamique de la requête SQL
+            console.log("state :",state);
 
-        return result ? (result as unknown as State) : null;
+            // Exécution de la requête
+            await this.db.runAsync(`UPDATE state 
+            SET state = $state, 
+                progression = $progression, 
+                read_count = $read_count, 
+                last_read_date = $last_read_date, 
+                is_available = $is_available
+            WHERE id_user = $id_user AND id_book = $id_book`, {
+                $state: state.state,
+                $progression: state.progression,
+                $read_count: state.read_count,
+                $last_read_date: state.last_read_date,
+                $is_available: state.is_available,
+                $id_user: state.id_user,
+                $id_book: state.id_book
+            })
+
+            console.log("updateState: Mise à jour réussie !");
+            return true;
+        } catch (error) {
+            console.error("Erreur dans updateState :", error);
+            return false;
+        }
+    }
+
+
+    async getFromIdBook(idBook: string): Promise<State | null> {
+
+        const result = await this.db.getFirstAsync<State>(
+            'SELECT * FROM state WHERE id_book = $idBook AND id_user = $idUser',
+            {
+                $idBook: idBook,
+                $idUser: this.id_user
+            });
+
+        return result;
     }
 
     async create(state: State): Promise<void> {
@@ -73,8 +106,12 @@ export class RemoteStateRepository implements StateRepository {
         return [];
     }
 
-    async get(id: string): Promise<State | null> {
+    async getFromIdBook(idBook: string): Promise<State | null> {
         return null;
+    }
+
+    async updateState(state: State): Promise<boolean> {
+        return false
     }
 
     async add(state: State): Promise<void> {

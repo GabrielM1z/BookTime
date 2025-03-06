@@ -28,12 +28,15 @@ export interface BookControllerProps {
     addBook: (idBook: string, idLibrary: string) => Promise<void>
     createLibrary: (library: CreateLibraryDto) => Promise<void>
     getAllLibraryInfo: () => Promise<LibraryWithBooksMin[] | []>
+    getBookById: (idBook: string, mode: string) => Promise<Book>
 }
 
 export class LocalBookController implements BookControllerProps {
     protected db: SQLiteDatabase;
     protected id_user: string;
-    protected remote: RemoteBookRepository;
+    protected remoteBook: RemoteBookRepository;
+    protected remoteAuthor: RemoteAuthorRepository;
+
 
     sync: SynchronisationController;
     book: LocalBookRepository;
@@ -50,7 +53,9 @@ export class LocalBookController implements BookControllerProps {
 
         this.db = db;
         this.id_user = id_user;
-        this.remote = new RemoteBookRepository();
+        this.remoteBook = new RemoteBookRepository();
+        this.remoteAuthor = new RemoteAuthorRepository();
+
 
         this.book = new LocalBookRepository(db, id_user, this.sync);
         this.library = new LocalLibraryRepository(db, id_user, this.sync);
@@ -62,8 +67,43 @@ export class LocalBookController implements BookControllerProps {
         this.sharedLibrary = new LocalSharedLibraryRepository(db, id_user, this.sync);
     }
 
+    //Retourne la méthode local ou remote selon la valeur du mode
+    async getBookById(idBook: string, mode: string): Promise<Book> {
+        switch (mode) {
+            case "library":
+                return await this.book.get(idBook);
+                break;
+            case "search":
+                return await this.remoteBook.get(idBook);
+                break;
+
+            default:
+                return await this.remoteBook.get(idBook)
+                break;
+        }
+    }
+
+    //Retourne la méthode local ou remote selon la valeur du mode
+    async getListAuthorByBookId(idBook: string, mode: string): Promise<Author[]> {
+        switch (mode) {
+            case "library":
+                return await this.author.getFromIdBooks(idBook);
+                break;
+            case "search":
+                return await this.remoteAuthor.getFromIdBooks(idBook);
+                break;
+
+            default:
+                return await this.remoteAuthor.getFromIdBooks(idBook);
+                break;
+        }
+    }
+
+
+
     async addBook(idBook: string, idLibrary: string): Promise<void> {
-        const book = await this.remote.get(idBook);
+
+        const book = await this.remoteBook.get(idBook);
 
         try {
             await this.db.withExclusiveTransactionAsync(async () => {
@@ -168,6 +208,10 @@ export class RemoteBookController implements BookControllerProps {
         this.libraryBook = new RemoteLibraryBookRepository();
         this.authorBook = new RemoteAuthorBookRepository();
         this.sharedLibrary = new RemoteSharedLibraryRepository();
+    }
+
+    async getBookById(idBook: string, mode: string): Promise<Book> {
+        return await this.book.get(idBook)
     }
 
     async addBook(idBook: string, idLibrary: string): Promise<void> { }

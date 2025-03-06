@@ -7,6 +7,7 @@ import { SynchronisationController } from '@/controllers/SynchronisationControll
 export interface AuthorRepository {
     getAll: () => Promise<Author[]>
     get: (id: string) => Promise<Author | null>;
+    getFromIdBooks: (idBook: string) => Promise<Author[]>
     add: (author: Author) => Promise<void>;
 }
 
@@ -40,7 +41,27 @@ export class LocalAuthorRepository implements AuthorRepository {
         return result ? (result as unknown as Author) : null;
     }
 
+    async getFromIdBooks(idBook: string): Promise<Author[]> {
+        try {
+            let allRowsFromIdBook = await this.db.getAllAsync<Author>(
+                `SELECT * FROM author 
+                LEFT JOIN book_author ON author.id_author = book_author.id_author
+                WHERE book_author.id_book = $idBook
+                `, {$idBook: idBook}
+            );
+            console.log(allRowsFromIdBook);
+            
+            return allRowsFromIdBook;
+
+        } catch (error) {
+            console.log("Error getFromIdBooks :", error);
+            return []
+            
+        }
+    }
+
     async createAll(listNewAuthors: Author[]): Promise<void> {
+        console.log("Création liste auteurs :",listNewAuthors);
         
         const insertAuthor = await this.db.prepareAsync(
             'INSERT OR IGNORE INTO author (id_author, name, description) VALUES ($id_author, $name, $description);'
@@ -84,6 +105,10 @@ export class RemoteAuthorRepository implements AuthorRepository {
 
     async get(id: string): Promise<Author | null> {
         return null;
+    }
+
+    async getFromIdBooks(idBook: string): Promise<Author[]> {
+        return [    ];
     }
 
     async add(author: Author): Promise<void> {
