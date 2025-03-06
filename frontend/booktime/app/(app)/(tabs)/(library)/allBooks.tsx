@@ -1,6 +1,8 @@
 import { ListBooks } from '@/components/library/ListBooks';
 import { useBookContext } from '@/contexts/BookContext';
 import { useRepository } from '@/hooks/useRepository';
+import { useTopTabbarScroll } from '@/hooks/useTopTabbarScroll';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import React from "react";
 
 
@@ -10,8 +12,17 @@ const AllBooksTab = () => {
         { id_book: string, title: string, cover_image_url: string }[]>(
             () => bookController.book.getAll(["title", "cover_image_url"]), []);
 
+    const { handleScroll } = useTopTabbarScroll(10);
+    const tabBarHeight = useBottomTabBarHeight();
+
     return (
-        <ListBooks books={books} loading={loading} onRefresh={refresh} />
+        <ListBooks
+            books={books}
+            loading={loading}
+            onRefresh={refresh}
+            onScroll={handleScroll}
+            contentContainerStyle={{ paddingBottom: tabBarHeight }}
+        />
     );
 }
 

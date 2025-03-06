@@ -94,7 +94,7 @@ export const AppBar = ({
                     onPress={onLeftIconPress ?? handleBack}
                 />
             )}
-            {children ?? <Text variant="titleLarge">{title}</Text>}
+            {children ?? <Text variant="titleLarge" style={styles.textInput}>{title}</Text>}
             {rightIcon && (
                 <IconButton
                     icon={rightIcon}

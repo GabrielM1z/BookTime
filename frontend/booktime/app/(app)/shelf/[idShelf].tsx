@@ -1,15 +1,22 @@
-import { Animated, Modal, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Modal, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import React, { useEffect, useState } from "react";
-import { useLocalSearchParams, useNavigation } from 'expo-router';
+import React, { useEffect, useRef, useState } from "react";
+import { Stack, useLocalSearchParams, useNavigation } from 'expo-router';
 import { Book } from '@/models/Book';
 import { Ionicons } from '@expo/vector-icons';
-import {LivreEtagere} from '@/components/LivreEtagere';
+import { LivreEtagere } from '@/components/LivreEtagere';
 import BackButton from '@/components/BackButton';
 import { useBookContext } from '@/contexts/BookContext';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { AppBar, CustomBottomSheet } from '@/common';
+import Animated, { useAnimatedRef } from 'react-native-reanimated';
+import { ListBooks } from '@/components/library/ListBooks';
+import { useRepository } from '@/hooks/useRepository';
+import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
+import { Button } from 'react-native-paper';
 
-export default function EtagereDetail() {
+export function EtagereDetail() {
 
     const { idEtagere, label } = useLocalSearchParams();
     const { bookController } = useBookContext();
@@ -62,7 +69,7 @@ export default function EtagereDetail() {
     const deleteEtagere = () => {
         console.log("Supprimer l'étagère");
         try {
-            bookController.library.delete({id_library: idEtagere as string}).then(() => {
+            bookController.library.delete({ id_library: idEtagere as string }).then(() => {
                 console.log("Etagère supprimée");
                 navigation.goBack();
             });
@@ -76,10 +83,10 @@ export default function EtagereDetail() {
 
         <ThemedView style={styles.container}>
 
-             {/* Barre de navigation avec retour + paramètre */}
+            {/* Barre de navigation avec retour + paramètre */}
             <View style={styles.header}>
-                
-                <BackButton/>
+
+                <BackButton />
 
                 {/* Icône de paramètres */}
                 <View>
@@ -98,7 +105,7 @@ export default function EtagereDetail() {
                             </TouchableOpacity>
                             <TouchableOpacity style={styles.menuItem} onPress={toggleMenu}>
                                 <Ionicons name="close-outline" size={24} color="white" />
-                            </TouchableOpacity>                            
+                            </TouchableOpacity>
                         </Animated.View>
                     )}
                 </View>
@@ -119,48 +126,95 @@ export default function EtagereDetail() {
     )
 }
 
+// const styles = StyleSheet.create({
+//     container: {
+//         flex: 1,
+//         padding: 20,
+//     },
+//     header: {
+//         flexDirection: "row",
+//         justifyContent: "space-between",
+//         alignItems: "center",
+//         marginBottom: 10,
+//         marginTop: 20,
+//     },
+//     settingsButton: {
+//         backgroundColor: "#333",
+//         padding: 10,
+//         borderRadius: 50,
+//     },
+//     menu: {
+//         position: "absolute",
+//         top: 45,
+//         right: 0,
+//         paddingVertical: 5,
+//         alignItems: "center",
+//         elevation: 5,
+//         zIndex: 1,
+//         gap: 5,
+//     },
+//     menuItem: {
+//         padding: 10,
+//         borderRadius: 50,
+//         backgroundColor: "#333",
+//     },
+//     title: {
+//         fontSize: 24,
+//         fontWeight: "bold",
+//         marginBottom: 20,
+//         textAlign: "center",
+//         margin: "auto",
+//     },
+//     etagereContainer: {
+//         flexDirection: 'row',
+//         flexWrap: 'wrap',
+//         justifyContent: 'flex-start',
+//     },
+// });
+
+// export default EtagereDetail;
+
+
+const ShelfDetail = () => {
+    const { idShelf } = useLocalSearchParams<{ idShelf: string }>();
+    const { bookController } = useBookContext();
+    const { data: shelf } = useRepository(() => bookController.library.get(idShelf), null, [idShelf]);
+    const { data: books, loading, refresh } = useRepository(() => bookController.book.getAllFromLibrary(idShelf), [], [idShelf]);
+    const scrollViewRef = useAnimatedRef<Animated.FlatList<Book>>();
+    const bottomSheetRef = useRef<BottomSheet>(null);
+
+    const handleMenu = () => {
+        bottomSheetRef.current?.expand();
+    }
+
+    return (
+        <SafeAreaView style={styles.container}>
+            <Stack.Screen name="shelf/[idShelf]" options={{
+                title: shelf?.name,
+                headerShown: true,
+                header: (props: any) => (
+                    <AppBar
+                        scrollViewRef={scrollViewRef}
+                        rightIcon={"menu"}
+                        onRightIconPress={() => console.log("Menu")}
+                        {...props}
+                    />
+                )
+            }} />
+            <ListBooks ref={scrollViewRef} books={books} loading={loading} onRefresh={refresh} />
+            <CustomBottomSheet ref={bottomSheetRef} index={-1}>
+                <BottomSheetView>
+                    <Button onPress={handleMenu}>Remove book</Button>
+                </BottomSheetView>
+            </CustomBottomSheet>
+        </SafeAreaView>
+    );
+}
+
+export default ShelfDetail;
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 20,
     },
-    header: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: 10,
-        marginTop: 20,
-    },
-    settingsButton: {
-        backgroundColor: "#333",
-        padding: 10,
-        borderRadius: 50,
-    },
-    menu: {
-        position: "absolute",
-        top: 45,
-        right: 0,
-        paddingVertical: 5,
-        alignItems: "center",
-        elevation: 5,
-        zIndex: 1,
-        gap: 5,
-    },
-    menuItem: {
-        padding: 10,
-        borderRadius: 50,
-        backgroundColor: "#333",
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: "bold",
-        marginBottom: 20,
-        textAlign: "center",
-        margin: "auto",
-    },
-    etagereContainer: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'flex-start',
-    },
-});
+})

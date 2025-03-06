@@ -1,5 +1,6 @@
 export { AppBar, SearchAppBar } from "./AppBar";
 export type { AppBarProps, SearchAppBarProps } from "./AppBar";
+export { CustomBottomSheet } from "./BottomSheet";
 export { BottomSheetModal, BottomSheetModalScreenOptions } from "./BottomSheetModal";
 export type { BottomSheetModalProps } from "./BottomSheetModal";
 export { BubbleBottomTabbar } from "./BubbleBottomTabbar";

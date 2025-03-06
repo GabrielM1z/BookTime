@@ -4,22 +4,25 @@ import { useRepository } from '@/hooks/useRepository';
 import { useSelectableList } from '@/hooks/useSelectableList';
 import { useTopTabbarScroll } from '@/hooks/useTopTabbarScroll';
 import { Book } from '@/models';
-import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { useRouter } from "expo-router";
-import React, { useMemo, useState } from "react";
-import { Dimensions, FlatList, StyleSheet } from 'react-native';
+import React, { forwardRef, useMemo, useState } from "react";
+import { Dimensions, FlatList, FlatListProps, StyleProp, StyleSheet, ViewStyle, View } from 'react-native';
 import { Searchbar } from "react-native-paper";
+import Animated from 'react-native-reanimated';
 
 const DEFAULT_WIDTH_RANGE = [100, 150];
 
 
-export interface ListBooksProps<T extends { id_book: string, title: string, cover_image_url: string }> {
+export interface ListBooksProps<
+    T extends { id_book: string, title: string, cover_image_url: string }
+> extends Omit<FlatListProps<T>, 'renderItem' | 'data'> {
     books: T[];
     selectable?: boolean;
     selectedBooks?: Book[];
     searchbar?: boolean;
     loading?: boolean;
     onRefresh?: () => void;
+    contentContainerStyle?: StyleProp<ViewStyle>;
 }
 
 // TODO: Check ca, ecrit par GPT pas sur que ca marche bien + prendre en compte le gap par default de FlatList
@@ -36,21 +39,20 @@ const calculateBookLayout = () => {
 
 const { width, height, columns } = calculateBookLayout();
 
-export const ListBooks = <T extends { id_book: string, title: string, cover_image_url: string }>({
+export const ListBooks = forwardRef<Animated.FlatList<Book>, ListBooksProps<Book>>(({
     books,
     selectable = false,
     selectedBooks = [],
     searchbar = true,
     loading = false,
     onRefresh,
-}: ListBooksProps<T>) => {
+    contentContainerStyle,
+    ...props
+}: ListBooksProps<Book>, ref) => {
     const router = useRouter();
 
     const { } = useSelectableList(books, [], 'id_book', true, []);
     const [search, setSearch] = useState<string>("");
-
-    const tabBarHeight = useBottomTabBarHeight();
-    const { handleScroll } = useTopTabbarScroll(10);
 
     const handleBookPress = (idBook: string) => {
         router.push({
@@ -68,6 +70,7 @@ export const ListBooks = <T extends { id_book: string, title: string, cover_imag
 
     return (
         <FlatList
+            ref={ref}
             data={filteredBooks}
             keyExtractor={(item) => item.id_book.toString()}
             renderItem={({ item }) => (
@@ -80,8 +83,6 @@ export const ListBooks = <T extends { id_book: string, title: string, cover_imag
                     onPress={handleBookPress}
                 />
             )}
-            contentContainerStyle={[styles.contentContainer, { paddingBottom: tabBarHeight }]}
-            onScroll={handleScroll}
             numColumns={columns}
             columnWrapperStyle={styles.columnWrapper}
             onRefresh={onRefresh}
@@ -95,16 +96,19 @@ export const ListBooks = <T extends { id_book: string, title: string, cover_imag
                     />
                 ) : null
             }
+            style={styles.container}
+            contentContainerStyle={[styles.contentContainer, contentContainerStyle]}
             ListHeaderComponentStyle={styles.searchbar}
+            {...props}
         />
     );
-}
+});
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
-        paddingHorizontal: 10,
-        justifyContent: "space-between",
+        // flex: 1,
+        // paddingHorizontal: 10,
+        // justifyContent: "space-between",
     },
     contentContainer: {
         alignItems: "center",

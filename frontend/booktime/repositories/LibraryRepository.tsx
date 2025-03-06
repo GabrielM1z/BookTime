@@ -3,7 +3,7 @@ import { SQLiteDatabase } from 'expo-sqlite';
 import { SynchronisationProxy } from "@/controllers/SynchronisationProxy";
 import { Context, CrudRepository } from '@/types/repositories';
 import { BaseLocalRepository } from './base/BaseRepository';
-import { syncAfterMethod } from '@/decorators/synchronisation';
+import { syncAfterMethod, syncBeforeMethod } from '@/decorators/synchronisation';
 
 export interface LibraryRepository extends CrudRepository<
     Library, CreateLibraryDto, UpdateLibraryDto, DeleteLibraryDto
@@ -32,6 +32,8 @@ export class LocalLibraryRepository extends BaseLocalRepository<Library> impleme
         return result!;
     }
 
+    // @ts-ignore
+    // @syncBeforeMethod()
     async getAll(): Promise<Library[]> {
         let allRows = await this.db.getAllAsync<Library>(
             `SELECT * FROM library 
@@ -49,6 +51,8 @@ export class LocalLibraryRepository extends BaseLocalRepository<Library> impleme
         return result!;
     }
 
+    // @ts-ignore
+    // @syncBeforeMethod()
     async getAllFromBook(id_book: string): Promise<Library[]> {
         const libraries = this.db.getAllAsync<Library>(
             `SELECT library.*
@@ -61,6 +65,8 @@ export class LocalLibraryRepository extends BaseLocalRepository<Library> impleme
         return libraries;
     }
 
+    // @ts-ignore
+    // @syncBeforeMethod()
     async getAllNotLibraryFromBook(id_book: string): Promise<Library[]> {
         const libraries = this.db.getAllAsync<Library>(
             `SELECT library.*
@@ -77,6 +83,8 @@ export class LocalLibraryRepository extends BaseLocalRepository<Library> impleme
         return libraries;
     }
 
+    // @ts-ignore
+    // @syncBeforeMethod()
     async getFirstFromBook(idBook: string): Promise<Library | null> {
         const result = await this.db.getFirstAsync<Library>(
             `SELECT library.*

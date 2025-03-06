@@ -6,6 +6,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SynchronisationController } from "@/controllers/SynchronisationController";
 import { actionEncode } from "@/helpers/parser";
 import { VariableRepository } from "@/repositories/VariableRepository";
+import { guestUserId } from "@/constants";
 
 export interface SynchronisationProxyProps {
     service: string;
@@ -20,16 +21,22 @@ export class SynchronisationProxy implements SynchronisationProxyProps {
     variable: VariableRepository;
     controller: SynchronisationController;
     syncFlag: boolean = false;
+    private syncing = false;
+    private idUser: string;
 
     constructor(service: string, tableName: string, controller: SynchronisationController, db: SQLiteDatabase, idUser: string) {
         this.service = service;
         this.action = new LocalActionRepository(tableName, db, idUser);
         this.variable = new VariableRepository(db);
         this.controller = controller;
+        this.idUser = idUser;
     }
 
     async runSync() {
-        if (this.syncFlag) return;
+        console.log("Synchronisation demandée", this.syncFlag, this.syncing);
+        if (this.idUser === guestUserId) return;
+        if (this.syncFlag || this.syncing) return;
+        // this.syncing = true;
 
         if (Platform.OS === "web") return // TODO: Check if needed, normally the function should not be called on web
 
@@ -53,14 +60,14 @@ export class SynchronisationProxy implements SynchronisationProxyProps {
                 encodedActions,
             );
 
-            this.controller.processActions(response.data);
-
             await this.controller.sync.action.deleteAll();
             await AsyncStorage.setItem(`${this.service}_last_sync`, response.data.sync_date);
-            // console.log("Synchronisation terminée avec succès !", response.data.sync_date);
-            // console.log("Actions restantes :", await this.action.getAll());
+
+            this.controller.processActions(response.data);
         } catch (error) {
             console.error("Erreur lors de la synchronisation :", error);
+        } finally {
+            // this.syncing = false;
         }
     }
 }

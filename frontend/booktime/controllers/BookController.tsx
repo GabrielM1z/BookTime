@@ -19,7 +19,7 @@ import { CreateLibraryDto, LibraryWithBooksMin } from "@/models/Library";
 import { guestUserId } from "@/constants";
 import { BookResponseSync } from "@/types/synchronisation";
 import { VariableRepository } from "@/repositories/VariableRepository";
-import { syncAfterMethod } from "@/decorators/synchronisation";
+import { syncAfterMethod, syncBeforeMethod } from "@/decorators/synchronisation";
 import { Buffer } from "buffer";
 import { safeActionDecode } from "@/helpers/parser";
 
@@ -124,7 +124,7 @@ export class LocalBookController extends SynchronisationController<BookResponseS
 
                 if (func && repository) {
                     await this.variable.set(`syncing_${type.toLowerCase()}_${table_name.toLowerCase()}`, "true"); 
-                    await (this[repository] as any)[func](decodedData, { syncing: true });
+                    await (this[repository] as any)[func](decodedData);
                     await this.variable.set(`syncing_${type.toLowerCase()}_${table_name.toLowerCase()}`, "false"); 
                 }
             }
@@ -221,6 +221,8 @@ export class LocalBookController extends SynchronisationController<BookResponseS
         }
     }
 
+    // @ts-ignore
+    // @syncBeforeMethod()
     async getAllLibraryInfo(): Promise<LibraryWithBooksMin[] | []> {
         try {
             const allLibrary: Library[] = await this.library.getAll();
