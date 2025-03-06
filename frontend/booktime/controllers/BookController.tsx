@@ -28,7 +28,7 @@ export interface BookControllerProps {
     addBook: (idBook: string, idLibrary: string) => Promise<void>
     createLibrary: (library: CreateLibraryDto) => Promise<void>
     getAllLibraryInfo: () => Promise<LibraryWithBooksMin[] | []>
-    getBookById: (idBook: string, mode: string) => Promise<Book>
+    getBookById: (idBook: string, mode: string) => Promise<Book | BookInfosServeur>
 }
 
 export class LocalBookController implements BookControllerProps {
@@ -68,13 +68,15 @@ export class LocalBookController implements BookControllerProps {
     }
 
     //Retourne la méthode local ou remote selon la valeur du mode
-    async getBookById(idBook: string, mode: string): Promise<Book> {
+    async getBookById(idBook: string, mode: string): Promise<Book | BookInfosServeur> {
+
         switch (mode) {
             case "library":
                 return await this.book.get(idBook);
                 break;
             case "search":
-                return await this.remoteBook.get(idBook);
+                let res = await this.remoteBook.get(idBook);
+                return res
                 break;
 
             default:
@@ -85,12 +87,16 @@ export class LocalBookController implements BookControllerProps {
 
     //Retourne la méthode local ou remote selon la valeur du mode
     async getListAuthorByBookId(idBook: string, mode: string): Promise<Author[]> {
+        
         switch (mode) {
             case "library":
                 return await this.author.getFromIdBooks(idBook);
                 break;
             case "search":
+
                 return await this.remoteAuthor.getFromIdBooks(idBook);
+               
+                
                 break;
 
             default:

@@ -1,14 +1,11 @@
 import { StyleSheet, View, FlatList } from 'react-native';
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Stack, useLocalSearchParams } from 'expo-router';
-import axios from 'axios';
-import { baseURL } from '@/constants/Api';
-import { Book } from '@/models/Book';
+import { router, Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { Book, BookInfosServeur } from '@/models/Book';
 import { State } from '@/models/State';
-import { linkToBase64 } from '@/helpers/image';
 import { useBookContext } from '@/contexts/BookContext';
-import { Avatar, IconButton, Text, TextInput, Title } from 'react-native-paper'
+import { Avatar, Button, IconButton, Text, TextInput, Title } from 'react-native-paper'
 import Animated, {
     interpolate,
     useAnimatedRef,
@@ -18,8 +15,7 @@ import Animated, {
 import { useTheme } from 'react-native-paper';
 import { useRepository } from '@/hooks/useRepository';
 import { Author } from '@/models';
-import Slider from '@react-native-community/slider';
-import NumericInput from 'react-native-numeric-input'
+
 const IMG_HEIGHT = 300;
 
 
@@ -28,8 +24,17 @@ export default function LivreDetail() {
     const { bookController } = useBookContext();
     const { idBook, mode } = useLocalSearchParams();
     // const [book, setBook] = useState<Book>();
-    const { data: book } = useRepository<Book>(async () => await bookController.getBookById(idBook, mode));
-    const { data: listAuthors, refresh, loading } = useRepository<Author[]>(async () => (await bookController.author.getFromIdBooks(idBook)), []);
+    const { data: book } = useRepository<Book | BookInfosServeur>(async () => await bookController.getBookById(idBook, mode));
+    // const { data: listAuthors, refresh, loading } = useRepository<Author[]>(async () => (await bookController.author.getFromIdBooks(idBook)), []);
+    const { data: listAuthors, refresh, loading } = useRepository<Author[]>(async () => {
+        console.log("mode :", mode);
+
+        if (mode == "search") {
+            return book.authors;
+        } else {
+            return await bookController.author.getFromIdBooks(idBook)
+        }
+    }, [], [book]);
     const { data: bookState, refresh: refreshBookState } = useRepository<State | null>(async () => (await bookController.state.getFromIdBook(idBook)), null);
 
     const scrollRef = useAnimatedRef<Animated.ScrollView>();
@@ -70,10 +75,12 @@ export default function LivreDetail() {
         )
     }, [book])
 
+    const router = useRouter();
+
     const headerButton = () => {
         return (
 
-            <Avatar.Icon icon={'chevron-left'} size={30} />
+            <Button icon="chevron-left" mode="contained" onPress={() => router.back()} children={undefined} />
         )
     }
 
