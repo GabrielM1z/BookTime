@@ -43,25 +43,25 @@ export class LocalStateRepository implements StateRepository {
             console.log("state :", state);
 
             // Exécution de la requête
-            // await this.db.runAsync(`UPDATE state 
-            // SET state = $state, 
-            //     progression = $progression, 
-            //     read_count = $read_count, 
-            //     last_read_date = $last_read_date, 
-            //     is_available = $is_available
-            // WHERE id_user = $id_user AND id_book = $id_book`, {
-            //     $state: state.state,
-            //     $progression: state.progression,
-            //     $read_count: state.read_count,
-            //     $last_read_date: state.last_read_date,
-            //     $is_available: state.is_available,
-            //     $id_user: state.id_user,
-            //     $id_book: state.id_book
-            // })
-
             await this.db.runAsync(`UPDATE state 
-            SET progression = 12
-            WHERE state.id_user = "guest" AND state.id_book = "9781264687749";`)
+            SET state = $state, 
+                progression = $progression, 
+                read_count = $read_count, 
+                last_read_date = $last_read_date, 
+                is_available = $is_available
+            WHERE id_user = $id_user AND id_book = $id_book`, {
+                $state: state.state,
+                $progression: state.progression,
+                $read_count: state.read_count,
+                $last_read_date: state.last_read_date,
+                $is_available: state.is_available,
+                $id_user: state.id_user,
+                $id_book: state.id_book
+            })
+
+            // await this.db.runAsync(`UPDATE state 
+            // SET progression = 12
+            // WHERE state.id_user = "guest" AND state.id_book = "9781264687749";`)
 
             console.log("updateState: Mise à jour réussie !");
             return true;
