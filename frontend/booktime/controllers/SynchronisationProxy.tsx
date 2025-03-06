@@ -33,10 +33,10 @@ export class SynchronisationProxy implements SynchronisationProxyProps {
     }
 
     async runSync() {
-        console.log("Synchronisation demandée", this.syncFlag, this.syncing);
+        // console.log("Synchronisation demandée", this.syncFlag, this.syncing);
         if (this.idUser === guestUserId) return;
-        if (this.syncFlag || this.syncing) return;
-        // this.syncing = true;
+        if (this.syncFlag) return;
+        this.syncing = true;
 
         if (Platform.OS === "web") return // TODO: Check if needed, normally the function should not be called on web
 
@@ -67,7 +67,7 @@ export class SynchronisationProxy implements SynchronisationProxyProps {
         } catch (error) {
             console.error("Erreur lors de la synchronisation :", error);
         } finally {
-            // this.syncing = false;
+            this.syncing = false;
         }
     }
 }

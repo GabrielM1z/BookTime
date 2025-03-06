@@ -135,7 +135,7 @@ export class LocalBookController extends SynchronisationController<BookResponseS
 
     async enter() {
         if (this.id_user !== guestUserId) {
-            await this.sync.runSync(); // Sync all data
+            // await this.sync.runSync(); // Sync all data
         }
 
         await this.variable.set("current_user", this.id_user);
@@ -190,9 +190,6 @@ export class LocalBookController extends SynchronisationController<BookResponseS
                 await this.author.createAll(bookServer.authors);
                 await this.authorBook.createAll(authorBooks);
             });
-
-            console.log("addBook: success")
-
         } catch (error) {
             console.log("Failed addBook :", error)
         }
@@ -212,8 +209,6 @@ export class LocalBookController extends SynchronisationController<BookResponseS
                 }
 
                 this.sharedLibrary.create(sharedLibrary);
-
-                console.log("Library created :", idLibrary);
             })
         } catch (error) {
             console.log("Failed createLibrary :", error)
@@ -222,7 +217,7 @@ export class LocalBookController extends SynchronisationController<BookResponseS
     }
 
     // @ts-ignore
-    // @syncBeforeMethod()
+    @syncBeforeMethod()
     async getAllLibraryInfo(): Promise<LibraryWithBooksMin[] | []> {
         try {
             const allLibrary: Library[] = await this.library.getAll();

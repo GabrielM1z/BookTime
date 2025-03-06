@@ -26,7 +26,6 @@ export class LocalLibraryBookRepository extends BaseLocalRepository<LibraryBook>
     // @ts-ignore
     @syncAfterMethod()
     async create(libraryBook: CreateLibraryBookDto): Promise<void> {
-        console.log("create library book");
         await this.create_base(libraryBook);
     }
 

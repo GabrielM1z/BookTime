@@ -8,14 +8,14 @@ export const linkToBase64 = async (link: string): Promise<string> => {
             return ""
         }
 
-        console.log('chargement image :', link);
+        // console.log('chargement image :', link);
         
         const response = await axios.get(link, { responseType: 'arraybuffer' });
         
         if (response == null) {
             return ""
         }
-        console.log('Image chargé');
+        // console.log('Image chargé');
         const base64Image: string = `data:image/jpeg;base64,${Buffer.from(response.data, 'binary').toString('base64')}`;
         return base64Image;
                 

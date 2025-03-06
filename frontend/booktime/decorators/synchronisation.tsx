@@ -7,7 +7,8 @@ export function syncBeforeMethod() {
         }
 
         descriptor.value = async function (...args: any[]) {
-            if ("sync" in this) {
+            // console.log((this as any).sync.syncFlag, (this as any).sync.syncing);
+            if ("sync" in this && !(this as any).sync.syncFlag && !(this as any).sync.syncing) {
                 (this as any).sync.runSync();
             }
             return await originalMethod.apply(this, args);
@@ -28,9 +29,11 @@ export function syncAfterMethod() {
                 (this as any).sync.syncFlag = true;
             }
             const result = await originalMethod.apply(this, args);
+            if ("sync" in this && !(this as any).sync.syncFlag) {
+                (this as any).sync.runSync();
+            }
             if ("sync" in this) {
                 (this as any).sync.syncFlag = false;
-                (this as any).sync.runSync();
             }
             return result;
         };

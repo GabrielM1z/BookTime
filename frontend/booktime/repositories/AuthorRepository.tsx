@@ -45,9 +45,7 @@ export class LocalAuthorRepository extends BaseLocalRepository<Author> implement
                 LEFT JOIN book_author ON author.id_author = book_author.id_author
                 WHERE book_author.id_book = $idBook
                 `, {$idBook: idBook}
-            );
-            console.log(allRowsFromIdBook);
-            
+            );            
             return allRowsFromIdBook;
 
         } catch (error) {
@@ -57,9 +55,7 @@ export class LocalAuthorRepository extends BaseLocalRepository<Author> implement
         }
     }
 
-    async createAll(listNewAuthors: CreateAuthorDto[]): Promise<void> {
-        console.log("Création liste auteurs :",listNewAuthors);
-        
+    async createAll(listNewAuthors: CreateAuthorDto[]): Promise<void> {        
         const insertAuthor = await this.db.prepareAsync(
             `INSERT OR IGNORE INTO author (id_author, name, description)
             VALUES ($id_author, $name, $description);`

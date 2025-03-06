@@ -104,11 +104,9 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: '#333',
     },
     authors: {
         fontSize: 14,
-        color: '#666',
     },
     icon: {
         borderRadius: 30,

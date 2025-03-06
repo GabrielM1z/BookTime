@@ -1,11 +1,11 @@
-import { StyleSheet, View, FlatList } from 'react-native';
+import { StyleSheet, View, FlatList, ScrollView } from 'react-native';
 
 import React, { useCallback, useMemo, useState } from "react";
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { Link, Stack, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { Book, BookInfosServeur } from '@/models/Book';
 import { State } from '@/models/State';
 import { useBookContext } from '@/contexts/BookContext';
-import { Avatar, Text, TextInput, Title } from 'react-native-paper'
+import { Avatar, Button, IconButton, Text, TextInput, Title } from 'react-native-paper'
 import Animated, {
     interpolate,
     useAnimatedRef,
@@ -75,7 +75,7 @@ export default function LivreDetail() {
             <Animated.View style={[headerAnimatedStyle, styles.headerTitles]}><Text variant='titleMedium'>{book ? book.title : ""}</Text></Animated.View>
         )
     }, [book])
-    
+
     return (
         <View >
             <Stack.Screen
@@ -97,7 +97,9 @@ export default function LivreDetail() {
                 />
 
                 <View style={[{ height: 2000, backgroundColor: colors.background }]}>
-                    {bookState ? <LivreDetailOwned bookState={bookState} book={book} /> : null}
+                    {bookState ?
+                        <LivreDetailOwned bookState={bookState} book={book} /> : null
+                    }
                     <View style={styles.container}>
 
                         <Text variant='titleLarge'>
@@ -143,6 +145,8 @@ export function LivreDetailOwned({ bookState, book }: LivreDetailOwnedProps) {
     const { bookController } = useBookContext();
     const [progression, setProgression] = useState(bookState?.progression || 0);
 
+    const { data: libraries, refresh } = useRepository(() => bookController.library.getAllFromBook(book.id_book), [], [book.id_book]);
+
     // Gestion du changement de valeur via TextInput
     const handleProgressChange = (text: string) => {
         let value = parseInt(text, 10); // Convertir en nombre entier
@@ -153,14 +157,36 @@ export function LivreDetailOwned({ bookState, book }: LivreDetailOwnedProps) {
         }
     };
 
+    useFocusEffect(
+        useCallback(() => {
+            refresh();
+        }, [refresh, book.id_book])
+    );
+
     const handleConfirmProgressChange = async () => {
         bookState.progression = progression;
         bookState.last_read_date = (new Date()).toISOString();
 
         await bookController.state.update(bookState);
     }
+
     return (
         <View style={styles.container}>
+            <FlatList
+                horizontal
+                nestedScrollEnabled
+                data={libraries}
+                keyExtractor={(item) => item.id_library.toString()}
+                renderItem={({ item }) => <Button mode="contained">{item.name}</Button>}
+                contentContainerStyle={{ alignItems: "center", gap: 10 }}
+                showsHorizontalScrollIndicator={false}
+                ListHeaderComponent={(
+                    <Link href={{ pathname: "/(app)/ManageLibraryModal", params: { idBook: book.id_book } }} asChild>
+                        <IconButton icon="plus" mode='contained' onPress={() => { }} />
+                    </Link>
+                )}
+            />
+
             <Text variant='titleLarge'>
                 Progression :
             </Text>
@@ -201,6 +227,7 @@ const styles = StyleSheet.create({
     },
     container: {
         margin: 20,
+        gap: 10
     },
     slider: {
         width: 300,
