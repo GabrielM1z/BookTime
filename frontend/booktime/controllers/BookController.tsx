@@ -180,7 +180,7 @@ export class LocalBookController extends SynchronisationController<BookResponseS
                     rate: 0,
                 }
 
-                const authorBooks = (bookServer.authors ?? []).map((author) => ({
+                const authorBooks = (bookServer.authors ?? []).map((author : Author) => ({
                     id_author: author.id_author,
                     id_book: book.id_book,
                 }));
@@ -267,10 +267,6 @@ export class RemoteBookController implements BookControllerProps {
         this.libraryBook = new RemoteLibraryBookRepository();
         this.authorBook = new RemoteAuthorBookRepository();
         this.sharedLibrary = new RemoteSharedLibraryRepository();
-    }
-
-    async getBookById(idBook: string, mode: string): Promise<Book> {
-        return await this.book.get(idBook)
     }
 
     async getBookById(idBook: string, mode: string): Promise<Book> {

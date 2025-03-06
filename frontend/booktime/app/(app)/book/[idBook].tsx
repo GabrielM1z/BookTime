@@ -29,7 +29,6 @@ export default function LivreDetail() {
     const { data: book } = useRepository<Book | BookInfosServeur>(async () => await bookController.getBookById(idBook, mode));
     // const { data: listAuthors, refresh, loading } = useRepository<Author[]>(async () => (await bookController.author.getFromIdBooks(idBook)), []);
     const { data: listAuthors, refresh, loading } = useRepository<Author[]>(async () => {
-        console.log("mode :", mode);
 
         if (mode == "search") {
             return book.authors;
@@ -76,13 +75,6 @@ export default function LivreDetail() {
             <Animated.View style={[headerAnimatedStyle, styles.headerTitles]}><Text variant='titleMedium'>{book ? book.title : ""}</Text></Animated.View>
         )
     }, [book])
-
-    // const headerButton = () => {
-    //     return (
-        
-    //         <Button icon="chevron-left" mode="contained" onPress={() => router.back()} children={undefined} />
-    //     )
-    // }
     
     return (
         <View >
@@ -165,7 +157,7 @@ export function LivreDetailOwned({ bookState, book }: LivreDetailOwnedProps) {
         bookState.progression = progression;
         bookState.last_read_date = (new Date()).toISOString();
 
-        await bookController.state.updateState(bookState);
+        await bookController.state.update(bookState);
     }
     return (
         <View style={styles.container}>

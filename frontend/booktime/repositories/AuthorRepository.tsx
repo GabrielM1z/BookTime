@@ -5,7 +5,10 @@ import { BaseLocalRepository } from './base/BaseRepository';
 
 export interface AuthorRepository extends CrudRepository<
     Author, CreateAuthorDto, UpdateAuthorDto, DeleteAuthorDto
-> { }
+> { 
+    getFromIdBooks: (idBook: string) => Promise<Author[]>
+
+}
 
 export class LocalAuthorRepository extends BaseLocalRepository<Author> implements AuthorRepository {
     private id_user: string;
@@ -99,6 +102,10 @@ export class RemoteAuthorRepository implements AuthorRepository {
     }
 
     async update(author: UpdateAuthorDto): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
+
+    async getFromIdBooks(idBook: string): Promise<Author[]> {
         throw new Error("Method not implemented.");
     }
 

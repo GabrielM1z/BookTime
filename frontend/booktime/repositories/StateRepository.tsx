@@ -6,7 +6,9 @@ import { BaseLocalRepository } from "./base/BaseRepository";
 
 export interface StateRepository extends CrudRepository<
     State, CreateStateDto, UpdateStateDto, DeleteStateDto
-> { }
+> { 
+    getFromIdBook: (idBook: string) => Promise<State | null>
+}
 
 export class LocalStateRepository extends BaseLocalRepository<State> implements StateRepository {
     private id_user: string;
@@ -70,7 +72,7 @@ export class RemoteStateRepository implements StateRepository {
     async update(state: UpdateStateDto): Promise<void> {
         throw new Error("Method not implemented.");
     }
-    
+
     async getFromIdBook(idBook: string): Promise<State | null> {
         return null;
     }
