@@ -4,6 +4,8 @@ import { SQLiteDatabase } from "expo-sqlite";
 import { Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SynchronisationController } from "@/controllers/SynchronisationController";
+import { actionEncode } from "@/helpers/parser";
+import { VariableRepository } from "@/repositories/VariableRepository";
 
 export interface SynchronisationProxyProps {
     service: string;
@@ -15,47 +17,50 @@ export interface SynchronisationProxyProps {
 export class SynchronisationProxy implements SynchronisationProxyProps {
     service: string;
     action: LocalActionRepository;
+    variable: VariableRepository;
     controller: SynchronisationController;
+    syncFlag: boolean = false;
 
-    constructor(service: string, tableName: string, controller: SynchronisationController, db: SQLiteDatabase) {
+    constructor(service: string, tableName: string, controller: SynchronisationController, db: SQLiteDatabase, idUser: string) {
         this.service = service;
-        this.action = new LocalActionRepository(tableName, db);
+        this.action = new LocalActionRepository(tableName, db, idUser);
+        this.variable = new VariableRepository(db);
         this.controller = controller;
     }
 
     async runSync() {
-        // try {
+        if (this.syncFlag) return;
+
         if (Platform.OS === "web") return // TODO: Check if needed, normally the function should not be called on web
 
         console.log("Synchronisation en cours...");
 
         const actionsFront = await this.action.getAll();
         const encodedActions = actionsFront.map((actionItem) => {
-            const actionBase64 = btoa(JSON.stringify(actionItem.action));
+            const actionBase64 = actionEncode(actionItem.action);
             return {
                 ...actionItem,
                 action: actionBase64,
             };
         });
 
-        console.log("Actions encodées en Base64 :", encodedActions);
+        // console.log("Actions encodées en Base64 :", encodedActions);
 
-        const lastSync = await AsyncStorage.getItem(`${this.service}_last_sync`) || "0";
-        const response = await api.post(
-            `/${this.service}/synchro/${lastSync}`,
-            encodedActions,
-        );
+        try {
+            const lastSync = await AsyncStorage.getItem(`${this.service}_last_sync`) || "2006-01-02T15:04:05Z";
+            const response = await api.post(
+                `/${this.service}/synchro/${lastSync}`,
+                encodedActions,
+            );
 
-        this.controller.processActions(response.data);
+            // this.controller.processActions(response.data);
 
-        // TODO récupération des actions du back
-        // TODO éxecution des actions dans l'ordre
-        // TODO recup des isbn des livres
-        // TODO comparaison des isbn server et client
-        // TODO faire un getBook si il manque des livres
-
-        // } catch (error) {
-        //     console.error("Erreur lors de la synchronisation :", error);
-        // }
+            await this.controller.sync.action.deleteAll();
+            await AsyncStorage.setItem(`${this.service}_last_sync`, response.data.sync_date);
+            // console.log("Synchronisation terminée avec succès !", response.data.sync_date);
+            // console.log("Actions restantes :", await this.action.getAll());
+        } catch (error) {
+            console.error("Erreur lors de la synchronisation :", error);
+        }
     }
 }

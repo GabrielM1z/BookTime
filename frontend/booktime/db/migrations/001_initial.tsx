@@ -19,6 +19,7 @@ export const initDB = async (db: SQLiteDatabase) => {
     await initUser(db)
     await initAction(db, "book_action")
     await initAction(db, "user_action")
+    await initVariable(db)
 
     // init des trigger
     await initTrigger(db)
@@ -148,12 +149,14 @@ const initState = async (db: SQLiteDatabase) => {
             CREATE TABLE IF NOT EXISTS state (
                 state VARCHAR(50),
                 progression INT,
-                read_count INT DEFAULT 0,
-                last_read_date TIMESTAMP,
+                readcount INT DEFAULT 0,
+                last_read_date TEXT,
                 id_user TEXT NOT NULL,
                 id_book VARCHAR(13) NOT NULL,
                 is_available BOOLEAN DEFAULT FALSE,
-                PRIMARY KEY (id_user, id_book)
+                comment TEXT,
+                rate INT,
+                PRIMARY KEY (id_user, id_book),
                 FOREIGN KEY (id_book) REFERENCES book(id_book) ON DELETE CASCADE
             );
         `);
@@ -225,7 +228,7 @@ const initAction = async (db: SQLiteDatabase, tableName: string) => {
                 id_action TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
                 id_user TEXT,
                 table_name VARCHAR(50),
-                date TIMESTAMP,
+                date TEXT,
                 type VARCHAR(50),
                 action JSON,
                 executed_by VARCHAR(6)
@@ -237,6 +240,19 @@ const initAction = async (db: SQLiteDatabase, tableName: string) => {
     }
 }
 
+const initVariable = async (db: SQLiteDatabase) => {
+    try {
+        await db.execAsync(`
+            CREATE TABLE IF NOT EXISTS variable (
+                name VARCHAR(50) PRIMARY KEY,
+                value TEXT
+            );
+        `);
+        console.log('variable initialized successfully');
+    } catch (error) {
+        console.error('Error initializing variable', error);
+    }
+}
 
 
 
@@ -282,6 +298,7 @@ const initTriggerInsertState = async (db: SQLiteDatabase) => {
             AFTER INSERT
             ON state
             FOR EACH ROW
+            WHEN (SELECT value FROM variable WHERE name = 'syncing_insert_state') <> 'true'
             BEGIN
                 INSERT INTO book_action (
                     id_action, 
@@ -289,23 +306,27 @@ const initTriggerInsertState = async (db: SQLiteDatabase) => {
                     date, 
                     type, 
                     action, 
-                    executed_by
+                    executed_by,
+                    id_user
                 )
                 VALUES (
                     lower(hex(randomblob(16))),
                     'STATE', 
-                    CURRENT_TIMESTAMP, 
+                    (SELECT strftime('%Y-%m-%dT%H:%M:%fZ', 'now')), 
                     'INSERT', 
                     json_object(
                         'state', NEW.state,
                         'progression', NEW.progression,
-                        'read_count', NEW.read_count,
+                        'readcount', NEW.readcount,
                         'last_read_date', NEW.last_read_date,
                         'id_user', NEW.id_user,
                         'id_book', NEW.id_book,
-                        'is_available', NEW.is_available
+                        'is_available', NEW.is_available,
+                        'comment', NEW.comment,
+                        'rate', NEW.rate
                     ), 
-                    'CLIENT'
+                    'CLIENT',
+                    NEW.id_user
                 );
             END;
         `);
@@ -326,6 +347,7 @@ const initTriggerUpdateState = async (db: SQLiteDatabase) => {
             AFTER UPDATE
             ON state
             FOR EACH ROW
+            WHEN (SELECT value FROM variable WHERE name = 'syncing_update_state') <> 'true'
             BEGIN
                 INSERT INTO book_action (
                     id_action, 
@@ -338,7 +360,7 @@ const initTriggerUpdateState = async (db: SQLiteDatabase) => {
                 VALUES (
                     lower(hex(randomblob(16))),
                     'STATE', 
-                    CURRENT_TIMESTAMP, 
+                    (SELECT strftime('%Y-%m-%dT%H:%M:%fZ', 'now')), 
                     'INSERT', 
                     json_object(
                         CASE WHEN OLD.state != NEW.state THEN 'state' ELSE NULL END, 
@@ -347,8 +369,8 @@ const initTriggerUpdateState = async (db: SQLiteDatabase) => {
                         CASE WHEN OLD.progression != NEW.progression THEN 'progression' ELSE NULL END, 
                         CASE WHEN OLD.progression != NEW.progression THEN NEW.progression ELSE NULL END,
 
-                        CASE WHEN OLD.read_count != NEW.read_count THEN 'read_count' ELSE NULL END, 
-                        CASE WHEN OLD.read_count != NEW.read_count THEN NEW.read_count ELSE NULL END,
+                        CASE WHEN OLD.readcount != NEW.readcount THEN 'readcount' ELSE NULL END, 
+                        CASE WHEN OLD.readcount != NEW.readcount THEN NEW.readcount ELSE NULL END,
 
                         CASE WHEN OLD.last_read_date != NEW.last_read_date THEN 'last_read_date' ELSE NULL END, 
                         CASE WHEN OLD.last_read_date != NEW.last_read_date THEN NEW.last_read_date ELSE NULL END,
@@ -360,7 +382,13 @@ const initTriggerUpdateState = async (db: SQLiteDatabase) => {
                         CASE WHEN OLD.id_book != NEW.id_book THEN NEW.id_book ELSE NULL END,
 
                         CASE WHEN OLD.is_available != NEW.is_available THEN 'is_available' ELSE NULL END, 
-                        CASE WHEN OLD.is_available != NEW.is_available THEN NEW.is_available ELSE NULL END
+                        CASE WHEN OLD.is_available != NEW.is_available THEN NEW.is_available ELSE NULL END,
+
+                        CASE WHEN OLD.comment != NEW.comment THEN 'comment' ELSE NULL END,
+                        CASE WHEN OLD.comment != NEW.comment THEN NEW.comment ELSE NULL END,
+
+                        CASE WHEN OLD.rate != NEW.rate THEN 'rate' ELSE NULL END,
+                        CASE WHEN OLD.rate != NEW.rate THEN NEW.rate ELSE NULL END
                     ), 
                     'CLIENT'
                 );
@@ -383,6 +411,7 @@ const initTriggerDeleteState = async (db: SQLiteDatabase) => {
             AFTER DELETE
             ON state
             FOR EACH ROW
+            WHEN COALESCE((SELECT value FROM variable WHERE name = 'syncing_delete_state'), 'false') <> 'true'
             BEGIN
                 INSERT INTO book_action (
                     id_action, 
@@ -395,7 +424,7 @@ const initTriggerDeleteState = async (db: SQLiteDatabase) => {
                 VALUES (
                     lower(hex(randomblob(16))),
                     'STATE', 
-                    CURRENT_TIMESTAMP, 
+                    (SELECT strftime('%Y-%m-%dT%H:%M:%fZ', 'now')), 
                     'DELETE', 
                     json_object(
                         'id_state', OLD.id_state
@@ -424,23 +453,26 @@ const initTriggerInsertLibrary = async (db: SQLiteDatabase) => {
             AFTER INSERT
             ON library
             FOR EACH ROW
+            WHEN COALESCE((SELECT value FROM variable WHERE name = 'syncing_insert_library'), 'false') <> 'true'
             BEGIN
                 INSERT INTO book_action (
                     table_name, 
                     date, 
                     type, 
                     action, 
-                    executed_by
+                    executed_by,
+                    id_user
                 )
                 VALUES (
                     'LIBRARY', 
-                    CURRENT_TIMESTAMP, 
+                    (SELECT strftime('%Y-%m-%dT%H:%M:%fZ', 'now')), 
                     'INSERT', 
                     json_object(
                         'id_library', NEW.id_library,
                         'name', NEW.name
                     ), 
-                    'CLIENT'
+                    'CLIENT',
+                    (SELECT value FROM variable WHERE name = 'current_user')
                 );
             END;
         `);
@@ -462,6 +494,7 @@ const initTriggerUpdateLibrary = async (db: SQLiteDatabase) => {
             AFTER UPDATE
             ON library
             FOR EACH ROW
+            WHEN COALESCE((SELECT value FROM variable WHERE name = 'syncing_update_library'), 'false') <> 'true'
             BEGIN
                 INSERT INTO book_action (
                     id_action, 
@@ -474,7 +507,7 @@ const initTriggerUpdateLibrary = async (db: SQLiteDatabase) => {
                 VALUES (
                     lower(hex(randomblob(16))),
                     'LIBRARY', 
-                    CURRENT_TIMESTAMP, 
+                    (SELECT strftime('%Y-%m-%dT%H:%M:%fZ', 'now')), 
                     'UPDATE', 
                     json_object(
                         'id_library', NEW.id_library,
@@ -502,6 +535,7 @@ const initTriggerDeleteLibrary = async (db: SQLiteDatabase) => {
             AFTER DELETE
             ON library
             FOR EACH ROW
+            WHEN COALESCE((SELECT value FROM variable WHERE name = 'syncing_delete_library'), 'false') <> 'true'
             BEGIN
                 INSERT INTO book_action (
                     id_action, 
@@ -514,7 +548,7 @@ const initTriggerDeleteLibrary = async (db: SQLiteDatabase) => {
                 VALUES (
                     lower(hex(randomblob(16))),
                     'LIBRARY', 
-                    CURRENT_TIMESTAMP, 
+                    (SELECT strftime('%Y-%m-%dT%H:%M:%fZ', 'now')), 
                     'DELETE', 
                     json_object(
                         'id_library', OLD.id_library
@@ -523,7 +557,7 @@ const initTriggerDeleteLibrary = async (db: SQLiteDatabase) => {
                 );
             END;
         `);
-        console.log('Trigger state delete initialized successfully');
+        console.log('Trigger library delete initialized successfully');
     } catch (error) {
         console.error('Error initializing trigger state delete', error);
     }
@@ -543,6 +577,7 @@ const initTriggerInsertSharedLibrary = async (db: SQLiteDatabase) => {
             AFTER INSERT
             ON shared_library
             FOR EACH ROW
+            WHEN COALESCE((SELECT value FROM variable WHERE name = 'syncing_insert_shared_library'), 'false') <> 'true'
             BEGIN
                 INSERT INTO book_action (
                     id_action, 
@@ -550,18 +585,20 @@ const initTriggerInsertSharedLibrary = async (db: SQLiteDatabase) => {
                     date, 
                     type, 
                     action, 
-                    executed_by
+                    executed_by,
+                    id_user
                 )
                 VALUES (
                     lower(hex(randomblob(16))),
                     'SHARED_LIBRARY', 
-                    CURRENT_TIMESTAMP, 
+                    (SELECT strftime('%Y-%m-%dT%H:%M:%fZ', 'now')), 
                     'INSERT', 
                     json_object(
                         'id_user', NEW.id_user,
                         'id_library', NEW.id_library
                     ), 
-                    'CLIENT'
+                    'CLIENT',
+                    NEW.id_user
                 );
             END;
         `);
@@ -582,6 +619,7 @@ const initTriggerDeleteSharedLibrary = async (db: SQLiteDatabase) => {
             AFTER DELETE
             ON shared_library
             FOR EACH ROW
+            WHEN COALESCE((SELECT value FROM variable WHERE name = 'syncing_delete_shared_library'), 'false') <> 'true'
             BEGIN
                 INSERT INTO book_action (
                     id_action, 
@@ -594,7 +632,7 @@ const initTriggerDeleteSharedLibrary = async (db: SQLiteDatabase) => {
                 VALUES (
                     lower(hex(randomblob(16))),
                     'SHARED_LIBRARY', 
-                    CURRENT_TIMESTAMP, 
+                    (SELECT strftime('%Y-%m-%dT%H:%M:%fZ', 'now')), 
                     'DELETE', 
                     json_object(
                         'id_user', OLD.id_user,
@@ -624,6 +662,7 @@ const initTriggerInsertLibraryBook = async (db: SQLiteDatabase) => {
             AFTER INSERT
             ON library_book
             FOR EACH ROW
+            WHEN COALESCE((SELECT value FROM variable WHERE name = 'syncing_insert_library_book'), 'false') <> 'true'
             BEGIN
                 INSERT INTO book_action (
                     id_action, 
@@ -631,18 +670,20 @@ const initTriggerInsertLibraryBook = async (db: SQLiteDatabase) => {
                     date, 
                     type, 
                     action, 
-                    executed_by
+                    executed_by,
+                    id_user
                 )
                 VALUES (
                     lower(hex(randomblob(16))),
                     'LIBRARY_BOOK', 
-                    CURRENT_TIMESTAMP, 
+                    (SELECT strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
                     'INSERT', 
                     json_object(
                         'id_library', NEW.id_library,
                         'id_book', NEW.id_book
                     ), 
-                    'CLIENT'
+                    'CLIENT',
+                    (SELECT value FROM variable WHERE name = 'current_user')
                 );
             END;
         `);
@@ -664,6 +705,7 @@ const initTriggerDeleteLibraryBook = async (db: SQLiteDatabase) => {
             AFTER DELETE
             ON library_book
             FOR EACH ROW
+            WHEN COALESCE((SELECT value FROM variable WHERE name = 'syncing_delete_library_book'), 'false') <> 'true'
             BEGIN
                 INSERT INTO book_action (
                     id_action, 
@@ -676,7 +718,7 @@ const initTriggerDeleteLibraryBook = async (db: SQLiteDatabase) => {
                 VALUES (
                     lower(hex(randomblob(16))),
                     'LIBRARY_BOOK', 
-                    CURRENT_TIMESTAMP, 
+                    (SELECT strftime('%Y-%m-%dT%H:%M:%fZ', 'now')), 
                     'DELETE', 
                     json_object(
                         'id_library', OLD.id_library,

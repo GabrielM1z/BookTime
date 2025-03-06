@@ -104,6 +104,8 @@ export const register = async (email: string, password: string, firstName: strin
         }).toString(),
     );
 
+    console.log(response);
+
     if (response.status !== 200) {
         throw new Error('Invalid credentials');
     }
@@ -123,6 +125,7 @@ export const register = async (email: string, password: string, firstName: strin
         {
             headers: {
                 'Authorization': `${tokenType} ${adminToken}`,
+                'content-type': 'application/json',
             }
         }
     );

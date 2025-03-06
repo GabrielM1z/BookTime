@@ -1,25 +1,19 @@
 import { SynchronisationController } from "@/controllers/SynchronisationController";
-import { CreateFormatDto, Format, UpdateFormatDto } from "@/models/Format";
+import { CreateFormatDto, DeleteFormatDto, Format, UpdateFormatDto } from "@/models/Format";
 import { CrudRepository } from "@/types/repositories";
 import { SQLiteDatabase } from 'expo-sqlite';
-import uuid from 'react-native-uuid';
+import { BaseLocalRepository } from "./base/BaseRepository";
 
+export interface FormatRepository extends CrudRepository<
+    Format, CreateFormatDto, UpdateFormatDto, DeleteFormatDto
+> { }
 
-export interface FormatRepository extends CrudRepository<Format> {
-    get: (id: string) => Promise<Format>;
-    getAll: () => Promise<Format[]>
-    create: (format: CreateFormatDto) => Promise<void>;
-    update: (id: string, format: UpdateFormatDto) => Promise<void>;
-    delete: (id: string) => Promise<void>;
-}
-
-export class LocalFormatRepository implements FormatRepository {
-    private db: SQLiteDatabase;
+export class LocalFormatRepository extends BaseLocalRepository<Format> implements FormatRepository {
     private sync: SynchronisationController;
 
     constructor(db: SQLiteDatabase, sync: SynchronisationController) {
+        super("format", db);
         this.sync = sync;
-        this.db = db;
     }
 
     async get(id: string): Promise<Format> {
@@ -38,30 +32,17 @@ export class LocalFormatRepository implements FormatRepository {
     }
 
     async create(format: CreateFormatDto): Promise<void> {
-        await this.db.runAsync(
-            `INSERT INTO format (id_format, name) VALUES ($id_format, $name);`,
-            { $name: format.name }
-        );
+        await this.create_base(format);
     }
 
-    async update(id: string, format: UpdateFormatDto): Promise<void> {
-        await this.db.runAsync(
-            `UPDATE format SET name = $name WHERE id_format = $id_format;`,
-            {
-                $id_format: id,
-                $name: format.name
-            }
-        );
+    async update(format: UpdateFormatDto): Promise<void> {
+        await this.update_base(format, ['id_format']);
     }
 
-    async delete(id: string): Promise<void> {
-        await this.db.runAsync(
-            `DELETE FROM format WHERE id_format = $id_format;`,
-            { $id_format: id }
-        );
+    async delete(format: DeleteFormatDto): Promise<void> {
+        await this.delete_base(format);
     }
 }
-
 
 export class RemoteFormatRepository implements FormatRepository {
     async getAll(): Promise<Format[]> {
@@ -76,11 +57,11 @@ export class RemoteFormatRepository implements FormatRepository {
         throw new Error("Method not implemented.");
     }
 
-    async update(id: string, format: UpdateFormatDto): Promise<void> {
+    async update(format: UpdateFormatDto): Promise<void> {
         throw new Error("Method not implemented.");
     }
 
-    async delete(id: string): Promise<void> {
+    async delete(format: DeleteFormatDto): Promise<void> {
         throw new Error("Method not implemented.");
     }
 }

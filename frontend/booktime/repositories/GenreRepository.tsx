@@ -1,25 +1,18 @@
-import { CreateGenreDto, Genre, UpdateGenreDto } from "@/models/Genre";
-import { SQLiteDatabase } from 'expo-sqlite';
-import { SynchronisationProxy } from "@/controllers/SynchronisationProxy";
+import { CreateGenreDto, DeleteGenreDto, Genre, UpdateGenreDto } from "@/models/Genre";
 import { CrudRepository } from "@/types/repositories";
+import { SQLiteDatabase } from 'expo-sqlite';
+import { BaseLocalRepository } from "./base/BaseRepository";
 
-export interface GenreRepository extends CrudRepository<Genre> {
-    get: (id: string) => Promise<Genre>;
-    getAll: () => Promise<Genre[]>
-    create: (genre: CreateGenreDto) => Promise<void>;
-    update: (id: string, genre: UpdateGenreDto) => Promise<void>;
-    delete: (id: string) => Promise<void>;
-}
+export interface GenreRepository extends CrudRepository<
+    Genre, CreateGenreDto, UpdateGenreDto, DeleteGenreDto
+> { }
 
-export class LocalGenreRepository implements GenreRepository {
-    private db: SQLiteDatabase;
+export class LocalGenreRepository extends BaseLocalRepository<Genre> implements GenreRepository {
     private id_user: string;
-    private sync: SynchronisationProxy;
 
-    constructor(db: SQLiteDatabase, id_user: string, sync: SynchronisationProxy) {
-        this.db = db;
+    constructor(db: SQLiteDatabase, id_user: string) {
+        super("genre", db);
         this.id_user = id_user;
-        this.sync = sync;
     }
 
     async get(id: string): Promise<Genre> {
@@ -38,24 +31,15 @@ export class LocalGenreRepository implements GenreRepository {
     }
 
     async create(genre: Genre): Promise<void> {
-        await this.db.runAsync(
-            `INSERT INTO genre (id_genre, name) VALUES ($id, $name);`,
-            { $id: genre.id_genre, $name: genre.name }
-        );
+        await this.create_base(genre);
     }
 
-    async update(id: string, genre: UpdateGenreDto): Promise<void> {
-        await this.db.runAsync(
-            `UPDATE genre SET name = $name WHERE id_genre = $id`,
-            { $id: id, $name: genre.name }
-        );
+    async update(genre: UpdateGenreDto): Promise<void> {
+        await this.update_base(genre, ["id_genre"]);
     }
 
-    async delete(id: string): Promise<void> {
-        await this.db.runAsync(
-            `DELETE FROM genre WHERE id_genre = $id`,
-            { $id: id }
-        );
+    async delete(genre: DeleteGenreDto): Promise<void> {
+        await this.delete_base(genre);
     }
 }
 
@@ -63,7 +47,7 @@ export class RemoteGenreRepository implements GenreRepository {
     async get(id: string): Promise<Genre> {
         throw new Error("Method not implemented.");
     }
-    
+
     async getAll(): Promise<Genre[]> {
         throw new Error("Method not implemented.");
     }
@@ -72,11 +56,11 @@ export class RemoteGenreRepository implements GenreRepository {
         throw new Error("Method not implemented.");
     }
 
-    async update(id: string, genre: UpdateGenreDto): Promise<void> {
+    async update(genre: UpdateGenreDto): Promise<void> {
         throw new Error("Method not implemented.");
     }
 
-    async delete(id: string): Promise<void> {
+    async delete(genre: DeleteGenreDto): Promise<void> {
         throw new Error("Method not implemented.");
     }
 }

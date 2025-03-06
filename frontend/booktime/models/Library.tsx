@@ -1,4 +1,4 @@
-import { CreateDtoAutoId, UpdateDto } from "@/types/repositories";
+import { CreateDtoAutoId, DeleteDto, UpdateDto } from "@/types/repositories";
 import { Book, BookMinInfos } from "./Book";
 
 export interface Library {
@@ -7,7 +7,8 @@ export interface Library {
 }
 
 export interface CreateLibraryDto extends CreateDtoAutoId<Library, "id_library"> { }
-export interface UpdateLibraryDto extends UpdateDto<Library, "id_library"> { }
+export interface UpdateLibraryDto extends UpdateDto<Library, ["id_library"]> { }
+export interface DeleteLibraryDto extends DeleteDto<Library, ["id_library"]> { }
 
 export interface LibraryWithBooks {
 	id_library: string;

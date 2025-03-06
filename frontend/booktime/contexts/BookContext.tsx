@@ -1,8 +1,8 @@
 import { BookControllerProps } from "@/controllers/BookController";
 import { bookControllerFactory } from "@/controllers/factories/bookControllerFactory";
 import { ContextNotFound } from "@/errors/ContextNotFound";
-import { usePersistentState } from "@/hooks/usePersistantState";
 import React, { createContext, useEffect } from "react";
+import { useAuthContext } from "./AuthContext";
 
 export interface BookProviderProps {
     children: React.ReactNode;
@@ -11,8 +11,6 @@ export interface BookProviderProps {
 
 export interface BookContextProps {
     bookController: BookControllerProps;
-    lastSync: string | null;
-    setLastSync: (lastSync: string | null) => void;
 }
 
 const BookContext = createContext<BookContextProps | undefined>(undefined);
@@ -21,8 +19,8 @@ export const BookProvider = ({
     children,
     id_user,
 }: BookProviderProps) => {
-    const [lastSync, setLastSync] = usePersistentState<string | null>('book_lastSync', null);
     const bookController = bookControllerFactory(id_user);
+    const { session } = useAuthContext();
 
     useEffect(() => {
         bookController.enter();
@@ -32,7 +30,7 @@ export const BookProvider = ({
     }, []);
 
     return (
-        <BookContext.Provider key={id_user} value={{ bookController, lastSync, setLastSync }}>
+        <BookContext.Provider key={id_user} value={{ bookController }}>
             {children}
         </BookContext.Provider>
     );

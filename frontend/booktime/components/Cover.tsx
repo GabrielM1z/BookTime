@@ -1,4 +1,4 @@
-import { defaultCover } from '@/assets/images';
+import { logo } from '@/assets/images';
 import { linkToBase64 } from '@/helpers/image';
 import { Image, ImageProps } from 'expo-image';
 import { useRouter } from 'expo-router';
@@ -68,7 +68,7 @@ export const Cover = ({
         <Image
             source={{ uri: uri }}
             style={imageStyle}
-            placeholder={defaultCover}
+            placeholder={logo}
             {...imageProps}
             onLoadStart={imageProps.onLoadStart ?? (() => setLoading(true))}
             onLoadEnd={imageProps.onLoadEnd ?? (() => setLoading(false))}

@@ -17,6 +17,11 @@ import { SharedLibrary } from "@/models/SharedLibrary";
 import { LocalSharedLibraryRepository, RemoteSharedLibraryRepository, SharedLibraryRepository } from "@/repositories/SharedLibrariesRepository";
 import { CreateLibraryDto, LibraryWithBooksMin } from "@/models/Library";
 import { guestUserId } from "@/constants";
+import { BookResponseSync } from "@/types/synchronisation";
+import { VariableRepository } from "@/repositories/VariableRepository";
+import { syncAfterMethod } from "@/decorators/synchronisation";
+import { Buffer } from "buffer";
+import { safeActionDecode } from "@/helpers/parser";
 
 export interface BookControllerProps {
     book: BookRepository;
@@ -34,12 +39,7 @@ export interface BookControllerProps {
     getAllLibraryInfo: () => Promise<LibraryWithBooksMin[] | []>
 }
 
-interface SyncResponse {
-    require_books: string[],
-    actions_to_exec: Action[]
-}
-
-export class LocalBookController extends SynchronisationController<SyncResponse> implements BookControllerProps {
+export class LocalBookController extends SynchronisationController<BookResponseSync> implements BookControllerProps {
     protected db: SQLiteDatabase;
     protected id_user: string;
     protected remote: RemoteBookRepository;
@@ -52,6 +52,7 @@ export class LocalBookController extends SynchronisationController<SyncResponse>
     libraryBook: LocalLibraryBookRepository;
     authorBook: LocalAuthorBookRepository;
     sharedLibrary: LocalSharedLibraryRepository;
+    variable: VariableRepository;
 
     protected tableToRepositoryMap: { [key: string]: keyof BookControllerProps } = {
         "book": "book",
@@ -65,73 +66,104 @@ export class LocalBookController extends SynchronisationController<SyncResponse>
     };
 
     constructor(db: SQLiteDatabase, id_user: string) {
-        super("books", "book_action", db);
+        super("books", "book_action", db, id_user);
 
         this.db = db;
         this.id_user = id_user;
         this.remote = new RemoteBookRepository();
 
-        this.book = new LocalBookRepository(db, id_user, this.sync);
+        this.book = new LocalBookRepository(db, id_user);
         this.library = new LocalLibraryRepository(db, id_user, this.sync);
-        this.author = new LocalAuthorRepository(db, id_user, this.sync);
-        this.genre = new LocalGenreRepository(db, id_user, this.sync);
+        this.author = new LocalAuthorRepository(db, id_user);
+        this.genre = new LocalGenreRepository(db, id_user);
         this.state = new LocalStateRepository(db, id_user, this.sync);
         this.libraryBook = new LocalLibraryBookRepository(db, id_user, this.sync);
-        this.authorBook = new LocalAuthorBookRepository(db, id_user, this.sync);
+        this.authorBook = new LocalAuthorBookRepository(db, id_user);
         this.sharedLibrary = new LocalSharedLibraryRepository(db, id_user, this.sync);
+        this.variable = new VariableRepository(db);
     }
 
-    async processActions({ require_books, actions_to_exec }: SyncResponse) {
+    async processActions({ require_books, actions_to_exec }: BookResponseSync) {
         console.log("Livres à récupérer :", require_books);
         console.log("Actions à exécuter :", actions_to_exec);
 
-        for (const action of actions_to_exec) {
-            // action.action = JSON.parse(atob(action.action));
-            // console.log("Action à exécuter :", action);
-            const { table, type, action: data } = action; // FIXME: named table_name in back instead of table
-            const decodedData: object = JSON.parse(atob(data))
-            const repository = this.tableToRepositoryMap[table.toLowerCase()];
-            const func = this.actionToCudMap[type];
+        try {
+            for (const book of require_books ?? []) {
+                await this._addBook(book);
+            }
 
-            console.log("repository :", repository, ",func :", func, ",data :", decodedData);
-            
+            for (const action of actions_to_exec) {
+                const { table_name, type, action: data } = action;
+                const decodedData = safeActionDecode(data);
+                const repository = this.tableToRepositoryMap[table_name.toLowerCase()];
+                const func = this.actionToCudMap[type];
+
+                if (func && repository) {
+                    await this.variable.set(`syncing_${type.toLowerCase()}_${table_name.toLowerCase()}`, "true"); 
+                    await (this[repository] as any)[func](decodedData, { syncing: true });
+                    await this.variable.set(`syncing_${type.toLowerCase()}_${table_name.toLowerCase()}`, "false"); 
+                }
+            }
+        } catch (error) {
+            console.log("Error processActions", error);
         }
     }
 
     async enter() {
-        // console.log("BookController enter", this.id_user);
         if (this.id_user !== guestUserId) {
             await this.sync.runSync(); // Sync all data
         }
+
+        await this.variable.set("current_user", this.id_user);
     }
 
     async exit() {
-
+        
     }
 
+    async clearUser(idUser: string) {
+        await this.db.runAsync(`DELETE FROM library WHERE id_user = $id_user`, { $id_user: idUser });
+        await this.db.runAsync(`DELETE FROM state WHERE id_user = $id_user`, { $id_user: idUser });
+    }
+
+    // @ts-ignore
+    @syncAfterMethod()
     async addBook(idBook: string): Promise<void> {
-        const book = await this.remote.get(idBook);
+        const bookServer = await this.remote.get(idBook);
 
         try {
             await this.db.withExclusiveTransactionAsync(async () => {
+                const book: Book = {
+                    id_book: bookServer.id_book,
+                    title: bookServer.title,
+                    cover_image_url: bookServer.cover_image_url,
+                    description: bookServer.description,
+                    publication_date: bookServer.publication_date,
+                    language: bookServer.language,
+                    publisher: bookServer.publisher,
+                    page_number: bookServer.page_number,
+                }
+
                 const state: State = {
                     id_book: book.id_book,
                     id_user: this.id_user,
                     state: "",
                     progression: 0,
-                    read_count: 0,
-                    last_read_date: 0,
-                    is_available: false
+                    readcount: 0,
+                    last_read_date: '1970-01-01T00:00:00.000Z',
+                    is_available: false,
+                    comment: "",
+                    rate: 0,
                 }
 
-                const authorBooks = (book.authors ?? []).map((author) => ({
+                const authorBooks = (bookServer.authors ?? []).map((author) => ({
                     id_author: author.id_author,
                     id_book: book.id_book,
-                }))
+                }));
 
                 await this.book.create(book);
                 await this.state.create(state);
-                await this.author.createAll(book.authors);
+                await this.author.createAll(bookServer.authors);
                 await this.authorBook.createAll(authorBooks);
             });
 
@@ -142,11 +174,13 @@ export class LocalBookController extends SynchronisationController<SyncResponse>
         }
     }
 
+    // @ts-ignore
+    @syncAfterMethod()
     async createLibrary(library: CreateLibraryDto): Promise<void> {
         try {
             await this.db.withExclusiveTransactionAsync(async () => {
                 await this.library.create(library);
-                const idLibrary = await this.library.getLastInsertedId();
+                const idLibrary = (await this.library.getLastInserted())!.id_library;
 
                 const sharedLibrary: SharedLibrary = {
                     id_user: this.id_user,
@@ -214,7 +248,7 @@ export class RemoteBookController implements BookControllerProps {
     async enter() { }
     async exit() { }
 
-    async addBook(idBook: string, idLibrary: string): Promise<void> { }
+    async addBook(idBook: string): Promise<void> { }
 
     async createLibrary(library: CreateLibraryDto): Promise<void> { }
 

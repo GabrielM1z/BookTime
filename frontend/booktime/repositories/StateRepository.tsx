@@ -1,31 +1,25 @@
 import { SynchronisationProxy } from "@/controllers/SynchronisationProxy";
 import { CreateStateDto, DeleteStateDto, State, UpdateStateDto } from "@/models/State";
-import { CrudJunctionRepository } from "@/types/repositories";
+import { Context, CrudRepository } from "@/types/repositories";
 import { SQLiteDatabase } from 'expo-sqlite';
+import { BaseLocalRepository } from "./base/BaseRepository";
 
-export interface StateRepository extends CrudJunctionRepository<State> {
-    getAll: () => Promise<State[]>;
-    create: (state: CreateStateDto) => Promise<void>;
-    update: (id1: string, id2: string, state: UpdateStateDto) => Promise<void>;
-    delete: (state: DeleteStateDto) => Promise<void>;
-}
+export interface StateRepository extends CrudRepository<
+    State, CreateStateDto, UpdateStateDto, DeleteStateDto
+> { }
 
-export class LocalStateRepository implements StateRepository {
-    private db: SQLiteDatabase;
+export class LocalStateRepository extends BaseLocalRepository<State> implements StateRepository {
     private id_user: string;
     private sync: SynchronisationProxy;
 
     constructor(db: SQLiteDatabase, id_user: string, sync: SynchronisationProxy) {
-        this.db = db;
+        super("state", db);
         this.id_user = id_user;
         this.sync = sync;
     }
 
-    async getLastInsertedId(): Promise<string> {
-        const result = await this.db.getFirstAsync<State>(
-            `SELECT * FROM state ORDER BY rowid DESC LIMIT 1;`,
-        );
-        return (result as State).id_book;
+    async get(id: string): Promise<State> {
+        throw new Error("Method not implemented.");
     }
 
     async getAll(): Promise<State[]> {
@@ -36,32 +30,23 @@ export class LocalStateRepository implements StateRepository {
     }
 
     async create(state: CreateStateDto): Promise<void> {
-        await this.db.runAsync(
-            `INSERT OR IGNORE INTO state (progression, id_user, id_book, read_count)
-            VALUES ($progression, $id_user, $id_book, $read_count);`,
-            {
-                $progression: 0,
-                $id_user: state.id_user,
-                $id_book: state.id_book,
-                $read_count: 0,
-            }
-        );
+        await this.create_base(state);
     }
 
-    async update(id_user: string, id_book: string, state: UpdateStateDto): Promise<void> {
-        throw new Error("Method not implemented.");
+    async update(state: UpdateStateDto): Promise<void> {
+        await this.update_base(state, ["id_user", "id_book"]);
     }
 
     async delete(state: DeleteStateDto): Promise<void> {
-        await this.db.runAsync(
-            `DELETE FROM state 
-            WHERE id_user == $id_user AND id_book == $id_book;`,
-            { $id_user: state.id_user, $id_book: state.id_book }
-        );
+        await this.delete_base(state);
     }
 }
 
 export class RemoteStateRepository implements StateRepository {
+    async get(id: string): Promise<State> {
+        throw new Error("Method not implemented.");
+    }
+    
     async getAll(): Promise<State[]> {
         throw new Error("Method not implemented.");
     }
@@ -70,7 +55,7 @@ export class RemoteStateRepository implements StateRepository {
         throw new Error("Method not implemented.");
     }
 
-    async update(id1: string, id2: string, state: UpdateStateDto): Promise<void> {
+    async update(state: UpdateStateDto): Promise<void> {
         throw new Error("Method not implemented.");
     }
 

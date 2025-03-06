@@ -1,1 +1,1 @@
-export const defaultCover = require('./logo_refait.png');
+export const logo = require('./logo_refait.png');

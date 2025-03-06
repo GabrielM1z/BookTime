@@ -1,6 +1,9 @@
-import { Action } from '@/models/Action';
+import { Action, ActionEncoded } from '@/models/Action';
 import { Trigger } from '@/models/Trigger';
+import { CreateDtoStrictId } from '@/types/repositories';
 import { SQLiteDatabase } from 'expo-sqlite';
+import { BaseLocalRepository } from './base/BaseRepository';
+import { actionEncode } from '@/helpers/parser';
 
 export interface ActionRepository {
     getAll: () => Promise<Action[]>;
@@ -8,13 +11,12 @@ export interface ActionRepository {
     getTrigger: () => Promise<Trigger[]>;
 }
 
-export class LocalActionRepository implements ActionRepository {
-    private tableName: string
-    private db: SQLiteDatabase;
-
-    constructor(tableName: string, db: SQLiteDatabase) {
-        this.tableName = tableName;
-        this.db = db;
+export class LocalActionRepository extends BaseLocalRepository<Action | ActionEncoded> implements ActionRepository {
+    private idUser: string;
+    
+    constructor(tableName: string, db: SQLiteDatabase, idUser: string) {
+        super(tableName, db);
+        this.idUser = idUser;
     }
 
     async getAll(): Promise<Action[]> {
@@ -31,6 +33,42 @@ export class LocalActionRepository implements ActionRepository {
         );
 
         return action!;
+    }
+
+    async createInsert(data: CreateDtoStrictId<any>, tableName: string): Promise<void> {
+        const action: ActionEncoded = {
+            date: new Date().toISOString(),
+            executed_by: "CLIENT",
+            table_name: tableName,
+            id_user: this.idUser,
+            type: "INSERT",
+            action: actionEncode(data),
+        }
+        await this.create_base(action);
+    }
+
+    async createUpdate(data: CreateDtoStrictId<any>, tableName: string): Promise<void> {
+        const action: ActionEncoded = {
+            date: new Date().toISOString(),
+            executed_by: "CLIENT",
+            table_name: tableName,
+            id_user: this.idUser,
+            type: "UPDATE",
+            action: actionEncode(data),
+        }
+        await this.create_base(action);
+    }
+
+    async createDelete(data: CreateDtoStrictId<any>, tableName: string): Promise<void> {
+        const action: ActionEncoded = {
+            date: new Date().toISOString(),
+            executed_by: "CLIENT",
+            table_name: tableName,
+            id_user: this.idUser,
+            type: "DELETE",
+            action: actionEncode(data),
+        }
+        await this.create_base(action);
     }
 
     async deleteAll(): Promise<void> {

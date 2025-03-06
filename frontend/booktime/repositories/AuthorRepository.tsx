@@ -1,25 +1,18 @@
-import { Author, CreateAuthorDto, UpdateAuthorDto } from '@/models/Author';
-import { SQLiteDatabase, SQLiteRunResult } from 'expo-sqlite';
-import { SynchronisationProxy } from "@/controllers/SynchronisationProxy";
+import { Author, CreateAuthorDto, DeleteAuthorDto, UpdateAuthorDto } from '@/models/Author';
 import { CrudRepository } from '@/types/repositories';
+import { SQLiteDatabase } from 'expo-sqlite';
+import { BaseLocalRepository } from './base/BaseRepository';
 
-export interface AuthorRepository extends CrudRepository<Author> {
-    getAll: () => Promise<Author[]>
-    get: (id: string) => Promise<Author>;
-    create: (author: CreateAuthorDto) => Promise<void>;
-    update: (id: string, author: UpdateAuthorDto) => Promise<void>;
-    delete: (id: string) => Promise<void>;
-}
+export interface AuthorRepository extends CrudRepository<
+    Author, CreateAuthorDto, UpdateAuthorDto, DeleteAuthorDto
+> { }
 
-export class LocalAuthorRepository implements AuthorRepository {
-    private db: SQLiteDatabase;
+export class LocalAuthorRepository extends BaseLocalRepository<Author> implements AuthorRepository {
     private id_user: string;
-    private sync: SynchronisationProxy;
 
-    constructor(db: SQLiteDatabase, id_user: string, sync: SynchronisationProxy) {
-        this.db = db;
+    constructor(db: SQLiteDatabase, id_user: string) {
+        super("author", db);
         this.id_user = id_user;
-        this.sync = sync;
     }
 
     async getAll(): Promise<Author[]> {
@@ -39,15 +32,7 @@ export class LocalAuthorRepository implements AuthorRepository {
     }
 
     async create(author: CreateAuthorDto): Promise<void> {
-        await this.db.runAsync(
-            `INSERT INTO author (id_author, name, description) 
-            VALUES ($id_author, $name, $description);`,
-            {
-                $id_author: author.id_author,
-                $name: author.name,
-                $description: author.description
-            }
-        );
+        await this.create_base(author);
     }
 
     async createAll(listNewAuthors: CreateAuthorDto[]): Promise<void> {
@@ -70,23 +55,12 @@ export class LocalAuthorRepository implements AuthorRepository {
         }
     }
 
-    async update(id: string, author: UpdateAuthorDto): Promise<void> {
-        await this.db.runAsync(
-            `UPDATE author SET name = $name, description = $description
-            WHERE id_author = $id_author;`,
-            {
-                $id_author: id,
-                $name: author.name,
-                $description: author.description
-            }
-        );
+    async update(author: UpdateAuthorDto): Promise<void> {
+        await this.update_base(author, ["id_author"]);
     }
 
-    async delete(id: string): Promise<void> {
-        await this.db.runAsync(
-            `DELETE FROM author WHERE id_author = $id_author;`,
-            { $id_author: id }
-        );
+    async delete(author: DeleteAuthorDto): Promise<void> {
+        await this.delete_base(author)
     }
 }
 
@@ -103,11 +77,11 @@ export class RemoteAuthorRepository implements AuthorRepository {
         throw new Error("Method not implemented.");
     }
 
-    async update(id: string, author: UpdateAuthorDto): Promise<void> {
+    async update(author: UpdateAuthorDto): Promise<void> {
         throw new Error("Method not implemented.");
     }
 
-    async delete(id: string): Promise<void> {
+    async delete(author: DeleteAuthorDto): Promise<void> {
         throw new Error("Method not implemented.");
     }
 }

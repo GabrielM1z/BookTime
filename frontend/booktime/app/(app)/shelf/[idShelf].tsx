@@ -62,7 +62,7 @@ export default function EtagereDetail() {
     const deleteEtagere = () => {
         console.log("Supprimer l'étagère");
         try {
-            bookController.library.delete(idEtagere as string).then(() => {
+            bookController.library.delete({id_library: idEtagere as string}).then(() => {
                 console.log("Etagère supprimée");
                 navigation.goBack();
             });

@@ -1,4 +1,4 @@
-import { CreateDtoStrictId, DeleteDtoJunction, UpdateDto } from "@/types/repositories";
+import { CreateDtoStrictId, DeleteDto, UpdateDto } from "@/types/repositories";
 
 export interface LibraryBook {
     id_library: string;
@@ -6,5 +6,5 @@ export interface LibraryBook {
 }
 
 export interface CreateLibraryBookDto extends CreateDtoStrictId<LibraryBook> { }
-export interface UpdateLibraryBookDto extends UpdateDto<LibraryBook, "id_library" | "id_book"> { }
-export interface DeleteLibraryBookDto extends DeleteDtoJunction<LibraryBook, ["id_library", "id_book"]> { }
+export interface UpdateLibraryBookDto extends UpdateDto<LibraryBook, ["id_library", "id_book"]> { }
+export interface DeleteLibraryBookDto extends DeleteDto<LibraryBook, ["id_library", "id_book"]> { }
