@@ -153,7 +153,7 @@ export class LocalBookController extends SynchronisationController<BookResponseS
     // @ts-ignore
     @syncAfterMethod()
     async addBook(idBook: string): Promise<void> {
-        const bookServer = await this.remote.get(idBook);
+        const bookServer = await this.remoteBook.get(idBook);
 
         try {
             await this.db.withExclusiveTransactionAsync(async () => {
