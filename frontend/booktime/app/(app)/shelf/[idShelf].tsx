@@ -2,7 +2,7 @@ import { Modal, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-nat
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import React, { useEffect, useRef, useState } from "react";
-import { Stack, useLocalSearchParams, useNavigation } from 'expo-router';
+import { Stack, useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { Book } from '@/models/Book';
 import { Ionicons } from '@expo/vector-icons';
 import { LivreEtagere } from '@/components/LivreEtagere';
@@ -176,6 +176,7 @@ export function EtagereDetail() {
 
 
 const ShelfDetail = () => {
+    const router = useRouter();
     const { idShelf } = useLocalSearchParams<{ idShelf: string }>();
     const { bookController } = useBookContext();
     const { data: shelf } = useRepository(() => bookController.library.get(idShelf), null, [idShelf]);
@@ -184,7 +185,12 @@ const ShelfDetail = () => {
     const bottomSheetRef = useRef<BottomSheet>(null);
 
     const handleMenu = () => {
-        bottomSheetRef.current?.expand();
+        bottomSheetRef.current?.snapToIndex(0);
+    }
+
+    const handleDelete = async () => {
+        await bookController.library.delete({ id_library: idShelf });
+        router.back();
     }
 
     return (
@@ -196,15 +202,15 @@ const ShelfDetail = () => {
                     <AppBar
                         scrollViewRef={scrollViewRef}
                         rightIcon={"menu"}
-                        onRightIconPress={() => console.log("Menu")}
+                        onRightIconPress={handleMenu}
                         {...props}
                     />
                 )
             }} />
             <ListBooks ref={scrollViewRef} books={books} loading={loading} onRefresh={refresh} />
-            <CustomBottomSheet ref={bottomSheetRef} index={-1}>
-                <BottomSheetView>
-                    <Button onPress={handleMenu}>Remove book</Button>
+            <CustomBottomSheet ref={bottomSheetRef} index={-1} snapPoints={['30%']}>
+                <BottomSheetView style={{ padding: 16 }}>
+                    <Button mode='contained-tonal' onPress={handleDelete}>Delete library</Button>
                 </BottomSheetView>
             </CustomBottomSheet>
         </SafeAreaView>
