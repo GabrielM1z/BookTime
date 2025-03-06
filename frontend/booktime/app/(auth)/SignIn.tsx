@@ -9,6 +9,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import styles from "./SignIn.style";
 import { Button, IconButton, Avatar, TextInput } from "react-native-paper";
 import { PressableText, PasswordTextInput, TextSwitch } from "@/common";
+import { logo } from '@/assets/images';
 
 export default function SignIn() {
     const { showSessions = false } = useLocalSearchParams();
@@ -64,7 +65,7 @@ export default function SignIn() {
             )}
             <View style={styles.innerContainer}>
                 <View style={styles.headerContainer}>
-                    <Avatar.Image size={150} source={require('@/assets/images/logo_refait.png')} />
+                    <Avatar.Image size={150} source={logo} />
                 </View>
                 <View style={styles.bodyContainer}>
                     <TextInput

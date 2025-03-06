@@ -1,14 +1,21 @@
 import { TextInput, TextInputProps } from 'react-native-paper';
 import React, { useState } from "react";
 
-export interface PasswordTextInputProps extends TextInputProps { }
+export interface PasswordTextInputProps extends TextInputProps {
+    variant?: 'confirm' | 'password';
+}
 
-export const PasswordTextInput = (props: PasswordTextInputProps) => {
+export const PasswordTextInput = ({
+    variant = 'password',
+    ...props
+}: PasswordTextInputProps) => {
     const [isPasswordVisible, setIsPasswordVisible] = useState<boolean>(false);
+
+    const placeholder = variant === 'password' ? 'Password' : 'Confirm Password';
 
     return (
         <TextInput
-            placeholder="Password"
+            placeholder={placeholder}
             secureTextEntry={!isPasswordVisible}
             autoCapitalize="none"
             right={

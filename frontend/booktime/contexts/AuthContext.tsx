@@ -1,14 +1,14 @@
 import { SessionController } from "@/controllers/SessionController";
 import { Session } from "@/models/Session";
 import { AuthRegisterProps, AuthResponseProps } from "@/models/keycloak";
-import { authenticate, logout as logoutAxios } from "@/services/axios";
+import { authenticate, logout as logoutAxios, register as registerAxios } from "@/services/axios";
 import React, { createContext, useContext, useEffect, useState } from "react";
 
 export interface AuthContextProps {
     session: Session | null;
     sessions: Session[];
     isLoading: boolean;
-    register: (props: AuthRegisterProps) => Promise<void>;
+    register: (email: string, password: string, username: string) => Promise<void>;
     logIn: (username: string, password: string, remember: boolean) => Promise<void>;
     logAsGuest: () => Promise<void>;
     logOut: () => Promise<void>;
@@ -26,13 +26,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const sessionController = new SessionController();
 
     const register = async (email: string, password: string, username: string) => {
-        // try {
-        //     setIsLoading(true);
-        //     await registerAxios(email, password, "", "");
-        //     await 
-        // } finally {
-        //     setIsLoading(false);
-        // }
+        try {
+            setIsLoading(true);
+            await registerAxios(email, password, username, username);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const logIn = async (email: string, password: string, remember: boolean) => {

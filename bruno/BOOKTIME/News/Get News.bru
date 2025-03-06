@@ -5,12 +5,41 @@ meta {
 }
 
 get {
-  url: http://localhost:8082/news/search?topic=books&language=en
+  url: {{base_news_url}}/search?topic=manga&language=fr&sortBy=publishedAt&pageSize=100
   body: none
   auth: none
 }
 
 params:query {
-  topic: books
-  language: en
+  topic: manga
+  language: fr
+  sortBy: publishedAt
+  pageSize: 100
+}
+
+docs {
+  <language>
+  The 2-letter ISO-639-1 code of the language you want to get headlines for. Possible options: ardeenesfrheitnlnoptrusvudzh.
+  
+  Default: all languages returned.
+  
+  
+  <sortBy>
+  The order to sort the articles in. Possible options: relevancy, popularity, publishedAt.
+  relevancy = articles more closely related to q come first.
+  popularity = articles from popular sources and publishers come first.
+  publishedAt = newest articles come first.
+  
+  Default: publishedAt
+  
+  
+  <pageSize>
+  The number of results to return per page.
+  
+  Default: 100. Maximum: 100.
+  
+  <topic>
+  Keywords or phrases to search for in the article title and body.
+  Advanced search is supported here:
+  Surrounded with quotes (") for exact match.
 }

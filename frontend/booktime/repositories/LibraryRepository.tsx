@@ -1,38 +1,26 @@
-import { Library, CreateLibraryDto, UpdateLibraryDto } from '@/models/Library';
+import { Library, CreateLibraryDto, UpdateLibraryDto, DeleteLibraryDto } from '@/models/Library';
 import { SQLiteDatabase } from 'expo-sqlite';
 import { SynchronisationProxy } from "@/controllers/SynchronisationProxy";
-import { CrudRepository } from '@/types/repositories';
-import { randomUUID } from "expo-crypto";
+import { Context, CrudRepository } from '@/types/repositories';
+import { BaseLocalRepository } from './base/BaseRepository';
+import { syncAfterMethod } from '@/decorators/synchronisation';
 
-export interface LibraryRepository extends CrudRepository<Library> {
-    get: (id: string) => Promise<Library>;
-    getAll: () => Promise<Library[]>;
+export interface LibraryRepository extends CrudRepository<
+    Library, CreateLibraryDto, UpdateLibraryDto, DeleteLibraryDto
+> {
     getAllFromBook: (id_book: string) => Promise<Library[]>;
     getAllNotLibraryFromBook: (id_book: string) => Promise<Library[]>;
-    getLastInsertedId: () => Promise<string | null>
     getFirstFromBook: (idBook: string) => Promise<Library | null>
-    getFirst: () => Promise<Library | null>;
-    create: (library: CreateLibraryDto) => Promise<void>;
-    update: (id: string, library: CreateLibraryDto) => Promise<void>;
-    delete: (id: string) => Promise<void>;
 }
 
-export class LocalLibraryRepository implements LibraryRepository {
-    private db: SQLiteDatabase;
+export class LocalLibraryRepository extends BaseLocalRepository<Library> implements LibraryRepository {
     private id_user: string;
     private sync: SynchronisationProxy;
 
     constructor(db: SQLiteDatabase, id_user: string, sync: SynchronisationProxy) {
-        this.db = db;
+        super("library", db);
         this.id_user = id_user;
         this.sync = sync;
-    }
-
-    async getLastInsertedId(): Promise<string> {
-        const result = await this.db.getFirstAsync<Library>(
-            `SELECT * FROM library ORDER BY rowid DESC LIMIT 1;`,
-        );
-        return (result as Library).id_library;
     }
 
     async get(id: string): Promise<Library> {
@@ -102,35 +90,23 @@ export class LocalLibraryRepository implements LibraryRepository {
     }
 
     async create(library: CreateLibraryDto): Promise<void> {
-        await this.db.runAsync(
-            `INSERT INTO library (id_library, name) 
-            VALUES ($id_library, $name);`,
-            { $id_library: randomUUID(), $name: library.name }
-        );
+        await this.create_base(library);
     }
 
-    async update(id: string, library: UpdateLibraryDto): Promise<void> {
-        await this.db.runAsync(
-            `UPDATE library SET name = $name 
-            WHERE id_library = $id;`,
-            { $id: id, $name: library.name }
-        );
+    // @ts-ignore
+    @syncAfterMethod()
+    async update(library: UpdateLibraryDto): Promise<void> {
+        await this.update_base(library, ["id_library"]);
     }
 
-    async delete(id: string): Promise<void> {
-        await this.db.runAsync(
-            `DELETE FROM library_book 
-            WHERE id_library = $id`,
-            { $id: id }
-        );
+    // @ts-ignore
+    @syncAfterMethod()
+    async delete(library: DeleteLibraryDto): Promise<void> {
+        await this.delete_base(library);
     }
 }
 
 export class RemoteLibraryRepository implements LibraryRepository {
-    async getLastInsertedId(): Promise<string | null> {
-        throw new Error("Method not implemented.");
-    }
-
     async getAll(): Promise<Library[]> {
         throw new Error("Method not implemented.");
     }
@@ -159,11 +135,11 @@ export class RemoteLibraryRepository implements LibraryRepository {
         throw new Error("Method not implemented.");
     }
 
-    async update(id: string, library: UpdateLibraryDto): Promise<void> {
+    async update(library: UpdateLibraryDto): Promise<void> {
         throw new Error("Method not implemented.");
     }
 
-    async delete(id: string): Promise<void> {
+    async delete(author: DeleteLibraryDto): Promise<void> {
         throw new Error("Method not implemented.");
     }
 }

@@ -1,37 +1,25 @@
 import { SQLiteDatabase } from 'expo-sqlite';
-import { Book, BookInfosServeur, BookMinInfos, CreateBookDto, UpdateBookDto } from '@/models/Book';
-import { syncAfterMethod, syncBeforeMethod } from '@/decorators/synchronisation';
+import { Book, BookInfosServeur, BookMinInfos, CreateBookDto, DeleteBookDto, UpdateBookDto } from '@/models/Book';
 import { formatColumns } from '@/helpers';
 import { api } from "@/services/axios"
 import { SynchronisationProxy } from '@/controllers/SynchronisationProxy';
 import { CrudRepository } from '@/types/repositories';
+import { BaseLocalRepository } from './base/BaseRepository';
 
-export interface BookRepository extends CrudRepository<Book> {
+export interface BookRepository extends CrudRepository<
+    Book, CreateBookDto, UpdateBookDto, DeleteBookDto
+> {
     get: (id: string, columns?: (keyof Book)[]) => Promise<Book>;
     getAll: (columns?: (keyof Book)[]) => Promise<Book[]>;
     getAllFromLibrary: (id_lib: string) => Promise<Book[]>
-    create: (book: CreateBookDto) => Promise<void>;
-    update: (id: string, book: UpdateBookDto) => Promise<void>;
-    delete: (id: string) => Promise<void>;
 }
 
-export class LocalBookRepository implements BookRepository {
-    private db: SQLiteDatabase;
+export class LocalBookRepository extends BaseLocalRepository<Book> implements BookRepository {
     private id_user: string;
-    private sync: SynchronisationProxy;
 
-    constructor(db: SQLiteDatabase, id_user: string, sync: SynchronisationProxy) {
-        this.db = db;
+    constructor(db: SQLiteDatabase, id_user: string) {
+        super("book", db);
         this.id_user = id_user;
-        this.sync = sync;
-    }
-
-    async getLastInsertedId(): Promise<string> {
-        const result = await this.db.getFirstAsync<Book>(
-            `SELECT * FROM book ORDER BY rowid DESC LIMIT 1;`,
-        );
-
-        return (result as Book).id_book;
     }
 
     async get(id: string, columns: (keyof Book)[] = []): Promise<Book> {
@@ -43,17 +31,17 @@ export class LocalBookRepository implements BookRepository {
         return result!;
     }
 
-    async getAll(columns: (keyof Book)[] = []): Promise<Book[]> {        
+    async getAll(columns: (keyof Book)[] = []): Promise<Book[]> {
         try {
             const args = formatColumns(columns, ['book.id_book']);
             let allRows = await this.db.getAllAsync<Book>(
                 `SELECT ${args} FROM book
                 LEFT JOIN state ON state.id_book = book.id_book
-                WHERE state.id_user = $id_user`, 
+                WHERE state.id_user = $id_user`,
                 { $id_user: this.id_user }
             );
-            console.log("allrows: ",allRows);
-            
+            console.log("allrows: ", allRows);
+
             return allRows;
 
         } catch (error) {
@@ -82,31 +70,15 @@ export class LocalBookRepository implements BookRepository {
     }
 
     async create(book: CreateBookDto): Promise<void> {
-        await this.db.runAsync(
-            `INSERT OR IGNORE INTO book (id_book, title, description, publisher, publication_date, page_number, language, cover_image_url) 
-            VALUES ($id_book, $title, $description, $publisher, $publication_date, $page_number, $language, $cover_image_url);`,
-            {
-                $id_book: book.id_book,
-                $title: book.title,
-                $description: book.description,
-                $publisher: book.publisher,
-                $publication_date: book.publication_date,
-                $page_number: book.page_number,
-                $language: book.language,
-                $cover_image_url: book.cover_image_url,
-            }
-        );
+        await this.create_base(book);
     }
 
-    async update(id: string, book: UpdateBookDto): Promise<void> {
-        throw new Error("Method not implemented.");
+    async update(book: UpdateBookDto): Promise<void> {
+        await this.update_base(book, ["id_book"]);
     }
 
-    async delete(id: string): Promise<void> {
-        await this.db.runAsync(
-            `DELETE FROM library_book WHERE id_book == $id;`,
-            { $id: id }
-        );
+    async delete(book: DeleteBookDto): Promise<void> {
+        await this.delete_base(book);
     }
 }
 
@@ -151,11 +123,11 @@ export class RemoteBookRepository implements BookRepository {
         throw new Error("Method not implemented.");
     }
 
-    async update(id: string, book: UpdateBookDto): Promise<void> {
+    async update(book: UpdateBookDto): Promise<void> {
         throw new Error("Method not implemented.");
     }
 
-    async delete(id: string): Promise<void> {
+    async delete(book: DeleteBookDto): Promise<void> {
         throw new Error("Method not implemented.");
     }
 }

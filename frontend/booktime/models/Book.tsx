@@ -1,4 +1,4 @@
-import { CreateDtoStrictId, UpdateDto } from "@/types/repositories";
+import { CreateDtoStrictId, DeleteDto, UpdateDto } from "@/types/repositories";
 import { Author } from "./Author";
 
 // export interface BookInfos{
@@ -43,7 +43,8 @@ export interface Book {
 }
 
 export interface CreateBookDto extends CreateDtoStrictId<Book> { }
-export interface UpdateBookDto extends UpdateDto<Book, "id_book"> { }
+export interface UpdateBookDto extends UpdateDto<Book, ["id_book"]> { }
+export interface DeleteBookDto extends DeleteDto<Book, ["id_book"]> { }
 
 export interface BookMinInfos {
 	id_book: string;

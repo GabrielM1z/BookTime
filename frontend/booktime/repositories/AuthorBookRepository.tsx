@@ -1,34 +1,26 @@
-import { SynchronisationProxy } from "@/controllers/SynchronisationProxy";
-import { AuthorBook, CreateAuthorBookDto, DeleteAuthorBookDto } from "@/models/AuthorBook";
-import { CrudJunctionRepository } from "@/types/repositories";
+import { AuthorBook, CreateAuthorBookDto, DeleteAuthorBookDto, UpdateAuthorBookDto } from "@/models/AuthorBook";
+import { CrudRepository } from "@/types/repositories";
 import { SQLiteDatabase } from 'expo-sqlite';
+import { BaseLocalRepository } from "./base/BaseRepository";
 
-export interface AuthorBookRepository extends CrudJunctionRepository<AuthorBook> {
-    create: (authorBook: CreateAuthorBookDto) => Promise<void>;
-    createAll: (authorBooks: CreateAuthorBookDto[]) => Promise<void>;
-    delete: (authorBook: DeleteAuthorBookDto) => Promise<void>;
-}
+export interface AuthorBookRepository extends CrudRepository<
+    AuthorBook, CreateAuthorBookDto, UpdateAuthorBookDto, DeleteAuthorBookDto
+> { }
 
-export class LocalAuthorBookRepository implements AuthorBookRepository {
-    private db: SQLiteDatabase;
+export class LocalAuthorBookRepository extends BaseLocalRepository<AuthorBook> implements AuthorBookRepository {
     private id_user: string;
-    private sync: SynchronisationProxy;
 
-    constructor(db: SQLiteDatabase, id_user: string, sync: SynchronisationProxy) {
-        this.db = db;
+    constructor(db: SQLiteDatabase, id_user: string) {
+        super("book_author", db);
         this.id_user = id_user;
-        this.sync = sync;
+    }
+
+    async get(id: string): Promise<AuthorBook> {
+        throw new Error("Method not implemented.")
     }
 
     async create(authorBook: CreateAuthorBookDto): Promise<void> {
-        await this.db.runAsync(
-            `INSERT OR IGNORE INTO book_author (id_author, id_book) 
-            VALUES ($id_author, $id_book);`,
-            {
-                $id_author: authorBook.id_author,
-                $id_book: authorBook.id_book,
-            }
-        );
+        await this.create_base(authorBook);
     }
 
     async createAll(authorBooks: CreateAuthorBookDto[]): Promise<void> {
@@ -49,25 +41,29 @@ export class LocalAuthorBookRepository implements AuthorBookRepository {
         }
     }
 
-    async delete(authorBook: DeleteAuthorBookDto): Promise<void> {
-        await this.db.runAsync(
-            `DELETE FROM book_author 
-            WHERE id_author = $id_author AND id_book = $id_book;`,
-            {
-                $id_author: authorBook.id_author,
-                $id_book: authorBook.id_book,
-            }
-        );
+    async update(authorBook: UpdateAuthorBookDto): Promise<void> {
+        await this.update_base(authorBook, ["id_author", "id_book"]);
     }
 
+    async delete(authorBook: DeleteAuthorBookDto): Promise<void> {
+        await this.delete_base(authorBook);
+    }
 }
 
 export class RemoteAuthorBookRepository implements AuthorBookRepository {
+    async get(id: string): Promise<AuthorBook> {
+        throw new Error("Method not implemented.");
+    }
+
     async create(authorBook: CreateAuthorBookDto): Promise<void> {
         throw new Error("Method not implemented.");
     }
 
     async createAll(authorBooks: CreateAuthorBookDto[]): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
+
+    async update(authorBook: UpdateAuthorBookDto): Promise<void> {
         throw new Error("Method not implemented.");
     }
 

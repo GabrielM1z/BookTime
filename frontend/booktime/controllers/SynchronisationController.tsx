@@ -1,15 +1,16 @@
 import { SynchronisationProxy } from "./SynchronisationProxy";
 import { SQLiteDatabase } from "expo-sqlite";
 import { CrudRepositoryWithoutGet } from "@/types/repositories";
+import { ResponseSync } from "@/types/synchronisation";
 
-export interface SynchronisationControllerProps<T> {
+export interface SynchronisationControllerProps<T extends ResponseSync> {
     sync: SynchronisationProxy
     processActions: (data: T) => void;
     getRepositoryByTableName: (tableName: string) => any;
     getCudByActionName: (actionName: string) => any;
 }
 
-export abstract class SynchronisationController<T = any> implements SynchronisationControllerProps<T> {
+export abstract class SynchronisationController<T extends ResponseSync = any> implements SynchronisationControllerProps<T> {
     protected abstract tableToRepositoryMap: { [key: string]: string };
     abstract processActions(data: T): void;
     sync: SynchronisationProxy;
@@ -21,8 +22,8 @@ export abstract class SynchronisationController<T = any> implements Synchronisat
         "DELETE": "delete"
     }
 
-    constructor(service: string, tableName: string, db: SQLiteDatabase) {
-        this.sync = new SynchronisationProxy(service, tableName, this, db);
+    constructor(service: string, tableName: string, db: SQLiteDatabase, idUser: string) {
+        this.sync = new SynchronisationProxy(service, tableName, this, db, idUser);
     }
 
     getRepositoryByTableName(tableName: string): any {

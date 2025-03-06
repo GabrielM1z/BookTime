@@ -51,8 +51,8 @@ const RootLayout = () => {
     });
     const colorScheme = useColorScheme();
 
-    // deleteDatabaseAsync('booktime.db');
-    // AsyncStorage.clear();
+    deleteDatabaseAsync('booktime.db');
+    AsyncStorage.clear();
 
     useEffect(() => {
         if (loaded) {
