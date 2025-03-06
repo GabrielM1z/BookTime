@@ -40,6 +40,7 @@ export default function CoverPressable({ id_book, cover , mode = "search" }: Cov
 
 	// console.log("idbook cover pressable : ", id_book)
 	return (
+		
 		<Link push href={{
 			pathname: "/book/[idBook]",
 			params: {

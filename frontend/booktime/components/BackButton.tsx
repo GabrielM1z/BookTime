@@ -1,15 +1,19 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "expo-router";
-import React from "react";
+import { useRouter } from "expo-router";
+import React, { useEffect } from "react";
 import { TouchableOpacity, StyleSheet } from "react-native";
 
 export default function BackButton() {
-    const navigation = useNavigation();
+    const router = useRouter();
+
+    useEffect(() => {
+        // console.log("router state:", window.history.length);
+    }, []);
 
     return (
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+        <TouchableOpacity style={styles.backButton} onPress={() =>router.back()}>
             <Ionicons name="arrow-back" size={24} color="white" />
-        </TouchableOpacity>
+        </TouchableOpacity >
     );
 }
 

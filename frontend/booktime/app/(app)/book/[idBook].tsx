@@ -1,11 +1,11 @@
 import { StyleSheet, View, FlatList } from 'react-native';
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { router, Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useCallback, useMemo, useState } from "react";
+import { Stack, useLocalSearchParams } from 'expo-router';
 import { Book, BookInfosServeur } from '@/models/Book';
 import { State } from '@/models/State';
 import { useBookContext } from '@/contexts/BookContext';
-import { Avatar, Button, IconButton, Text, TextInput, Title } from 'react-native-paper'
+import { Avatar, Text, TextInput, Title } from 'react-native-paper'
 import Animated, {
     interpolate,
     useAnimatedRef,
@@ -15,6 +15,8 @@ import Animated, {
 import { useTheme } from 'react-native-paper';
 import { useRepository } from '@/hooks/useRepository';
 import { Author } from '@/models';
+import BackButton from '@/components/BackButton';
+import { useRoute } from '@react-navigation/native';
 
 const IMG_HEIGHT = 300;
 
@@ -75,22 +77,20 @@ export default function LivreDetail() {
         )
     }, [book])
 
-    const router = useRouter();
-
-    const headerButton = () => {
-        return (
-
-            <Button icon="chevron-left" mode="contained" onPress={() => router.back()} children={undefined} />
-        )
-    }
-
+    // const headerButton = () => {
+    //     return (
+        
+    //         <Button icon="chevron-left" mode="contained" onPress={() => router.back()} children={undefined} />
+    //     )
+    // }
+    
     return (
         <View >
             <Stack.Screen
                 options={{
                     headerShown: true,
                     headerTransparent: true,
-                    headerLeft: headerButton,
+                    headerBackVisible: true,
                     headerBackground: () => <Animated.View style={[headerStyle, styles.header, headerAnimatedStyle]} />,
                     headerTitle: headerTitle,
 
