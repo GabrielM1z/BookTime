@@ -6,5 +6,5 @@ export interface ResponseSync {
 }
 
 export interface BookResponseSync extends ResponseSync {
-    require_books: string[];
+    required_books: string[];
 }

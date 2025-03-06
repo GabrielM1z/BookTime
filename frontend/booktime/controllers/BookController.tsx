@@ -83,13 +83,13 @@ export class LocalBookController extends SynchronisationController<BookResponseS
         this.variable = new VariableRepository(db);
     }
 
-    async processActions({ require_books, actions_to_exec }: BookResponseSync) {
-        console.log("Livres à récupérer :", require_books);
+    async processActions({ required_books, actions_to_exec }: BookResponseSync) {
+        console.log("Livres à récupérer :", required_books);
         console.log("Actions à exécuter :", actions_to_exec);
 
         try {
-            for (const book of require_books ?? []) {
-                await this._addBook(book);
+            for (const book of required_books ?? []) {
+                await this.addBook(book);
             }
 
             for (const action of actions_to_exec) {
