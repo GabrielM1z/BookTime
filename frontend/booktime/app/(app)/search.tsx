@@ -56,16 +56,6 @@ const SearchTab = () => {
         });
     }, [filters]);
 
-    // TODO
-    // const handleBack = useCallback(() => {
-    //     // Check if one book has been added to the library
-    //     if (libraryName !== "") {
-    //         router.push("/(app)/(tabs)/(library)/myShelves");
-    //     } else {
-    //         router.back();
-    //     }
-    // }, [router, libraryName]);
-
     const handleBack = useCallback(() => {
         router.back();
     }, [router]);

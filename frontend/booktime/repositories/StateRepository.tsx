@@ -37,6 +37,18 @@ export class LocalStateRepository extends BaseLocalRepository<State> implements 
         await this.update_base(state, ["id_user", "id_book"]);
     }
 
+    async getFromIdBook(idBook: string): Promise<State | null> {
+
+        const result = await this.db.getFirstAsync<State>(
+            'SELECT * FROM state WHERE id_book = $idBook AND id_user = $idUser',
+            {
+                $idBook: idBook,
+                $idUser: this.id_user
+            });
+
+        return result;
+    }
+
     async delete(state: DeleteStateDto): Promise<void> {
         await this.delete_base(state);
     }
@@ -57,6 +69,14 @@ export class RemoteStateRepository implements StateRepository {
 
     async update(state: UpdateStateDto): Promise<void> {
         throw new Error("Method not implemented.");
+    }
+    
+    async getFromIdBook(idBook: string): Promise<State | null> {
+        return null;
+    }
+
+    async add(state: State): Promise<void> {
+        return;
     }
 
     async delete(state: DeleteStateDto): Promise<void> {

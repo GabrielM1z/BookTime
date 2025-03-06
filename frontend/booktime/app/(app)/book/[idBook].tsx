@@ -1,195 +1,226 @@
-import { StyleSheet, View, Image, TouchableOpacity, ScrollView } from 'react-native';
-import React, { useEffect, useState } from "react";
+import { StyleSheet, View, FlatList } from 'react-native';
 
-import { ThemedView } from '@/components/ThemedView';
-import { useLocalSearchParams, useNavigation } from 'expo-router';
-import { ThemedText } from '@/components/ThemedText';
-import { Colors } from '@/constants/Colors';
-import { Link } from 'expo-router';
-import LibraryChoice from '@/components/LibraryChoice';
-import axios from 'axios';
-import { baseURL } from '@/constants/Api';
-import { Book } from '@/models/Book';
-import { linkToBase64 } from '@/helpers/image';
-import { Ionicons } from '@expo/vector-icons';
-import BackButton from '@/components/BackButton';
+import React, { useCallback, useMemo, useState } from "react";
+import { Stack, useLocalSearchParams } from 'expo-router';
+import { Book, BookInfosServeur } from '@/models/Book';
+import { State } from '@/models/State';
 import { useBookContext } from '@/contexts/BookContext';
+import { Avatar, Text, TextInput, Title } from 'react-native-paper'
+import Animated, {
+    interpolate,
+    useAnimatedRef,
+    useAnimatedStyle,
+    useScrollViewOffset
+} from 'react-native-reanimated';
+import { useTheme } from 'react-native-paper';
+import { useRepository } from '@/hooks/useRepository';
+import { Author } from '@/models';
+import BackButton from '@/components/BackButton';
+import { useRoute } from '@react-navigation/native';
+
+const IMG_HEIGHT = 300;
+
 
 export default function LivreDetail() {
 
     const { bookController } = useBookContext();
-    const navigation = useNavigation();
-    const { idBook, cover, mode } = useLocalSearchParams();
+    const { idBook, mode } = useLocalSearchParams();
+    // const [book, setBook] = useState<Book>();
+    const { data: book } = useRepository<Book | BookInfosServeur>(async () => await bookController.getBookById(idBook, mode));
+    // const { data: listAuthors, refresh, loading } = useRepository<Author[]>(async () => (await bookController.author.getFromIdBooks(idBook)), []);
+    const { data: listAuthors, refresh, loading } = useRepository<Author[]>(async () => {
+        console.log("mode :", mode);
 
-    const [book, setBook] = useState<Book>();
-    const [expandedResume, setExpandedResume] = useState(false);
-
-    // 🔹 Vérifier si `cover` est bien une chaîne avant d'essayer de parser
-    // let parsedCover = null;
-    // try {
-    //     parsedCover = cover && typeof cover === 'string' ? JSON.parse(cover) : null;
-    // } catch (error) {
-    //     console.error("Error parsing cover:", error);
-    // }
-
-    console.log("mode:", mode);
-
-    const getBookFromBack = async (url: string) => {
-        try {
-            let bookData = (await axios.get(url));
-            let imageBase64 = await linkToBase64(bookData.data.data.cover_image_url)
-            const book: Book = {
-                id_book: bookData.data.data.id_book,
-                title: bookData.data.data.title,
-                description: bookData.data.data.description,
-                publisher: bookData.data.data.publisher,
-                publication_date: bookData.data.data.publication_date,
-                page_number: bookData.data.data.page_number,
-                language: bookData.data.data.language,
-                cover_image_url: imageBase64,
-            };
-            setBook(book);
-            // console.log("Book fetched:", bookData);
-
-        } catch (error) {
-            console.error("Error fetching book:", error);
-        }
-    }
-
-    const getBookFromFront = async (idBook: string) => {
-        try {
-            let book = await bookController.book.get(idBook)
-            setBook(book);
-            console.log("chargement book front :", book.title)
-
-        } catch (error) {
-            console.error("Error fetching book from local DB:", error);
-        }
-    }
-
-    useEffect(() => {
-        if (!idBook || typeof idBook !== 'string') {
-            console.error("Invalid idBook type:", typeof idBook);
-
-        } // Sécurité si `idBook` est undefined ou est une liste de string
-        else if (mode === "search") {
-            console.log("Fetching book from server DB...");
-            const url = baseURL + `/books/books/` + idBook;
-            getBookFromBack(url);
-
-        } else if (mode === "library") {
-            console.log("Fetching book from local DB...");
-            getBookFromFront(idBook)
-
+        if (mode == "search") {
+            return book.authors;
         } else {
-            console.log("Mode inconnu :", mode);
+            return await bookController.author.getFromIdBooks(idBook)
         }
-    }, [idBook, mode]); // Dépendances du `useEffect`
+    }, [], [book]);
+    const { data: bookState, refresh: refreshBookState } = useRepository<State | null>(async () => (await bookController.state.getFromIdBook(idBook)), null);
 
-    // Fonction pour revenir en arrière
-    const goBack = () => {
-        navigation.goBack();
-    };
+    const scrollRef = useAnimatedRef<Animated.ScrollView>();
+    const scrollOffset = useScrollViewOffset(scrollRef);
 
+    const imageAnimatedStyle = useAnimatedStyle(() => {
+        return {
+            transform: [
+                {
+                    translateY: interpolate(
+                        scrollOffset.value,
+                        [-IMG_HEIGHT, 0, IMG_HEIGHT],
+                        [-IMG_HEIGHT / 2, 0, IMG_HEIGHT * 0.75]
+                    )
+                },
+                {
+                    scale: interpolate(scrollOffset.value, [-IMG_HEIGHT, 0, IMG_HEIGHT], [2, 1, 1])
+                }
+            ]
+        };
+    });
+
+    const headerAnimatedStyle = useAnimatedStyle(() => {
+        return {
+            opacity: interpolate(scrollOffset.value, [0, IMG_HEIGHT / 1.5], [0, 1])
+        };
+    });
+
+    const { colors } = useTheme();
+    const headerStyle = useMemo(() => [styles.header, {
+        backgroundColor: colors.background
+    }], [colors]);
+
+
+    const headerTitle = useCallback(() => {
+        return (
+            <Animated.View style={[headerAnimatedStyle, styles.headerTitles]}><Text variant='titleMedium'>{book ? book.title : ""}</Text></Animated.View>
+        )
+    }, [book])
+
+    // const headerButton = () => {
+    //     return (
+        
+    //         <Button icon="chevron-left" mode="contained" onPress={() => router.back()} children={undefined} />
+    //     )
+    // }
+    
     return (
-        <ThemedView style={styles.container}>
+        <View >
+            <Stack.Screen
+                options={{
+                    headerShown: true,
+                    headerTransparent: true,
+                    headerBackVisible: true,
+                    headerBackground: () => <Animated.View style={[headerStyle, styles.header, headerAnimatedStyle]} />,
+                    headerTitle: headerTitle,
 
-            <View style={styles.header}>
-                <BackButton />
-            </View>
+                }}
+            />
+            <Animated.ScrollView ref={scrollRef} scrollEventThrottle={16}>
+                <Animated.Image
+                    source={{
+                        uri: book?.cover_image_url
+                    }}
+                    style={[styles.image, imageAnimatedStyle]}
+                />
 
-            <ScrollView style={styles.containerScrollable}>
+                <View style={[{ height: 2000, backgroundColor: colors.background }]}>
+                    {bookState ? <LivreDetailOwned bookState={bookState} book={book} /> : null}
+                    <View style={styles.container}>
 
-
-
-                <View style={styles.containerTitre}>
-
-                    {/* 🔹 Vérification si `parsedCover` ou `book.cover_image_url` est disponible */}
-                    {book ? (
-                        <Image source={{ uri: book.cover_image_url }} style={styles.coverLivre} />
-                    ) : (
-                        <ThemedText>Aucune image disponible</ThemedText>
-                    )}
-
-                    <View>
-                        <ThemedText type='titreLivreHorizontal'>{book?.title || "Titre inconnu"}</ThemedText>
+                        <Text variant='titleLarge'>
+                            Auteurs :
+                        </Text>
+                        <FlatList
+                            horizontal
+                            nestedScrollEnabled
+                            // style={styles.flatList}
+                            data={listAuthors}
+                            keyExtractor={(item) => item.id_author.toString()}
+                            renderItem={({ item }) => (
+                                <View style={styles.authorElement}>
+                                    <Avatar.Image size={100} source={require('@/assets/images/auteur.jpg')} />
+                                    <Text variant='labelMedium' numberOfLines={1}>{item.name}</Text>
+                                </View>
+                            )}
+                            showsHorizontalScrollIndicator={false}
+                            onRefresh={refresh}
+                            refreshing={loading}
+                        />
                     </View>
 
-                    {/* TODO: mettre le bon id de l'auteur */}
-                    <Link push href={{
-                        pathname: "/author/[idAuthor]",
-                        params: {
-                            idAuthor: "test",
-                        }
-                    }}>
-                        {/* TODO: mettre le bon nom de l'auteur */}
-                        <ThemedText type='auteurLivreHorizontal'>{book?.title || "Auteur inconnu"}</ThemedText>
-                    </Link>
+                    <View style={styles.container}>
+                        <Text variant='titleLarge'>
+                            Description :
+                        </Text>
+                        <Text> {book?.description} </Text>
+                    </View>
 
                 </View>
+            </Animated.ScrollView>
+        </View>
+    );
+};
 
-                {/* Résumé avec affichage tronqué */}
-                <View style={styles.containerResume}>
-                    <ThemedText type='sousTab'>Résumé</ThemedText>
-                    <ThemedText>
-                        {expandedResume || !book?.description
-                            ? book?.description || "Pas de description disponible."
-                            : `${book?.description.substring(0, 200)}...`} {/* Affiche seulement 200 caractères */}
-                    </ThemedText>
-                    {book?.description && book?.description.length > 200 && (
-                        <TouchableOpacity onPress={() => setExpandedResume(!expandedResume)}>
-                            <ThemedText style={styles.expandedResume}>
-                                {expandedResume ? "Voir moins" : "Voir plus"}
-                            </ThemedText>
-                        </TouchableOpacity>
-                    )}
-                </View>
+export interface LivreDetailOwnedProps {
+    bookState: State;
+    book: Book;
+}
 
-                <View style={styles.containerResume}>
-                    <ThemedText type='sousTab'>Bibliothèques</ThemedText>
-                    <LibraryChoice book={book} />
-                </View>
+export function LivreDetailOwned({ bookState, book }: LivreDetailOwnedProps) {
+    const { bookController } = useBookContext();
+    const [progression, setProgression] = useState(bookState?.progression || 0);
 
-            </ScrollView>
-        </ThemedView>
+    // Gestion du changement de valeur via TextInput
+    const handleProgressChange = (text: string) => {
+        let value = parseInt(text, 10); // Convertir en nombre entier
+        if (!isNaN(value) && value >= 0 && value <= book.page_number) {
+            setProgression(value);
+        } else if (text === "") {
+            setProgression(0); // Remet à zéro si l'utilisateur efface
+        }
+    };
+
+    const handleConfirmProgressChange = async () => {
+        bookState.progression = progression;
+        bookState.last_read_date = (new Date()).toISOString();
+
+        await bookController.state.updateState(bookState);
+    }
+    return (
+        <View style={styles.container}>
+            <Text variant='titleLarge'>
+                Progression :
+            </Text>
+            <View style={{ flexDirection: "row" }}>
+                <TextInput
+                    style={styles.inputNumber}
+                    keyboardType="numeric"
+                    placeholder="Page actuelle"
+                    value={progression.toString()} // Convertir en string pour l'affichage
+                    onChangeText={handleProgressChange} // Synchronise avec l'état
+                    onBlur={handleConfirmProgressChange}
+                />
+                <Text variant='titleLarge' style={{ marginTop: "auto", marginBottom: "auto" }}>
+                    / {book?.page_number}
+                </Text>
+            </View>
+        </View>
     );
 }
 
-
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: 20,
-    },
-    containerScrollable: {
-        flex: 1,
-    },
-    containerTitre: {
-        alignItems: 'center',
-        marginTop: 30,
-    },
-    containerResume: {
-        marginTop: 50,
-        width: '90%',
-        alignSelf: 'center',
-    },
-    coverLivre: {
-        width: 200,
-        height: 200,
-        marginTop: 50,
-        borderRadius: 20,
-        borderWidth: 5,
-        borderColor: Colors.dark.secondary,
-    },
-    expandedResume: {
-        color: Colors.dark.secondary,
-        marginTop: 5,
-        fontWeight: 'bold',
+
+    image: {
+        marginTop: 10,
+        height: IMG_HEIGHT,
+        resizeMode: "contain"
     },
     header: {
-        position: 'absolute',
-        top: 40,
-        left: 20,
-        zIndex: 1,
+        height: 100,
+        borderWidth: StyleSheet.hairlineWidth,
+
+    },
+    headerTitles: {
+        marginLeft: 20
+    },
+    authorElement: {
+        width: 110,
+    },
+    container: {
+        margin: 20,
+    },
+    slider: {
+        width: 300,
+        height: 40,
+    },
+    inputNumber: {
+        width: 80,
+        height: 40,
+        borderColor: '#ccc',
+        borderWidth: 1,
+        borderRadius: 5,
+        textAlign: 'center',
+        fontSize: 16,
     },
 });

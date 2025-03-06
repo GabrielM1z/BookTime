@@ -52,7 +52,7 @@ export const SearchItem = ({ idBook, title, authors, uri }: SearchItemProps) => 
     });
 
     const handleItemPress = () => {
-        router.push({ pathname: "/book/[idBook]", params: { idBook } });
+        router.push({ pathname: "/book/[idBook]", params: { idBook, mode: 'search' } });
     };
 
     const iconAnimatedStyle = useAnimatedStyle(() => ({

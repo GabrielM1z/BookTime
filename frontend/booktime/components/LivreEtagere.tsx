@@ -4,6 +4,9 @@ import CoverPressable from './CoverPressable';
 import React, { useEffect, useState } from 'react';
 import { BookMinInfos } from '@/models/Book';
 import { linkToBase64 } from '@/helpers/image';
+import { Pressable } from 'react-native-gesture-handler';
+import { PressableCover } from './Cover';
+import { useRouter } from 'expo-router';
 
 // component représentant le LIVRE de l'ETAGERE
 interface LivreEtagereProps {
@@ -12,10 +15,18 @@ interface LivreEtagereProps {
 
 export const LivreEtagere = ({ livre }: LivreEtagereProps) => {
 
+    const router = useRouter()    
+
+    const handleBookPress = (idBook: string) => {
+        router.push({
+            pathname: "/book/[idBook]",
+            params: { idBook, mode: 'library' },
+        });
+    }
+
     return (
         <View style={styles.livreContainer}>
-            <CoverPressable id_book={livre.id_book} cover={livre.cover_image_url} mode='library' ></CoverPressable>
-            {/* <ThemedText type="titreLivreVertical">{livre.title}</ThemedText> */}
+            <PressableCover idBook={livre.id_book} uri={livre.cover_image_url} onPress={ handleBookPress }></PressableCover>
         </View>
     );
 }

@@ -35,7 +35,28 @@ export class LocalAuthorRepository extends BaseLocalRepository<Author> implement
         await this.create_base(author);
     }
 
+    async getFromIdBooks(idBook: string): Promise<Author[]> {
+        try {
+            let allRowsFromIdBook = await this.db.getAllAsync<Author>(
+                `SELECT * FROM author 
+                LEFT JOIN book_author ON author.id_author = book_author.id_author
+                WHERE book_author.id_book = $idBook
+                `, {$idBook: idBook}
+            );
+            console.log(allRowsFromIdBook);
+            
+            return allRowsFromIdBook;
+
+        } catch (error) {
+            console.log("Error getFromIdBooks :", error);
+            return []
+            
+        }
+    }
+
     async createAll(listNewAuthors: CreateAuthorDto[]): Promise<void> {
+        console.log("Création liste auteurs :",listNewAuthors);
+        
         const insertAuthor = await this.db.prepareAsync(
             `INSERT OR IGNORE INTO author (id_author, name, description)
             VALUES ($id_author, $name, $description);`

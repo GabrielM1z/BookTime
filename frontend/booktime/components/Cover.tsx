@@ -111,8 +111,10 @@ export const PressableCover = ({
 
     return (
         <TouchableOpacity
-            onPress={() => onPress?.(coverProps.idBook) ?? handleDefaultPress()}
-        >
+            // onPress={() => onPress?.(coverProps.idBook) ?? handleDefaultPress()}
+            onPress={() => onPress ? onPress(coverProps.idBook) : handleDefaultPress() }
+
+>
             <Cover {...coverProps} />
         </TouchableOpacity>
     );
@@ -162,6 +164,24 @@ export const SearchCover = ({
         />
     );
 }
+
+// export const BookDetailsCover = ({
+//     selected,
+//     onToggle,
+//     onSelectionMode,
+//     selectionMode,
+//     ...coverProps
+// }: SelectableCoverProps) => {
+//     const handlePress = useCallback(() => {
+//         return selected ? onToggle?.(coverProps.idBook, selected) : undefined;
+//     }, [selected]);
+
+//     return (
+//         <Cover
+//             {...coverProps}
+//         />
+//     );
+// }
 
 const styles = StyleSheet.create({
     container: {

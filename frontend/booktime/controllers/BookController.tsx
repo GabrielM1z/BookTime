@@ -37,12 +37,15 @@ export interface BookControllerProps {
     addBook: (idBook: string) => Promise<void>
     createLibrary: (library: CreateLibraryDto) => Promise<void>
     getAllLibraryInfo: () => Promise<LibraryWithBooksMin[] | []>
+    getBookById: (idBook: string, mode: string) => Promise<Book | BookInfosServeur>
 }
 
 export class LocalBookController extends SynchronisationController<BookResponseSync> implements BookControllerProps {
     protected db: SQLiteDatabase;
     protected id_user: string;
-    protected remote: RemoteBookRepository;
+    protected remoteBook: RemoteBookRepository;
+    protected remoteAuthor: RemoteAuthorRepository;
+
 
     book: LocalBookRepository;
     library: LocalLibraryRepository;
@@ -70,7 +73,9 @@ export class LocalBookController extends SynchronisationController<BookResponseS
 
         this.db = db;
         this.id_user = id_user;
-        this.remote = new RemoteBookRepository();
+        this.remoteBook = new RemoteBookRepository();
+        this.remoteAuthor = new RemoteAuthorRepository();
+
 
         this.book = new LocalBookRepository(db, id_user);
         this.library = new LocalLibraryRepository(db, id_user, this.sync);
@@ -82,6 +87,25 @@ export class LocalBookController extends SynchronisationController<BookResponseS
         this.sharedLibrary = new LocalSharedLibraryRepository(db, id_user, this.sync);
         this.variable = new VariableRepository(db);
     }
+
+    //Retourne la méthode local ou remote selon la valeur du mode
+    async getBookById(idBook: string, mode: string): Promise<Book | BookInfosServeur> {
+
+        switch (mode) {
+            case "library":
+                return await this.book.get(idBook);
+                break;
+            case "search":
+                let res = await this.remoteBook.get(idBook);
+                return res
+                break;
+
+            default:
+                return await this.remoteBook.get(idBook)
+                break;
+        }
+    }
+
 
     async processActions({ require_books, actions_to_exec }: BookResponseSync) {
         console.log("Livres à récupérer :", require_books);
@@ -243,6 +267,14 @@ export class RemoteBookController implements BookControllerProps {
         this.libraryBook = new RemoteLibraryBookRepository();
         this.authorBook = new RemoteAuthorBookRepository();
         this.sharedLibrary = new RemoteSharedLibraryRepository();
+    }
+
+    async getBookById(idBook: string, mode: string): Promise<Book> {
+        return await this.book.get(idBook)
+    }
+
+    async getBookById(idBook: string, mode: string): Promise<Book> {
+        return await this.book.get(idBook)
     }
 
     async enter() { }
