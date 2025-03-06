@@ -149,7 +149,7 @@ const initState = async (db: SQLiteDatabase) => {
                 state VARCHAR(50),
                 progression INT,
                 read_count INT DEFAULT 0,
-                last_read_date TIMESTAMP,
+                last_read_date TEXT,
                 id_user TEXT NOT NULL,
                 id_book VARCHAR(13) NOT NULL,
                 is_available BOOLEAN DEFAULT FALSE,
@@ -260,7 +260,7 @@ const initTrigger = async (db: SQLiteDatabase) => {
     // Library Book
     await initTriggerInsertLibraryBook(db);
     await initTriggerDeleteLibraryBook(db);
- 
+
     // Shared Library
     await initTriggerInsertSharedLibrary(db);
     await initTriggerDeleteSharedLibrary(db);
@@ -705,7 +705,7 @@ const initTriggerDeleteLibraryBook = async (db: SQLiteDatabase) => {
 const initBaseData = async (db: SQLiteDatabase) => {
 
     // await initBaseLibraryData(db);
-    
+
 }
 
 /**
@@ -726,7 +726,7 @@ const initBaseLibraryData = async (db: SQLiteDatabase) => {
             const statement = await db.prepareAsync(
                 'INSERT INTO library (name) VALUES ($name);'
             );
-    
+
             await statement.executeAsync({
                 $name: element
             });
@@ -736,5 +736,5 @@ const initBaseLibraryData = async (db: SQLiteDatabase) => {
             console.error('Error during the add of library', element, ' : ', error);
         }
     });
-    
+
 }

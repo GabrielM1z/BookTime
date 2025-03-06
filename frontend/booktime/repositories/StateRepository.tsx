@@ -40,24 +40,28 @@ export class LocalStateRepository implements StateRepository {
 
         try {
             // Création dynamique de la requête SQL
-            console.log("state :",state);
+            console.log("state :", state);
 
             // Exécution de la requête
+            // await this.db.runAsync(`UPDATE state 
+            // SET state = $state, 
+            //     progression = $progression, 
+            //     read_count = $read_count, 
+            //     last_read_date = $last_read_date, 
+            //     is_available = $is_available
+            // WHERE id_user = $id_user AND id_book = $id_book`, {
+            //     $state: state.state,
+            //     $progression: state.progression,
+            //     $read_count: state.read_count,
+            //     $last_read_date: state.last_read_date,
+            //     $is_available: state.is_available,
+            //     $id_user: state.id_user,
+            //     $id_book: state.id_book
+            // })
+
             await this.db.runAsync(`UPDATE state 
-            SET state = $state, 
-                progression = $progression, 
-                read_count = $read_count, 
-                last_read_date = $last_read_date, 
-                is_available = $is_available
-            WHERE id_user = $id_user AND id_book = $id_book`, {
-                $state: state.state,
-                $progression: state.progression,
-                $read_count: state.read_count,
-                $last_read_date: state.last_read_date,
-                $is_available: state.is_available,
-                $id_user: state.id_user,
-                $id_book: state.id_book
-            })
+            SET progression = 12
+            WHERE state.id_user = "guest" AND state.id_book = "9781264687749";`)
 
             console.log("updateState: Mise à jour réussie !");
             return true;
@@ -83,13 +87,14 @@ export class LocalStateRepository implements StateRepository {
     async create(state: State): Promise<void> {
         try {
             await this.db.runAsync(
-                `INSERT OR IGNORE INTO state (progression, id_user, id_book, read_count)
-                 VALUES ($progression, $id_user, $id_book, $read_count);`,
+                `INSERT OR IGNORE INTO state (progression, id_user, id_book, read_count, state)
+                 VALUES ($progression, $id_user, $id_book, $read_count, $state);`,
                 {
                     $progression: 0,
                     $id_user: state.id_user,
                     $id_book: state.id_book,
                     $read_count: 0,
+                    $state: ""
                 }
             );
 

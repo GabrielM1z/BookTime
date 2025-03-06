@@ -85,27 +85,6 @@ export class LocalBookController implements BookControllerProps {
         }
     }
 
-    //Retourne la méthode local ou remote selon la valeur du mode
-    async getListAuthorByBookId(idBook: string, mode: string): Promise<Author[]> {
-        
-        switch (mode) {
-            case "library":
-                return await this.author.getFromIdBooks(idBook);
-                break;
-            case "search":
-
-                return await this.remoteAuthor.getFromIdBooks(idBook);
-               
-                
-                break;
-
-            default:
-                return await this.remoteAuthor.getFromIdBooks(idBook);
-                break;
-        }
-    }
-
-
 
     async addBook(idBook: string, idLibrary: string): Promise<void> {
 
@@ -124,7 +103,7 @@ export class LocalBookController implements BookControllerProps {
                     state: "",
                     progression: 0,
                     read_count: 0,
-                    last_read_date: 0,
+                    last_read_date: "",
                     is_available: false
                 }
 

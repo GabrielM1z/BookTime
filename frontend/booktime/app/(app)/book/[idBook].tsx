@@ -163,7 +163,7 @@ export function LivreDetailOwned({ bookState, book }: LivreDetailOwnedProps) {
 
     const handleConfirmProgressChange = async () => {
         bookState.progression = progression;
-        bookState.last_read_date = (new Date()).getTime();
+        bookState.last_read_date = (new Date()).toISOString();
 
         await bookController.state.updateState(bookState);
     }
