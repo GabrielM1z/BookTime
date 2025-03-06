@@ -44,9 +44,14 @@ func (bc *synchroController) Synchro(c *gin.Context) {
 	for _, action := range actions_to_exec {
 		if action.TableName == "LIBRARY_BOOK" && action.Type == "INSERT" {
 			var libraryBook model.LibraryBook
-			err := json.Unmarshal(action.Action, &libraryBook)
+			var unescapedAction string
+			err := json.Unmarshal(action.Action, &unescapedAction)
 			if err != nil {
-				log.Fatalf("Erreur lors du décodage du JSON : %v", err)
+				log.Fatalf("Erreur lors du déséchappement du JSON 3 : %v", err)
+			}
+			err = json.Unmarshal([]byte(unescapedAction), &libraryBook)
+			if err != nil {
+				log.Fatalf("Erreur lors du décodage du JSON  lib harry : %v", err)
 			}
 			required_books = append(required_books, libraryBook.IdBook)
 		}

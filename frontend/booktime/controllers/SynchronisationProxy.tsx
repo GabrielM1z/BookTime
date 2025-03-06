@@ -44,7 +44,7 @@ export class SynchronisationProxy implements SynchronisationProxyProps {
             };
         });
 
-        // console.log("Actions encodées en Base64 :", encodedActions);
+        console.log("Actions encodées en Base64 :", encodedActions);
 
         try {
             const lastSync = await AsyncStorage.getItem(`${this.service}_last_sync`) || "2006-01-02T15:04:05Z";
@@ -53,7 +53,7 @@ export class SynchronisationProxy implements SynchronisationProxyProps {
                 encodedActions,
             );
 
-            // this.controller.processActions(response.data);
+            this.controller.processActions(response.data);
 
             await this.controller.sync.action.deleteAll();
             await AsyncStorage.setItem(`${this.service}_last_sync`, response.data.sync_date);

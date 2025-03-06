@@ -60,7 +60,7 @@ func (ar *ActionRepository) SelectActionsFromDate(idUser uuid.UUID, lastSyncDate
 	if err != nil {
 		fmt.Println("Erreur lors de la conversion :", err)
 	}
-	query := "SELECT * FROM action WHERE id_user = $1 and date >= $2"
+	query := "SELECT * FROM action WHERE id_user = $1 and date > $2"
 	rows, err := ar.DB.Query(query, idUser, parsedTime)
 	if err != nil {
 		log.Fatal(err)
