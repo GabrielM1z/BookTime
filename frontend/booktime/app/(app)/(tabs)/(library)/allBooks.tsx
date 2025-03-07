@@ -4,7 +4,7 @@ import { useRepository } from '@/hooks/useRepository';
 import { useTopTabbarScroll } from '@/hooks/useTopTabbarScroll';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { useFocusEffect } from 'expo-router';
-import React from "react";
+import React, { useCallback } from "react";
 
 
 const AllBooksTab = () => {
@@ -16,9 +16,9 @@ const AllBooksTab = () => {
     const { handleScroll } = useTopTabbarScroll(10);
     const tabBarHeight = useBottomTabBarHeight();
 
-    useFocusEffect(() => {
+    useFocusEffect(useCallback(() => {
         refresh();
-    });
+    }, [refresh]));
 
     return (
         <ListBooks

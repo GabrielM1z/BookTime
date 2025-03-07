@@ -17,8 +17,13 @@ const MyShelvesTab = () => {
     const tabBarHeight = useBottomTabBarHeight();
     const { handleScroll } = useTopTabbarScroll(10);
 
+    // const test = async () => {
+    //     console.log(await bookController.library.getAll());
+    // }
+
     useFocusEffect(useCallback(() => {
         refresh();
+        // test();
     }, [refresh]));
 
     return (
