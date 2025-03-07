@@ -90,9 +90,10 @@ export class LocalLibraryRepository extends BaseLocalRepository<Library> impleme
             `SELECT library.*
             FROM library
             JOIN library_book ON library.id_library = library_book.id_library
-            WHERE library_book.id_book = $id_book
+            JOIN shared_library ON library.id_library = shared_library.id_library
+            WHERE library_book.id_book = $id_book AND shared_library.id_user = $id_user
             LIMIT 1;`,
-            { $id_book: idBook }
+            { $id_book: idBook, $id_user: this.id_user }
         );
         return result;
     }
